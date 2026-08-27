@@ -1,0 +1,21 @@
+{
+  "results": [
+    {
+      "symbol": "SUSP.JK",
+      "suspension_date": "2026-08-18",
+      "reason": "Synthetic fixture suspension",
+      "pdf_url": "https://example.invalid/synthetic-notice.pdf"
+    }
+  ],
+  "pagination": {
+    "total_count": 1,
+    "showing": 1,
+    "limit": 30,
+    "offset": 0,
+    "has_next": false,
+    "has_previous": false,
+    "next_offset": null,
+    "previous_offset": null
+  },
+  "fixture_notice": "SYNTHETIC — NOT LIVE SECTORS DATA"
+}

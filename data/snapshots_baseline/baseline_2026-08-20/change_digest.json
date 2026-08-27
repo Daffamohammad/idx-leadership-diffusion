@@ -1,0 +1,53 @@
+{
+  "as_of": "2026-08-20",
+  "previous": null,
+  "upgrades": [],
+  "downgrades": [],
+  "broadening": [],
+  "narrowing": [],
+  "new_leaders": [],
+  "lost_leadership": [],
+  "stable": [
+    {
+      "group_id": "Financials",
+      "leadership_transition": null,
+      "diffusion_transition": null,
+      "breadth_delta": null,
+      "relative_strength_delta": 5.9749953260419035,
+      "rank_delta": null,
+      "materiality_label": "STABLE",
+      "materiality_reason": "no previous snapshot"
+    },
+    {
+      "group_id": "Consumer",
+      "leadership_transition": null,
+      "diffusion_transition": null,
+      "breadth_delta": null,
+      "relative_strength_delta": 5.449116153359922,
+      "rank_delta": null,
+      "materiality_label": "STABLE",
+      "materiality_reason": "no previous snapshot"
+    },
+    {
+      "group_id": "Industrial",
+      "leadership_transition": null,
+      "diffusion_transition": null,
+      "breadth_delta": null,
+      "relative_strength_delta": 4.499340300461207,
+      "rank_delta": null,
+      "materiality_label": "STABLE",
+      "materiality_reason": "no previous snapshot"
+    },
+    {
+      "group_id": "Telecom",
+      "leadership_transition": null,
+      "diffusion_transition": null,
+      "breadth_delta": null,
+      "relative_strength_delta": -0.9539203617230783,
+      "rank_delta": null,
+      "materiality_label": "STABLE",
+      "materiality_reason": "no previous snapshot"
+    }
+  ],
+  "notes": []
+}

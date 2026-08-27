@@ -1,0 +1,15 @@
+{
+  "symbol": "BBCA.JK",
+  "corporate_actions": {
+    "agm": [],
+    "bonus": null,
+    "warrant": null,
+    "dividend": [],
+    "right_issue": null,
+    "stock_split": [
+      {"date": "2026-08-20", "split_ratio": 2.0}
+    ],
+    "upcoming_dividend": null
+  },
+  "fixture_notice": "SYNTHETIC — NOT LIVE SECTORS DATA"
+}

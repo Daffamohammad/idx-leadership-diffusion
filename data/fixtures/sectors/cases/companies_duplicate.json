@@ -1,0 +1,7 @@
+{
+  "results": [
+    {"symbol": "BBCA", "company_name": "First synthetic row"},
+    {"symbol": "BBCA.JK", "company_name": "Duplicate synthetic row"}
+  ],
+  "pagination": {"limit": 30, "offset": 0, "has_next": false}
+}

@@ -1,0 +1,33 @@
+{
+  "results": [
+    {
+      "symbol": "BBCA",
+      "company_name": "Synthetic Bank Alpha Tbk.",
+      "listing_board": "Main",
+      "sector": "Financials",
+      "sub_sector": "Banks",
+      "industry": "Banks",
+      "sub_industry": "Banks",
+      "unexpected_optional_vendor_field": "allowed"
+    },
+    {
+      "symbol": "ADRO.JK",
+      "company_name": "Synthetic Energy Alpha Tbk.",
+      "sector": "Energy",
+      "sub_sector": "Oil Gas & Coal",
+      "industry": "Coal",
+      "sub_industry": "Coal Production"
+    }
+  ],
+  "pagination": {
+    "total_count": 3,
+    "showing": 2,
+    "limit": 30,
+    "offset": 0,
+    "has_next": true,
+    "has_previous": false,
+    "next_offset": 30,
+    "previous_offset": null
+  },
+  "fixture_notice": "SYNTHETIC — NOT LIVE SECTORS DATA"
+}

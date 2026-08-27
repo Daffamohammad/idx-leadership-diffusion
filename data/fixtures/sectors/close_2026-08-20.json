@@ -1,0 +1,19 @@
+{
+  "results": [
+    {"symbol": "BBCA.JK", "date": "2026-08-20", "close": 10000.0},
+    {"symbol": "ADRO.JK", "date": "2026-08-20", "close": 2000.0},
+    {"symbol": "KLBF.JK", "date": "2026-08-20", "close": 1500.0},
+    {"symbol": "IHSG.JK", "date": "2026-08-20", "close": 7200.0}
+  ],
+  "pagination": {
+    "total_count": 4,
+    "showing": 4,
+    "limit": 30,
+    "offset": 0,
+    "has_next": false,
+    "has_previous": false,
+    "next_offset": null,
+    "previous_offset": null
+  },
+  "fixture_notice": "SYNTHETIC — NOT LIVE SECTORS DATA"
+}

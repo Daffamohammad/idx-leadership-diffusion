@@ -1,0 +1,151 @@
+"""Tests for group aggregation."""
+from __future__ import annotations
+
+import tempfile
+import shutil
+from datetime import date
+from pathlib import Path
+
+import pandas as pd
+import pytest
+
+from idx_leadership.aggregation.groups import (
+    aggregate_history,
+    build_group_snapshots,
+    rank_groups,
+)
+from idx_leadership.features.relative_strength import compute_excess_returns
+from idx_leadership.models import GroupSnapshot, LeadershipState
+from idx_leadership.signals.diffusion_v2 import DiffusionStateV2
+
+
+def test_build_group_snapshots_basic(prices_df, benchmark_df, taxonomy_df):
+    as_of = date(2026, 8, 20)
+    features = compute_excess_returns(prices_df, benchmark_df, horizons={"5d": 5, "20d": 20, "60d": 60}, as_of=as_of)
+    snaps = build_group_snapshots(
+        features=features,
+        taxonomy=taxonomy_df,
+        snapshot_date=as_of,
+        prices=prices_df,
+        horizons={"5d": 5, "20d": 20, "60d": 60},
+        min_constituents=1,  # relax for the small fixture
+        min_coverage_pct=0.0,
+    )
+    assert len(snaps) > 0
+    gids = {s.group_id for s in snaps}
+    assert "Financials" in gids
+    assert "Telecom" in gids
+    assert "Industrial" in gids
+    assert "Consumer" in gids
+
+
+def test_rank_groups_assigns_ranks(prices_df, benchmark_df, taxonomy_df):
+    as_of = date(2026, 8, 20)
+    features = compute_excess_returns(prices_df, benchmark_df, horizons={"5d": 5, "20d": 20, "60d": 60}, as_of=as_of)
+    snaps = build_group_snapshots(
+        features=features,
+        taxonomy=taxonomy_df,
+        snapshot_date=as_of,
+        prices=prices_df,
+        horizons={"5d": 5, "20d": 20, "60d": 60},
+        min_constituents=1,
+        min_coverage_pct=0.0,
+    )
+    snaps = rank_groups(snaps)
+    # All groups that are not UNCONFIRMED should have a leadership_rank
+    ranks = [s.leadership_rank for s in snaps if s.leadership_rank is not None]
+    assert len(ranks) > 0
+    # Ranks must be 1..N and unique
+    assert sorted(ranks) == list(range(1, len(ranks) + 1))
+
+
+def test_aggregate_history_long_format(prices_df, benchmark_df, taxonomy_df):
+    as_of = date(2026, 8, 20)
+    features = compute_excess_returns(prices_df, benchmark_df, horizons={"5d": 5, "20d": 20, "60d": 60}, as_of=as_of)
+    snaps = build_group_snapshots(
+        features=features,
+        taxonomy=taxonomy_df,
+        snapshot_date=as_of,
+        prices=prices_df,
+        horizons={"5d": 5, "20d": 20, "60d": 60},
+        min_constituents=1,
+        min_coverage_pct=0.0,
+    )
+    snaps = rank_groups(snaps)
+    long = aggregate_history({as_of: snaps})
+    assert not long.empty
+    assert "leadership_state" in long.columns
+    assert "diffusion_state" in long.columns
+
+
+def test_build_group_snapshots_uses_configured_v2_engines(
+    prices_df, benchmark_df, taxonomy_df
+):
+    """The configured v2 contract must reach the group model, not just metadata."""
+    as_of = date(2026, 8, 20)
+    features = compute_excess_returns(
+        prices_df,
+        benchmark_df,
+        horizons={"5d": 5, "20d": 20, "60d": 60},
+        as_of=as_of,
+    )
+    previous = [
+        GroupSnapshot(
+            snapshot_date=date(2026, 8, 13),
+            group_id="Financials",
+            breadth_outperforming=0.0,
+        )
+    ]
+
+    snaps = build_group_snapshots(
+        features=features,
+        taxonomy=taxonomy_df,
+        snapshot_date=as_of,
+        prices=prices_df,
+        horizons={"5d": 5, "20d": 20, "60d": 60},
+        min_constituents=1,
+        min_coverage_pct=0.0,
+        previous_groups=previous,
+        method_version="methodology-v2",
+        feature_version="features-v2",
+        diffusion_mode="group_size_aware",
+        concentration_mode="absolute_move_v2",
+    )
+    financials = next(s for s in snaps if s.group_id == "Financials")
+
+    assert financials.method_version == "methodology-v2"
+    assert financials.feature_version == "features-v2"
+    assert financials.concentration.convention == "absolute_move_v2"
+    assert financials.concentration.hhi_contribution is not None
+    assert financials.diffusion_state_v2 == DiffusionStateV2.BROADENING_FIRM
+    # The legacy field remains a deliberate v1 projection for old consumers.
+    assert financials.diffusion_state.value == "BROADENING"
+
+
+def test_leadership_classification_uses_primary_20d_excess_return(
+    prices_df, taxonomy_df
+):
+    """A negative 20D return with positive acceleration is IMPROVING, not LEADING."""
+    features = pd.DataFrame(
+        [
+            {
+                "ticker": "BBCA.JK",
+                "return_20d": 1.0,
+                "excess_return_20d": -2.0,
+                "excess_return_5d": 5.0,
+                "excess_return_60d": 0.0,
+            }
+        ]
+    )
+    snapshots = build_group_snapshots(
+        features=features,
+        taxonomy=taxonomy_df,
+        snapshot_date=date(2026, 8, 20),
+        prices=prices_df,
+        horizons={"5d": 5, "20d": 20, "60d": 60},
+        min_constituents=1,
+        min_coverage_pct=0.0,
+    )
+
+    financials = next(s for s in snapshots if s.group_id == "Financials")
+    assert financials.leadership_state == LeadershipState.IMPROVING

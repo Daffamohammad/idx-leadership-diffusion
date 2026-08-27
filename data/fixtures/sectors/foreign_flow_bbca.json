@@ -1,0 +1,10 @@
+{
+  "symbol": "BBCA.JK",
+  "start": "2026-08-19",
+  "end": "2026-08-20",
+  "data": [
+    {"date": "2026-08-19", "net_foreign_inflow": -1000000000},
+    {"date": "2026-08-20", "net_foreign_inflow": 2500000000}
+  ],
+  "fixture_notice": "SYNTHETIC — NOT LIVE SECTORS DATA"
+}

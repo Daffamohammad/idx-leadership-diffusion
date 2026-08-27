@@ -1,0 +1,14 @@
+{
+  "status": "READY",
+  "issues": [],
+  "coverage_pct": 100.0,
+  "requested_securities": 10,
+  "loaded_securities": 10,
+  "usable_securities": 10,
+  "failed_securities": 0,
+  "benchmark_latest_date": "2026-08-20",
+  "latest_common_date": "2026-05-20",
+  "duplicate_ticker_date_rows": 0,
+  "invalid_prices": 0,
+  "stale": false
+}

@@ -1,0 +1,27 @@
+{
+  "snapshot_count": 1,
+  "first_date": "2026-08-20",
+  "latest_date": "2026-08-20",
+  "provider": "fixture",
+  "universe_version": "prototype-v1",
+  "taxonomy_version": "prototype-v1",
+  "method_version": "methodology-v1",
+  "feature_version": "features-v1",
+  "entries": [
+    {
+      "snapshot_id": "baseline_2026-08-20",
+      "snapshot_date": "2026-08-20",
+      "as_of": "2026-08-20",
+      "provider": "fixture",
+      "universe_version": "prototype-v1",
+      "taxonomy_version": "prototype-v1",
+      "method_version": "methodology-v1",
+      "feature_version": "features-v1",
+      "coverage_status": "READY",
+      "coverage_pct": 100.0,
+      "created_at": "2026-08-27",
+      "notes": null
+    }
+  ],
+  "notes": []
+}

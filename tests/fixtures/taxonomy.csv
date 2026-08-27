@@ -1,0 +1,11 @@
+ticker,group_id,sector,subsector
+BBCA.JK,Financials,Financials,Banks
+BBRI.JK,Financials,Financials,Banks
+BMRI.JK,Financials,Financials,Banks
+BBNI.JK,Financials,Financials,Banks
+TLKM.JK,Telecom,Telecom,Telecommunication
+ISAT.JK,Telecom,Telecom,Telecommunication
+EXCL.JK,Telecom,Telecom,Telecommunication
+ASII.JK,Industrial,Industrial,Automotive
+UNTR.JK,Industrial,Industrial,Heavy Equipment
+ICBP.JK,Consumer,Consumer,Food

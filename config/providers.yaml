@@ -1,0 +1,66 @@
+# IDX Leadership Diffusion — provider configuration
+
+# User-visible execution is selected by mode, never by implicit fallback.
+default_mode: PUBLIC_PROTOTYPE
+mode_map:
+  DEMO_FIXTURE: fixture
+  PUBLIC_PROTOTYPE: public
+  SECTORS_FIXTURE: sectors_fixture
+  SECTORS_LIVE: sectors
+
+providers:
+  fixture:
+    name: demo_fixture
+    class: idx_leadership.providers.fixture.FixtureProvider
+    enabled: false
+    options:
+      fixtures_dir: tests/fixtures
+
+  public:
+    name: yfinance
+    class: idx_leadership.providers.public.YFinanceProvider
+    enabled: true
+    options:
+      request_timeout_seconds: 20
+      max_retries: 2
+      retry_backoff_seconds: 1.5
+      # Cache TTL: how long a raw response may be reused before re-fetching.
+      cache_ttl_hours: 12
+    default_universe: config/universe.yaml
+
+  sectors_fixture:
+    name: sectors_fixture
+    class: idx_leadership.providers.sectors_fixture.SectorsFixtureProvider
+    enabled: false
+    options:
+      fixtures_dir: data/fixtures/sectors
+
+  sectors:
+    name: sectors
+    class: idx_leadership.providers.sectors.SectorsProvider
+    enabled: false  # Live calls remain opt-in; set --allow-live with a key.
+    options:
+      base_url: https://api.sectors.app
+      api_key_env: SECTORS_API_KEY
+      request_timeout_seconds: 30
+      max_retries: 3
+
+# Dry-run planning inputs only. These values estimate calls/pages/cache reuse;
+# no credit price is inferred here.
+refresh_plan:
+  page_size: 30
+  universe_size: 950
+  core:
+    - security_master
+    - taxonomy
+    - market_close
+    - benchmark
+  enrichment:
+    - free_float
+    - fundamentals
+    - foreign_flow
+  deep_dive:
+    - broker
+    - filings
+    - news
+    - corporate_actions

@@ -1,0 +1,6 @@
+{
+  "results": [
+    {"symbol": "BBCA.JK", "date": "2026-08-19", "close": 1000.0}
+  ],
+  "pagination": {"limit": 30, "offset": 0, "has_next": false}
+}

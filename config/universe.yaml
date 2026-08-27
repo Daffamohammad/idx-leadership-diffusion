@@ -1,0 +1,86 @@
+# IDX Leadership Diffusion — prototype universe
+#
+# This is NOT the full IDX. It is a cross-sector subset of liquid names
+# used to validate the analytical pipeline end-to-end. Replace with
+# Sectors universe when available.
+#
+# Classification is prototype metadata — not authoritative Sectors taxonomy.
+# Field "sectors" here is a coarse label used for grouping only.
+
+benchmark: ^JKSE
+benchmark_name: IHSG (Yahoo ^JKSE)
+universe_version: prototype-v1
+taxonomy_version: prototype-v1
+
+universe:
+  # Financials
+  - { ticker: BBCA.JK, sectors: Financials, sub_sectors: Banks }
+  - { ticker: BBRI.JK, sectors: Financials, sub_sectors: Banks }
+  - { ticker: BMRI.JK, sectors: Financials, sub_sectors: Banks }
+  - { ticker: BBNI.JK, sectors: Financials, sub_sectors: Banks }
+  - { ticker: BRIS.JK, sectors: Financials, sub_sectors: Banks }
+  - { ticker: ARTO.JK, sectors: Financials, sub_sectors: Digital Banks }
+  - { ticker: BBHI.JK, sectors: Financials, sub_sectors: Banks }
+  - { ticker: BNGA.JK, sectors: Financials, sub_sectors: Banks }
+  - { ticker: BJBR.JK, sectors: Financials, sub_sectors: Banks }
+  - { ticker: BTPS.JK, sectors: Financials, sub_sectors: Digital Banks }
+
+  # Consumer / Retail
+  - { ticker: ICBP.JK, sectors: Consumer, sub_sectors: Food }
+  - { ticker: INDF.JK, sectors: Consumer, sub_sectors: Food }
+  - { ticker: MYOR.JK, sectors: Consumer, sub_sectors: Food }
+  - { ticker: SIDO.JK, sectors: Consumer, sub_sectors: Pharmaceuticals }
+  - { ticker: KLBF.JK, sectors: Consumer, sub_sectors: Pharmaceuticals }
+  - { ticker: UNVR.JK, sectors: Consumer, sub_sectors: Household }
+  - { ticker: ACES.JK, sectors: Consumer, sub_sectors: Retail }
+  - { ticker: MAPI.JK, sectors: Consumer, sub_sectors: Retail }
+  - { ticker: AMRT.JK, sectors: Consumer, sub_sectors: Retail }
+  - { ticker: ERAA.JK, sectors: Consumer, sub_sectors: Retail }
+
+  # Energy / Mining
+  - { ticker: PGAS.JK, sectors: Energy, sub_sectors: Gas Distribution }
+  - { ticker: PTBA.JK, sectors: Energy, sub_sectors: Coal }
+  - { ticker: ADRO.JK, sectors: Energy, sub_sectors: Coal }
+  - { ticker: ITMG.JK, sectors: Energy, sub_sectors: Coal }
+  - { ticker: HRUM.JK, sectors: Energy, sub_sectors: Coal }
+  - { ticker: ANTM.JK, sectors: Energy, sub_sectors: Mining Diversified }
+  - { ticker: INCO.JK, sectors: Energy, sub_sectors: Mining Diversified }
+  - { ticker: MDKA.JK, sectors: Energy, sub_sectors: Mining Diversified }
+  - { ticker: MEDC.JK, sectors: Energy, sub_sectors: Oil & Gas Upstream }
+
+  # Telecom & Tech
+  - { ticker: TLKM.JK, sectors: Telecom, sub_sectors: Telecommunication }
+  - { ticker: ISAT.JK, sectors: Telecom, sub_sectors: Telecommunication }
+  - { ticker: EXCL.JK, sectors: Telecom, sub_sectors: Telecommunication }
+  - { ticker: GOTO.JK, sectors: Technology, sub_sectors: Internet Services }
+  - { ticker: BUKA.JK, sectors: Technology, sub_sectors: Internet Services }
+  - { ticker: EMTK.JK, sectors: Technology, sub_sectors: Media }
+
+  # Industrial / Infrastructure
+  - { ticker: ASII.JK, sectors: Industrial, sub_sectors: Automotive }
+  - { ticker: UNTR.JK, sectors: Industrial, sub_sectors: Heavy Equipment }
+  - { ticker: INTP.JK, sectors: Industrial, sub_sectors: Cement }
+  - { ticker: SMGR.JK, sectors: Industrial, sub_sectors: Cement }
+  - { ticker: WIKA.JK, sectors: Industrial, sub_sectors: Construction }
+  - { ticker: PTPP.JK, sectors: Industrial, sub_sectors: Construction }
+  - { ticker: JSMR.JK, sectors: Industrial, sub_sectors: Toll Roads }
+  - { ticker: WSKT.JK, sectors: Industrial, sub_sectors: Construction }
+
+  # Healthcare
+  - { ticker: MIKA.JK, sectors: Healthcare, sub_sectors: Hospitals }
+  - { ticker: SILO.JK, sectors: Healthcare, sub_sectors: Hospitals }
+  - { ticker: HEAL.JK, sectors: Healthcare, sub_sectors: Hospitals }
+
+  # Property
+  - { ticker: BSDE.JK, sectors: Property, sub_sectors: Real Estate }
+  - { ticker: CTRA.JK, sectors: Property, sub_sectors: Real Estate }
+  - { ticker: PWON.JK, sectors: Property, sub_sectors: Real Estate }
+  - { ticker: SMRA.JK, sectors: Property, sub_sectors: Real Estate }
+
+  # Materials
+  - { ticker: BRPT.JK, sectors: Materials, sub_sectors: Petrochemicals }
+  - { ticker: TPIA.JK, sectors: Materials, sub_sectors: Petrochemicals }
+  - { ticker: ESSA.JK, sectors: Materials, sub_sectors: Fertilizers }
+
+  # Transportation
+  - { ticker: GIAA.JK, sectors: Transportation, sub_sectors: Airlines }

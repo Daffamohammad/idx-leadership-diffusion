@@ -1,0 +1,23 @@
+{
+  "results": [
+    {
+      "symbol": "KLBF",
+      "company_name": "Synthetic Healthcare Alpha Tbk.",
+      "sector": "Healthcare",
+      "sub_sector": "Pharmaceuticals",
+      "industry": "Pharmaceuticals",
+      "sub_industry": null
+    }
+  ],
+  "pagination": {
+    "total_count": 3,
+    "showing": 1,
+    "limit": 30,
+    "offset": 30,
+    "has_next": false,
+    "has_previous": true,
+    "next_offset": null,
+    "previous_offset": 0
+  },
+  "fixture_notice": "SYNTHETIC — NOT LIVE SECTORS DATA"
+}

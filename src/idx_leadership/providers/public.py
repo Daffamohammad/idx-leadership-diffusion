@@ -1,0 +1,292 @@
+"""Public-data prototype provider (yfinance) — keeps the existing
+groundwork implementation, but now also satisfies the
+`PriceCrossSectionProvider` and `BenchmarkProvider` capability
+interfaces so the engine can use it as a uniform capability-aware
+provider in tests and dev mode.
+"""
+from __future__ import annotations
+
+import time
+from datetime import date
+from pathlib import Path
+from typing import Any, Optional
+
+import pandas as pd
+
+from ..data import RawCache
+from ..models import (
+    BenchmarkObservation,
+    PriceObservation,
+    PriceBasis,
+    ProviderName,
+    ProviderMode,
+    SecurityMasterEntry,
+)
+from ..utils import get_logger, load_yaml, project_root
+from ..utils.errors import ProviderError
+from .base import MarketDataProvider
+from .capabilities import (
+    BenchmarkProvider,
+    PriceCrossSectionProvider,
+    PriceHistoryProvider,
+    SecurityMasterProvider,
+    TaxonomyProvider,
+)
+from .ledger import RequestLedger
+
+_log = get_logger(__name__)
+
+
+class YFinanceProvider(
+    MarketDataProvider,
+    SecurityMasterProvider,
+    PriceHistoryProvider,
+    PriceCrossSectionProvider,
+    BenchmarkProvider,
+    TaxonomyProvider,
+):
+    """Concrete provider for Yahoo Finance public data (groundwork)."""
+
+    name = "yfinance"
+    mode = ProviderMode.PUBLIC_PROTOTYPE
+
+    def __init__(
+        self,
+        *,
+        universe_path: str | Path = "config/universe.yaml",
+        request_timeout_seconds: int = 20,
+        max_retries: int = 2,
+        retry_backoff_seconds: float = 1.5,
+        cache_ttl_hours: int = 12,
+        ledger: Optional[RequestLedger] = None,
+        cache: Optional[RawCache] = None,
+    ) -> None:
+        super().__init__(ledger=ledger)
+        self.universe_path = project_root() / universe_path
+        self.timeout = int(request_timeout_seconds)
+        self.max_retries = max(0, int(max_retries))
+        self.retry_backoff = float(retry_backoff_seconds)
+        self.cache_ttl = int(cache_ttl_hours) * 3600
+        self.cache = cache or RawCache()
+        self._universe_config: dict[str, Any] = load_yaml(self.universe_path)
+        self._ticker_meta: dict[str, dict[str, Any]] = {
+            row["ticker"]: row for row in self._universe_config.get("universe", [])
+        }
+
+    # ---- contract methods ----
+
+    def get_security_master(self) -> list[SecurityMasterEntry]:
+        out: list[SecurityMasterEntry] = []
+        for tkr, meta in self._ticker_meta.items():
+            out.append(
+                SecurityMasterEntry(
+                    ticker=tkr,
+                    vendor_ticker=tkr,
+                    company_name=meta.get("company_name"),
+                    exchange=meta.get("exchange", "IDX"),
+                    country="ID",
+                    sector=meta.get("sectors"),
+                    subsector=meta.get("sub_sectors"),
+                    industry=None,
+                    subindustry=None,
+                    group_id=meta.get("sectors"),
+                    active=True,
+                    benchmark_flag=False,
+                    source=ProviderName.YFINANCE,
+                    source_as_of=date.today(),
+                )
+            )
+        return out
+
+    def get_full_universe_close(self, as_of: date) -> pd.DataFrame:
+        """Best-effort cross-section from the per-ticker cache.
+        Returns whatever yfinance returned for the requested date; may
+        be incomplete for thinly-traded names.
+        """
+        tickers = list(self._ticker_meta.keys())
+        return self.get_price_history(tickers, start=as_of, end=as_of)
+
+    def get_price_history(
+        self, tickers: list[str], *, start: date, end: date
+    ) -> pd.DataFrame:
+        if not tickers:
+            return _empty_price_frame()
+        frames: list[pd.DataFrame] = []
+        for tkr in tickers:
+            try:
+                df = self._fetch_one(tkr, start=start, end=end)
+            except Exception as e:  # noqa: BLE001
+                _log.warning("yfinance_fetch_failed ticker=%s err=%s", tkr, e)
+                continue
+            if not df.empty:
+                frames.append(df)
+        if not frames:
+            return _empty_price_frame()
+        return pd.concat(frames, ignore_index=True)
+
+    def get_benchmark_history(
+        self, benchmark_id: str, *, start: date, end: date
+    ) -> pd.DataFrame:
+        df = self._fetch_one(benchmark_id, start=start, end=end, is_benchmark=True)
+        if df.empty:
+            return pd.DataFrame(
+                columns=["benchmark_id", "date", "close", "price_basis", "source"]
+            )
+        return pd.DataFrame(
+            {
+                "benchmark_id": benchmark_id,
+                "date": pd.to_datetime(df["date"]).dt.date,
+                "close": df["close"].astype(float).values,
+                "price_basis": PriceBasis.CLOSE.value,
+                "source": ProviderName.YFINANCE.value,
+            }
+        )
+
+    def get_group_taxonomy(self) -> pd.DataFrame:
+        rows = [
+            {
+                "ticker": tkr,
+                "group_id": meta.get("sectors"),
+                "sector": meta.get("sectors"),
+                "subsector": meta.get("sub_sectors"),
+            }
+            for tkr, meta in self._ticker_meta.items()
+        ]
+        return pd.DataFrame(rows, columns=["ticker", "group_id", "sector", "subsector"])
+
+    # ---- internals (unchanged from groundwork) ----
+
+    def _fetch_one(self, ticker: str, *, start: date, end: date, is_benchmark: bool = False) -> pd.DataFrame:
+        cache_key = f"yfinance:{ticker}:{start.isoformat()}:{end.isoformat()}:bench={is_benchmark}"
+        cached = self.cache.get(cache_key, ttl_seconds=self.cache_ttl)
+        if cached is not None:
+            self.ledger.record(
+                provider=self.name,
+                endpoint="price_history" if not is_benchmark else "benchmark_history",
+                request_type="single",
+                parameters={"ticker": ticker, "start": start, "end": end, "is_benchmark": is_benchmark},
+                cache_hit=True,
+                status="ok",
+                rows_returned=len(cached.get("rows", [])),
+                elapsed_ms=0.0,
+            )
+            return _payload_to_frame(cached)
+
+        t0 = time.time()
+        rows = self._call_yfinance_with_retry(ticker, start=start, end=end)
+        elapsed = (time.time() - t0) * 1000.0
+        if rows is None:
+            self.ledger.record(
+                provider=self.name,
+                endpoint="price_history",
+                request_type="single",
+                parameters={"ticker": ticker, "start": start, "end": end},
+                cache_hit=False,
+                status="failed",
+                rows_returned=0,
+                elapsed_ms=elapsed,
+                error="yfinance returned no data",
+            )
+            raise ProviderError(f"yfinance returned no data for {ticker}")
+
+        self.cache.set(cache_key, {"rows": rows})
+        self.ledger.record(
+            provider=self.name,
+            endpoint="price_history" if not is_benchmark else "benchmark_history",
+            request_type="single",
+            parameters={"ticker": ticker, "start": start, "end": end, "is_benchmark": is_benchmark},
+            cache_hit=False,
+            status="ok",
+            rows_returned=len(rows),
+            elapsed_ms=elapsed,
+        )
+        return _payload_to_frame({"rows": rows})
+
+    def _call_yfinance_with_retry(
+        self, ticker: str, *, start: date, end: date
+    ) -> Optional[list[dict[str, Any]]]:
+        try:
+            import yfinance as yf  # type: ignore
+        except ImportError as e:
+            raise ProviderError("yfinance not installed") from e
+
+        last_err: Optional[Exception] = None
+        for attempt in range(self.max_retries + 1):
+            try:
+                df = yf.download(
+                    tickers=ticker,
+                    start=start.isoformat(),
+                    end=(end + pd.Timedelta(days=1)).isoformat(),
+                    progress=False,
+                    auto_adjust=False,
+                    threads=False,
+                    timeout=self.timeout,
+                )
+                if df is None or df.empty:
+                    return None
+                if isinstance(df.columns, pd.MultiIndex):
+                    df.columns = df.columns.get_level_values(0)
+                rows: list[dict[str, Any]] = []
+                for idx, row in df.iterrows():
+                    rows.append(
+                        {
+                            "date": idx.date().isoformat(),
+                            "close": float(row["Close"]),
+                            "adjusted_close": float(row["Adj Close"]),
+                            "volume": int(row["Volume"]) if not pd.isna(row["Volume"]) else None,
+                        }
+                    )
+                return rows
+            except Exception as e:  # noqa: BLE001
+                last_err = e
+                if attempt < self.max_retries:
+                    time.sleep(self.retry_backoff * (attempt + 1))
+                    continue
+                break
+        if last_err is not None:
+            _log.warning("yfinance_attempts_exhausted ticker=%s err=%s", ticker, last_err)
+        return None
+
+
+def _empty_price_frame() -> pd.DataFrame:
+    return pd.DataFrame(
+        columns=[
+            "ticker",
+            "date",
+            "close",
+            "adjusted_close",
+            "volume",
+            "market_cap",
+            "currency",
+            "price_basis",
+            "source",
+        ]
+    )
+
+
+def _payload_to_frame(payload: dict[str, Any]) -> pd.DataFrame:
+    rows = payload.get("rows", [])
+    if not rows:
+        return _empty_price_frame()
+    df = pd.DataFrame(rows)
+    df["date"] = pd.to_datetime(df["date"]).dt.date
+    df["currency"] = "IDR"
+    if "price_basis" not in df.columns:
+        df["price_basis"] = PriceBasis.ADJUSTED_CLOSE.value
+    if "source" not in df.columns:
+        df["source"] = ProviderName.YFINANCE.value
+    if "market_cap" not in df.columns:
+        df["market_cap"] = None
+    return df[
+        [
+            "ticker",
+            "date",
+            "close",
+            "adjusted_close",
+            "volume",
+            "market_cap",
+            "currency",
+            "price_basis",
+            "source",
+        ]
+    ]

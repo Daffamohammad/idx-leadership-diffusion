@@ -1,0 +1,17 @@
+{
+  "results": [
+    {"symbol": "BBCA", "company_name": "Synthetic Bank Alpha Tbk.", "free_float": 0.43},
+    {"symbol": "ADRO", "company_name": "Synthetic Energy Alpha Tbk.", "free_float": 0.38}
+  ],
+  "pagination": {
+    "total_count": 2,
+    "showing": 2,
+    "limit": 30,
+    "offset": 0,
+    "has_next": false,
+    "has_previous": false,
+    "next_offset": null,
+    "previous_offset": null
+  },
+  "fixture_notice": "SYNTHETIC — NOT LIVE SECTORS DATA"
+}

@@ -1,0 +1,34 @@
+benchmark: ^JKSE
+taxonomy_version: prototype-v1
+universe:
+- sectors: Financials
+  sub_sectors: X
+  ticker: BBCA.JK
+- sectors: Financials
+  sub_sectors: X
+  ticker: BBRI.JK
+- sectors: Financials
+  sub_sectors: X
+  ticker: BMRI.JK
+- sectors: Financials
+  sub_sectors: X
+  ticker: BBNI.JK
+- sectors: Telecom
+  sub_sectors: X
+  ticker: TLKM.JK
+- sectors: Telecom
+  sub_sectors: X
+  ticker: ISAT.JK
+- sectors: Telecom
+  sub_sectors: X
+  ticker: EXCL.JK
+- sectors: Industrial
+  sub_sectors: X
+  ticker: ASII.JK
+- sectors: Industrial
+  sub_sectors: X
+  ticker: UNTR.JK
+- sectors: Consumer
+  sub_sectors: X
+  ticker: ICBP.JK
+universe_version: prototype-v1

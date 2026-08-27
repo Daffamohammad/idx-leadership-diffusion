@@ -1,0 +1,89 @@
+# IDX Leadership Diffusion — methodology parameters
+#
+# method_version: methodology-v2 (frontier pass #1)
+#   - diffusion: group-size-aware threshold (constituent floor) added
+#   - concentration: top1_abs_share explicitly capped at 1.0; separate
+#     signed share and HHI reported alongside
+#   - group minimum: 4 -> 5 to stabilize small subsectors
+#
+# v1 snapshots remain readable (Pydantic extra=ignore on manifest
+# entries); see docs/METHODOLOGY_SENSITIVITY.md.
+
+method_version: methodology-v3
+feature_version: features-v3
+schema_version: schemas-v3
+eligibility_version: eligibility-v1
+leadership_version: leadership-v2
+diffusion_version: diffusion-v2
+concentration_version: concentration-v3
+
+# Horizons in trading days
+horizons:
+  short: 5
+  primary: 20
+  medium: 60
+
+# Price basis: which column to use for returns.
+# valid: adjusted_close | close
+# Sectors close is treated as RAW (G011); the engine normalizes to
+# `adjusted_close == close` until the corporate-action audit lands.
+price_basis: adjusted_close
+
+# As-of date resolution tolerance (calendar days).
+as_of_tolerance_days: 7
+
+breadth:
+  broadening_threshold_pp: 10.0
+  narrowing_threshold_pp: -10.0
+  min_history_days: 60
+  core_metric: benchmark_outperformance_share
+  diagnostic_metrics:
+    - positive_return_share
+    - improvement_share
+
+# Diffusion v2 — see docs/METHODOLOGY_SENSITIVITY.md
+diffusion:
+  mode: group_size_aware
+  broadening_threshold_pp: 10.0
+  narrowing_threshold_pp: -10.0
+  constituent_floor:
+    fraction: 0.10
+    minimum: 2
+  # v1 raw ±10pp rule is preserved for backward compatibility but
+  # deprecated; the engine uses v2.
+  legacy_v1_mode: breadth_delta
+
+concentration:
+  mode: absolute_move_v2
+  top_n: [1, 3, 5]
+  cap_top1_abs_share_at: 1.0
+  report_signed_share: true
+  report_hhi: true
+  signed_denominator_epsilon: 1.0e-9
+  signed_min_net_to_gross: 0.05
+
+leadership:
+  excess_return_improving: 0.0
+  excess_return_leading: 0.0
+  acceleration_threshold_pp: 1.0
+  minimum_eligible_constituents: 5  # was 4 in v1
+  minimum_coverage_pct: 60.0
+
+groups:
+  minimum_constituents: 5  # was 4 in v1
+  minimum_coverage_pct: 60.0
+  primary_taxonomy_level: sector
+  drilldown_taxonomy_level: subsector
+
+# Materiality thresholds (provisional, descriptive only).
+materiality:
+  breadth_delta_min_pp: 10.0
+  excess_return_delta_min_pp: 1.5
+  rank_delta_min: 3
+  # A categorical transition must also clear at least one quantitative
+  # threshold above; state change alone is not material.
+  require_quantitative_corroboration: true
+
+persistence:
+  definition: consecutive_observations_in_current_state
+  includes_current_observation: true

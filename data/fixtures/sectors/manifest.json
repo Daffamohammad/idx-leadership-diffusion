@@ -1,0 +1,54 @@
+{
+  "fixture_kind": "SYNTHETIC_SECTORS_V2",
+  "not_live": true,
+  "schema_version": "sectors-fixture-v1",
+  "description": "Synthetic payloads for offline contract and normalization testing. Never a live parity result.",
+  "routes": [
+    {
+      "path": "/v2/companies/",
+      "params": {"offset": 0},
+      "file": "companies_page_1.json"
+    },
+    {
+      "path": "/v2/companies/",
+      "params": {"offset": 30},
+      "file": "companies_page_2.json"
+    },
+    {
+      "path": "/v2/close/",
+      "params": {"date": "2026-08-20", "offset": 0},
+      "file": "close_2026-08-20.json"
+    },
+    {
+      "path": "/v2/close/",
+      "params": {"date": "2026-08-21", "offset": 0},
+      "file": "empty_page.json"
+    },
+    {
+      "path": "/v2/free-float/",
+      "params": {"offset": 0},
+      "file": "free_float.json"
+    },
+    {
+      "path": "/v2/foreign-flow/BBCA.JK/",
+      "params": {},
+      "file": "foreign_flow_bbca.json"
+    },
+    {
+      "path": "/v2/company/corporate-actions/BBCA.JK/",
+      "params": {},
+      "file": "corporate_actions_bbca.json"
+    },
+    {
+      "path": "/v2/suspensions/",
+      "params": {"offset": 0},
+      "file": "suspensions.json"
+    },
+    {
+      "path": "/v2/test/error/",
+      "params": {},
+      "file": "cases/api_error.json",
+      "status": 400
+    }
+  ]
+}

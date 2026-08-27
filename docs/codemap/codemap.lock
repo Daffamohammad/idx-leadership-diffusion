@@ -1,0 +1,361 @@
+{
+  "schema": "codemap.lock.v1",
+  "fingerprint_algorithm": "sha256(file_path + sha256(file_contents)) per module; module fingerprint = sha256 over the (path, file_hash) lines",
+  "generated_at": "2026-08-27T14:43:44.323949+00:00",
+  "commit": "unknown",
+  "working_tree_dirty": false,
+  "scanned_scope": [
+    "FRONTIER_PASS_1_AUDIT.md",
+    "FRONTIER_PASS_2_AUDIT.md",
+    "GROUNDWORK_AUDIT.md",
+    "README.md",
+    "app/components.py",
+    "app/data_quality.py",
+    "app/story_mode.py",
+    "app/streamlit_app.py",
+    "config/methodology.yaml",
+    "config/providers.yaml",
+    "config/universe.yaml",
+    "docs/ARCHITECTURE.md",
+    "docs/DATA_CONTRACTS.md",
+    "docs/DECISION_LOG.md",
+    "docs/ENRICHMENT_RESEARCH.md",
+    "docs/KNOWN_GAPS.md",
+    "docs/LIVE_METHODOLOGY_AUDIT.md",
+    "docs/METHODOLOGY.md",
+    "docs/METHODOLOGY_SENSITIVITY.md",
+    "docs/NEXT_ITERATION.md",
+    "docs/PROVIDER_PARITY_REPORT.md",
+    "docs/SECTORS_API_AUDIT.md",
+    "docs/SECTORS_CREDIT_AUDIT.md",
+    "docs/SECTORS_INTEGRATION_PLAN.md",
+    "docs/SECTORS_PRICE_BASIS.md",
+    "docs/SECTORS_REFRESH_BUDGET.md",
+    "docs/TAXONOMY_AUDIT.md",
+    "docs/UNIVERSE_ELIGIBILITY.md",
+    "docs/codemap/_build.py",
+    "scripts/__init__.py",
+    "scripts/audit_close_basis.py",
+    "scripts/build_history.py",
+    "scripts/build_market_snapshot.py",
+    "scripts/build_snapshot.py",
+    "scripts/compare_providers.py",
+    "scripts/credit_audit.py",
+    "scripts/export_diagnostics.py",
+    "scripts/refresh_public_data.py",
+    "scripts/refresh_sectors_core.py",
+    "scripts/run_diffusion_sensitivity.py",
+    "scripts/run_horizon_sensitivity.py",
+    "scripts/run_stale_trading.py",
+    "scripts/run_state_turnover.py",
+    "scripts/validate_data.py",
+    "src/idx_leadership/aggregation/groups.py",
+    "src/idx_leadership/analytics/__init__.py",
+    "src/idx_leadership/analytics/contradictions.py",
+    "src/idx_leadership/analytics/invalidation.py",
+    "src/idx_leadership/analytics/persistence.py",
+    "src/idx_leadership/data/__init__.py",
+    "src/idx_leadership/data/endpoint_status.py",
+    "src/idx_leadership/data/manifests.py",
+    "src/idx_leadership/data/quality.py",
+    "src/idx_leadership/data/snapshots.py",
+    "src/idx_leadership/evidence/builder.py",
+    "src/idx_leadership/features/__init__.py",
+    "src/idx_leadership/features/breadth.py",
+    "src/idx_leadership/features/concentration.py",
+    "src/idx_leadership/features/concentration_v2.py",
+    "src/idx_leadership/features/relative_strength.py",
+    "src/idx_leadership/features/returns.py",
+    "src/idx_leadership/models/__init__.py",
+    "src/idx_leadership/models/benchmark_observation.py",
+    "src/idx_leadership/models/enums.py",
+    "src/idx_leadership/models/evidence.py",
+    "src/idx_leadership/models/flow.py",
+    "src/idx_leadership/models/fundamental.py",
+    "src/idx_leadership/models/group_snapshot.py",
+    "src/idx_leadership/models/manifest.py",
+    "src/idx_leadership/models/price_observation.py",
+    "src/idx_leadership/models/security_feature_snapshot.py",
+    "src/idx_leadership/models/security_master.py",
+    "src/idx_leadership/models/transition_event.py",
+    "src/idx_leadership/pipeline.py",
+    "src/idx_leadership/providers/__init__.py",
+    "src/idx_leadership/providers/base.py",
+    "src/idx_leadership/providers/capabilities.py",
+    "src/idx_leadership/providers/factory.py",
+    "src/idx_leadership/providers/fixture.py",
+    "src/idx_leadership/providers/ledger.py",
+    "src/idx_leadership/providers/market_universe.py",
+    "src/idx_leadership/providers/public.py",
+    "src/idx_leadership/providers/sectors.py",
+    "src/idx_leadership/providers/sectors_client.py",
+    "src/idx_leadership/providers/sectors_normalizers.py",
+    "src/idx_leadership/signals/change_digest.py",
+    "src/idx_leadership/signals/diffusion.py",
+    "src/idx_leadership/signals/diffusion_v2.py",
+    "src/idx_leadership/signals/leadership.py",
+    "src/idx_leadership/signals/transitions.py",
+    "tests/__init__.py",
+    "tests/conftest.py",
+    "tests/conftest_app.py",
+    "tests/test_aggregation.py",
+    "tests/test_analytics.py",
+    "tests/test_breadth.py",
+    "tests/test_capability_provider.py",
+    "tests/test_concentration.py",
+    "tests/test_concentration_v2.py",
+    "tests/test_config.py",
+    "tests/test_diffusion_group_size.py",
+    "tests/test_endpoint_status.py",
+    "tests/test_evidence.py",
+    "tests/test_market_universe.py",
+    "tests/test_methodology_versioning.py",
+    "tests/test_no_lookahead.py",
+    "tests/test_parity_public_sectors.py",
+    "tests/test_pipeline.py",
+    "tests/test_provider_contracts.py",
+    "tests/test_providers.py",
+    "tests/test_relative_strength.py",
+    "tests/test_returns.py",
+    "tests/test_schema.py",
+    "tests/test_sectors_client.py",
+    "tests/test_sectors_provider.py",
+    "tests/test_snapshots.py",
+    "tests/test_states.py",
+    "tests/test_transitions.py",
+    "tests/test_ui_story_mode.py"
+  ],
+  "excluded_directories": [
+    ".venv",
+    "__pycache__",
+    ".pytest_cache",
+    ".git",
+    "node_modules",
+    "dist",
+    "build",
+    ".mypy_cache",
+    ".ruff_cache",
+    "data/cache",
+    "data/raw",
+    "data/normalized",
+    "data/snapshots",
+    "data/snapshots_baseline",
+    "data/sample"
+  ],
+  "modules": {
+    "app": {
+      "files": [
+        "app/streamlit_app.py",
+        "app/components.py",
+        "app/data_quality.py",
+        "app/story_mode.py"
+      ],
+      "fingerprint": "91b4ce8d83f87d6de030094473499593fbfda74426b806d7e64fa8fb00bf2ad8"
+    },
+    "scripts": {
+      "files": [
+        "scripts/run_horizon_sensitivity.py",
+        "scripts/compare_providers.py",
+        "scripts/refresh_public_data.py",
+        "scripts/__init__.py",
+        "scripts/credit_audit.py",
+        "scripts/export_diagnostics.py",
+        "scripts/run_stale_trading.py",
+        "scripts/audit_close_basis.py",
+        "scripts/build_history.py",
+        "scripts/build_snapshot.py",
+        "scripts/run_diffusion_sensitivity.py",
+        "scripts/run_state_turnover.py",
+        "scripts/refresh_sectors_core.py",
+        "scripts/validate_data.py",
+        "scripts/build_market_snapshot.py"
+      ],
+      "fingerprint": "6a65a29f408d45684bee627189e9e25d2530db0035c6f37e33a41967e06763f9"
+    },
+    "pipeline": {
+      "files": [
+        "src/idx_leadership/pipeline.py"
+      ],
+      "fingerprint": "f3d536ca296265808ebfc3a070bb0c8928343a2066ee95e03bc9c6f7e1f2fefc"
+    },
+    "providers": {
+      "files": [
+        "src/idx_leadership/providers/__init__.py",
+        "src/idx_leadership/providers/fixture.py",
+        "src/idx_leadership/providers/factory.py",
+        "src/idx_leadership/providers/sectors.py",
+        "src/idx_leadership/providers/sectors_normalizers.py",
+        "src/idx_leadership/providers/public.py",
+        "src/idx_leadership/providers/base.py",
+        "src/idx_leadership/providers/capabilities.py"
+      ],
+      "fingerprint": "18e1df3235975b201d82e6aadb3718fc12321f5c3569ad24bdb7694045673ad5"
+    },
+    "sectors-client": {
+      "files": [
+        "src/idx_leadership/providers/sectors_client.py"
+      ],
+      "fingerprint": "985a0c579b286aea29ee81005a9bad2a0b9ff929df295345dc1b7cd55186d091"
+    },
+    "market-universe": {
+      "files": [
+        "src/idx_leadership/providers/market_universe.py"
+      ],
+      "fingerprint": "c53d4968d8a1475485e825044c3ca4b2da6d5c4d74b1317fd6806b820048ac29"
+    },
+    "models": {
+      "files": [
+        "src/idx_leadership/models/group_snapshot.py",
+        "src/idx_leadership/models/enums.py",
+        "src/idx_leadership/models/transition_event.py",
+        "src/idx_leadership/models/manifest.py",
+        "src/idx_leadership/models/__init__.py",
+        "src/idx_leadership/models/flow.py",
+        "src/idx_leadership/models/security_master.py",
+        "src/idx_leadership/models/benchmark_observation.py",
+        "src/idx_leadership/models/price_observation.py",
+        "src/idx_leadership/models/fundamental.py",
+        "src/idx_leadership/models/evidence.py",
+        "src/idx_leadership/models/security_feature_snapshot.py"
+      ],
+      "fingerprint": "0a83e2a0790260df982c1134e5b4a64b7480204ddd02e8eb65bc4016b53dec19"
+    },
+    "features": {
+      "files": [
+        "src/idx_leadership/features/concentration.py",
+        "src/idx_leadership/features/breadth.py",
+        "src/idx_leadership/features/__init__.py",
+        "src/idx_leadership/features/returns.py",
+        "src/idx_leadership/features/relative_strength.py",
+        "src/idx_leadership/features/concentration_v2.py"
+      ],
+      "fingerprint": "6c2288af4f697734f21a93ad507e3e275613c9e83b0bdc3e75ad54f0372fdbf4"
+    },
+    "aggregation": {
+      "files": [
+        "src/idx_leadership/aggregation/groups.py"
+      ],
+      "fingerprint": "3fea94284560196c34d75c735bebfe8b089d013029491093e9692061cbb23b25"
+    },
+    "signals-leadership": {
+      "files": [
+        "src/idx_leadership/signals/leadership.py"
+      ],
+      "fingerprint": "fb537612d0f31282b6a0e0ae52c12b3bf03362001115da2382490606ca5b42fd"
+    },
+    "signals-diffusion": {
+      "files": [
+        "src/idx_leadership/signals/diffusion.py",
+        "src/idx_leadership/signals/diffusion_v2.py"
+      ],
+      "fingerprint": "15aead643112e615fc559cc6b6503bdaf00bd13b8bd144a0e92dc416eced16f7"
+    },
+    "signals-transitions": {
+      "files": [
+        "src/idx_leadership/signals/transitions.py",
+        "src/idx_leadership/signals/change_digest.py"
+      ],
+      "fingerprint": "95e66d91a074a82a7614b9102efb0272478901582b5fe5b7914796ab33ed4ad1"
+    },
+    "analytics": {
+      "files": [
+        "src/idx_leadership/analytics/persistence.py",
+        "src/idx_leadership/analytics/contradictions.py",
+        "src/idx_leadership/analytics/invalidation.py",
+        "src/idx_leadership/analytics/__init__.py"
+      ],
+      "fingerprint": "05b17a18ac7ec37fa37c3734cb96b911ee3ae0b047d2286eacd2a1890d4b0d59"
+    },
+    "evidence-builder": {
+      "files": [
+        "src/idx_leadership/evidence/builder.py"
+      ],
+      "fingerprint": "7905228b3133d15c2e033c713aca7a84cf0fdde9a328671184f1426e4a5a9645"
+    },
+    "data-snapshots": {
+      "files": [
+        "src/idx_leadership/data/__init__.py",
+        "src/idx_leadership/data/snapshots.py",
+        "src/idx_leadership/data/manifests.py",
+        "src/idx_leadership/data/quality.py",
+        "src/idx_leadership/data/endpoint_status.py"
+      ],
+      "fingerprint": "5fc88383d468fe27dd92bc8de364602dbd6fd0e3743c340c4dae8b1cdca37914"
+    },
+    "ledger": {
+      "files": [
+        "src/idx_leadership/providers/ledger.py"
+      ],
+      "fingerprint": "f24232f1f26516dd0dad4d14898b45a1394edf94cff56588b7d1740319fbb641"
+    },
+    "tests": {
+      "files": [
+        "tests/conftest_app.py",
+        "tests/test_concentration.py",
+        "tests/test_methodology_versioning.py",
+        "tests/test_sectors_client.py",
+        "tests/conftest.py",
+        "tests/test_concentration_v2.py",
+        "tests/test_providers.py",
+        "tests/test_endpoint_status.py",
+        "tests/test_sectors_provider.py",
+        "tests/test_returns.py",
+        "tests/test_states.py",
+        "tests/test_aggregation.py",
+        "tests/__init__.py",
+        "tests/test_breadth.py",
+        "tests/test_relative_strength.py",
+        "tests/test_analytics.py",
+        "tests/test_capability_provider.py",
+        "tests/test_schema.py",
+        "tests/test_snapshots.py",
+        "tests/test_evidence.py",
+        "tests/test_config.py",
+        "tests/test_provider_contracts.py",
+        "tests/test_ui_story_mode.py",
+        "tests/test_parity_public_sectors.py",
+        "tests/test_diffusion_group_size.py",
+        "tests/test_market_universe.py",
+        "tests/test_transitions.py",
+        "tests/test_no_lookahead.py",
+        "tests/test_pipeline.py"
+      ],
+      "fingerprint": "5647884de6818aea1618fa111c77d2a2b095fec93f1c5bd069c67cef9d58153e"
+    },
+    "config": {
+      "files": [
+        "config/methodology.yaml",
+        "config/universe.yaml",
+        "config/providers.yaml"
+      ],
+      "fingerprint": "c05e1a0f617ad0914eb60510c1a40bccc9538eb626d21d0641a8586c13306b3a"
+    },
+    "docs": {
+      "files": [
+        "docs/codemap/_build.py",
+        "docs/SECTORS_CREDIT_AUDIT.md",
+        "docs/SECTORS_API_AUDIT.md",
+        "docs/ARCHITECTURE.md",
+        "docs/LIVE_METHODOLOGY_AUDIT.md",
+        "docs/UNIVERSE_ELIGIBILITY.md",
+        "docs/DATA_CONTRACTS.md",
+        "docs/SECTORS_INTEGRATION_PLAN.md",
+        "docs/METHODOLOGY.md",
+        "docs/SECTORS_PRICE_BASIS.md",
+        "docs/NEXT_ITERATION.md",
+        "docs/PROVIDER_PARITY_REPORT.md",
+        "docs/DECISION_LOG.md",
+        "docs/ENRICHMENT_RESEARCH.md",
+        "docs/SECTORS_REFRESH_BUDGET.md",
+        "docs/METHODOLOGY_SENSITIVITY.md",
+        "docs/TAXONOMY_AUDIT.md",
+        "docs/KNOWN_GAPS.md",
+        "FRONTIER_PASS_2_AUDIT.md",
+        "GROUNDWORK_AUDIT.md",
+        "FRONTIER_PASS_1_AUDIT.md",
+        "README.md"
+      ],
+      "fingerprint": "7c1d6f0374ffed4b39b5bd16536927076c9740f58b2574562575c1f9eed6a0b1"
+    }
+  }
+}

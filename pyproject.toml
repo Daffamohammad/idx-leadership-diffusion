@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "idx-leadership-diffusion"
+version = "0.1.0"
+description = "Market-wide intelligence system for Indonesian equities: leadership, breadth, diffusion, and concentration beneath the index surface."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "IDX Leadership Diffusion Team" }]
+keywords = ["idx", "indonesia", "market-intelligence", "breadth", "diffusion", "concentration"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Office/Business :: Financial :: Investment",
+]
+
+dependencies = [
+    "pandas>=2.0",
+    "numpy>=1.24",
+    "pyyaml>=6.0",
+    "pydantic>=2.0",
+    "pyarrow>=14.0",
+    "yfinance>=0.2.40",
+]
+
+[project.optional-dependencies]
+ui = [
+    "streamlit>=1.30",
+    "altair>=5.0",
+    "plotly>=5.18",
+]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+]
+
+[project.scripts]
+idx-refresh = "scripts.refresh_public_data:main"
+idx-build-snapshot = "scripts.build_snapshot:main"
+idx-build-history = "scripts.build_history:main"
+idx-validate = "scripts.validate_data:main"
+idx-diagnostics = "scripts.export_diagnostics:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+filterwarnings = [
+    "ignore::DeprecationWarning:yfinance.*",
+    "ignore::FutureWarning",
+]
