@@ -4,7 +4,75 @@ Single-line changelog across passes. Detailed audits live next to
 the original `GROUNDWORK_AUDIT.md`, `FRONTIER_PASS_1_AUDIT.md`,
 `FRONTIER_PASS_2_AUDIT.md`, and `OFFLINE_REFINEMENT_AUDIT.md`.
 
+## UI Productization (2026-08-28)
+
+* **Command-center Overview** now follows the explicit hierarchy
+  `Market Read → Leadership × Diffusion Map + Material Shifts →
+  Contradictions → Leadership Tape → Under the Surface`.  All
+  content is pure presentation derivation on the frozen v1
+  intelligence contract.
+* **Top-bar provider pill** (`mode-pill`) is now a colored chip
+  with a status dot.  Provider modes (DEMO FIXTURE / SECTORS
+  FIXTURE / SECTORS LIVE / PUBLIC PROTOTYPE) are visually
+  unambiguous.
+* **Contradictions block** on the Overview ranks
+  CRITICAL-before-WARNING, deduplicated by (group, metric), with
+  severity chip, group name, label, evidence, and breadth delta.
+* **Screen Invalidation** sub-card appears under Under the
+  Surface for the selected group, mirroring the brief contract.
+* **Leadership Tape** now has a `Contradictions` column
+  (count + top severity) and a `Confirmation` column
+  (worst data-gap status across the frozen categories) instead
+  of the legacy `Fundamentals: UNAVAILABLE` strings.
+* **Method/Quality `Known gaps`** is now a structured per-category
+  rollup of the frozen `DataGapCategory` enum, mirroring the
+  brief's `## Data Gaps` block.
+* **Sidebar** now exposes a per-category data-gap rollup.
+* **DashboardView** exposes `frozen_contract_version = "brief-v1"`,
+  `intelligence_version = "intelligence-v1"`, and
+  `contradiction_rows: tuple[ContradictionRow, ...]`.
+* **14 new UI presentation tests** in `tests/test_ui_productization.py`.
+  Frozen contract tests (12) and e2e regression (12) all still pass.
+* **Test count: 327 passing** (was 313; +14).
+* **Compile: clean.**
+* **No new analytics.  No methodology change.  No brief section added
+  or renamed.**  The frozen contract is unchanged.
+
 ## Integration Freeze (2026-08-28)
+
+* **Brief contract frozen at v1** in `src/idx_leadership/intelligence/contract.py`.
+  Section order is `Market Read → Leadership → Broadening →
+  Narrowing → Material Shifts → Contradictions → Selected Evidence
+  → Screen Invalidation → Data Gaps`. Adding a section, renaming one,
+  or reordering them is a contract-version-bump change.
+* **Data gaps normalized** to a structured `DataGap` object with
+  frozen `DataGapCategory` and `DataGapStatus` enums
+  (`FUNDAMENTALS`, `FOREIGN_FLOW`, `BROKER_ACTIVITY`, `FREE_FLOAT`,
+  `TAXONOMY`, `CORPORATE_ACTIONS`, `BENCHMARK`). The duplicate
+  "foreign flow unavailable — Sectors live not connected" string is
+  gone; each category appears at most once in the brief.
+* **Contradictions section added** to the brief. A deterministic
+  `ContradictionRecord` with `metric`, `label`, `severity`, and
+  `evidence` is consumed by both the UI and the Markdown renderer.
+  Bullets are deduplicated by `(group, metric)` and sorted with
+  CRITICAL before WARNING.
+* **Screen invalidation sub-section** added under Selected Evidence.
+  The frozen `InvalidationCondition` carries `condition`, `metric`,
+  `threshold`, and `rationale`; the brief always renders a
+  deterministic intro line and one bullet per condition.
+* **Intelligence contract version stamped** on `GroupEvidence` as
+  `intelligence-v1`; the brief and the UI consume the same shape.
+* **End-to-end demo regression** in `tests/test_e2e_demo.py`
+  exercises the full source → snapshot → transition → intelligence →
+  brief path and asserts the frozen contract.
+* **Brief contract golden tests** in `tests/test_brief_contract.py`
+  run the real `scripts.export_market_brief` subprocess against the
+  demo fixture and assert the section order, the structured data gaps,
+  the contradictions section, and the screen invalidation bullets.
+* **Test count: 313 passing** (was 287; +26 from this freeze pass).
+* No live Sectors data was claimed. No live Sectors call was made.
+
+## Offline Refinement (2026-08-28)
 
 * **Brief contract frozen at v1** in `src/idx_leadership/intelligence/contract.py`.
   Section order is `Market Read → Leadership → Broadening →

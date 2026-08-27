@@ -394,3 +394,77 @@ Oil & Gas would lose its current IMPROVING/BROADENING interpretation if:
 The next pass is the live-Sectors cutover described in
 `docs/NEXT_ITERATION.md` (P0.1 → P0.5). No structural refactor is
 required to begin; the offline scaffold is already green.
+
+---
+
+# UI Productization Pass (2026-08-28)
+
+> Reference point: `offline-freeze-v1` (commit 816b981).  This pass
+> starts after the freeze and produces `ui-productization-v1`
+> (commit 0ac4852).  The freeze contract is unchanged; this pass is
+> presentation only.
+
+## What changed (all presentation derivations on the frozen contract)
+
+| Surface | Change | Underlying source |
+| --- | --- | --- |
+| Top bar | Loud colored **mode-pill** (DEMO FIXTURE / SECTORS FIXTURE / SECTORS LIVE / PUBLIC PROTOTYPE) instead of a flat badge | `view.provider_mode` |
+| Overview hierarchy | `Market Read → Map+Shifts → Contradictions → Leadership Tape → Under the Surface` | frozen dashboard view |
+| Market Read | Big serif headline + supporting bullets + 5-cell metric strip | `view.headline`, `view.supporting_points` |
+| Contradictions block | Ranked, CRITICAL-first, with severity chip, group name, label, evidence, breadth delta | `view.contradiction_rows` |
+| Leadership Tape | Adds `Contradictions` and `Confirmation` columns derived from `ContradictionView` and `DataGapView`; legacy `Fundamentals: UNAVAILABLE` strings removed | `group_tape_rows()` |
+| Under the Surface | Structured **Screen Invalidation** card + per-group contradictions | `invalidation_rows_for()`, `group.contradictions` |
+| Method / Quality | `Known gaps` is now a per-category **structured rollup** of the frozen `DataGapCategory` enum | `data_gap_rollup()` |
+| Sidebar | Data-gap rollup in an expander so the per-category status is one click away | `data_gap_rollup()` |
+
+## What did NOT change
+
+- Brief section order (`brief-v1`).
+- Intelligence contract (`intelligence-v1`).
+- Methodology (`methodology-v3`).
+- Provider mode contract (`provider-mode-v1`).
+- Snapshot comparability contract (`snapshot-comparability-v1`).
+- `config/methodology.yaml`.
+- Any analytics engine.
+- No new brief sections, no new contradictions, no new invalidation rules,
+  no new horizons, no new thresholds.
+
+## What was added
+
+| File | Purpose |
+| --- | --- |
+| `tests/test_ui_productization.py` | 14 UI presentation tests |
+| `app/view_models.py` | `ContradictionRow`, `InvalidationRow` derivations, `_build_contradiction_rows`, `invalidation_rows_for`, `data_gap_rollup`, `aggregate_data_gap_status`, `frozen_contract_version`, `intelligence_version` |
+
+## Test results
+
+```text
+collected  327   (was 313; +14 net)
+passed     327
+failed       0
+skipped      0
+warnings     0
+duration  ~5.4s
+compile clean
+live Sectors tests executed: NO — credential unavailable
+```
+
+## Decision discipline applied to the UI pass
+
+| Question | Decision | Reasoning |
+| --- | --- | --- |
+| "We need a new UI field for momentum blend." | Rejected. | Not in the frozen contract; the brief was explicit that no new analytics is to be added unless a contract defect is exposed. |
+| "We need a 'New Leaders' / 'Lost Leadership' section in the UI." | Rejected. | The Material Shifts block already covers new / lost leadership via the structured `MaterialShiftView` list; adding a parallel section would duplicate the freeze contract. |
+| "We need a mock fundamentals table." | Rejected. | The brief explicitly says do not use mock fundamentals; keep `DATA GAP` explicit so the live Sectors improvement is visibly real. |
+| "We need a 'Recent Sub-Industries' drill-down." | Out of scope. | The UI already supports taxonomy drill-down through the explorer; adding a parallel path would diverge from the frozen surface hierarchy. |
+| "The contradictions should be inline in the tape." | Rejected. | Contradictions are first-class in the brief contract; they belong in their own block, not embedded in the tape. |
+| "The provider mode badge is too small." | Addressed in the CSS. | The badge is now a colored pill in the top bar and the sidebar. |
+| "The Known Gaps section reads as free-form strings." | Addressed via `data_gap_rollup()`. | The Method/Quality page now mirrors the brief's structured `## Data Gaps` block. |
+
+## Next pass
+
+The next pass is the live-Sectors cutover described in
+`docs/NEXT_ITERATION.md` (P0.1 → P0.5).  No UI work should resume
+until that cutover is complete; the UI is intentionally waiting on
+real market data so its next iteration can be calibrated against
+real evidence instead of a frozen demo fixture.
