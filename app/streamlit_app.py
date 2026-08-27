@@ -27,8 +27,11 @@ from app.view_models import (
     CONFIRMATION_DATA_GAP,
     DashboardView,
     GroupView,
+    InvalidationRow,
     build_dashboard_view,
+    data_gap_rollup,
     group_tape_rows,
+    invalidation_rows_for,
     render_market_brief,
 )
 
@@ -52,6 +55,7 @@ CSS = """
   --amber: #f2b84b;
   --cyan: #4dd2c3;
   --red: #ef7f72;
+  --green: #74d9c8;
   --paper: #f4f0e7;
 }
 .stApp { background: #09111a; color: var(--ink); }
@@ -59,21 +63,29 @@ CSS = """
   linear-gradient(180deg, rgba(38, 58, 76, .23), transparent 18rem), #09111a; }
 [data-testid="stHeader"] { background: rgba(9, 17, 26, .9); }
 [data-testid="stSidebar"] { background: #0c151f; border-right: 1px solid var(--line); }
-.block-container { max-width: 1480px; padding-top: 1.4rem; padding-bottom: 4rem; }
+.block-container { max-width: 1480px; padding-top: 1.2rem; padding-bottom: 4rem; }
 h1, h2, h3 { font-family: "Iowan Old Style", "Palatino Linotype", Georgia, serif !important; letter-spacing: -.025em; }
 p, label, button, input, [data-testid="stMarkdownContainer"] { font-family: "Avenir Next", "IBM Plex Sans", sans-serif; }
 .product-kicker { color: var(--amber); font-size: .72rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; }
 .product-title { color: var(--paper); font: 600 clamp(1.8rem, 3.1vw, 3.2rem)/1.04 "Iowan Old Style", Georgia, serif; margin: .15rem 0 .35rem; }
 .product-deck { color: var(--muted); max-width: 760px; font-size: .92rem; }
 .meta-line { color: #7f8d9b; font-size: .75rem; letter-spacing: .025em; }
-.mode-badge { display: inline-flex; align-items: center; border: 1px solid rgba(242,184,75,.55); color: #ffd88d; background: rgba(242,184,75,.09); border-radius: 999px; padding: .35rem .65rem; font: 700 .68rem/1 "Avenir Next", sans-serif; letter-spacing: .11em; }
-.mode-live { border-color: rgba(77,210,195,.65); color: #8de9df; background: rgba(77,210,195,.09); }
+.mode-bar { display:flex; gap:.6rem; align-items:center; flex-wrap:wrap; margin-top:.5rem 0 .25rem; }
+.mode-pill { display:inline-flex; align-items:center; gap:.4rem; border:1px solid rgba(242,184,75,.55); color:#ffd88d; background: rgba(242,184,75,.10); border-radius: 999px; padding:.42rem .85rem; font: 800 .76rem/1 "Avenir Next", sans-serif; letter-spacing:.13em; text-transform: uppercase; }
+.mode-pill .pulse { width:.5rem; height:.5rem; border-radius:50%; background: var(--amber); }
+.mode-pill.is-live { border-color: rgba(77,210,195,.65); color:#8de9df; background: rgba(77,210,195,.10); }
+.mode-pill.is-live .pulse { background: var(--cyan); }
+.mode-pill.is-fixture { border-color: rgba(125,137,148,.55); color:#c0cad4; background: rgba(125,137,148,.10); }
+.mode-pill.is-fixture .pulse { background: #c0cad4; }
+.mode-pill.is-prototype { border-color: rgba(239,127,114,.55); color:#f5b4ad; background: rgba(239,127,114,.10); }
+.mode-pill.is-prototype .pulse { background: #ef7f72; }
 .demo-warning { border: 1px solid rgba(242,184,75,.36); background: rgba(242,184,75,.08); padding: .72rem .9rem; color: #f8d89b; font-size: .78rem; margin: .8rem 0 1rem; }
-.section-label { color: var(--amber); font-size: .68rem; font-weight: 800; letter-spacing: .17em; text-transform: uppercase; margin: 1.4rem 0 .38rem; }
-.market-read { background: linear-gradient(135deg, rgba(30,46,61,.97), rgba(13,24,35,.97)); border-top: 2px solid var(--amber); border-bottom: 1px solid var(--line); padding: 1.2rem 1.35rem 1rem; margin: .5rem 0 1.15rem; }
-.market-read h2 { color: var(--paper); font-size: 1.55rem; line-height: 1.15; margin: 0 0 .5rem; }
-.market-read p { color: #c6d0d9; font-size: .96rem; line-height: 1.55; margin: 0; max-width: 980px; }
-.metric-strip { display:grid; grid-template-columns: repeat(5, minmax(92px,1fr)); border:1px solid var(--line); border-left:0; margin-top:1rem; }
+.section-label { color: var(--amber); font-size: .68rem; font-weight: 800; letter-spacing: .17em; text-transform: uppercase; margin: 1.4rem 0 .38rem; display:flex; align-items:center; gap:.6rem; }
+.section-label .num { background: rgba(242,184,75,.15); color: var(--amber); border-radius:999px; padding:.1rem .45rem; font-size:.62rem; letter-spacing:.04em; }
+.market-read { background: linear-gradient(135deg, rgba(30,46,61,.97), rgba(13,24,35,.97)); border-top: 2px solid var(--amber); border-bottom: 1px solid var(--line); padding: 1.4rem 1.5rem 1.1rem; margin: .25rem 0 1.15rem; }
+.market-read h2 { color: var(--paper); font-size: clamp(1.6rem, 2.6vw, 2.4rem); line-height: 1.1; margin: 0 0 .55rem; font-family: "Iowan Old Style", Georgia, serif; font-weight: 600; }
+.market-read p { color: #c6d0d9; font-size: 1.02rem; line-height: 1.55; margin: 0 0 .85rem; max-width: 1080px; }
+.metric-strip { display:grid; grid-template-columns: repeat(5, minmax(92px,1fr)); border:1px solid var(--line); border-left:0; }
 .metric-cell { border-left:1px solid var(--line); padding:.65rem .8rem; background:rgba(7,15,23,.35); }
 .metric-value { color:var(--paper); font:600 1.25rem/1.1 "Iowan Old Style", Georgia,serif; }
 .metric-label { color:var(--muted); font-size:.64rem; letter-spacing:.09em; text-transform:uppercase; margin-top:.2rem; }
@@ -85,6 +97,25 @@ p, label, button, input, [data-testid="stMarkdownContainer"] { font-family: "Ave
 .shift-name { color:var(--paper); font-weight:700; font-size:.79rem; letter-spacing:.045em; text-transform:uppercase; }
 .shift-transition { color:#c7d0d9; font-size:.73rem; margin:.15rem 0; line-height:1.38; }
 .shift-evidence { color:var(--muted); font-size:.69rem; line-height:1.35; }
+.contradiction-row { display:grid; grid-template-columns:2.25rem auto 1fr; gap:.7rem; padding:.7rem 0; border-bottom:1px solid var(--line); align-items:start; }
+.contradiction-rank { color:var(--red); font:700 .78rem/1.3 "Avenir Next",sans-serif; letter-spacing:.08em; }
+.contradiction-sev { font:700 .66rem/1 "Avenir Next", sans-serif; letter-spacing:.1em; text-transform:uppercase; padding:.18rem .4rem; border-radius:3px; }
+.sev-critical { background: rgba(239,127,114,.18); color:#f5b4ad; border:1px solid rgba(239,127,114,.45); }
+.sev-warning { background: rgba(241,189,104,.15); color:#f1bd68; border:1px solid rgba(241,189,104,.4); }
+.contradiction-name { color:var(--paper); font-weight:700; font-size:.79rem; letter-spacing:.045em; text-transform:uppercase; }
+.contradiction-body { color:#c7d0d9; font-size:.75rem; line-height:1.4; margin-top:.15rem; }
+.contradiction-meta { color:var(--muted); font-size:.68rem; margin-top:.15rem; }
+.invalidation-card { background: var(--panel); border:1px solid var(--line); border-left:3px solid var(--red); padding:1rem 1.1rem; margin-top:.75rem; }
+.invalidation-card h4 { color: var(--paper); font-family: "Iowan Old Style", Georgia, serif; font-size:1rem; margin: 0 0 .35rem; }
+.invalidation-intro { color:#c6d0d9; font-size:.85rem; margin-bottom:.55rem; }
+.invalidation-row { border-top:1px solid var(--line); padding:.45rem 0; font-size:.75rem; }
+.invalidation-row .label { color: var(--amber); font-weight:700; }
+.invalidation-row .threshold { color: var(--muted); font-family: "Avenir Next", "IBM Plex Mono", monospace; font-size:.7rem; }
+.invalidation-row .rationale { color:#c6d0d9; }
+.gap-table { display:grid; grid-template-columns: 11rem 1fr auto; row-gap:.4rem; column-gap:.9rem; align-items:center; font-size:.78rem; }
+.gap-table .gap-label { color:var(--paper); font-weight:600; }
+.gap-table .gap-status { font:700 .66rem/1 "Avenir Next", sans-serif; letter-spacing:.1em; text-transform:uppercase; padding:.25rem .55rem; border-radius:3px; }
+.gap-table .gap-detail { color:#c6d0d9; }
 .state-line { display:flex; flex-wrap:wrap; gap:.35rem; margin:.45rem 0 1rem; }
 .state-chip { border:1px solid var(--line); background:var(--panel-2); color:#d8e0e7; padding:.28rem .48rem; font-size:.66rem; letter-spacing:.055em; }
 .state-chip strong { color:var(--paper); }
@@ -146,15 +177,18 @@ def _load_selected_source() -> DashboardView:
 
 
 def _header(view: DashboardView) -> None:
-    badge_class = "mode-live" if view.provider_mode == "SECTORS_LIVE" else ""
+    pill_class, label_text = _provider_pill(view.provider_mode)
+    as_of = html.escape(view.as_of)
+    market = html.escape(view.market_date or "UNAVAILABLE")
+    benchmark = html.escape(view.benchmark_date or "UNAVAILABLE")
     st.markdown(
         f"""
         <div class="product-kicker">Indonesian Equities · Market Intelligence</div>
         <div class="product-title">IDX Leadership Diffusion</div>
         <div class="product-deck">Where leadership is moving—and whether participation beneath the index surface confirms, narrows, or contradicts the move.</div>
-        <div style="display:flex;gap:.65rem;align-items:center;margin-top:.75rem">
-          <span class="mode-badge {badge_class}">{html.escape(view.provider_badge)}</span>
-          <span class="meta-line">As of {html.escape(view.as_of)} · market {html.escape(view.market_date or 'UNAVAILABLE')} · benchmark {html.escape(view.benchmark_date or 'UNAVAILABLE')}</span>
+        <div class="mode-bar">
+          <span class="mode-pill {pill_class}"><span class="pulse"></span>{html.escape(label_text)}</span>
+          <span class="meta-line">As of {as_of} · market {market} · benchmark {benchmark}</span>
         </div>
         """,
         unsafe_allow_html=True,
@@ -164,6 +198,17 @@ def _header(view: DashboardView) -> None:
             '<div class="demo-warning"><strong>DEMO FIXTURE</strong> · Deterministic synthetic data for product demonstration. It is neither a public-market snapshot nor a Sectors API result.</div>',
             unsafe_allow_html=True,
         )
+
+
+def _provider_pill(provider_mode: str) -> tuple[str, str]:
+    """Map provider mode to (CSS modifier, human label)."""
+    if provider_mode == "SECTORS_LIVE":
+        return "is-live", "SECTORS LIVE"
+    if provider_mode == "SECTORS_FIXTURE":
+        return "is-fixture", "SECTORS FIXTURE"
+    if provider_mode == "DEMO_FIXTURE":
+        return "", "DEMO FIXTURE"
+    return "is-prototype", "PUBLIC PROTOTYPE"
 
 
 def _market_read(view: DashboardView) -> None:
@@ -179,12 +224,16 @@ def _market_read(view: DashboardView) -> None:
         f'<div class="metric-cell"><div class="metric-value">{value}</div><div class="metric-label">{html.escape(label)}</div></div>'
         for label, value in metrics
     )
+    bullets = "".join(
+        f'<li>{html.escape(point)}</li>' for point in view.supporting_points
+    )
     st.markdown(
         f"""
-        <div class="section-label">Market Read</div>
+        <div class="section-label"><span class="num">01</span>Market Read</div>
         <div class="market-read">
           <h2>{html.escape(view.headline)}</h2>
           <p>{html.escape(view.market_read)}</p>
+          <ul style="margin:0 0 0 1.1rem; padding:0; color:#c6d0d9; font-size:.9rem; line-height:1.55;">{bullets}</ul>
           <div class="metric-strip">{metric_html}</div>
         </div>
         """,
@@ -346,12 +395,15 @@ def _material_shifts(view: DashboardView) -> None:
 
 
 def _tape(view: DashboardView) -> None:
-    st.markdown('<div class="section-label">Leadership Tape</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="section-label"><span class="num">03</span>Leadership Tape</div>',
+        unsafe_allow_html=True,
+    )
     frame = pd.DataFrame(group_tape_rows(view.groups))
     st.dataframe(
         frame,
         width="stretch",
-        height=min(460, 38 + 35 * len(frame)),
+        height=min(480, 38 + 35 * len(frame)),
         hide_index=True,
         column_config={
             "Rank": st.column_config.NumberColumn(format="%d", width="small"),
@@ -363,6 +415,79 @@ def _tape(view: DashboardView) -> None:
             "Persistence": st.column_config.NumberColumn(format="%d obs."),
         },
     )
+
+
+def _contradictions_block(view: DashboardView) -> None:
+    """Ranked contradictions block, mirroring the brief contract.
+
+    Pure presentation; rows come from ``DashboardView.contradiction_rows``,
+    which is itself derived from the structured :class:`ContradictionView`
+    list on each :class:`GroupView`.
+    """
+    st.markdown(
+        '<div class="section-label"><span class="num">02</span>Contradictions</div>'
+        '<div class="panel-head"><div class="panel-title">Where evidence disagrees with itself</div>'
+        f'<div class="panel-note">{"rows: " + str(len(view.contradiction_rows)) if view.contradiction_rows else "none flagged"}</div></div>',
+        unsafe_allow_html=True,
+    )
+    if not view.contradiction_rows:
+        st.info("No contradictions were flagged on the latest observation.")
+        return
+    for row in view.contradiction_rows[:5]:
+        sev_class = "sev-critical" if row.severity == "CRITICAL" else "sev-warning"
+        evidence = row.evidence or row.label
+        detail_bits = [evidence]
+        if row.breadth_delta is not None:
+            detail_bits.append(f"breadth {row.breadth_delta:+.1f}pp")
+        if row.breadth is not None:
+            detail_bits.append(f"current breadth {row.breadth:.1f}%")
+        st.markdown(
+            f"""
+            <div class="contradiction-row">
+              <div class="contradiction-rank">{row.rank:02d}</div>
+              <div><span class="contradiction-sev {sev_class}">{html.escape(row.severity)}</span></div>
+              <div>
+                <div class="contradiction-name">{html.escape(row.group_name)} · {html.escape(row.leadership)} / {html.escape(row.diffusion)}</div>
+                <div class="contradiction-body">{html.escape(row.label)}</div>
+                <div class="contradiction-meta">{' · '.join(html.escape(b) for b in detail_bits)}</div>
+              </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+
+def _invalidation_block(group: GroupView) -> None:
+    """Screen-state invalidation block, mirroring the brief contract."""
+    rows = invalidation_rows_for(group)
+    st.markdown(
+        f"""
+        <div class="invalidation-card">
+          <h4>Screen Invalidation</h4>
+          <div class="invalidation-intro">{html.escape(group.name)} would lose its current {html.escape(group.leadership)} / {html.escape(group.diffusion_detail)} interpretation if:</div>
+        """,
+        unsafe_allow_html=True,
+    )
+    for row in rows:
+        threshold = (
+            f'<div class="threshold">{html.escape(row.threshold)}</div>' if row.threshold else ""
+        )
+        st.markdown(
+            f"""
+            <div class="invalidation-row">
+              <div class="label">{html.escape(row.condition)}</div>
+              {threshold}
+              <div class="rationale">{html.escape(row.rationale)}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    if not rows:
+        st.markdown(
+            '<div class="invalidation-row"><div class="rationale">No invalidation conditions available.</div></div>',
+            unsafe_allow_html=True,
+        )
+    st.markdown("</div>", unsafe_allow_html=True)
 
 
 def _selected_group_control(view: DashboardView, key: str, default: str | None = None) -> str:
@@ -485,7 +610,10 @@ def _evidence_panel(group: GroupView) -> None:
 
 
 def _under_surface(group: GroupView) -> None:
-    st.markdown('<div class="section-label">Under the Surface</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="section-label"><span class="num">04</span>Under the Surface</div>',
+        unsafe_allow_html=True,
+    )
     st.markdown(
         f"<div class='panel-head'><div><div class='panel-title'>{html.escape(group.name)}</div><div class='panel-note'>{html.escape(group.interpretation)}</div></div><div class='panel-note'>Breadth {html.escape(_format_value(group.breadth, '%'))} · top-1 {html.escape(_format_share(group.top1))}</div></div>",
         unsafe_allow_html=True,
@@ -500,17 +628,53 @@ def _under_surface(group: GroupView) -> None:
     with right:
         _evidence_panel(group)
 
+    # Selected-group contradictions surface here too, mirroring the
+    # brief contract's per-group structure.
+    if group.contradictions:
+        st.markdown("---")
+        st.caption("Contradictions for this group")
+        for cn in group.contradictions:
+            sev_class = "sev-critical" if cn.severity == "CRITICAL" else "sev-warning"
+            st.markdown(
+                f"""
+                <div class="contradiction-row" style="grid-template-columns: auto auto 1fr;">
+                  <div><span class="contradiction-sev {sev_class}">{html.escape(cn.severity)}</span></div>
+                  <div></div>
+                  <div>
+                    <div class="contradiction-body">{html.escape(cn.label)}</div>
+                    <div class="contradiction-meta">{html.escape(cn.evidence or '')}</div>
+                  </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+    st.markdown("---")
+    _invalidation_block(group)
+
 
 def overview(view: DashboardView) -> None:
+    """The command-center viewport: Market Read → Map+Shifts → Contradictions → Tape → Under the Surface."""
     _market_read(view)
+
+    # 02 — Map + Shifts (side by side) + Contradictions (below).
     selected_id = _selected_group_control(view, "overview_group", view.highlighted_group_id)
     map_col, shifts_col = st.columns([2.1, .9], gap="large")
     with map_col:
-        st.markdown('<div class="panel-head"><div class="panel-title">Leadership × Diffusion Map</div><div class="panel-note">20D excess × breadth change · click or hover for evidence</div></div>', unsafe_allow_html=True)
+        st.markdown(
+            '<div class="panel-head"><div class="panel-title">Leadership × Diffusion Map</div>'
+            '<div class="panel-note">20D excess × breadth change · click a group to focus Under the Surface</div></div>',
+            unsafe_allow_html=True,
+        )
         _leadership_map(view, selected_id, height=485)
     with shifts_col:
         _material_shifts(view)
+    _contradictions_block(view)
+
+    # 03 — Leadership Tape.
     _tape(view)
+
+    # 04 — Under the Surface (selected group).
     selected = view.group(selected_id)
     if selected:
         _under_surface(selected)
@@ -638,13 +802,32 @@ def method_quality(view: DashboardView) -> None:
         )
     st.markdown(f'<div class="quality-grid">{"".join(quality_html)}</div>', unsafe_allow_html=True)
     st.markdown("### Known gaps")
+    # The rollup derives from the structured DataGapView list on each
+    # group, with the worst observed status per frozen category.  This
+    # mirrors the brief contract "## Data Gaps" block.
+    rollup = data_gap_rollup(view.groups)
+    gap_html = "".join(
+        f'<div class="gap-label">{html.escape(row["label"])}</div>'
+        f'<div class="gap-detail">{html.escape(row["status"].replace("_", " ").title())}</div>'
+        f'<div class="gap-status">{html.escape(row["status"])}</div>'
+        for row in rollup
+    )
     st.markdown(
         f"""
-        - **Fundamentals:** {CONFIRMATION_DATA_GAP}
-        - **Foreign Flow:** {CONFIRMATION_DATA_GAP}
-        - Live Sectors authentication, schema parity, pagination, credit usage, and price basis are not validated by this UI.
-        - Demo fixture values are deterministic synthetic evidence; public prototype values use a limited, non-authoritative taxonomy.
-        """
+        <div class="quality-grid" style="grid-template-columns: 1fr;">
+          <div class="quality-item" style="padding: 0;">
+            <div class="gap-table" style="padding: .8rem .9rem;">
+              {gap_html}
+            </div>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.caption(
+        "Categories are frozen in the brief contract (brief-v1).  "
+        "Live Sectors data will flip DATA_GAP / NOT_INTEGRATED to READY "
+        "for each category it covers; the rollup is derived, not asserted."
     )
     with st.expander("Active methodology configuration"):
         st.json(methodology)
@@ -653,14 +836,27 @@ def method_quality(view: DashboardView) -> None:
 
 
 def _sidebar(view: DashboardView) -> None:
+    pill_class, label_text = _provider_pill(view.provider_mode)
     st.sidebar.markdown("### Research state")
-    st.sidebar.markdown(f'<span class="mode-badge">{html.escape(view.provider_badge)}</span>', unsafe_allow_html=True)
+    st.sidebar.markdown(
+        f'<span class="mode-pill {pill_class}" style="margin-bottom:.5rem"><span class="pulse"></span>{html.escape(label_text)}</span>',
+        unsafe_allow_html=True,
+    )
     st.sidebar.caption(f"As of {view.as_of}")
     if view.is_demo:
         st.sidebar.warning("DEMO FIXTURE · synthetic, deterministic, not live")
     st.sidebar.markdown("---")
     st.sidebar.markdown("**Integrity boundary**")
     st.sidebar.caption("The UI reads local artifacts only. Live credentials and provider clients are outside this process.")
+    # The structured data-gap rollup is the authoritative per-category
+    # summary.  Render it in the sidebar so the provenance detail is
+    # one click away.
+    rollup = data_gap_rollup(view.groups)
+    with st.sidebar.expander("Data-gap rollup", expanded=False):
+        for row in rollup:
+            st.sidebar.caption(
+                f"**{row['label']}** — `{row['status']}`"
+            )
     brief = render_market_brief(view)
     st.sidebar.download_button(
         "Download market brief",

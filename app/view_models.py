@@ -197,6 +197,68 @@ class MaterialShiftView:
 
 
 @dataclass(frozen=True)
+class ContradictionRow:
+    """One ranked row for the Overview's Contradictions block.
+
+    Pure presentation; no analytics.  Sorts CRITICAL before WARNING
+    and breaks ties by group name.
+    """
+
+    rank: int
+    group_id: str
+    group_name: str
+    severity: str
+    label: str
+    evidence: str | None
+    breadth_delta: float | None
+    breadth: float | None
+    leadership: str
+    diffusion: str
+
+    @classmethod
+    def from_view(
+        cls,
+        rank: int,
+        group: "GroupView",
+        contradiction: "ContradictionView",
+    ) -> "ContradictionRow":
+        return cls(
+            rank=rank,
+            group_id=group.group_id,
+            group_name=group.name,
+            severity=contradiction.severity,
+            label=contradiction.label,
+            evidence=contradiction.evidence,
+            breadth_delta=group.breadth_delta,
+            breadth=group.breadth,
+            leadership=group.leadership,
+            diffusion=group.diffusion,
+        )
+
+
+@dataclass(frozen=True)
+class InvalidationRow:
+    """One row in the screen-invalidation block of the selected group."""
+
+    metric: str
+    condition: str
+    threshold: str | None
+    rationale: str
+
+    @classmethod
+    def from_view(
+        cls,
+        invalidation: "InvalidationView",
+    ) -> "InvalidationRow":
+        return cls(
+            metric=invalidation.metric,
+            condition=invalidation.condition,
+            threshold=invalidation.threshold,
+            rationale=invalidation.rationale,
+        )
+
+
+@dataclass(frozen=True)
 class DataQualityLayer:
     layer: str
     status: str
@@ -217,6 +279,7 @@ class DashboardView:
     supporting_points: tuple[str, ...]
     groups: tuple[GroupView, ...]
     material_shifts: tuple[MaterialShiftView, ...]
+    contradiction_rows: tuple[ContradictionRow, ...]
     highlighted_group_id: str | None
     leading_count: int
     improving_count: int
@@ -227,6 +290,8 @@ class DashboardView:
     methodology: Mapping[str, Any]
     manifest: Mapping[str, Any]
     quality_layers: tuple[DataQualityLayer, ...]
+    frozen_contract_version: str = "brief-v1"
+    intelligence_version: str = "intelligence-v1"
 
     def group(self, group_id: str | None) -> GroupView | None:
         if group_id is None:
@@ -276,6 +341,7 @@ def build_dashboard_view(payload: Mapping[str, Any]) -> DashboardView:
 
     groups.sort(key=_group_sort_key)
     shifts = _build_material_shifts(groups)
+    contradiction_rows = _build_contradiction_rows(groups)
     headline, market_read, supporting = _build_market_read(groups)
     leading = sum(group.leadership == "LEADING" for group in groups)
     improving = sum(group.leadership == "IMPROVING" for group in groups)
@@ -299,7 +365,10 @@ def build_dashboard_view(payload: Mapping[str, Any]) -> DashboardView:
         supporting_points=supporting,
         groups=tuple(groups),
         material_shifts=shifts,
-        highlighted_group_id=shifts[0].group_id if shifts else groups[0].group_id,
+        contradiction_rows=contradiction_rows,
+        highlighted_group_id=shifts[0].group_id if shifts else (
+            contradiction_rows[0].group_id if contradiction_rows else groups[0].group_id
+        ),
         leading_count=leading,
         improving_count=improving,
         broadening_count=broadening,
@@ -313,6 +382,8 @@ def build_dashboard_view(payload: Mapping[str, Any]) -> DashboardView:
         ),
         manifest=manifest,
         quality_layers=_quality_layers(payload, mode),
+        frozen_contract_version="brief-v1",
+        intelligence_version="intelligence-v1",
     )
 
 
@@ -508,6 +579,117 @@ def _build_material_shifts(groups: Sequence[GroupView]) -> tuple[MaterialShiftVi
     return tuple(shifts)
 
 
+def _build_contradiction_rows(
+    groups: Sequence[GroupView],
+) -> tuple[ContradictionRow, ...]:
+    """Rank all contradictions across the panel for the Overview block.
+
+    Dedupes by (group, metric), sorts CRITICAL before WARNING, and
+    breaks ties by group name.  The output is pure presentation data;
+    no analytics live here.
+    """
+    seen: set[tuple[str, str]] = set()
+    rows: list[ContradictionRow] = []
+    for group in groups:
+        for cn in group.contradictions:
+            key = (group.group_id, cn.metric)
+            if key in seen:
+                continue
+            seen.add(key)
+            rows.append(ContradictionRow.from_view(rank=0, group=group, contradiction=cn))
+    rows.sort(
+        key=lambda row: (
+            0 if row.severity == "CRITICAL" else 1,
+            row.group_name,
+        )
+    )
+    ranked = [
+        ContradictionRow(
+            rank=index,
+            group_id=row.group_id,
+            group_name=row.group_name,
+            severity=row.severity,
+            label=row.label,
+            evidence=row.evidence,
+            breadth_delta=row.breadth_delta,
+            breadth=row.breadth,
+            leadership=row.leadership,
+            diffusion=row.diffusion,
+        )
+        for index, row in enumerate(rows, start=1)
+    ]
+    return tuple(ranked)
+
+
+def invalidation_rows_for(group: GroupView) -> tuple[InvalidationRow, ...]:
+    """UI helper: project a group's structured invalidation conditions.
+
+    Pure derivation.  The freeze-pass contract uses these rows for
+    both the selected group's Under-the-Surface panel and the brief's
+    "Screen Invalidation" subsection.
+    """
+    return tuple(InvalidationRow.from_view(item) for item in group.invalidation)
+
+
+def aggregate_data_gap_status(
+    groups: Sequence[GroupView],
+    category: DataGapCategory,
+) -> str:
+    """Return the worst observed status for a given data-gap category.
+
+    Priority order: ``FAILED`` > ``DATA_GAP`` > ``STALE`` >
+    ``NOT_INTEGRATED`` > ``NOT_APPLIED`` > ``PROTOTYPE`` > ``READY``.
+    The Method/Quality "Known gaps" section consumes this to give a
+    per-category rollup rather than a list of free-form strings.
+    """
+    priority = {
+        "READY": 0,
+        "PROTOTYPE": 1,
+        "NOT_APPLIED": 2,
+        "NOT_INTEGRATED": 3,
+        "STALE": 4,
+        "DATA_GAP": 5,
+    }
+    worst: str | None = None
+    worst_score = -1
+    for group in groups:
+        for gap in group.data_gaps:
+            if gap.category != category.value:
+                continue
+            score = priority.get(gap.status, 0)
+            if score > worst_score:
+                worst = gap.status
+                worst_score = score
+    return worst or "READY"
+
+
+def data_gap_rollup(
+    groups: Sequence[GroupView],
+) -> list[dict[str, str]]:
+    """Build a per-category rollup of data-gap status across the panel.
+
+    Used by the Method/Quality page and the sidebar.  Categories are
+    drawn from the frozen :class:`DataGapCategory` enum so the
+    rollup is identical to the brief contract.
+    """
+    return [
+        {
+            "category": category.value,
+            "label": _data_gap_category_label(category.value),
+            "status": aggregate_data_gap_status(groups, category),
+        }
+        for category in (
+            DataGapCategory.FUNDAMENTALS,
+            DataGapCategory.FOREIGN_FLOW,
+            DataGapCategory.BROKER_ACTIVITY,
+            DataGapCategory.FREE_FLOAT,
+            DataGapCategory.TAXONOMY,
+            DataGapCategory.CORPORATE_ACTIONS,
+            DataGapCategory.BENCHMARK,
+        )
+    ]
+
+
 def render_market_brief(view: DashboardView, selected_group_id: str | None = None) -> str:
     """Render the same product contract as an auditable Markdown brief.
 
@@ -667,24 +849,60 @@ def _data_gap_category_label(category: str) -> str:
 
 
 def group_tape_rows(groups: Sequence[GroupView]) -> list[dict[str, Any]]:
-    """Stable tabular contract used by Streamlit and focused tests."""
-    return [
-        {
-            "Rank": group.rank,
-            "Group": group.name,
-            "Leadership": group.leadership,
-            "Diffusion": group.diffusion,
-            "20D Excess": group.excess_20d,
-            "60D Excess": group.excess_60d,
-            "Breadth": group.breadth,
-            "Δ Breadth": group.breadth_delta,
-            "Concentration": group.concentration_label,
-            "Persistence": group.leadership_persistence,
-            "Fundamentals": "UNAVAILABLE",
-            "Foreign Flow": "UNAVAILABLE",
-        }
-        for group in groups
-    ]
+    """Stable tabular contract used by Streamlit and focused tests.
+
+    The columns are pure presentation data.  The ``Contradictions``
+    column derives from the structured :class:`ContradictionView`
+    list on each group; the ``Confirmation`` column derives from the
+    structured :class:`DataGapView` list and shows the worst
+    observed status across the frozen categories.
+    """
+    confirmation_priority = {
+        "READY": 0,
+        "PROTOTYPE": 1,
+        "NOT_APPLIED": 2,
+        "NOT_INTEGRATED": 3,
+        "STALE": 4,
+        "DATA_GAP": 5,
+    }
+    rows: list[dict[str, Any]] = []
+    for group in groups:
+        # Contradiction summary: count + top severity.
+        if group.contradictions:
+            top = sorted(
+                group.contradictions,
+                key=lambda cn: 0 if cn.severity == "CRITICAL" else 1,
+            )[0]
+            contradiction_summary = f"{len(group.contradictions)} · {top.severity}"
+        else:
+            contradiction_summary = "—"
+        # Confirmation summary: the worst data-gap status across the
+        # frozen categories.  If a group carries no data gaps, the
+        # confirmation column is "READY".
+        worst_status = "READY"
+        worst_score = -1
+        for gap in group.data_gaps:
+            score = confirmation_priority.get(gap.status, 0)
+            if score > worst_score:
+                worst_status = gap.status
+                worst_score = score
+        rows.append(
+            {
+                "Rank": group.rank,
+                "Group": group.name,
+                "Leadership": group.leadership,
+                "Diffusion": group.diffusion,
+                "20D Excess": group.excess_20d,
+                "60D Excess": group.excess_60d,
+                "Breadth": group.breadth,
+                "Δ Breadth": group.breadth_delta,
+                "Concentration": group.concentration_label,
+                "Persistence": group.leadership_persistence,
+                "Contradictions": contradiction_summary,
+                "Confirmation": worst_status,
+            }
+        )
+    return rows
 
 
 def _quality_layers(payload: Mapping[str, Any], mode: str) -> tuple[DataQualityLayer, ...]:
