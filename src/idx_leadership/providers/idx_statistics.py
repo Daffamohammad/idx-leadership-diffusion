@@ -485,6 +485,8 @@ def parse_idx_monthly_investor_html(
         "quality": {
             "source_table_count": len(tables),
             "daily_rows": len(daily),
+            "positive_day_count": sum(1 for row in daily if row["net_foreign_value_idr"] > 0),
+            "negative_day_count": sum(1 for row in daily if row["net_foreign_value_idr"] < 0),
             "reconciliation": reconciliation,
             "search_agent_role": "DISCOVERY_ONLY",
             "full_month_release": True,
