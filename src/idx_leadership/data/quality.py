@@ -69,6 +69,17 @@ def assess_quality(
     if failed:
         issues.append(f"failed_securities={failed}")
 
+    history_counts = pd.Series(dtype=int)
+    if {"ticker", "date"}.issubset(prices.columns):
+        history_counts = prices.groupby("ticker")["date"].nunique()
+    insufficient_history = sorted(
+        ticker
+        for ticker in loaded
+        if int(history_counts.get(ticker, 0)) < min_history_days
+    )
+    if insufficient_history:
+        issues.append(f"insufficient_history={insufficient_history}")
+
     # Duplicate rows
     dupes = 0
     if {"ticker", "date"}.issubset(prices.columns):
@@ -85,7 +96,13 @@ def assess_quality(
 
     # Coverage
     loaded_count = len(loaded)
-    coverage_pct = (loaded_count / max(1, len(requested))) * 100.0
+    usable = {
+        ticker
+        for ticker in loaded
+        if int(history_counts.get(ticker, 0)) >= min_history_days
+    }
+    usable_count = len(usable)
+    coverage_pct = (usable_count / max(1, len(requested))) * 100.0
 
     # Benchmark present?
     if benchmark.empty:
@@ -104,21 +121,37 @@ def assess_quality(
 
     # Latest common date (max date where all loaded tickers have data)
     latest_common: date | None = None
-    if not prices.empty and "ticker" in prices.columns and "date" in prices.columns:
-        counts = prices.groupby("date")["ticker"].nunique()
+    if (
+        usable
+        and not prices.empty
+        and "ticker" in prices.columns
+        and "date" in prices.columns
+    ):
+        counts = (
+            prices[prices["ticker"].isin(usable)]
+            .groupby("date")["ticker"]
+            .nunique()
+        )
         if not counts.empty:
-            best = counts.idxmax()
-            if counts.max() >= max(1, int(0.9 * len(loaded))):
+            threshold = max(1, int(0.9 * len(usable)))
+            qualifying = counts[counts >= threshold]
+            if not qualifying.empty:
+                # idxmax() returns the first tied date; for a common-date
+                # diagnostic we need the most recent date that qualifies.
+                best = qualifying.index.max()
                 latest_common = best.date() if isinstance(best, pd.Timestamp) else best
             else:
                 issues.append("no_common_date_with_90pct_coverage")
 
     # Determine status
-    if failed and len(failed) == len(requested):
+    if not usable:
+        status = DataQualityStatus.FAILED
+        issues.append("no_usable_securities")
+    elif failed and len(failed) == len(requested):
         status = DataQualityStatus.FAILED
     elif stale:
         status = DataQualityStatus.STALE
-    elif failed or dupes or invalid or (bench_latest is None):
+    elif failed or insufficient_history or dupes or invalid or (bench_latest is None):
         status = DataQualityStatus.READY_WITH_GAPS
     else:
         status = DataQualityStatus.READY
@@ -129,7 +162,7 @@ def assess_quality(
         coverage_pct=round(coverage_pct, 2),
         requested_securities=len(requested),
         loaded_securities=loaded_count,
-        usable_securities=loaded_count,
+        usable_securities=usable_count,
         failed_securities=len(failed),
         benchmark_latest_date=bench_latest,
         latest_common_date=latest_common,

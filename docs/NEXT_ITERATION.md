@@ -1,28 +1,28 @@
 # Next Iteration
 
-> Updated at the end of the **Offline Refinement Pass** (2026-08-28).
-> The next pass is **LIVE SECTORS VALIDATION**, blocked only on
-> `SECTORS_API_KEY`. No structural refactor is required to begin it;
-> the offline scaffold is already green.
+> Updated during the **Frontier Pass #2 live integration** (2026-08-28).
+> The first credentialed Sectors snapshot and live parity spot-check are
+> complete. This file now tracks the remaining hardening work; the live
+> bundle is `READY_WITH_GAPS`, not a demo fallback.
 
-## P0 — Live Sectors validation (the next pass, in order)
+## P0 — Live Sectors validation (core evidence complete; follow-ups remain)
 
-### P0.1 — Live Sectors auth + minimal validation
+### P0.1 — Live Sectors auth + minimal validation (complete with one bounded gap)
 
 - **Trigger:** `SECTORS_API_KEY` available in the process environment.
 - **Required inputs:** key only; no other state needed.
 - **Command:**
 
   ```bash
-  python -m scripts.validate_sectors_live \
+  .venv/bin/python -m scripts.validate_sectors_live \
     --live --allow-credit-spend --as-of YYYY-MM-DD
   ```
 
 - **Expected outputs:** `data/raw/sectors_validation/<run>/validation_report.json`,
   sanitized fixtures under `sanitized_fixtures/`, request ledger.
-- **Success criteria:** all four checks (`auth`, `taxonomy`,
-  `market_close`, `benchmark`) are `PASS`; no `SECTORS_LIVE` snapshot is
-  written at this stage.
+- **Observed:** auth, taxonomy, and market-close contracts passed. The
+  one-page benchmark probe returned `NOT_FOUND_IN_FETCHED_PAGES`; the
+  market-wide runner separately used `/v2/index-daily/ihsg/` successfully.
 - **Risk:** low; client is unit-tested offline.
 
 ### P0.2 — Price-basis audit (BBCA split 2021-10-13)
@@ -46,22 +46,22 @@
   decision is escalated to D013 follow-up.
 - **Risk:** may still be UNKNOWN; the runbook's rollback applies.
 
-### P0.3 — Live market-wide snapshot
+### P0.3 — Live market-wide snapshot (complete; `READY_WITH_GAPS`)
 
 - **Trigger:** P0.1 PASS; benchmark source resolved.
 - **Required inputs:** key, as-of date.
 - **Command:**
 
   ```bash
-  python -m scripts.build_market_snapshot --as-of YYYY-MM-DD --allow-live
+  .venv/bin/python -m scripts.build_market_snapshot --as-of YYYY-MM-DD --allow-live --allow-credit-spend
   ```
 
 - **Expected outputs:** `data/snapshots/sectors/sectors_<asof>/`,
   `manifest.json` with `provider_mode=SECTORS_LIVE` and all version
   fields.
-- **Success criteria:** snapshot readable, `coverage_pct > 50%`,
-  `report.md` is human-auditable, no `SECTORS_LIVE` field is silently
-  relabeled.
+- **Observed:** snapshot readable, 99.2% usable requested-history coverage
+  for the 500-row used sample (265 policy-eligible), native Sectors IHSG
+  through 2026-08-27, and explicit prefix-sample disclosure.
 
 ### P0.4 — Live credit audit
 
@@ -80,13 +80,13 @@
 - **Success criteria:** every entry has `estimated_credit_cost`; the
   observed delta is appended to `SECTORS_CREDIT_AUDIT.md`.
 
-### P0.5 — Live parity run
+### P0.5 — Live parity run (complete for the bounded spot-check)
 
 - **Trigger:** P0.3; both public and Sectors sources have true history.
 - **Command:**
 
   ```bash
-  python -m scripts.compare_providers --mode SECTORS_LIVE \
+  .venv/bin/python -m scripts.compare_providers --sectors-mode SECTORS_LIVE \
     --live --allow-credit-spend --as-of YYYY-MM-DD
   ```
 

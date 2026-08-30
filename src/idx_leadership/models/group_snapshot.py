@@ -48,6 +48,17 @@ class GroupSnapshot(BaseModel):
     constituent_count: int = Field(default=0, ge=0)
     eligible_count: int = Field(default=0, ge=0)
     missing_count: int = Field(default=0, ge=0)
+    # Raw candidate count: all members in the raw taxonomy for this group,
+    # including policy-excluded members. Tracked separately for disclosure.
+    raw_candidate_count: int = Field(default=0, ge=0)
+    # Policy-eligible count: members that passed all policy checks
+    # (suspension, delisting, board, taxonomy, liquidity). This is the
+    # denominator for the 60% coverage gate.
+    policy_eligible_count: int = Field(default=0, ge=0)
+    # Acquisition-failed count: members where the provider request failed
+    # (429, network, etc.). These remain in the policy-eligible denominator
+    # as missing data.
+    acquisition_failed_count: int = Field(default=0, ge=0)
 
     # Group returns in percent.
     group_return_equal_weight: Optional[float] = None

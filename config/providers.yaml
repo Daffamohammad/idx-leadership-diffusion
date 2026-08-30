@@ -38,17 +38,46 @@ providers:
   sectors:
     name: sectors
     class: idx_leadership.providers.sectors.SectorsProvider
-    enabled: false  # Live calls remain opt-in; set --allow-live with a key.
+    enabled: true  # HTTP remains opt-in at runtime via --allow-live.
     options:
       base_url: https://api.sectors.app
       api_key_env: SECTORS_API_KEY
       request_timeout_seconds: 30
       max_retries: 3
+      retry_backoff_seconds: 1.5
+      cache_ttl_hours: 24
+      history_workers: 1
+      # Serialize the paid history calls and leave a conservative gap between
+      # requests; Sectors documents 429 responses for rate-limit breaches.
+      request_interval_seconds: 0.75
 
+  tavily:
+    name: tavily
+    class: idx_leadership.providers.tavily_client.TavilyClient
+    enabled: true  # Used only by explicit web-context commands; never quantitative.
+    options:
+      base_url: https://api.tavily.com
+      api_key_env: TAVILY_API_KEY
+      request_timeout_seconds: 20
+      max_retries: 2
+      cache_ttl_hours: 24
+
+  you:
+    name: you
+    class: idx_leadership.providers.you_client.YouClient
+    enabled: true  # Used only by explicit web-context commands; never quantitative.
+    options:
+      search_base_url: https://ydc-index.io
+      research_base_url: https://api.you.com
+      api_key_env: YOU_API_KEY
+      request_timeout_seconds: 30
+      max_retries: 2
+      retry_backoff_seconds: 1.0
+      cache_ttl_hours: 24
 # Dry-run planning inputs only. These values estimate calls/pages/cache reuse;
 # no credit price is inferred here.
 refresh_plan:
-  page_size: 30
+  page_size: 200
   universe_size: 950
   core:
     - security_master

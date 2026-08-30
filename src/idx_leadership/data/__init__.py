@@ -65,6 +65,6 @@ class RawCache:
     def clear(self) -> None:
         for p in self.root.glob("**/*.json"):
             p.unlink()
-from .comparability import SnapshotComparability, assess_snapshot_comparability
+from .comparability import SnapshotComparability, assess_snapshot_comparability, check_snapshot_compatibility
 
-__all__ = ["SnapshotComparability", "assess_snapshot_comparability"]
+__all__ = ["SnapshotComparability", "assess_snapshot_comparability", "check_snapshot_compatibility"]

@@ -4,10 +4,9 @@
 > field represents **raw close**, **corporate-action-adjusted close**,
 > **total-return-adjusted price**, or **unknown**.
 >
-> **Live Sectors API key is not available in this environment**
-> (per `FRONTIER_PASS_2_AUDIT.md` Gate 1). The empirical leg of the
-> investigation is BLOCKED. This document records the methodology and
-> what is currently known vs. UNKNOWN.
+> A credentialed live run was completed on 2026-08-28. The API response and
+> the live snapshot still do not establish whether `close` is raw or adjusted;
+> the empirical conclusion remains `UNKNOWN / VERIFY`.
 
 ## 1. Documentation search
 
@@ -70,9 +69,9 @@ The empirical leg requires:
 | BMRI.JK | TBD | investigate |
 | TLKM.JK | TBD | investigate |
 
-**Status:** **BLOCKED** — no live key. The script to run this audit
-will land as `scripts/audit_close_basis.py` (queued; see
-`FRONTIER_PASS_2_AUDIT.md`).
+**Status:** **OPEN** — the live snapshot preserves raw close and the
+corporate-action adjustment semantics remain `UNKNOWN / VERIFY`.
+`scripts/audit_close_basis.py` is the bounded follow-up.
 
 ## 4. Defensive defaults (until resolved)
 
@@ -96,12 +95,13 @@ created (D017).
 
 | Statement | Status |
 | --- | --- |
-| Sectors `close` is the **raw** close | **LIKELY — MEDIUM CONFIDENCE** (no `adjusted_close` field; the docs example is sparse but unadjusted) |
+| Sectors `close` is the **raw** close | **UNKNOWN / VERIFY** (the field is named `close`; no adjustment basis is documented) |
 | Sectors `close` is **split-adjusted** | UNLIKELY — would normally be accompanied by an `adjusted_close` field |
 | Sectors `close` is **dividend-adjusted / total return** | UNLIKELY — would be explicitly named |
 | Sectors `close` is the official IDX close | UNKNOWN |
 
-**Empirical proof is BLOCKED until a live key is available.**
+**Empirical proof remains open after the first live run; a known corporate-action
+window still needs to be reconciled against the Sectors corporate-action payload.**
 
 ## 6. Revisit
 

@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-08-27T14:43:44.287052+00:00",
-  "generated_from_commit": "unknown",
+  "generated_at": "2026-08-28T03:03:51.774718+00:00",
+  "generated_from_commit": "035a01ba7ec50882fda758755c5364a4d47847ee",
   "scope": [
     "FRONTIER_PASS_1_AUDIT.md",
     "FRONTIER_PASS_2_AUDIT.md",
@@ -10,20 +10,43 @@
     "app/data_quality.py",
     "app/story_mode.py",
     "app/streamlit_app.py",
-    "config/methodology.yaml",
-    "config/providers.yaml",
-    "config/universe.yaml",
+    "app/web/index.html",
+    "app/web/package.json",
+    "app/web/src/App.tsx",
+    "app/web/src/components/AppShell.tsx",
+    "app/web/src/components/BrandMark.tsx",
+    "app/web/src/components/CustomCursor.tsx",
+    "app/web/src/components/EmptyState.tsx",
+    "app/web/src/components/ImageWithFallback.tsx",
+    "app/web/src/components/StatusChips.tsx",
+    "app/web/src/components/ThemeToggle.tsx",
+    "app/web/src/data/SnapshotContext.tsx",
+    "app/web/src/data/SnapshotProvider.tsx",
+    "app/web/src/data/adapter.ts",
+    "app/web/src/data/snapshot.ts",
+    "app/web/src/index.css",
+    "app/web/src/main.tsx",
+    "app/web/src/pages/GroupExplorer.tsx",
+    "app/web/src/pages/LeadershipMap.tsx",
+    "app/web/src/pages/Methodology.tsx",
+    "app/web/src/pages/PublicHome.tsx",
+    "app/web/src/pages/WhatChanged.tsx",
+    "app/web/tsconfig.json",
+    "app/web/vite.config.ts",
     "docs/ARCHITECTURE.md",
+    "docs/CHANGE_SUMMARY.md",
     "docs/DATA_CONTRACTS.md",
     "docs/DECISION_LOG.md",
     "docs/ENRICHMENT_RESEARCH.md",
     "docs/KNOWN_GAPS.md",
     "docs/LIVE_METHODOLOGY_AUDIT.md",
+    "docs/LIVE_SECTORS_RUNBOOK.md",
     "docs/METHODOLOGY.md",
     "docs/METHODOLOGY_SENSITIVITY.md",
     "docs/NEXT_ITERATION.md",
     "docs/PROVIDER_PARITY_REPORT.md",
     "docs/SECTORS_API_AUDIT.md",
+    "docs/SECTORS_BLOCKERS.md",
     "docs/SECTORS_CREDIT_AUDIT.md",
     "docs/SECTORS_INTEGRATION_PLAN.md",
     "docs/SECTORS_PRICE_BASIS.md",
@@ -33,12 +56,21 @@
     "docs/codemap/_build.py",
     "scripts/__init__.py",
     "scripts/audit_close_basis.py",
+    "scripts/audit_group_size_diffusion.py",
+    "scripts/audit_methodology_sensitivity.py",
+    "scripts/audit_price_basis.py",
+    "scripts/audit_sectors_credit.py",
+    "scripts/audit_state_turnover.py",
     "scripts/build_history.py",
     "scripts/build_market_snapshot.py",
     "scripts/build_snapshot.py",
+    "scripts/build_snapshot_index.py",
     "scripts/compare_providers.py",
     "scripts/credit_audit.py",
     "scripts/export_diagnostics.py",
+    "scripts/export_market_brief.py",
+    "scripts/export_snapshot_json.py",
+    "scripts/plan_sectors_refresh.py",
     "scripts/refresh_public_data.py",
     "scripts/refresh_sectors_core.py",
     "scripts/run_diffusion_sensitivity.py",
@@ -46,12 +78,17 @@
     "scripts/run_stale_trading.py",
     "scripts/run_state_turnover.py",
     "scripts/validate_data.py",
+    "scripts/validate_sectors_live.py",
     "src/idx_leadership/aggregation/groups.py",
     "src/idx_leadership/analytics/__init__.py",
     "src/idx_leadership/analytics/contradictions.py",
+    "src/idx_leadership/analytics/data_gaps.py",
     "src/idx_leadership/analytics/invalidation.py",
     "src/idx_leadership/analytics/persistence.py",
+    "src/idx_leadership/analytics/sensitivity.py",
+    "src/idx_leadership/analytics/turnover.py",
     "src/idx_leadership/data/__init__.py",
+    "src/idx_leadership/data/comparability.py",
     "src/idx_leadership/data/endpoint_status.py",
     "src/idx_leadership/data/manifests.py",
     "src/idx_leadership/data/quality.py",
@@ -91,36 +128,7 @@
     "src/idx_leadership/signals/diffusion.py",
     "src/idx_leadership/signals/diffusion_v2.py",
     "src/idx_leadership/signals/leadership.py",
-    "src/idx_leadership/signals/transitions.py",
-    "tests/__init__.py",
-    "tests/conftest.py",
-    "tests/conftest_app.py",
-    "tests/test_aggregation.py",
-    "tests/test_analytics.py",
-    "tests/test_breadth.py",
-    "tests/test_capability_provider.py",
-    "tests/test_concentration.py",
-    "tests/test_concentration_v2.py",
-    "tests/test_config.py",
-    "tests/test_diffusion_group_size.py",
-    "tests/test_endpoint_status.py",
-    "tests/test_evidence.py",
-    "tests/test_market_universe.py",
-    "tests/test_methodology_versioning.py",
-    "tests/test_no_lookahead.py",
-    "tests/test_parity_public_sectors.py",
-    "tests/test_pipeline.py",
-    "tests/test_provider_contracts.py",
-    "tests/test_providers.py",
-    "tests/test_relative_strength.py",
-    "tests/test_returns.py",
-    "tests/test_schema.py",
-    "tests/test_sectors_client.py",
-    "tests/test_sectors_provider.py",
-    "tests/test_snapshots.py",
-    "tests/test_states.py",
-    "tests/test_transitions.py",
-    "tests/test_ui_story_mode.py"
+    "src/idx_leadership/signals/transitions.py"
   ],
   "nodes": [
     {
@@ -146,6 +154,52 @@
         "app/data_quality.py",
         "app/story_mode.py",
         "app/streamlit_app.py"
+      ]
+    },
+    {
+      "id": "web-app",
+      "path": "app/web/src/App.tsx",
+      "role": "Read-only Vite/React/TypeScript SPA that mirrors the Figma design prototype. Five routes: PublicHome, WhatChanged (/overview), LeadershipMap (/map), GroupExplorer (/explorer), Methodology. Consumes a single JSON dump of the snapshot bundle; renders explicit empty states where the prototype universe does not yet emit data (breadth history, foreign flow, fundamentals).",
+      "entrypoints": [
+        "app/web/src/App.tsx:App",
+        "app/web/src/data/SnapshotProvider.tsx:SnapshotProvider",
+        "app/web/src/data/adapter.ts:adaptSnapshot"
+      ],
+      "tests": [
+        "app/web/tsc -b --noEmit (typecheck)"
+      ],
+      "constraints": [
+        "Read-only \u2014 no analytical logic, no vendor SDK imports",
+        "Snapshot data is loaded via /snapshots/<id>.json + /snapshots/index.json",
+        "Pages never fabricate values: missing data renders an EmptyState card"
+      ],
+      "evidence": "app/web/src/App.tsx:13 SnapshotProvider",
+      "files": [
+        "app/web/index.html",
+        "app/web/package.json",
+        "app/web/src/App.tsx",
+        "app/web/src/components/AppShell.tsx",
+        "app/web/src/components/BrandMark.tsx",
+        "app/web/src/components/CustomCursor.tsx",
+        "app/web/src/components/EmptyState.tsx",
+        "app/web/src/components/ImageWithFallback.tsx",
+        "app/web/src/components/StatusChips.tsx",
+        "app/web/src/components/ThemeToggle.tsx",
+        "app/web/src/data/SnapshotContext.tsx",
+        "app/web/src/data/SnapshotProvider.tsx",
+        "app/web/src/data/adapter.ts",
+        "app/web/src/data/snapshot.ts",
+        "app/web/src/index.css",
+        "app/web/src/main.tsx",
+        "app/web/src/pages/GroupExplorer.tsx",
+        "app/web/src/pages/LeadershipMap.tsx",
+        "app/web/src/pages/Methodology.tsx",
+        "app/web/src/pages/PublicHome.tsx",
+        "app/web/src/pages/WhatChanged.tsx",
+        "app/web/tsconfig.json",
+        "app/web/vite.config.ts",
+        "scripts/build_snapshot_index.py",
+        "scripts/export_snapshot_json.py"
       ]
     },
     {
@@ -175,19 +229,27 @@
       "files": [
         "scripts/__init__.py",
         "scripts/audit_close_basis.py",
+        "scripts/audit_group_size_diffusion.py",
+        "scripts/audit_methodology_sensitivity.py",
+        "scripts/audit_price_basis.py",
+        "scripts/audit_sectors_credit.py",
+        "scripts/audit_state_turnover.py",
         "scripts/build_history.py",
         "scripts/build_market_snapshot.py",
         "scripts/build_snapshot.py",
         "scripts/compare_providers.py",
         "scripts/credit_audit.py",
         "scripts/export_diagnostics.py",
+        "scripts/export_market_brief.py",
+        "scripts/plan_sectors_refresh.py",
         "scripts/refresh_public_data.py",
         "scripts/refresh_sectors_core.py",
         "scripts/run_diffusion_sensitivity.py",
         "scripts/run_horizon_sensitivity.py",
         "scripts/run_stale_trading.py",
         "scripts/run_state_turnover.py",
-        "scripts/validate_data.py"
+        "scripts/validate_data.py",
+        "scripts/validate_sectors_live.py"
       ]
     },
     {
@@ -453,8 +515,11 @@
       "files": [
         "src/idx_leadership/analytics/__init__.py",
         "src/idx_leadership/analytics/contradictions.py",
+        "src/idx_leadership/analytics/data_gaps.py",
         "src/idx_leadership/analytics/invalidation.py",
-        "src/idx_leadership/analytics/persistence.py"
+        "src/idx_leadership/analytics/persistence.py",
+        "src/idx_leadership/analytics/sensitivity.py",
+        "src/idx_leadership/analytics/turnover.py"
       ]
     },
     {
@@ -501,6 +566,7 @@
       "evidence": "src/idx_leadership/data/snapshots.py:30 SnapshotWriter",
       "files": [
         "src/idx_leadership/data/__init__.py",
+        "src/idx_leadership/data/comparability.py",
         "src/idx_leadership/data/endpoint_status.py",
         "src/idx_leadership/data/manifests.py",
         "src/idx_leadership/data/quality.py",
@@ -541,37 +607,7 @@
         "Offline-only; no network"
       ],
       "evidence": "tests/conftest.py:9 fixtures_dir",
-      "files": [
-        "tests/__init__.py",
-        "tests/conftest.py",
-        "tests/conftest_app.py",
-        "tests/test_aggregation.py",
-        "tests/test_analytics.py",
-        "tests/test_breadth.py",
-        "tests/test_capability_provider.py",
-        "tests/test_concentration.py",
-        "tests/test_concentration_v2.py",
-        "tests/test_config.py",
-        "tests/test_diffusion_group_size.py",
-        "tests/test_endpoint_status.py",
-        "tests/test_evidence.py",
-        "tests/test_market_universe.py",
-        "tests/test_methodology_versioning.py",
-        "tests/test_no_lookahead.py",
-        "tests/test_parity_public_sectors.py",
-        "tests/test_pipeline.py",
-        "tests/test_provider_contracts.py",
-        "tests/test_providers.py",
-        "tests/test_relative_strength.py",
-        "tests/test_returns.py",
-        "tests/test_schema.py",
-        "tests/test_sectors_client.py",
-        "tests/test_sectors_provider.py",
-        "tests/test_snapshots.py",
-        "tests/test_states.py",
-        "tests/test_transitions.py",
-        "tests/test_ui_story_mode.py"
-      ]
+      "files": []
     },
     {
       "id": "config",
@@ -590,11 +626,7 @@
         "No magic numbers in code; all thresholds in config"
       ],
       "evidence": "config/methodology.yaml:8 method_version",
-      "files": [
-        "config/methodology.yaml",
-        "config/providers.yaml",
-        "config/universe.yaml"
-      ]
+      "files": []
     },
     {
       "id": "docs",
@@ -618,16 +650,19 @@
         "GROUNDWORK_AUDIT.md",
         "README.md",
         "docs/ARCHITECTURE.md",
+        "docs/CHANGE_SUMMARY.md",
         "docs/DATA_CONTRACTS.md",
         "docs/DECISION_LOG.md",
         "docs/ENRICHMENT_RESEARCH.md",
         "docs/KNOWN_GAPS.md",
         "docs/LIVE_METHODOLOGY_AUDIT.md",
+        "docs/LIVE_SECTORS_RUNBOOK.md",
         "docs/METHODOLOGY.md",
         "docs/METHODOLOGY_SENSITIVITY.md",
         "docs/NEXT_ITERATION.md",
         "docs/PROVIDER_PARITY_REPORT.md",
         "docs/SECTORS_API_AUDIT.md",
+        "docs/SECTORS_BLOCKERS.md",
         "docs/SECTORS_CREDIT_AUDIT.md",
         "docs/SECTORS_INTEGRATION_PLAN.md",
         "docs/SECTORS_PRICE_BASIS.md",
@@ -805,25 +840,43 @@
       "from": "aggregation",
       "to": "features",
       "type": "calls",
-      "evidence": "src/idx_leadership/aggregation/groups.py:15 from ..features.breadth import compute_breadth"
-    },
-    {
-      "from": "aggregation",
-      "to": "signals-leadership",
-      "type": "calls",
-      "evidence": "src/idx_leadership/aggregation/groups.py:25 from ..signals.leadership import classify_leadership"
-    },
-    {
-      "from": "aggregation",
-      "to": "signals-diffusion",
-      "type": "calls",
-      "evidence": "src/idx_leadership/aggregation/groups.py:26 from ..signals.diffusion_v2 import \u2026"
+      "evidence": "src/idx_leadership/aggregation/groups.py:18 from ..features.relative_strength import compute_excess_returns"
     },
     {
       "from": "aggregation",
       "to": "models",
       "type": "imports",
-      "evidence": "src/idx_leadership/aggregation/groups.py:18 from ..models import ConcentrationMetrics, DiffusionState, EligibilityStatus, GroupSnapshot, LeadershipState"
+      "evidence": "src/idx_leadership/aggregation/groups.py:17 from ..models import ConcentrationMetrics, DiffusionState, EligibilityStatus, GroupSnapshot, LeadershipState"
+    },
+    {
+      "from": "tests",
+      "to": "app",
+      "type": "imports",
+      "evidence": "tests/test_ui_story_mode.py:14 from app.story_mode import build_story_card"
+    },
+    {
+      "from": "scripts",
+      "to": "web-app",
+      "type": "writes",
+      "evidence": "scripts/export_snapshot_json.py:75 PUBLIC_DIR = project_root() / 'app' / 'web' / 'public' / 'snapshots'"
+    },
+    {
+      "from": "scripts",
+      "to": "web-app",
+      "type": "writes",
+      "evidence": "scripts/build_snapshot_index.py:42 out_path = ... app/web/public/snapshots/index.json"
+    },
+    {
+      "from": "web-app",
+      "to": "data-snapshots",
+      "type": "reads",
+      "evidence": "app/web/src/data/SnapshotProvider.tsx:35 res = await fetch('/snapshots/${id}.json') -- payload is the JSON dump of a data/snapshots/<id>/ bundle"
+    },
+    {
+      "from": "web-app",
+      "to": "models",
+      "type": "reads",
+      "evidence": "unknown \u2014 JSON shape is documented in app/web/src/data/snapshot.ts but no Python import exists at runtime (boundary is the JSON file)"
     },
     {
       "from": "signals-transitions",
@@ -976,6 +1029,26 @@
         "data-snapshots"
       ],
       "outcome": "data/normalized/credit_audit.json with by_endpoint and by_refresh_kind buckets"
+    },
+    {
+      "id": "flow-export-snapshot",
+      "trigger": "Operator runs `python -m scripts.export_snapshot_json --latest && python -m scripts.build_snapshot_index`",
+      "steps": [
+        "scripts",
+        "data-snapshots",
+        "models",
+        "web-app"
+      ],
+      "outcome": "app/web/public/snapshots/{index.json, snap_<asof>.json} -- SPA fetches them as static assets"
+    },
+    {
+      "id": "flow-web-render",
+      "trigger": "Browser opens http://127.0.0.1:4173/overview (or any workspace route)",
+      "steps": [
+        "web-app",
+        "data-snapshots"
+      ],
+      "outcome": "5 routes (PublicHome / WhatChanged / LeadershipMap / GroupExplorer / Methodology) rendered with explicit EmptyStates where the prototype universe does not yet emit data"
     }
   ]
 }

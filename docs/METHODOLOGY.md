@@ -3,29 +3,33 @@
 > All numerical thresholds live in `config/methodology.yaml`. No magic
 > numbers in code. This document states the formulas; values are
 > versioned and configurable. The current configuration is
-> `methodology-v2` / `features-v2`; v1 snapshots remain readable.
+> `methodology-v3` / `features-v3`; v1 and v2 snapshots remain readable.
 
 ## 1. Universe
 
 Offline/prototype runs use a **subset of IDX** declared in
-`config/universe.yaml`. The subset is intentionally cross-sector and
-reviewable. It is **not** the full IDX. Group-level conclusions drawn
-from this universe are partial by definition.
+`config/universe.yaml`. The live Sectors path uses the provider security
+master and its structured taxonomy query. Group-level conclusions remain
+bounded by the usable-history and eligibility coverage recorded in each live
+snapshot.
 
 | Field | Source | Versioning |
 | --- | --- | --- |
-| `universe` | `config/universe.yaml` | `universe_version` |
-| Taxonomy mapping | `config/universe.yaml` (sectors/sub_sectors) | `taxonomy_version` |
-| Benchmark | `^JKSE` (Yahoo) | benchmark_id = "IHSG" in canonical schema |
+| `universe` | Sectors `/v2/companies/` in live mode; local YAML in prototype modes | `universe_version` |
+| Taxonomy mapping | Sectors structured company query in live mode; local YAML otherwise | `taxonomy_version` |
+| Benchmark | Sectors `/v2/index-daily/ihsg/` in live mode; `^JKSE` otherwise | benchmark source in provenance |
 
-The taxonomy is **prototype metadata**, not authoritative Sectors
-taxonomy. Missing values remain explicit; nothing is fabricated.
+Prototype taxonomy is not authoritative Sectors taxonomy. Missing values
+remain explicit; nothing is fabricated. The 2026-08-27 live bundle recorded
+100% taxonomy coverage for its 962 discovered company rows.
 
 ## 2. Benchmark
 
-The primary benchmark is the IHSG (Yahoo: `^JKSE`). The pipeline uses
-`close` for benchmark return calculations and `adjusted_close` for
-securities.
+The live primary benchmark is the Sectors-native IHSG series
+(`/v2/index-daily/ihsg/`). Prototype modes use Yahoo `^JKSE`. The pipeline
+uses the benchmark's canonical price field for return calculations and keeps
+the Sectors security close as raw close until corporate-action semantics are
+verified.
 
 ## 3. Price basis
 
@@ -215,6 +219,9 @@ The default absolute thresholds are `±10pp` for breadth delta and
 - Missing benchmark observation → snapshot status `STALE` or `FAILED`.
 - Group with insufficient constituents → `UNCONFIRMED`.
 - Group with insufficient history → no group return; `UNCONFIRMED`.
+- No comparable prior breadth observation → current breadth may be shown as a
+  clearly labeled level on the map, but breadth delta, diffusion change, and
+  trajectories remain unavailable; no prior value or delta is fabricated.
 - Negative or zero prices → rejected; treated as missing.
 - As-of date older than the latest available observation by more
   than `as_of_tolerance_days` (default 7 days) → snapshot status `STALE`.
@@ -226,22 +233,31 @@ missing values.
 
 - Equal-weight only; no market-cap or free-float weighting.
 - Equal-weight; no cap-weight; no risk-adjusted weighting.
-- Public prototype only. The Sectors v2 client/provider is implemented,
-  but live calls remain explicitly gated and require credentials.
-- No corporate-action guardrail beyond adjusted_close.
+- Live Sectors is available but remains explicitly gated and requires
+  credentials plus `--allow-credit-spend`.
+- Sectors close adjustment semantics are `UNKNOWN / VERIFY`; the live path
+  mirrors raw close into the canonical adjusted-close slot and surfaces the
+  caveat rather than claiming adjusted prices.
 - No fundamental, flow, broker, filing, or news confirmation.
-- Prototype universe ≠ full IDX.
+- The local prototype universe is not full IDX; the live Sectors universe is
+  provider-derived, subject to its explicit history, liquidity, listing, and
+  instrument-classification gaps.
 - 5/20/60 day horizons; the engine cannot answer short-term (1D)
   tactical questions reliably from this prototype.
 - Snapshots are written in serial; concurrent runs are not supported.
 
-## 15. Future Sectors-native enrichment
+## 15. Live Sectors coverage boundary
 
-For a credentialed Sectors run:
+The credentialed live run (as of 2026-08-27) discovered 962 company rows and
+used a disclosed 500-row prefix sample. Taxonomy was complete within the used
+sample, 265 securities were policy-eligible, and 496/500 requested histories
+were usable (99.2%). The snapshot is therefore descriptive and
+`READY_WITH_GAPS`; diffusion remains `UNCONFIRMED` until a persisted
+comparable prior snapshot exists. The next refresh should reuse the persisted
+cache and retry only unresolved symbols after the provider throttle window.
 
-- Full-universe daily close replaces the prototype universe.
-- IHSG benchmark should come from Sectors index endpoint (the public
-  `^JKSE` should be cross-checked but not relied on for production).
+Future Sectors-native enrichment includes:
+
 - Free-float weights remain available through
   `CapabilityProvider.get_free_float` as a separate magnitude channel.
 - Subsector reports unlock qualitative corroboration in evidence.

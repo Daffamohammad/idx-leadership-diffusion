@@ -1,20 +1,16 @@
 # Sectors Refresh Budget (v2)
 
-> **Status:** The Frontier Pass #2 budget is the same per-endpoint
-> cost as Frontier Pass #1 (per the Sectors v2 docs), now wrapped
-> behind a `scripts/credit_audit.py` rollup that consumes the
-> `RequestLedger`. Live observed values land in
-> `data/normalized/credit_audit.json` once a key is available.
->
-> **Live Sectors key is not present in this environment.** The
-> rollup is exercised against an empty ledger (no entries) and
-> reports structure only; no numbers are invented.
+> **Status:** The Frontier Pass #2 budget uses the current Sectors v2
+> per-endpoint cost model and is backed by the first live request ledger from
+> 2026-08-28.
+> The live artifact records 975 requests, 454 cache hits, and 226 estimated
+> credits; account balance and actual debit remain unavailable.
 
-## 1. Tiered refresh model (unchanged)
+## 1. Tiered refresh model
 
 | Tier | Goal | Endpoints | Cost (doc'd) |
 | --- | --- | --- | --- |
-| 1 — Core market | full-universe close, security master, taxonomy, IHSG, free-float, suspensions | `/v2/companies/`, `/v2/close/`, `/v2/free-float/`, `/v2/suspensions/` | 1/page (close), 1/100 co (free-float), 1 (suspensions), UNKNOWN (companies) |
+| 1 — Core market | latest close, structured security master/taxonomy, per-symbol history, IHSG, suspensions | `/v2/companies/`, `/v2/close/`, `/v2/daily/{symbol}/`, `/v2/index-daily/ihsg/`, `/v2/suspensions/` | 1/page (structured companies and close), 1/call (daily, IHSG, suspensions) |
 | 2 — Selected enrichment | subsector report, fundamental screener, company report | `/v2/company/report/{symbol}/` | UNKNOWN |
 | 3 — Targeted constituent | foreign flow, corporate actions, broker summary | `/v2/foreign-flow/{symbol}/`, `/v2/company/corporate-actions/{symbol}/` | 1 each |
 
@@ -22,15 +18,16 @@
 
 | Strategy | Endpoints | Estimated cost |
 | --- | --- | --- |
-| Core daily refresh (Tier 1) | companies, close, suspensions, free-float | ~70 credits + UNKNOWN (companies) |
-| Weekly history extension (Tier 1) | close (re-pull last 30d for transitions) | +30 × 1/page = 30 credits |
-| Single-group drilldown (Tier 1 + Tier 3 top-3) | one snapshot + 3 × 1 (foreign) + 3 × 1 (corporate) | ~70 + 6 credits |
+| Latest-date live snapshot (cold, 962 symbols) | structured companies × 2, latest close page, daily history × 962, IHSG, suspensions | **975 baseline credits** |
+| Exact historical `--as-of` (cold, 962 symbols) | latest close, full close × 33 pages, structured companies × 10 pages, daily history × 962, IHSG, suspensions | **1,008 baseline credits; preflight blocks it** |
+| Targeted group drilldown | existing snapshot + selected Tier 3 calls | 1 credit per foreign-flow or corporate-action call |
 | Foreign-flow enrichment (Tier 3, top driver per material transition) | foreign-flow | 1 credit / call |
 | Fundamental confirmation (Tier 2, on demand) | company-report | UNKNOWN |
 
 The totals are still estimates because:
-* `companies` cost is `UNKNOWN / VERIFY` (see D020 in
-  `DECISION_LOG.md`).
+* The live runner uses only documented structured screener queries
+  (`where=...`), priced at 1 credit per page. The unfiltered screener form is
+  not used because its price is not stated.
 * `company-report` cost is `UNKNOWN / VERIFY`.
 * A live balance read is not available; we cannot measure
   observed delta.
@@ -48,9 +45,10 @@ The totals are still estimates because:
 }
 ```
 
-When the ledger is empty (no live runs), only the `by_refresh_kind`
+When the ledger is empty (for an offline run), only the `by_refresh_kind`
 buckets appear; `by_endpoint` is empty and `totals` is zero. This is
-intentional — the rollup must not invent numbers (D012).
+intentional — the rollup must not invent numbers (D012). The first live
+snapshot ledger is preserved separately under `data/raw/sectors_live/`.
 
 ## 4. Tier separation in code
 
@@ -62,20 +60,22 @@ flagged `material` (per `transitions._classify_materiality`).
 
 ## 5. Rate-limit response
 
-`SectorsClient` retries on `429` with linear backoff (default 1.5s,
-max 2 retries). The Sectors `RATE_LIMIT_EXCEEDED` body is typed
+`SectorsClient` serializes the live history calls at a conservative interval
+and retries on `429` with bounded exponential/backoff delays. The Sectors
+`RATE_LIMIT_EXCEEDED` body is typed
 (`{"error": "RATE_LIMIT_EXCEEDED", "message": "..."}`) and the
-client retries on it. Without a live key we cannot measure
-observed RTT or actual retry behavior, but the unit test
+client retries on it. The first live run recorded 429 responses in the
+history diagnostics; the unit test
 `test_sectors_client.py::test_retry_on_429` exercises the path with
 a fake transport.
 
-## 6. Cost-protection guardrails (unchanged)
+## 6. Cost-protection guardrails
 
 * `SectorsClient` and `SectorsProvider` refuse live HTTP unless
   `allow_live=True`. The factory passes `allow_live=False` by
   default; the CLI scripts pass `--allow-live` to opt in.
-* Every Sectors call flows through the `RequestLedger`; per-call
-  `estimated_credit_cost` is recorded. `scripts/credit_audit.py`
-  rolls the ledger up; future passes will add a daily balance
-  read when Sectors exposes one.
+* Every Sectors call flows through the `RequestLedger`; documented estimates
+  and retry-inclusive budget reserves are recorded separately.
+* The live snapshot runner performs a network-free preflight and defaults to a
+  hard `--max-estimated-credits 1000` ceiling. Every HTTP attempt reserves
+  before leaving the process, so retries cannot silently cross the ceiling.

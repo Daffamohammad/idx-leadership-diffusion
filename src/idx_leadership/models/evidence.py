@@ -143,9 +143,9 @@ class InvalidationCondition(BaseModel):
 class ContradictionRecord(BaseModel):
     """One normalized contradiction between leadership and participation.
 
-    The brief contract and the UI both consume this structure.  The
-    free-form ``comment`` field is preserved for the screen text but
-    the metric label is the structured handle.
+    The brief contract and the UI both consume this structure.  ``evidence``
+    carries the human-readable screen text while ``metric`` remains the
+    structured handle.
     """
 
     model_config = ConfigDict(extra="forbid")

@@ -14,6 +14,7 @@ from ..models import ProviderMode
 from ..utils import ConfigurationError, load_yaml
 from .base import MarketDataProvider
 from .ledger import RequestLedger
+from .sectors_client import SectorsClient
 
 
 _LEGACY_MODE_ALIASES: dict[str, ProviderMode] = {
@@ -59,6 +60,7 @@ def build_provider_from_config(
     allow_live: bool = False,
     max_pages: int | None = None,
     force_refresh: bool = False,
+    max_estimated_credits: float | None = None,
     ledger: RequestLedger | None = None,
 ) -> MarketDataProvider:
     """Construct one provider without any mode fallback.
@@ -111,6 +113,13 @@ def build_provider_from_config(
 
     resolved_ledger = ledger or RequestLedger()
     if parsed_mode is ProviderMode.SECTORS_LIVE:
+        # Every production factory path gets the same conservative ceiling,
+        # including older audit CLIs that do not expose a budget flag.
+        resolved_max_estimated_credits = (
+            SectorsClient.DEFAULT_MAX_ESTIMATED_CREDITS
+            if max_estimated_credits is None
+            else max_estimated_credits
+        )
         kwargs: dict[str, Any] = {
             "api_key": os.environ.get(options.get("api_key_env", "SECTORS_API_KEY"), ""),
             "base_url": options.get("base_url", "https://api.sectors.app"),
@@ -119,6 +128,15 @@ def build_provider_from_config(
             "mode": ProviderMode.SECTORS_LIVE,
             "max_pages": max_pages,
             "force_refresh": bool(force_refresh),
+            "max_estimated_credits": resolved_max_estimated_credits,
+            "timeout": int(options.get("request_timeout_seconds", 30)),
+            "max_retries": int(options.get("max_retries", 2)),
+            "backoff_seconds": float(options.get("retry_backoff_seconds", 1.5)),
+            "cache_ttl_seconds": int(options.get("cache_ttl_hours", 1)) * 60 * 60,
+            "history_workers": int(options.get("history_workers", 4)),
+            "min_request_interval_seconds": float(
+                options.get("request_interval_seconds", 0.0)
+            ),
         }
     elif parsed_mode is ProviderMode.SECTORS_FIXTURE:
         kwargs = {

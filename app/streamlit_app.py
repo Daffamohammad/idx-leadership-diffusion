@@ -793,6 +793,18 @@ def method_quality(view: DashboardView) -> None:
         {"Field": "Versions", "Value": f"{method_version} · {methodology.get('feature_version', entry.get('feature_version', 'UNAVAILABLE'))}"},
     ]
     st.dataframe(pd.DataFrame(summary_rows), width="stretch", hide_index=True)
+    if view.provider_mode == "SECTORS_LIVE":
+        live_rows = [
+            {"Metric": "Security master", "Value": f"{view.coverage.get('security_master_total', '—')} discovered"},
+            {"Metric": "Eligible universe", "Value": f"{view.coverage.get('eligible_securities', '—')} eligible"},
+            {"Metric": "Price-history coverage", "Value": f"{view.coverage.get('price_history_coverage_pct', '—')}% usable"},
+            {"Metric": "Taxonomy coverage", "Value": f"{view.coverage.get('taxonomy_coverage_pct', '—')}% complete"},
+            {"Metric": "Provider provenance", "Value": str(view.provider_provenance.get('provider', 'Sectors'))},
+        ]
+        st.dataframe(pd.DataFrame(live_rows), width="stretch", hide_index=True)
+        warnings = view.data_warnings.get("warnings", [])
+        if isinstance(warnings, list) and warnings:
+            st.warning(f"Live data warnings: {len(warnings)} persisted warning(s). See the selected snapshot artifacts for full diagnostics.")
     st.markdown('<div class="section-label">Per-layer Status</div>', unsafe_allow_html=True)
     quality_html = []
     for layer in view.quality_layers:

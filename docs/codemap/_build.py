@@ -45,6 +45,23 @@ NODES: list[dict[str, Any]] = [
         "evidence": "app/streamlit_app.py:148 main",
     },
     {
+        "id": "web-app",
+        "path": "app/web/src/App.tsx",
+        "role": "Read-only Vite/React/TypeScript SPA that mirrors the Figma design prototype. Five routes: PublicHome, WhatChanged (/overview), LeadershipMap (/map), GroupExplorer (/explorer), Methodology. Consumes a single JSON dump of the snapshot bundle; renders explicit empty states where the prototype universe does not yet emit data (breadth history, foreign flow, fundamentals).",
+        "entrypoints": [
+            "app/web/src/App.tsx:App",
+            "app/web/src/data/SnapshotProvider.tsx:SnapshotProvider",
+            "app/web/src/data/adapter.ts:adaptSnapshot",
+        ],
+        "tests": ["app/web/tsc -b --noEmit (typecheck)"],
+        "constraints": [
+            "Read-only — no analytical logic, no vendor SDK imports",
+            "Snapshot data is loaded via /snapshots/<id>.json + /snapshots/index.json",
+            "Pages never fabricate values: missing data renders an EmptyState card",
+        ],
+        "evidence": "app/web/src/App.tsx:13 SnapshotProvider",
+    },
+    {
         "id": "scripts",
         "path": "scripts/build_market_snapshot.py",
         "role": "CLI entry points: refresh, build, compare, audit, sensitivity studies. Orchestrates the full engine.",
@@ -285,12 +302,37 @@ FILE_TO_NODE: list[tuple[set[str], str]] = [
       "src/idx_leadership/data/manifests.py",
       "src/idx_leadership/data/quality.py",
       "src/idx_leadership/data/endpoint_status.py",
+      "src/idx_leadership/data/comparability.py",
       "src/idx_leadership/data/__init__.py"},
      "data-snapshots"),
-    ({"tests/"}, "tests"),
-    ({"config/"}, "config"),
     ({"docs/", "FRONTIER_PASS_1_AUDIT.md", "FRONTIER_PASS_2_AUDIT.md", "GROUNDWORK_AUDIT.md", "README.md"}, "docs"),
-]
+    ({"app/web/src/App.tsx",
+      "app/web/src/main.tsx",
+      "app/web/src/index.css",
+      "app/web/src/components/AppShell.tsx",
+      "app/web/src/components/BrandMark.tsx",
+      "app/web/src/components/CustomCursor.tsx",
+      "app/web/src/components/EmptyState.tsx",
+      "app/web/src/components/ImageWithFallback.tsx",
+      "app/web/src/components/StatusChips.tsx",
+      "app/web/src/components/ThemeToggle.tsx",
+      "app/web/src/data/SnapshotContext.tsx",
+      "app/web/src/data/SnapshotProvider.tsx",
+      "app/web/src/data/adapter.ts",
+      "app/web/src/data/snapshot.ts",
+      "app/web/src/pages/GroupExplorer.tsx",
+      "app/web/src/pages/LeadershipMap.tsx",
+      "app/web/src/pages/Methodology.tsx",
+      "app/web/src/pages/PublicHome.tsx",
+      "app/web/src/pages/WhatChanged.tsx",
+      "app/web/index.html",
+      "app/web/package.json",
+      "app/web/tsconfig.json",
+      "app/web/vite.config.ts",
+      "scripts/export_snapshot_json.py",
+      "scripts/build_snapshot_index.py"},
+     "web-app"),
+ ]
 
 
 def build_file_to_node() -> dict[str, str]:
@@ -384,14 +426,21 @@ EDGES: list[dict[str, str]] = [
 
     # aggregation
     {"from": "aggregation", "to": "features", "type": "calls",
-     "evidence": "src/idx_leadership/aggregation/groups.py:15 from ..features.breadth import compute_breadth"},
-    {"from": "aggregation", "to": "signals-leadership", "type": "calls",
-     "evidence": "src/idx_leadership/aggregation/groups.py:25 from ..signals.leadership import classify_leadership"},
-    {"from": "aggregation", "to": "signals-diffusion", "type": "calls",
-     "evidence": "src/idx_leadership/aggregation/groups.py:26 from ..signals.diffusion_v2 import …"},
+     "evidence": "src/idx_leadership/aggregation/groups.py:18 from ..features.relative_strength import compute_excess_returns"},
     {"from": "aggregation", "to": "models", "type": "imports",
-     "evidence": "src/idx_leadership/aggregation/groups.py:18 from ..models import ConcentrationMetrics, DiffusionState, EligibilityStatus, GroupSnapshot, LeadershipState"},
+     "evidence": "src/idx_leadership/aggregation/groups.py:17 from ..models import ConcentrationMetrics, DiffusionState, EligibilityStatus, GroupSnapshot, LeadershipState"},
+    {"from": "tests", "to": "app", "type": "imports",
+     "evidence": "tests/test_ui_story_mode.py:14 from app.story_mode import build_story_card"},
 
+    # web-app
+    {"from": "scripts", "to": "web-app", "type": "writes",
+     "evidence": "scripts/export_snapshot_json.py:75 PUBLIC_DIR = project_root() / 'app' / 'web' / 'public' / 'snapshots'"},
+    {"from": "scripts", "to": "web-app", "type": "writes",
+     "evidence": "scripts/build_snapshot_index.py:42 out_path = ... app/web/public/snapshots/index.json"},
+    {"from": "web-app", "to": "data-snapshots", "type": "reads",
+     "evidence": "app/web/src/data/SnapshotProvider.tsx:35 res = await fetch('/snapshots/${id}.json') -- payload is the JSON dump of a data/snapshots/<id>/ bundle"},
+    {"from": "web-app", "to": "models", "type": "reads",
+     "evidence": "unknown — JSON shape is documented in app/web/src/data/snapshot.ts but no Python import exists at runtime (boundary is the JSON file)"},
     # signals
     {"from": "signals-transitions", "to": "signals-leadership", "type": "imports",
      "evidence": "src/idx_leadership/signals/transitions.py:14 from ..models import DiffusionState, GroupSnapshot, LeadershipState, MaterialityLabel, TransitionEvent"},
@@ -433,8 +482,7 @@ EDGES: list[dict[str, str]] = [
 
 
 # --------------------------------------------------------------------------- #
-# 3. The 5 most important end-to-end flows.
-# --------------------------------------------------------------------------- #
+# 3. The 5 most important end-to-end flows (now 6 with the web SPA path).
 
 FLOWS: list[dict[str, Any]] = [
     {
@@ -472,8 +520,19 @@ FLOWS: list[dict[str, Any]] = [
         "steps": ["scripts", "ledger", "data-snapshots"],
         "outcome": "data/normalized/credit_audit.json with by_endpoint and by_refresh_kind buckets",
     },
+    {
+        "id": "flow-export-snapshot",
+        "trigger": "Operator runs `python -m scripts.export_snapshot_json --latest && python -m scripts.build_snapshot_index`",
+        "steps": ["scripts", "data-snapshots", "models", "web-app"],
+        "outcome": "app/web/public/snapshots/{index.json, snap_<asof>.json} -- SPA fetches them as static assets",
+    },
+    {
+        "id": "flow-web-render",
+        "trigger": "Browser opens http://127.0.0.1:4173/overview (or any workspace route)",
+        "steps": ["web-app", "data-snapshots"],
+        "outcome": "5 routes (PublicHome / WhatChanged / LeadershipMap / GroupExplorer / Methodology) rendered with explicit EmptyStates where the prototype universe does not yet emit data",
+    },
 ]
-
 
 # --------------------------------------------------------------------------- #
 # 4. Helpers — git, fingerprint, file mapping.

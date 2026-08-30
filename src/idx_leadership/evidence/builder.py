@@ -219,5 +219,20 @@ def build_group_evidence(
     )
 
 
-def build_evidence_table(snapshots: Iterable[GroupSnapshot]) -> list[GroupEvidence]:
-    return [build_group_evidence(s) for s in snapshots]
+def build_evidence_table(
+    snapshots: Iterable[GroupSnapshot],
+    *,
+    provider_mode: ProviderMode = ProviderMode.PUBLIC_PROTOTYPE,
+    previous_by_group: dict[str, GroupSnapshot] | None = None,
+) -> list[GroupEvidence]:
+    """Build evidence with an explicit provider mode and prior-state map."""
+
+    previous_by_group = previous_by_group or {}
+    return [
+        build_group_evidence(
+            snapshot,
+            previous=previous_by_group.get(snapshot.group_id),
+            provider_mode=provider_mode,
+        )
+        for snapshot in snapshots
+    ]

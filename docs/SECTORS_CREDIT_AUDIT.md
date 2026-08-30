@@ -1,13 +1,14 @@
 # Sectors Credit Audit
 
-> **Approach:** credit costs were taken **directly from the official Sectors v2 docs**
-> (the per-endpoint prose states "Costs N API credit(s)"). No live call was issued
-> during this pass because no API key was available in the environment.
+> **Approach:** documented endpoint costs were compared with the sanitized
+> request ledger from the first credentialed market-wide run on 2026-08-28.
+> The client records estimates only; the account balance and actual debit were
+> not exposed.
 >
 > **Balance inspection:** no programmatic balance endpoint was found in the docs.
 > The Sectors Insider upgrade page is gated; balance is visible only to the
-> authenticated user inside `sectors.app`. A direct probe is queued for the next
-> pass when a key is available.
+> authenticated user inside `sectors.app`. The live artifact therefore keeps
+> `credit_balance: UNAVAILABLE`.
 
 ## 1. Per-endpoint credit costs (DOCUMENTED)
 
@@ -18,20 +19,28 @@
 | `/v2/foreign-flow/{symbol}/` | **1 credit** | docs.sectors.app "Daily Net Foreign Inflow" |
 | `/v2/company/corporate-actions/{symbol}/` | **1 credit** | docs.sectors.app "Corporate Actions" |
 | `/v2/suspensions/` | **1 credit** | docs.sectors.app "Stock Suspensions" |
-| `/v2/companies/` | `UNKNOWN / VERIFY` | not stated on the page |
+| `/v2/companies/` structured `where` | **1 credit per page** | docs.sectors.app "Companies Screener" |
+| `/v2/companies/` natural-language `q` | **3 credits per page** | docs.sectors.app "Companies Screener" |
+| `/v2/companies/` unfiltered form | `UNKNOWN / VERIFY` | not used by the live provider |
 | `/v2/company/report/{symbol}/` | `UNKNOWN / VERIFY` | not stated on the page |
 
 ## 2. Refresh budget (estimated from docs)
 
-A standard **market-wide refresh** for one as-of date consists of:
+A standard **latest-date market refresh** consists of:
 
 | Step | Endpoint | Cost (est.) | Notes |
 | --- | --- | --- | --- |
-| Security master + taxonomy | `/v2/companies/` | UNKNOWN — assumed ≤ 1/page × 32 pages ≈ 32 | will be recorded in ledger on first run |
-| Full-universe close | `/v2/close/` | **~32 credits** (942 tickers / 30 per page) | 1 trading day |
-| Free float | `/v2/free-float/` | **~10 credits** (1 per 100 of ~942) | one-time daily cache |
-| Suspensions | `/v2/suspensions/` | **~28 credits** (556 / 20 per page) | incremental |
-| **Tier-1 daily total** | | **~102 credits + companies** | dominated by close + suspensions |
+| Structured security master + taxonomy | `/v2/companies/` | **10 credits** (2 × ceil(962 / 200)) | identity pass plus complete-taxonomy pass |
+| Latest-date discovery | `/v2/close/` | **1 credit** | one page is enough to read the market date |
+| Per-symbol history | `/v2/daily/{symbol}/` | **962 credits** (upper bound) | one bounded 90-day call per discovered symbol |
+| Native benchmark | `/v2/index-daily/ihsg/` | **1 credit** | one 90-day call |
+| Suspensions | `/v2/suspensions/` | **1 credit** | one bounded eligibility call in the current contract |
+| **Cold baseline total** | | **975 credits** | before cache reuse; 25-credit retry headroom remains under the 1,000 ceiling |
+
+An exact historical `--as-of` request also walks the paginated full-universe
+close feed. For 962 companies that adds **33 credits** (`ceil(962 / 30)`), so
+the cold baseline becomes **1,008 credits** and is blocked by the runner's
+preflight rather than allowed to start.
 
 | Step | Endpoint | Cost (est.) | Notes |
 | --- | --- | --- | --- |
@@ -39,33 +48,37 @@ A standard **market-wide refresh** for one as-of date consists of:
 | Corporate actions (per highlighted driver) | `/v2/company/corporate-actions/{symbol}/` | **1 credit** | called only when return anomaly detected |
 | **Tier-3 per-driver total** | | **≤ 2 credits / driver** | |
 
-A typical end-to-end refresh that includes both Tier 1 + Tier 3 for **one**
-highlighted group (top 3 drivers) is **~108 credits + the `companies` page cost**.
+Targeted Tier-3 enrichment is additive to the core baseline: one selected
+driver costs up to **2 credits** when both foreign flow and corporate actions
+are requested. The live snapshot runner does not call these endpoints for the
+whole market, and the client blocks any request that would cross its hard
+1,000-credit ceiling.
 
 ## 3. Observed-vs-estimated
 
 | | Estimated | Observed |
 | --- | --- | --- |
-| Starting balance | n/a | UNKNOWN (key not present) |
+| Starting balance | n/a | UNKNOWN (not exposed to the client) |
 | Ending balance after full refresh | n/a | UNKNOWN |
 | Observed delta | n/a | UNKNOWN |
-| Confidence | low for `companies` (no doc'd cost) | n/a |
-| Notes | A first-run probe with a key will populate the ledger and the audit table | First refresh must be guarded with `--dry-run` for safety |
+| Confidence | high for structured screener, daily, index-daily, close, and suspensions costs | n/a |
+| Notes | The ledger keeps documented estimates, retry reserves, and observed debit separate | Earlier run recorded 975 requests, 454 cache hits, and 226 documented estimated credits |
 
 ## 4. Conclusion
 
 - The Sectors credit model is **endpoint-based, not request-based** (e.g.
   `/v2/close/` is per-page, `/v2/free-float/` is per-100-tickers).
-- **Pagination matters for cost.** Always use the maximum `limit=30` to minimize
-  total pages.
+- **Pagination matters for cost.** Use `limit=200` for structured companies
+  pages and `limit=30` for the close feed, each matching its current documented
+  maximum.
 - **Tier-3 enrichment is the safest cost lever** because each call is bounded to
   1–2 credits and is gated by a Tier-1 material transition flag.
-- **Balance read is not available programmatically**; we must rely on the
-  `RequestLedger.actual_credit_cost` field once observed and trust the documented
-  per-call cost until then.
+- **Balance read is not available programmatically**; the live artifact reports
+  `credit_balance: UNAVAILABLE` and keeps documented estimates separate from
+  actual account debit.
 
 ## 5. UNKNOWN / VERIFY items
 
-- `/v2/companies/` per-call credit cost
+- `/v2/companies/` unfiltered-form credit cost (the provider avoids this form)
 - `/v2/company/report/{symbol}/` per-call credit cost
 - Total credits remaining on the user's account (no programmatic endpoint found)

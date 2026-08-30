@@ -1,8 +1,10 @@
 # Live Sectors Runbook
 
-This runbook starts only when a Sectors API key is available. The current
-offline pass did **not** execute these live calls. The first live run is a
-bounded contract validation, not a market-wide refresh.
+This runbook covers the credentialed Sectors path. A bounded contract
+validation and a market-wide refresh were exercised on 2026-08-28. The
+market-wide bundle is reproducible but currently `READY_WITH_GAPS` because
+the provider rate-limited part of the per-symbol history batch; the gap is
+preserved in the snapshot and diagnostics.
 
 ## Before the live run
 
@@ -12,14 +14,15 @@ bounded contract validation, not a market-wide refresh.
    git status --short --branch
    ```
 
-   The delivery workspace used for the offline pass did not contain `.git`;
-   do not interpret that filesystem state as a clean Git worktree.
+   Keep unrelated worktree changes intact; live outputs and ledgers are
+   separate from source files.
 
-2. Export the credential without writing it to source, logs, shell arguments,
-   fixtures, or reports:
+2. Load the credentials from the local environment without writing them to
+   source, logs, shell arguments, fixtures, or reports:
 
    ```bash
-   test -n "${SECTORS_API_KEY:-}" && echo "key present" || echo "key missing"
+   test -n "${SECTORS_API_KEY:-}" && echo "Sectors key present" || echo "Sectors key missing"
+   test -n "${TAVILY_API_KEY:-}" && echo "Tavily key present" || echo "Tavily key missing"
    ```
 
 3. Record the account credit balance manually if the Sectors account page
@@ -31,14 +34,14 @@ bounded contract validation, not a market-wide refresh.
    data/raw/sectors_validation/
    data/cache/
    data/normalized/
-   data/snapshots/sectors/
+   data/snapshots/
    ```
 
 5. Run the offline suite before spending a credit:
 
    ```bash
-   python -m pytest
-   python -m compileall -q src app scripts
+   .venv/bin/pytest -q
+   .venv/bin/python -m compileall -q src app scripts
    ```
 
 ## Dry-run call plan
@@ -46,19 +49,26 @@ bounded contract validation, not a market-wide refresh.
 The default is non-live and spends no credits:
 
 ```bash
-python -m scripts.validate_sectors_live --dry-run --max-pages 1
-python -m scripts.plan_sectors_refresh --universe-size 950 --page-size 30
+.venv/bin/python -m scripts.validate_sectors_live --dry-run --max-pages 1
+.venv/bin/python -m scripts.build_market_snapshot --preflight-only
+.venv/bin/python -m scripts.plan_sectors_refresh --universe-size 950 --page-size 200
 ```
 
 The refresh planner estimates HTTP calls, pages, and cache hits. It does not
 invent a credit cost.
+
+The snapshot preflight is the paid-run gate. It uses the latest persisted live
+universe when available, prices structured screener pages at one credit, and
+blocks a baseline above the hard 1,000-credit ceiling before constructing a
+live client. Retries reserve again at the client boundary and are stopped when
+the same ceiling is reached.
 
 ## Minimal credentialed validation
 
 Run exactly one page per core endpoint first:
 
 ```bash
-python -m scripts.validate_sectors_live \
+.venv/bin/python -m scripts.validate_sectors_live \
   --live \
   --allow-credit-spend \
   --max-pages 1 \
@@ -78,7 +88,8 @@ Expected bounded checks:
 
 Do not mark the benchmark check as passed merely because a close page was
 valid. If IHSG is not present in the pages fetched, its status remains
-`NOT_FOUND_IN_FETCHED_PAGES` and market-wide expansion is still blocked.
+`NOT_FOUND_IN_FETCHED_PAGES`; the separate market-wide runner independently
+validated and used the native IHSG history endpoint.
 
 Use `--force-refresh` only when a cached response must be bypassed and the
 additional request is intentional. Raising `--max-pages` expands the possible
@@ -107,7 +118,7 @@ If balances are available, provide both values. Otherwise the command remains
 successful and reports `BALANCE UNAVAILABLE`:
 
 ```bash
-python -m scripts.audit_sectors_credit \
+.venv/bin/python -m scripts.audit_sectors_credit \
   --ledger data/raw/sectors_validation/<run>/request_ledger.jsonl \
   --request-category ALL \
   --before-balance <value> \
@@ -122,7 +133,7 @@ Start with a known corporate-action window and preserve public raw and adjusted
 series separately:
 
 ```bash
-python -m scripts.audit_price_basis \
+.venv/bin/python -m scripts.audit_price_basis \
   --ticker BBCA.JK \
   --start 2021-10-01 \
   --end 2021-10-29 \
@@ -133,8 +144,9 @@ python -m scripts.audit_price_basis \
   --max-pages 1
 ```
 
-Until this produces credentialed evidence, the documented result remains
-`SECTORS LIVE COMPARISON BLOCKED`.
+The bounded run is expected to leave the benchmark status as
+`NOT_FOUND_IN_FETCHED_PAGES` when only one close page is requested; the
+market-wide runner separately calls the native IHSG history endpoint.
 
 ## Market-wide expansion
 
@@ -152,11 +164,18 @@ accepted.
 6. Confirm market date, benchmark date, universe/taxonomy/method versions,
    coverage, and per-layer data-quality states in the manifest.
 
-The existing market-wide command remains:
+The market-wide command is:
 
 ```bash
-python -m scripts.build_market_snapshot --as-of YYYY-MM-DD --allow-live
+.venv/bin/python -m scripts.build_market_snapshot \
+  --allow-live --allow-credit-spend --max-estimated-credits 1000 \
+  --history-workers 1 --with-tavily
 ```
+
+Run the no-network preflight immediately before it. Do not add an exact
+historical `--as-of` on a cold full-universe run unless the preflight returns
+`READY`; at the current 962-company universe that path is estimated at 1,008
+credits and is intentionally blocked.
 
 Treat it as a second-stage command. Its output is not accepted merely because
 the process exits successfully; the validation report and manifest gates still
@@ -168,8 +187,8 @@ Run parity only when both sources contain true histories for the same tickers
 and dates:
 
 ```bash
-python -m scripts.compare_providers \
-  --mode SECTORS_LIVE \
+.venv/bin/python -m scripts.compare_providers \
+  --sectors-mode SECTORS_LIVE \
   --live \
   --allow-credit-spend \
   --as-of YYYY-MM-DD
@@ -192,10 +211,18 @@ row. Fixture parity proves the pipeline only; it is never a live parity result.
 
 ## Rollback and quarantine
 
+After a successful run, export the exact live snapshot and advertise only
+that mode to the SPA:
+
+```bash
+.venv/bin/python -m scripts.export_snapshot_json \
+  --snapshot-id snap_sectors_YYYY-MM-DD
+.venv/bin/python -m scripts.build_snapshot_index --provider-mode SECTORS_LIVE
+```
+
 Provider selection is explicit, so rollback means selecting
 `PUBLIC_PROTOTYPE`, `SECTORS_FIXTURE`, or `DEMO_FIXTURE` and restarting the UI.
 Do not relabel a failed live artifact. Move suspect live outputs to a bounded
 quarantine directory, preserve the request ledger/report, and leave the last
 validated snapshot untouched. No methodology downgrade or historical snapshot
 rewrite is required.
-

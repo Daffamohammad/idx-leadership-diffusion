@@ -1,4 +1,10 @@
-"""Dry-run Sectors refresh budget expressed only in calls/pages/cache hits."""
+"""Dry-run Sectors refresh plan expressed in calls/pages/cache hits.
+
+The company screener and full-universe close feed have different documented
+page limits. Keep those boundaries separate here even though this planner does
+not infer paid-provider credits; the live snapshot preflight is authoritative
+for the 1,000-credit ceiling.
+"""
 from __future__ import annotations
 
 import argparse
@@ -16,12 +22,15 @@ REFRESH_TIERS = {
     "ENRICHMENT": ("free_float", "fundamentals", "foreign_flow"),
     "DEEP_DIVE": ("broker", "filings", "news", "corporate_actions"),
 }
+COMPANIES_PAGE_SIZE = 200
+CLOSE_PAGE_SIZE = 30
+FREE_FLOAT_PAGE_SIZE = 100
 
 
 def estimate_refresh_plan(
     *,
     universe_size: int,
-    page_size: int = 30,
+    page_size: int = COMPANIES_PAGE_SIZE,
     enrichment_names: int = 0,
     deep_dive_names: int = 0,
     cached: Iterable[str] = (),
@@ -29,15 +38,19 @@ def estimate_refresh_plan(
     if universe_size < 0 or page_size < 1 or enrichment_names < 0 or deep_dive_names < 0:
         raise ValueError("refresh-plan counts must be non-negative and page_size positive")
     cached_set = {name.strip() for name in cached if name.strip()}
-    universe_pages = math.ceil(universe_size / page_size) if universe_size else 0
+    company_pages = math.ceil(universe_size / page_size) if universe_size else 0
+    close_pages = math.ceil(universe_size / CLOSE_PAGE_SIZE) if universe_size else 0
+    free_float_pages = (
+        math.ceil(universe_size / FREE_FLOAT_PAGE_SIZE) if universe_size else 0
+    )
     specs = [
-        ("CORE", "security_master", universe_pages),
+        ("CORE", "security_master", company_pages),
         # Taxonomy reuses the companies/security-master payload.
         ("CORE", "taxonomy", 0),
-        ("CORE", "market_close", universe_pages),
-        # Benchmark is probed from the market-close payload; no invented endpoint.
-        ("CORE", "benchmark", 0),
-        ("ENRICHMENT", "free_float", 1 if universe_size else 0),
+        ("CORE", "market_close", close_pages),
+        # The live provider uses the native IHSG history route.
+        ("CORE", "benchmark", 1 if universe_size else 0),
+        ("ENRICHMENT", "free_float", free_float_pages),
         ("ENRICHMENT", "fundamentals", enrichment_names),
         ("ENRICHMENT", "foreign_flow", enrichment_names),
         ("DEEP_DIVE", "broker", deep_dive_names),
@@ -49,7 +62,6 @@ def estimate_refresh_plan(
     for tier, category, pages in specs:
         shared_source = {
             "taxonomy": "security_master",
-            "benchmark": "market_close",
         }.get(category)
         # Shared-source consumers always count as cache reuse within this plan.
         if shared_source is not None:
@@ -77,6 +89,11 @@ def estimate_refresh_plan(
         "inputs": {
             "universe_size": universe_size,
             "page_size": page_size,
+            "documented_page_sizes": {
+                "companies": page_size,
+                "close": CLOSE_PAGE_SIZE,
+                "free_float": FREE_FLOAT_PAGE_SIZE,
+            },
             "enrichment_names": enrichment_names,
             "deep_dive_names": deep_dive_names,
             "cached": sorted(cached_set),
@@ -122,7 +139,7 @@ def main(argv: list[str] | None = None) -> int:
             page_size=(
                 args.page_size
                 if args.page_size is not None
-                else int(plan_cfg.get("page_size", 30))
+                else int(plan_cfg.get("page_size", COMPANIES_PAGE_SIZE))
             ),
             enrichment_names=args.enrichment_names,
             deep_dive_names=args.deep_dive_names,

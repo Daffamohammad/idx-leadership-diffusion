@@ -9,7 +9,7 @@ import argparse
 import json
 import os
 import sys
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
@@ -17,7 +17,7 @@ import pandas as pd
 
 from idx_leadership.models import ProviderMode
 from idx_leadership.providers.factory import build_provider_from_config
-from idx_leadership.utils import data_root
+from idx_leadership.utils import data_root, load_project_env
 from idx_leadership.utils.errors import ProviderError
 
 
@@ -169,6 +169,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    load_project_env()
     as_of = date.fromisoformat(args.as_of)
     tickers = [_canonical_ticker(value) for value in args.tickers.split(",") if value.strip()]
     mode = ProviderMode(args.sectors_mode)
@@ -203,7 +204,18 @@ def main(argv: list[str] | None = None) -> int:
         force_refresh=args.force_refresh,
     )
     try:
-        sectors = sectors_provider.get_full_universe_close(as_of)
+        if mode is ProviderMode.SECTORS_LIVE:
+            # Compare the live provider's native per-symbol history route so
+            # parity does not depend on a ticker appearing in the first close
+            # page. Only the requested observation is persisted below.
+            sectors = sectors_provider.get_price_history(
+                tickers,
+                start=as_of - timedelta(days=3),
+                end=as_of,
+            )
+            sectors = sectors[sectors["date"] == as_of].copy()
+        else:
+            sectors = sectors_provider.get_full_universe_close(as_of)
     except ProviderError as exc:
         print(f"sectors provider error: {exc}", file=sys.stderr)
         return 2

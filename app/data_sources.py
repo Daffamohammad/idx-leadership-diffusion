@@ -114,6 +114,20 @@ def load_snapshot_payload(snapshot_dir: Path) -> dict[str, Any]:
     change_digest = _read_json_optional(snapshot_dir / "change_digest.json")
     features = _read_table(snapshot_dir / "features")
     security_master = _read_json_optional(snapshot_dir / "security_master.json", default=[])
+    coverage = _read_json_optional(snapshot_dir / "coverage.json")
+    data_warnings = _read_json_optional(snapshot_dir / "data_warnings.json")
+    provider_provenance = _read_json_optional(snapshot_dir / "provider_provenance.json")
+    methodology_sensitivity = _read_json_optional(
+        snapshot_dir / "methodology_sensitivity.json"
+    )
+    tavily_context = _read_json_optional(snapshot_dir / "tavily_context.json")
+    api_credit_audit = _read_json_optional(snapshot_dir / "api_credit_audit.json")
+    security_master_diagnostics = _read_json_optional(
+        snapshot_dir / "security_master_diagnostics.json"
+    )
+    history_diagnostics = _read_json_optional(
+        snapshot_dir / "history_diagnostics.json"
+    )
 
     return {
         "provider_mode": _safe_mode_hint(manifest, snapshot_dir),
@@ -123,6 +137,14 @@ def load_snapshot_payload(snapshot_dir: Path) -> dict[str, Any]:
         "benchmark_date": _max_date(_read_table(snapshot_dir / "benchmark")),
         "manifest": manifest,
         "quality": quality,
+        "coverage": coverage,
+        "data_warnings": data_warnings,
+        "provider_provenance": provider_provenance,
+        "methodology_sensitivity": methodology_sensitivity,
+        "you_context": _read_json_optional(snapshot_dir / "you_context.json"),
+        "api_credit_audit": api_credit_audit,
+        "security_master_diagnostics": security_master_diagnostics,
+        "history_diagnostics": history_diagnostics,
         "endpoints": endpoints,
         "change_digest": change_digest,
         "groups": _records(groups),

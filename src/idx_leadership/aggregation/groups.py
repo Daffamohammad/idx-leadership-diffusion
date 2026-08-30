@@ -39,6 +39,8 @@ def build_group_snapshots(
     horizons: dict[str, int],
     min_constituents: int = 4,
     min_coverage_pct: float = 60.0,
+    raw_candidate_taxonomy: pd.DataFrame | None = None,
+    acquisition_failed_tickers: set[str] | None = None,
     previous_groups: Optional[list[GroupSnapshot]] = None,
     broadening_threshold_pp: float = 10.0,
     narrowing_threshold_pp: float = -10.0,
@@ -61,11 +63,38 @@ def build_group_snapshots(
 
     Returns a list of `GroupSnapshot` (Pydantic) for downstream
     serialization.
+
+    The taxonomy frame is the **policy-eligible** universe: the set on
+    which the 60% coverage gate is evaluated. The raw candidate taxonomy
+    is tracked separately for disclosure. Acquisition-failed tickers
+    remain in the denominator and count toward `missing_count` rather
+    than being silently dropped.
     """
     if features.empty or taxonomy.empty:
         return []
 
-    merged = features.merge(taxonomy, on="ticker", how="left")
+    # The taxonomy frame is the policy-eligible universe: this is the
+    # denominator for the 60% coverage gate. The raw candidate count is
+    # tracked separately for disclosure.
+    taxonomy_base = taxonomy.drop_duplicates(subset=["ticker"], keep="last")
+    raw_base = (
+        raw_candidate_taxonomy.drop_duplicates(subset=["ticker"], keep="last")
+        if raw_candidate_taxonomy is not None and not raw_candidate_taxonomy.empty
+        else taxonomy_base
+    )
+    acq_fail = {str(t) for t in (acquisition_failed_tickers or set())}
+    # The live runner keeps taxonomy columns alongside feature columns so it
+    # can reuse one canonical frame for coverage, sensitivity, and export.
+    # Drop those duplicate presentation columns before the join; otherwise
+    # pandas suffixes them and taxonomy_path silently loses its hierarchy.
+    feature_columns = [
+        column
+        for column in features.columns
+        if column == "ticker" or column not in taxonomy_base.columns
+    ]
+    merged = taxonomy_base.merge(
+        features[feature_columns], on="ticker", how="outer"
+    )
     merged["group_id"] = merged["group_id"].fillna("UNCLASSIFIED")
 
     prev_by_group: dict[str, GroupSnapshot] = {}
@@ -75,10 +104,29 @@ def build_group_snapshots(
 
     out: list[GroupSnapshot] = []
     for group_id, gdf in merged.groupby("group_id"):
+        # The policy-eligible universe is the denominator. We treat the
+        # taxonomy frame as policy-eligible (the caller filters it). The
+        # raw candidate taxonomy is used only for disclosure counts.
         total_constituents = int(gdf["ticker"].nunique())
+        n_observed = int(gdf["return_20d"].notna().sum())
+        n_acq_failed = int(gdf["ticker"].astype(str).isin(acq_fail).sum())
+        if (
+            raw_candidate_taxonomy is not None
+            and not raw_candidate_taxonomy.empty
+            and "group_id" in raw_candidate_taxonomy.columns
+        ):
+            raw_candidates = int(
+                raw_candidate_taxonomy.loc[
+                    raw_candidate_taxonomy["group_id"].fillna("UNCLASSIFIED")
+                    == group_id,
+                    "ticker",
+                ].nunique()
+            )
+        else:
+            raw_candidates = total_constituents
         eligible_flag = _is_eligible(
             n_total=total_constituents,
-            n_eligible=len(gdf.dropna(subset=["return_20d"])),
+            n_eligible=n_observed,
             min_constituents=min_constituents,
             min_coverage_pct=min_coverage_pct,
         )
@@ -210,6 +258,9 @@ def build_group_snapshots(
             group_id=group_id,
             group_name=group_id,
             constituent_count=total_constituents,
+            raw_candidate_count=raw_candidates,
+            policy_eligible_count=total_constituents,
+            acquisition_failed_count=n_acq_failed,
             eligible_count=breadth.usable_constituents,
             missing_count=breadth.missing_constituents,
             group_return_equal_weight=group_return,

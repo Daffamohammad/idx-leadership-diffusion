@@ -6,7 +6,7 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from .enums import DataQualityStatus, ProviderMode, ProviderName
+from .enums import DataQualityStatus, PriceBasis, ProviderMode, ProviderName
 
 
 class ManifestEntry(BaseModel):
@@ -19,6 +19,9 @@ class ManifestEntry(BaseModel):
     as_of: date
     provider: ProviderName
     provider_mode: Optional[ProviderMode] = None
+    # None remains valid for legacy readability; strict compatibility rejects
+    # manifests that do not carry the effective calculation basis.
+    price_basis: Optional[PriceBasis] = None
     market_date: Optional[date] = None
     benchmark_date: Optional[date] = None
     universe_version: str
@@ -35,6 +38,13 @@ class ManifestEntry(BaseModel):
     coverage_pct: float = Field(default=0.0, ge=0.0, le=100.0)
     created_at: date
     notes: Optional[str] = None
+    # Eligible ticker set hash for membership parity checks across
+    # snapshots. Two snapshots with different eligible ticker sets
+    # (e.g., 500 of 962 vs the full 962) must not be treated as
+    # comparable even if the version stamps match.
+    eligible_ticker_set_hash: Optional[str] = None
+    eligible_ticker_count: int = Field(default=0, ge=0)
+    raw_ticker_count: int = Field(default=0, ge=0)
 
 
 class SnapshotManifest(BaseModel):
@@ -47,6 +57,7 @@ class SnapshotManifest(BaseModel):
     latest_date: Optional[date] = None
     provider: ProviderName
     provider_mode: Optional[ProviderMode] = None
+    price_basis: Optional[PriceBasis] = None
     universe_version: str
     taxonomy_version: str
     eligibility_version: str = "eligibility-v1"

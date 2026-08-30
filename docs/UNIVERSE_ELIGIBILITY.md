@@ -1,8 +1,7 @@
 # Universe Eligibility
 
-> **Status:** design + implementation shipped. Live numbers pending a
-> real Sectors key; the eligibility module is exercised against a stub
-> in `tests/test_market_universe.py`.
+> **Status:** design + implementation shipped. Live numbers below come from
+> the first Sectors snapshot dated 2026-08-27; offline tests remain provider-free.
 
 ## 1. Eligibility rules
 
@@ -53,19 +52,24 @@ exclusion_reason
 }
 ```
 
-## 4. Behavioural expectations (real IDX, post-pass estimate)
+## 4. First live result (2026-08-27)
 
-| Reason | Expected share |
-| --- | --- |
-| `listing_board` | small (only tickers not on Main/Development/Acceleration) |
-| `no_taxonomy` | < 1 % of the 942 listed (per Sectors docs example) |
-| `insufficient_history` | newly-listed tickers; small |
-| `recently_suspended` | ~5–10 in any 60-day window (per Sectors suspension count) |
-| `stale_price` | delisted or halted names; small |
+| Metric | Observed |
+| --- | ---: |
+| Discovered company rows | 962 |
+| Used security-master rows | 500 (prefix sample) |
+| Policy-eligible securities | 265 |
+| Excluded securities in used sample | 235 |
+| Taxonomy complete in used sample | 500 / 500 (100%) |
+| Usable requested histories | 496 / 500 (99.2%) |
 
-These are estimates based on the Sectors example counts (942 listed,
-556 historical suspensions). The next pass will record the **real**
-shares in this file.
+Observed exclusion diagnostics in the used sample were
+`insufficient_liquidity=123`, `listing_board=98`, `recently_suspended=10`,
+and `insufficient_history=4`. A raw row can
+appear in more than one diagnostic category upstream; the persisted
+`exclusion_reason` is the first rule that fires. The detailed machine-readable
+result is persisted in
+`data/snapshots/snap_sectors_2026-08-27/coverage.json`.
 
 ## 5. Why equal-weight universe, not liquidity-filtered
 

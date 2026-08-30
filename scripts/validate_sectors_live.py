@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import sys
 from datetime import date, datetime, timezone
@@ -18,7 +19,7 @@ from idx_leadership.models import ProviderMode
 from idx_leadership.providers.factory import build_provider_from_config
 from idx_leadership.providers.ledger import RequestLedger
 from idx_leadership.providers.sectors_contracts import validate_sectors_payload
-from idx_leadership.utils import data_root
+from idx_leadership.utils import data_root, load_project_env
 from idx_leadership.utils.errors import IDXError
 
 
@@ -65,6 +66,7 @@ def _fetch_pages(
     max_pages: int,
     force_refresh: bool,
     expected_date: date | None = None,
+    page_size: int = 30,
 ) -> tuple[list[Any], list[dict[str, Any]], list[Any]]:
     offset = 0
     pages: list[Any] = []
@@ -72,7 +74,7 @@ def _fetch_pages(
     rows: list[Any] = []
     for _ in range(max_pages):
         page_params = dict(params)
-        page_params.update({"limit": 30, "offset": offset})
+        page_params.update({"limit": page_size, "offset": offset})
         response = client.get(
             endpoint, page_params, use_cache=not force_refresh
         )
@@ -93,7 +95,7 @@ def _fetch_pages(
             if not isinstance(pagination, Mapping) or not pagination.get("has_next"):
                 break
             next_offset = pagination.get("next_offset")
-            offset = int(next_offset) if next_offset is not None else offset + 30
+            offset = int(next_offset) if next_offset is not None else offset + page_size
         elif isinstance(payload, list):
             rows.extend(payload)
             break
@@ -133,6 +135,12 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Ignore cached payloads after all live gates pass.",
     )
+    parser.add_argument(
+        "--max-estimated-credits",
+        type=float,
+        default=1_000.0,
+        help="Hard client-side Sectors credit ceiling; never above 1000.",
+    )
     return parser
 
 
@@ -140,6 +148,16 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     if args.max_pages < 1:
         print("BLOCKED --max-pages must be at least 1", file=sys.stderr)
+        return 2
+    if (
+        not math.isfinite(args.max_estimated_credits)
+        or args.max_estimated_credits < 0
+        or args.max_estimated_credits > 1_000
+    ):
+        print(
+            "BLOCKED --max-estimated-credits must be finite and between 0 and 1000",
+            file=sys.stderr,
+        )
         return 2
     as_of = date.fromisoformat(args.as_of) if args.as_of else date.today()
     call_plan = {
@@ -150,6 +168,7 @@ def main(argv: list[str] | None = None) -> int:
         "as_of": as_of.isoformat(),
         "max_pages_per_endpoint": args.max_pages,
         "force_refresh": bool(args.force_refresh),
+        "max_estimated_credits": args.max_estimated_credits,
         "planned_endpoints": [
             {
                 "endpoint": "/v2/companies/",
@@ -205,30 +224,92 @@ def main(argv: list[str] | None = None) -> int:
             allow_live=True,
             max_pages=args.max_pages,
             force_refresh=args.force_refresh,
+            max_estimated_credits=args.max_estimated_credits,
             ledger=ledger,
         )
 
         company_pages, company_contracts, company_rows = _fetch_pages(
             provider.client,
             "/v2/companies/",
-            {},
+            {
+                "where": "symbol IS NOT NULL",
+                "order_by": "symbol",
+            },
             max_pages=args.max_pages,
             force_refresh=args.force_refresh,
+            page_size=200,
         )
         report["checks"]["auth"] = {
             "status": "PASS",
             "evidence": "authenticated companies response",
         }
         report["checks"]["taxonomy"] = {
-            "status": "PASS" if company_rows else "FAIL",
+            "status": "PARTIAL" if company_rows else "FAIL",
             "rows": len(company_rows),
             "contracts": company_contracts,
             "non_null_sector_rows": sum(
                 1 for row in company_rows if isinstance(row, Mapping) and row.get("sector")
             ),
+            "note": (
+                "The identity pass uses the documented structured screener contract; "
+                "a second complete-taxonomy query_values probe follows."
+            ),
         }
         for index, payload in enumerate(company_pages, start=1):
             capture = out_dir / "sanitized_fixtures" / f"companies_page_{index:03d}.json"
+            _write_json(
+                capture,
+                {
+                    "capture_kind": "SANITIZED_LIVE_SECTORS_RESPONSE",
+                    "provider_mode": ProviderMode.SECTORS_LIVE.value,
+                    "captured_at": stamp,
+                    "payload": sanitize_payload(payload),
+                },
+            )
+            report["sanitized_captures"].append(str(capture.relative_to(out_dir)))
+
+        taxonomy_where = (
+            "sector IS NOT NULL and sub_sector IS NOT NULL and "
+            "industry IS NOT NULL and sub_industry IS NOT NULL and "
+            "listing_board IS NOT NULL"
+        )
+        taxonomy_pages, taxonomy_contracts, taxonomy_rows = _fetch_pages(
+            provider.client,
+            "/v2/companies/",
+            {
+                "where": taxonomy_where,
+                "include_query_values": "true",
+            },
+            max_pages=args.max_pages,
+            force_refresh=args.force_refresh,
+            page_size=200,
+        )
+
+        def query_value(row: Mapping[str, Any], key: str) -> Any:
+            direct = row.get(key)
+            if direct is not None:
+                return direct
+            nested = row.get("query_values")
+            return nested.get(key) if isinstance(nested, Mapping) else None
+
+        taxonomy_complete_rows = sum(
+            1
+            for row in taxonomy_rows
+            if isinstance(row, Mapping)
+            and all(query_value(row, key) not in (None, "") for key in (
+                "sector", "sub_sector", "industry", "sub_industry"
+            ))
+        )
+        report["checks"]["taxonomy"] = {
+            **report["checks"]["taxonomy"],
+            "status": "PASS" if taxonomy_complete_rows else "REVIEW_REQUIRED",
+            "structured_query": taxonomy_where,
+            "structured_query_rows": len(taxonomy_rows),
+            "structured_query_complete_rows": taxonomy_complete_rows,
+            "structured_query_contracts": taxonomy_contracts,
+        }
+        for index, payload in enumerate(taxonomy_pages, start=1):
+            capture = out_dir / "sanitized_fixtures" / f"companies_taxonomy_page_{index:03d}.json"
             _write_json(
                 capture,
                 {
@@ -298,4 +379,8 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
+    # Keep programmatic callers and tests honest about the process
+    # environment; the convenience .env loader is only for the CLI entry
+    # point.
+    load_project_env()
     sys.exit(main())

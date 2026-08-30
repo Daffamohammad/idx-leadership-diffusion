@@ -1,11 +1,13 @@
 # Sectors API Audit
 
 > **Source of truth for this document:** the official Sectors v2 documentation at
-> `https://docs.sectors.app` (fetched 2026-08-27). Each endpoint section includes
+> `https://docs.sectors.app` (checked 2026-08-28). Each endpoint section includes
 > the path, parameters, and response shape taken directly from the docs.
 >
-> Live calls were **not** issued during this pass because no API key was present in
-> the environment. Where a contract is unclear, the field is marked `UNKNOWN / VERIFY`.
+> Live calls were exercised on 2026-08-28 with the project credential. Response
+> captures are sanitized and stored under `data/raw/sectors_validation/`; no
+> credential material is persisted. Where the documentation and observed
+> response differ, the field is marked `UNKNOWN / VERIFY` rather than inferred.
 
 ## 1. Base contract
 
@@ -13,7 +15,9 @@
 | --- | --- | --- |
 | Base URL | `https://api.sectors.app/v2/` | docs.sectors.app overview |
 | Auth header | `Authorization: <api-key>` (no `Bearer ` prefix) | every endpoint page |
-| Default pagination | `offset=0, limit=20` (max `limit=30`) | every paginated endpoint |
+| Documented screener pagination | `offset=0, limit=50` (max `limit=200`) | Companies Screener documentation |
+| Documented close pagination | `offset=0, limit=20` (max `limit=30`) | Daily Full-Universe Close documentation |
+| Observed companies pagination | `limit=200` returned 200 rows and `next_offset=200` | authenticated probe; consistent with the current screener contract |
 | Common error codes | `400` (bad request), `404` (not found), `429` (`RATE_LIMIT_EXCEEDED`) | docs |
 | `RATE_LIMIT_EXCEEDED` body | `{"error": "RATE_LIMIT_EXCEEDED", "message": "Rate limit exceeded. Consider upgrading."}` | `free-float` example |
 | Versioning | v1 was discontinued 2026-05-11; only v2 supported | overview |
@@ -24,15 +28,24 @@
 
 - **Purpose:** IDX-wide company screener.
 - **Granularity:** one row per company (paginated).
-- **Pagination:** `offset`, `limit (max 30)`, response `pagination.total_count`.
+- **Pagination:** `offset`, `limit (max 200)`, response `pagination.total_count`.
 - **Key fields in response (confirmed from docs):** `symbol`, `company_name`, `listing_board`, `industry`, `sub_industry`, `sector`, `sub_sector`, `market_cap`, `market_cap_rank`, `employee_num`, `listing_date`, `last_close_price`, `daily_close_change`, `forward_pe`, `intrinsic_value`, `esg_score`, `yield_ttm`, `dividend_ttm`, `payout_ratio`, `cash_payout_ratio`, `yoy_quarter_earnings_growth`, `yoy_quarter_revenue_growth`, `tags`, `indices`, `affiliates`.
 - **Query modes:** `q` (natural language) **or** `where`+`order_by` (SQL-like, mutually exclusive).
 - **Filter fields:** sector, sub_sector, industry, sub_industry (kebab-case slugs).
 - **Bracket notation:** `field[YYYY]` for historical/forecast.
 - **Arithmetic:** allowed on both sides of comparison.
 - **Smart FY handling:** Jan–Apr queries default to the previous audited year.
-- **Credit cost:** `UNKNOWN / VERIFY` (not stated on the doc page).
+- **Credit cost:** **1 credit per page for structured queries**; natural-language
+  `q` queries cost **3 credits**. The unfiltered listing form is not used by the
+  live provider because its price is not stated on the public page.
 - **Use here:** canonical security master + taxonomy (replaces the local YAML).
+
+**Live observation (2026-08-28):** a structured identity query using
+`where=symbol IS NOT NULL` returned the full identity population at
+`limit=200`. A second structured `where` query with
+`include_query_values=true` returned nested taxonomy and listing-board values.
+The live provider merges those two known-cost passes; missing taxonomy remains
+an explicit diagnostic.
 
 ### 2.2 `GET /v2/close/`
 
@@ -44,9 +57,43 @@
 - **Tickers with no recorded close for the day are omitted from the response.**
 - **Future dates return `400`.**
 - **Credit cost (DOCUMENTED):** **1 credit per page**; full ~950-ticker universe ≈ 32 credits at `limit=30`.
-- **Use here:** primary price source for the engine. **Treated as raw close** until a corporate-action audit proves otherwise (see `KNOWN_GAPS.md` G011).
+- **Use here:** latest-date discovery and current-close evidence. Historical
+  returns use the per-symbol daily route below. **Treated as raw close** until
+  a corporate-action audit proves otherwise (see `KNOWN_GAPS.md` G011).
 
-### 2.3 `GET /v2/free-float/`
+**Live observation (2026-08-28):** the latest observed market date was
+2026-08-27. A request for `date=2026-08-28` returned HTTP 200 with no rows,
+where the documentation describes a future-date 400 response. The distinction
+between “no close published yet” and “future date” is therefore
+`UNKNOWN / VERIFY`; the runner resolves the latest date from a one-page
+date-discovery request and never relabels an empty requested date.
+
+The close endpoint was not used to reconstruct the full historical panel: its
+per-page cost would make that unnecessarily expensive. The live history path
+uses the documented per-symbol daily route below.
+
+### 2.3 `GET /v2/daily/{symbol}/`
+
+- **Purpose:** per-security daily history.
+- **Live observation (2026-08-28):** `BBCA.JK` returned 61 dated rows for
+  2026-05-29 through 2026-08-27, including `symbol`, `date`, `close`, `volume`,
+  and `market_cap`. The 90-calendar-day request boundary was accepted.
+- **Credit cost:** **1 credit per call** according to the current endpoint
+  documentation; actual account debit is not exposed to this client.
+- **Basis:** close is retained as raw close and mirrored to the canonical
+  adjusted-close slot with an explicit `UNKNOWN / VERIFY` corporate-action
+  warning.
+
+### 2.4 `GET /v2/index-daily/{index}/`
+
+- **Purpose:** native index history.
+- **Live observation (2026-08-28):** `/v2/index-daily/ihsg/` returned dated
+  `index_code`, `date`, and `price` rows for the requested window and was used
+  as the benchmark in the live snapshot.
+- **Credit cost:** **1 credit per call** according to the current endpoint
+  documentation; actual account debit is not exposed to this client.
+
+### 2.5 `GET /v2/free-float/`
 
 - **Purpose:** free-float percentage for IDX-listed companies, optionally filtered to one taxonomy level.
 - **Granularity:** one row per company.
@@ -57,7 +104,7 @@
 - **Order:** descending by `free_float`.
 - **Use here:** separate "magnitude" weighting channel (D011 in `DECISION_LOG.md`).
 
-### 2.4 `GET /v2/foreign-flow/{symbol}/`
+### 2.6 `GET /v2/foreign-flow/{symbol}/`
 
 - **Purpose:** daily net foreign-broker inflow (IDR) for one ticker over a date range.
 - **Path param:** `symbol` (4 letters, optional `.JK`, case-insensitive).
@@ -69,7 +116,7 @@
 - **Credit cost (DOCUMENTED):** **1 credit per call**.
 - **Use here:** Tier-3 enrichment only — invoked when a transition is flagged material, for the top driver per highlighted group.
 
-### 2.5 `GET /v2/company/corporate-actions/{symbol}/`
+### 2.7 `GET /v2/company/corporate-actions/{symbol}/`
 
 - **Purpose:** full corporate-action history per ticker.
 - **Response structure (DOCUMENTED):** `{symbol, corporate_actions: {agm[], bonus, warrant, dividend[], right_issue, stock_split[], upcoming_dividend}}`.
@@ -80,7 +127,7 @@
 - **Error:** `404` if no data.
 - **Use here:** corporate-action guardrail. Mark affected security with `caveat`; do not silently edit prices.
 
-### 2.6 `GET /v2/suspensions/`
+### 2.8 `GET /v2/suspensions/`
 
 - **Purpose:** historical IDX stock suspensions.
 - **Filters:** `symbol` (single), `start`, `end` (independent and optional).
@@ -89,14 +136,14 @@
 - **Future `end` dates return `400`.**
 - **Use here:** suspension filter in the universe eligibility check (excluded from current breadth denominator).
 
-### 2.7 `GET /v2/company/report/{symbol}/`
+### 2.9 `GET /v2/company/report/{symbol}/`
 
 - **Purpose:** per-company overview + valuation + future + financials + ratios.
 - **Response (partial, DOCUMENTED):** `overview` (listing board, industry, sub_industry, sector, sub_sector, market_cap, market_cap_rank, listing_date, last_close_price, latest_close_date, daily_close_change, all_time_price{...}, esg_score, tags, indices, affiliates), `valuation` (forward_pe, intrinsic_value, historical_valuation[{pb, pe, ps, pcf, peg, year, ...}]), `future` (company_value_forecasts, company_growth_forecasts, analyst_rating_breakdown), `financials` (eps, historical_eps, ...).
 - **Use here:** Tier 2 enrichment for group drilldown (subsector report style). Not auto-applied.
 - **Credit cost:** `UNKNOWN / VERIFY` (not stated on the doc page).
 
-### 2.8 Other endpoints of interest (NOT integrated this pass)
+### 2.10 Other endpoints of interest (NOT integrated this pass)
 
 - `/v2/indonesia/brokers/broker-activity-by-code`
 - `/v2/indonesia/brokers/broker-activity-top`
@@ -111,10 +158,12 @@
 
 ## 3. Cross-cutting observations
 
-- **Authentication is uniform:** all endpoints use the same `Authorization` header. No
-  per-endpoint scoping observed.
-- **Pagination is uniform:** `{results, pagination: {total_count, showing, limit,
-  offset, has_next, has_previous, next_offset, previous_offset}}` shape.
+- **Authentication is uniform in the exercised routes:** the raw API key in the
+  `Authorization` header authenticated the Sectors calls. No per-endpoint
+  scoping was observed.
+- **Pagination is consistent in the exercised list routes:** responses carried
+  `results` plus pagination metadata. The current screener documentation allows
+  `limit=200`; the close feed remains capped at 30.
 - **Credit costs are documented per-endpoint** in the prose ("Costs N API credit(s)").
   This makes `SECTORS_CREDIT_AUDIT.md` tractable without an active key — see
   `docs/SECTORS_CREDIT_AUDIT.md` for the budget table.
@@ -128,19 +177,22 @@
 | Item | Reason | Required action |
 | --- | --- | --- |
 | `close` field adjustment basis (raw vs split/dividend adjusted) | docs do not state | corporate-action audit, then choose basis (see `KNOWN_GAPS.md` G011) |
-| Credit cost for `/v2/companies/`, `/v2/company/report/{symbol}/`, `/v2/suspensions/` over window | not always stated | initial Sectors call with key will record in `RequestLedger` |
-| Maximum lookback window for `/v2/close/` per single call | only `date` is documented, not `start/end` | probe with key |
-| `/v2/close/` adjustment for splits when querying historical dates | docs silent | probe; pair with `corporate-actions` |
-| Whether `companies` paginates the same way as `close` | confirmed for `close`; not explicitly for `companies` | client should support both anyway |
+| Actual account debit and remaining balance | response did not expose a usable balance/debit field | reconcile against the Sectors account dashboard |
+| Unfiltered companies-form pricing | the public page prices structured and natural-language queries but does not state the unfiltered-form price | the provider uses `where=symbol IS NOT NULL` instead |
+| Whether an empty close response for the current calendar date means “future” or “not published” | observed 200 empty vs documented future-date 400 | verify with a known future date and the provider response contract |
+| Split/dividend adjustment behavior on historical closes | docs silent | pair a corporate-action call with public adjusted/raw history |
+| Complete instrument classification | company responses exposed no explicit instrument-type field in the sampled live rows | add an authoritative field or issuer/instrument review before claiming a pure common-equity universe |
 
 ## 5. Endpoint summary table
 
 | Endpoint | Method | Cost (doc'd) | Pagination | Date filter | Path filter | Used by engine |
 | --- | --- | --- | --- | --- | --- | --- |
-| `/v2/companies/` | GET | `UNKNOWN` | offset/limit (max 30) | — | — | yes (security master + taxonomy) |
-| `/v2/close/` | GET | **1/page** | offset/limit (max 30) | `date` | — | yes (primary price) |
-| `/v2/free-float/` | GET | **1 / 100 co** | none observed | — | sector/sub_sector/industry/sub_industry | yes (magnitude weight) |
-| `/v2/foreign-flow/{symbol}/` | GET | **1** | none | `start`, `end` (≤90d) | `symbol` | yes (Tier 3, on demand) |
-| `/v2/company/corporate-actions/{symbol}/` | GET | **1** | none | — | `symbol` | yes (guardrail) |
+| `/v2/companies/` | GET | **1 structured / 3 natural-language** | offset/limit (max 200) | — | — | yes (security master + taxonomy) |
+| `/v2/close/` | GET | **1/page** | offset/limit (max 30) | `date` | — | yes (latest-date discovery) |
+| `/v2/daily/{symbol}/` | GET | **1/call** | none observed | `start`, `end` (≤90d) | `symbol` | yes (security history) |
+| `/v2/index-daily/{index}/` | GET | **1/call** | none observed | `start`, `end` | `index` | yes (IHSG benchmark) |
+| `/v2/free-float/` | GET | **1 / 100 co** | none observed | — | sector/sub_sector/industry/sub_industry | no (deferred weighting) |
+| `/v2/foreign-flow/{symbol}/` | GET | **1** | none | `start`, `end` (≤90d) | `symbol` | no (deferred confirmation) |
+| `/v2/company/corporate-actions/{symbol}/` | GET | **1** | none | — | `symbol` | no (deferred guardrail) |
 | `/v2/suspensions/` | GET | **1** | offset/limit | `start`, `end` | `symbol` | yes (eligibility) |
 | `/v2/company/report/{symbol}/` | GET | `UNKNOWN` | none | — | `symbol` | research only (Tier 2) |

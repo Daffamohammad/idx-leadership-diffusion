@@ -5,13 +5,12 @@
 > leadership is broadening, concentrating, or deteriorating beneath
 > the index surface.
 
-This is the current offline-ready implementation. It includes the
-provider abstraction, a live-gated Sectors v2 client, versioned
-methodology engines, snapshot/manifest/quality infrastructure, a
-deterministic story-mode UI, a synthetic-market methodology harness
-(scenarios A–G), and an offline pytest suite of 287 tests. No live
-Sectors data is claimed in this environment because `SECTORS_API_KEY`
-is not present.
+This repository contains both an offline-safe implementation and a
+credentialed live Sectors path. The live path has been exercised against
+the IDX universe and produces reproducible, versioned snapshots with
+coverage, provenance, rate-limit, and data-gap metadata. Tavily is wired as
+an optional qualitative context layer; it never supplies quantitative market
+data.
 
 **This project is an analytical market-intelligence prototype for
 research and educational purposes. It does not provide investment
@@ -23,7 +22,7 @@ advice or personalized recommendations.**
 - [Prototype mode](#prototype-mode)
 - [Demo mode](#demo-mode)
 - [Sectors integration status](#sectors-integration-status)
-- [How to validate live once a key arrives](#how-to-validate-live-once-a-key-arrives)
+- [Live Sectors + Tavily refresh](#live-sectors--tavily-refresh)
 - [Architecture](#architecture)
 - [Methodology](#method-overview)
 - [Known limitations](#known-limitations)
@@ -59,13 +58,114 @@ A clean Python 3.10+ package that:
 | Group-size diffusion grid (3, 4, 5, 7, 10, 20, 40) | shipped | `scripts/audit_group_size_diffusion.py` |
 | No-look-ahead regression on synthetic history | shipped | `tests/test_no_lookahead_synthetic.py` |
 | Live-key validation command (`validate_sectors_live`) | shipped, dry-run by default | `scripts/validate_sectors_live.py` |
-| Price-basis investigation (`audit_price_basis --as-of`) | shipped, fixture-blocked without a key | `scripts/audit_price_basis.py` |
+| Price-basis investigation (`audit_price_basis --as-of`) | shipped; live semantics remain `UNKNOWN / VERIFY` | `scripts/audit_price_basis.py` |
 | Sectors credit audit (`audit_sectors_credit`) | shipped, `BALANCE UNAVAILABLE` without observed balances | `scripts/audit_sectors_credit.py` |
-| Provider parity (`compare_providers`) | shipped, fixture parity only | `scripts/compare_providers.py` |
+| Provider parity (`compare_providers`) | shipped, live 3-ticker spot-check exercised | `scripts/compare_providers.py` |
 | Refresh budget dry-run (`plan_sectors_refresh`) | shipped | `scripts/plan_sectors_refresh.py` |
 | Markdown market brief export (`export_market_brief`) | shipped | `scripts/export_market_brief.py` |
 | State turnover audit (`audit_state_turnover`) | shipped, JSON+CSV+MD | `scripts/audit_state_turnover.py` |
-| 287 tests, all offline | shipped | `pytest tests` |
+| Offline test suite | shipped; live availability not required | `.venv/bin/pytest -q` |
+| React SPA (Figma design port), snapshot-driven | shipped | `app/web/`, `scripts/export_snapshot_json.py`, `scripts/build_snapshot_index.py` |
+
+## React SPA (Figma design port)
+
+A Vite/React/TypeScript port of the Figma design prototype lives in
+`app/web/`. Both the Streamlit UI and SPA are read-only product surfaces
+that consume JSON/parquet exported from the snapshot bundle; neither opens
+provider connections while rendering.
+
+### Pages
+
+| Route | Page | Data source |
+| --- | --- | --- |
+| `/` | `PublicHome` | marketing copy (no data dependency) |
+| `/overview` | `WhatChanged` | real `groups` + `transitions` from the snapshot |
+| `/map` | `LeadershipMap` | real `groups` (60D/20D signed excess returns; current breadth, or breadth delta when a comparable prior exists) |
+| `/explorer` | `GroupExplorer` | real `features` joined to `security_master` per `group_id` |
+| `/methodology` | `Methodology` | real `manifest`, `quality`, coverage, warnings, plus static method cards |
+
+The map uses an explicitly labeled current-breadth view when the snapshot has
+no comparable prior. Breadth-delta diffusion and trajectory views remain
+unavailable until compatible history is persisted; no prior or delta is
+fabricated. Prototype snapshots may include persisted per-group breadth
+history, while the canonical live snapshot currently does not. Foreign flow
+and fundamentals remain explicit data gaps and never become fabricated neutral
+values; unsupported views render a one-line reason rather than a blank chart.
+
+### Run it
+
+```bash
+# 1. Build or refresh a snapshot. The live path is explicitly opt-in.
+.venv/bin/python -m scripts.build_market_snapshot \
+  --allow-live --allow-credit-spend --max-estimated-credits 1000 \
+  --with-tavily --history-workers 1
+
+# 2. Export the live snapshot and make it the SPA default.
+.venv/bin/python -m scripts.export_snapshot_json \
+  --snapshot-id snap_sectors_YYYY-MM-DD
+.venv/bin/python -m scripts.build_snapshot_index --provider-mode SECTORS_LIVE
+
+# 3. Install + start the SPA.
+cd app/web
+npm install
+npm run dev   # http://127.0.0.1:5173
+```
+
+The output of step 2 lands in `app/web/public/snapshots/` and is served
+as static assets at `/snapshots/<id>.json`. The SPA auto-discovers the
+latest advertised snapshot via `/snapshots/index.json`; the provider-mode
+filter prevents a newer public prototype from silently replacing a live
+Sectors view. Override with `VITE_SNAPSHOT_ID` when intentionally reviewing
+another payload.
+
+### What is real vs design scaffolding
+
+Real (driven by the snapshot bundle):
+
+- group-level leadership / diffusion state, 20D / 60D excess returns,
+  breadth, concentration
+- leadership transitions (`prev` / `current`)
+- per-group constituent table built from `features.parquet` joined to
+  `security_master` on `group_id`
+- sidebar as-of, data-status chip, snapshot id in the header
+- Data Status and Provenance tables on the Methodology page
+
+Design scaffolding and optional context (explicit empty-state, never fake values):
+
+- per-group breadth / performance time series (available when a snapshot
+  contains persisted comparable observations)
+- leadership trail lines on the map (same reason)
+- quantitative foreign flow, fundamentals, and events (not emitted by the
+  current intelligence contract)
+
+An existing snapshot can receive a bounded, first-party Tavily research
+context pass without rebuilding or calling Sectors:
+
+```bash
+.venv/bin/python -m scripts.enrich_tavily_context \
+  --snapshot-id snap_sectors_2026-08-27 \
+  --allow-live --allow-credit-spend --with-crawl
+```
+
+This searches three official-source categories and optionally crawls a small
+IDX path set. The result is stored in `tavily_context.json` and displayed as
+`READY WITH GAPS` / `CONTEXT ONLY`. It is qualitative provenance only: the
+pass does not create per-ticker metrics or change leadership, breadth,
+diffusion, or confirmation values. The command has an explicit request and
+The You.com web-search and research APIs are wired as a parallel bounded
+context layer.  Run a single command to attach both search evidence and a
+multi-step research synthesis to an existing snapshot:
+
+```bash
+.venv/bin/python -m scripts.enrich_you_context \
+  --snapshot-id snap_sectors_2026-08-27 \
+  --allow-live --allow-credit-spend --with-research --max-credit-budget 10
+```
+
+The command never calls the Sectors provider and never creates per-ticker
+metrics.  The result is stored in `you_context.json` and rendered on the
+Methodology page alongside the Tavily panel; both layers carry
+`quantitative_use: false` and remain qualitative provenance only.
 
 ## Prototype mode
 
@@ -76,8 +176,19 @@ is not authoritative Sectors taxonomy. Snapshots produced in this
 mode are labelled `PUBLIC PROTOTYPE` in the UI.
 
 ```bash
-python -m scripts.build_snapshot --provider fixture --as-of 2026-08-20
+.venv/bin/python -m scripts.build_snapshot --provider public --as-of 2026-08-20
 streamlit run app/streamlit_app.py
+```
+
+The public prototype uses Yahoo Finance through the provider boundary. It is
+kept as a separate fallback for reproducible return, breadth, concentration,
+leadership, and diffusion comparisons; it is not a full IDX universe and its
+local taxonomy is not authoritative. To refresh it and feed the React preview:
+
+```bash
+.venv/bin/python -m scripts.build_snapshot --provider public --as-of 2026-08-20
+.venv/bin/python -m scripts.export_snapshot_json --latest
+.venv/bin/python -m scripts.build_snapshot_index
 ```
 
 ## Demo mode
@@ -95,45 +206,55 @@ must not be quoted as market observations.
 | Surface | Status | Reference |
 | --- | --- | --- |
 | Client + capability protocols | shipped | `src/idx_leadership/providers/sectors_*.py` |
-| `SECTORS_LIVE` mode | shipped, refuses without key or `--allow-credit-spend` | `src/idx_leadership/providers/factory.py` |
+| `SECTORS_LIVE` mode | exercised; explicit key and credit-spend gates remain | `src/idx_leadership/providers/factory.py` |
 | Normalizers (taxonomy, close, free float, flow, corporate actions) | shipped, fixture-tested | `src/idx_leadership/providers/sectors_normalizers.py` |
 | Contract drift tests | shipped, fixture-only | `tests/test_provider_contracts.py` |
 | Sectors-shaped fixtures | shipped | `data/fixtures/sectors/` |
-| Live market-wide snapshot | shipped, command ready, BLOCKED on key | `scripts/build_market_snapshot.py` |
-| Live parity | shipped, command ready, BLOCKED on key | `scripts/compare_providers.py` |
+| Live market-wide snapshot | exercised; `READY_WITH_GAPS` at 99.2% requested-history coverage for 500 used of 962 discovered rows; 265 policy-eligible | `scripts/build_market_snapshot.py` |
+| Live parity | exercised; 3/3 close spot-checks matched | `scripts/compare_providers.py` |
 | Live credit audit | shipped, command ready, `BALANCE UNAVAILABLE` without balances | `scripts/audit_sectors_credit.py` |
-| Live price-basis audit | shipped, command ready, `SECTORS LIVE COMPARISON BLOCKED` without key | `scripts/audit_price_basis.py` |
+| Live price-basis audit | still open; raw/adjusted semantics remain `UNKNOWN / VERIFY` | `scripts/audit_price_basis.py` |
 | Blocker register | shipped | `docs/SECTORS_BLOCKERS.md` |
 | Live runbook | shipped | `docs/LIVE_SECTORS_RUNBOOK.md` |
 
-The blocker register lists every empirical question that requires a
-credential. None of them are answered by offline scaffolding.
+The blocker register remains useful for unresolved provider questions, but
+the live bundle and its sanitized validation artifacts are now the evidence
+for the exercised path. Do not treat demo or public prototype payloads as
+live market observations.
 
-## How to validate live once a key arrives
+## Live Sectors + Tavily refresh
 
 ```bash
-# 1. Confirm key is present (env only; never log it).
-test -n "${SECTORS_API_KEY:-}" && echo "key present" || echo "key missing"
+# 1. Confirm keys are present (env only; never log them).
+test -n "${SECTORS_API_KEY:-}" && echo "Sectors key present" || echo "Sectors key missing"
+test -n "${TAVILY_API_KEY:-}" && echo "Tavily key present" || echo "Tavily key missing"
 
 # 2. Run the offline suite to confirm a clean baseline.
-python -m pytest -q
+.venv/bin/pytest -q
 
 # 3. Dry-run the bounded validator (no HTTP).
-python -m scripts.validate_sectors_live --dry-run --as-of 2026-08-20
+.venv/bin/python -m scripts.validate_sectors_live --dry-run --as-of YYYY-MM-DD
 
 # 4. Bounded credentialed validation (one page per endpoint).
-python -m scripts.validate_sectors_live \
-  --live --allow-credit-spend --as-of 2026-08-20
+.venv/bin/python -m scripts.validate_sectors_live \
+  --live --allow-credit-spend --max-pages 1 --as-of YYYY-MM-DD
 
-# 5. Price-basis audit on a known corporate action.
-python -m scripts.audit_price_basis \
+# 5. Optional price-basis audit on a known corporate action.
+.venv/bin/python -m scripts.audit_price_basis \
   --ticker BBCA.JK --start 2021-10-01 --end 2021-10-29 \
   --corporate-action-date 2021-10-13 \
   --sectors-mode SECTORS_LIVE --live --allow-credit-spend \
   --as-of 2021-10-29
 
-# 6. Market-wide snapshot only after the above are clean.
-python -m scripts.build_market_snapshot --as-of 2026-08-20 --allow-live
+# 6. Market-wide live snapshot. Preflight is the paid-run gate; the client
+#    hard-stops before any request that would exceed 1,000 Sectors credits.
+.venv/bin/python -m scripts.build_market_snapshot \
+  --allow-live --allow-credit-spend --max-estimated-credits 1000 \
+  --history-workers 1 --with-tavily
+
+# 7. Export only the live snapshot for the SPA's default index.
+.venv/bin/python -m scripts.export_snapshot_json --snapshot-id snap_sectors_YYYY-MM-DD
+.venv/bin/python -m scripts.build_snapshot_index --provider-mode SECTORS_LIVE
 ```
 
 The runbook (`docs/LIVE_SECTORS_RUNBOOK.md`) covers the same flow with
@@ -149,10 +270,10 @@ source .venv/bin/activate
 pip install -e .
 
 # Build a snapshot from the public-data prototype
-python -m scripts.build_snapshot --provider fixture --as-of 2026-08-20
+.venv/bin/python -m scripts.build_snapshot --provider public --as-of 2026-08-20
 
-# Run the test suite (offline, 287 tests)
-pytest
+# Run the test suite (offline; live availability is not required)
+.venv/bin/pytest -q
 
 # Launch the exploratory UI
 streamlit run app/streamlit_app.py
@@ -160,7 +281,10 @@ streamlit run app/streamlit_app.py
 
 ## Current scope
 
-- Prototype universe of ~50 cross-sector IDX tickers (see `config/universe.yaml`).
+- Live Sectors security master of 962 discovered IDX company rows in the
+  exercised 2026-08-27 snapshot; the browser payload uses a disclosed 500-row
+  prefix sample, with 265 policy-eligible securities and 496/500 usable
+  requested histories (99.2%).
 - 5D / 20D / 60D horizons.
 - Equal-weight group aggregation.
 - 4-state provisional leadership model + UNCONFIRMED.
@@ -193,10 +317,10 @@ source .venv/bin/activate
 pip install -e .
 
 # Build a snapshot from the public-data prototype
-python -m scripts.build_snapshot --provider fixture --as-of 2026-08-20
+.venv/bin/python -m scripts.build_snapshot --provider public --as-of 2026-08-20
 
 # Run the test suite
-pytest
+.venv/bin/pytest -q
 
 # Launch the exploratory UI
 streamlit run app/streamlit_app.py
@@ -248,24 +372,27 @@ See `docs/METHODOLOGY.md` for the full specification.
 
 - Prototype universe is not full IDX.
 - Equal-weight only; no market-cap or free-float weighting.
-- Live Sectors values are unavailable until a key is supplied; the
-  client is implemented and live calls are gated.
-- No foreign flow, broker activity, fundamental, or news confirmation.
-- Adjusted price is the only corporate-action guardrail.
+- Live Sectors history is intentionally partial when the provider rate-limits
+  a request batch. The current snapshot is labeled `READY_WITH_GAPS`, not
+  silently filled or downgraded to demo data.
+- No structured foreign flow, broker activity, fundamental, or news
+  confirmation. Optional Tavily sources are context only and are not a
+  substitute for normalized per-ticker or per-group observations.
+- Sectors close adjustment semantics remain `UNKNOWN / VERIFY`; the live
+  path surfaces the raw-close caveat rather than claiming adjusted prices.
 
 See `docs/KNOWN_GAPS.md` for the full register.
 
-## Sectors migration plan
+## Sectors operating model
 
 The provider abstraction is the seam. `SectorsProvider` is implemented
 against the Sectors v2 HTTP contract and refuses live calls by default.
 When credentials are available:
 
 - `config/providers.yaml` flipped to `enabled: true` for `sectors`
-- run `scripts/refresh_sectors_core.py --allow-live` for the bounded
-  Tier-1 refresh, then
-  `scripts/build_market_snapshot.py --allow-live` for the snapshot
-- Parity test (P0.5) run before cutover
+- run the bounded validator, then
+  `scripts/build_market_snapshot.py --allow-live --allow-credit-spend`
+- run the live provider-parity spot-check before using the snapshot
 - Snapshots remain readable forever; no migration of historical
   data is required
 

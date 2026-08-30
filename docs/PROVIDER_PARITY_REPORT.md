@@ -1,10 +1,8 @@
 # Public-vs-Sectors Provider Parity Report
 
-> **Status:** scaffolding only. **A live Sectors API key is not
-> available in this environment**, so a true public-vs-Sectors
-> comparison could not be run. This document records the parity
-> harness, the classification rules, and what the next pass must do
-> when a key is available.
+> **Status:** live bounded spot-check exercised 2026-08-28. Three
+> public-vs-Sectors close observations matched exactly. This remains a
+> validation sample, not proof of market-wide adjusted-price or return parity.
 >
 > The harness is implemented in
 > `tests/test_parity_public_sectors.py` and is exercised against a
@@ -56,7 +54,22 @@ harness will:
 5. Append a summary to `docs/PROVIDER_PARITY_REPORT.md` (a CI bot can
    do this automatically).
 
-## 4. Stub-run evidence (this pass)
+## 4. Live spot-check evidence (2026-08-27)
+
+The bounded live comparison used the persisted Sectors close history and a
+public close sample for three liquid IDX names:
+
+| Ticker | Date | Public close | Sectors close | Difference | Classification |
+| --- | --- | ---: | ---: | ---: | --- |
+| ADRO.JK | 2026-08-27 | 2700.0 | 2700.0 | 0.0 | MATCH |
+| BBCA.JK | 2026-08-27 | 6400.0 | 6400.0 | 0.0 | MATCH |
+| KLBF.JK | 2026-08-27 | 805.0 | 805.0 | 0.0 | MATCH |
+
+Machine-readable evidence is in `data/normalized/provider_parity_2026-08-27.csv`
+and its metadata sidecar. The sample did not establish full-universe return
+parity, taxonomy parity, or adjusted-price semantics.
+
+## 5. Stub-run evidence (offline regression)
 
 The `test_parity_no_diff_when_prices_match` test exercises the
 harness with identical inputs and expects a 0.0pp delta; the
@@ -64,16 +77,15 @@ harness with identical inputs and expects a 0.0pp delta; the
 difference and expects the harness to detect it. Both pass.
 
 ```text
-$ pytest tests/test_parity_public_sectors.py -v
+$ .venv/bin/pytest tests/test_parity_public_sectors.py -v
 3 passed in 0.01s
 ```
 
-## 5. What the next pass must do
+## 6. What remains to do
 
-1. Set `SECTORS_API_KEY` in `.env`.
-2. Run `python -m scripts.compare_providers --as-of 2026-08-20` (to
-   be created in the next pass; this pass ships only the test
-   harness).
+1. Expand the sample only when the credit budget and rate limit permit.
+2. Run `.venv/bin/python -m scripts.compare_providers --as-of YYYY-MM-DD`
+   with explicit live flags.
 3. Read the resulting CSV; the `price-basis` bucket is the most
    important signal: a persistent ~2% difference is consistent with
    the Sectors `close` being **raw** while yfinance is
@@ -83,7 +95,7 @@ $ pytest tests/test_parity_public_sectors.py -v
    `SectorsProvider.get_corporate_actions(symbol)` to **annotate**
    the row (per the brief §44), not silently edit the price.
 
-## 6. Hypothesised outcomes (until live)
+## 7. Hypothesised outcomes (until broader live evidence)
 
 Based on the docs:
 

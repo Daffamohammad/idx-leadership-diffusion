@@ -10,6 +10,10 @@ class ProviderError(IDXError):
     """A data provider could not complete a request."""
 
 
+class CreditBudgetExceeded(ProviderError):
+    """A paid-provider request was blocked by the configured credit ceiling."""
+
+
 class NormalizationError(IDXError):
     """A provider response could not be normalized to a canonical schema."""
 

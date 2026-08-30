@@ -31,6 +31,11 @@ class LedgerEntry:
     rows_returned: int
     elapsed_ms: float
     estimated_credit_cost: float = 0.0
+    # Conservative client-side reservation. This can include retry attempts
+    # even when the provider's documented endpoint estimate is lower or
+    # unavailable; it is kept separate so the audit never presents a reserve
+    # as an observed account debit.
+    budget_reserved_credit_cost: float = 0.0
     actual_credit_cost: Optional[float] = None
     error: Optional[str] = None
 
@@ -62,6 +67,7 @@ class RequestLedger:
         rows_returned: int,
         elapsed_ms: float,
         estimated_credit_cost: float = 0.0,
+        budget_reserved_credit_cost: float = 0.0,
         actual_credit_cost: Optional[float] = None,
         error: Optional[str] = None,
     ) -> None:
@@ -76,6 +82,7 @@ class RequestLedger:
             rows_returned=rows_returned,
             elapsed_ms=elapsed_ms,
             estimated_credit_cost=estimated_credit_cost,
+            budget_reserved_credit_cost=budget_reserved_credit_cost,
             actual_credit_cost=actual_credit_cost,
             error=error,
         )

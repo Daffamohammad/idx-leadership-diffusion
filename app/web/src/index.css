@@ -1,0 +1,179 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --font-geist: 'Geist', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, monospace;
+  --color-ground: #ffffff;
+  --color-surface: #ffffff;
+  --color-ink: #202325;
+  --color-muted: #747a7d;
+  --color-line: #e1e2de;
+  --color-signal: #d97956;
+  --color-leading: #54718b;
+  --color-improving: #438b82;
+  --color-warning: #aa8750;
+  --color-weakening: #ad6765;
+}
+
+html, body, #root { height: 100%; }
+body { margin: 0; background: #ffffff; color: #16191c; font-family: 'Geist', system-ui, sans-serif; font-size: 14px; -webkit-font-smoothing: antialiased; }
+body.custom-cursor-enabled { cursor: none; }
+html:not(.dark) #root { filter: saturate(.78) contrast(.985); }
+html.dark { background: #121619; }
+html.dark body { background: #121619; }
+html.dark #root { filter: invert(1) hue-rotate(180deg); }
+button, select { font: inherit; }
+button:focus-visible, a:focus-visible, select:focus-visible { outline: 2px solid #f26a3d; outline-offset: 3px; }
+.tabnum { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+.eyebrow, .eyebrow-muted { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 10px; letter-spacing: .075em; text-transform: uppercase; line-height: 1.5; }
+.eyebrow { color: #16191c; }.eyebrow-muted { color: #686e73; }
+.scroll-thin { scrollbar-width: thin; scrollbar-color: #dfe2e1 transparent; }
+.scroll-thin::-webkit-scrollbar { width: 5px; height: 5px; }.scroll-thin::-webkit-scrollbar-thumb { background: #dfe2e1; }
+.recharts-wrapper { font-family: 'Geist', system-ui, sans-serif; }
+.recharts-cartesian-axis-tick-value { font-family: 'Geist Mono', monospace; }
+@media (max-width: 900px) {
+  .public-grid, .overview-grid, .surface-grid { grid-template-columns: 1fr !important; }
+  .desktop-only { display: none !important; }
+  .market-read-stats { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .map-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .explorer-metrics { flex-wrap: wrap; }
+  .explorer-metrics > * { flex: 1 1 calc(50% - 6px) !important; min-width: 0; }
+  .explorer-confirmation-grid, .method-research-grid { grid-template-columns: 1fr !important; }
+  .method-coverage-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .leadership-map-frame { overflow-x: auto !important; }
+  .workspace-header { padding-inline: 12px !important; gap: 8px !important; }
+  .workspace-header .workspace-asof, .workspace-header .workspace-separator { display: none; }
+  .workspace-header .workspace-home { padding-inline: 6px !important; }
+  .surface-grid > div[style*="border-left"] { border-left: 0 !important; padding-left: 0 !important; }
+}
+
+@media (max-width: 560px) {
+  .public-header, .public-main { padding-inline: 16px !important; }
+  .public-hero { padding-block: 54px 72px !important; }
+  .hero-card-float { right: 10px !important; top: 16px !important; width: min(205px, calc(100% - 20px)) !important; }
+  .public-cta-row { align-items: flex-start !important; flex-wrap: wrap; }
+  .market-read-stats, .method-coverage-grid, .map-summary-grid { grid-template-columns: 1fr !important; }
+}
+
+/* ── Custom cursor ─────────────────────────────────────── */
+.cursor-dot { position: fixed; width: 5px; height: 5px; border-radius: 50%; background: #16191c; pointer-events: none; z-index: 99999; top: -3px; left: -3px; will-change: transform; }
+.cursor-ring { position: fixed; width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgba(22,25,28,0.3); pointer-events: none; z-index: 99998; top: -14px; left: -14px; transition: width 0.25s ease, height 0.25s ease, border-color 0.25s ease; will-change: transform; }
+.map-group:focus-visible { outline: 2px solid #f26a3d; outline-offset: 3px; }
+.cursor-ring.cursor-hover { width: 44px; height: 44px; border-color: #f26a3d; }
+
+/* ── Text reveal ───────────────────────────────────────── */
+@keyframes word-up { from { transform: translateY(115%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.word-reveal { display: inline-block; animation: word-up 0.75s cubic-bezier(0.23, 1, 0.32, 1) both; }
+
+/* ── Button sheen ──────────────────────────────────────── */
+.btn-sheen { position: relative; overflow: hidden; }
+.btn-sheen::after { content: ''; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.18) 50%, transparent 65%); transform: translateX(-120%); }
+.btn-sheen:hover::after { transform: translateX(120%); transition: transform 0.55s ease; }
+
+/* ── Scroll reveal ─────────────────────────────────────── */
+.reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.75s ease, transform 0.75s cubic-bezier(0.23, 1, 0.32, 1); }
+.reveal.revealed { opacity: 1; transform: none; }
+
+/* ── Marquee ───────────────────────────────────────────── */
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.marquee-wrap { overflow: hidden; }
+.marquee-track { display: flex; white-space: nowrap; animation: marquee 22s linear infinite; }
+.marquee-track:hover { animation-play-state: paused; }
+
+/* ── Float (hero card) ─────────────────────────────────── */
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+.hero-card-float { animation: float 5.5s ease-in-out infinite; }
+
+/* ── DotField bar entrance ─────────────────────────────── */
+@keyframes bar-in { from { transform: scaleY(0); opacity: 0; } to { transform: scaleY(1); opacity: 1; } }
+
+/* ── Status dot pulse ──────────────────────────────────── */
+@keyframes status-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(23,132,119,0.45); } 60% { box-shadow: 0 0 0 5px rgba(23,132,119,0); } }
+.status-dot-pulse { animation: status-pulse 2.6s ease infinite; border-radius: 50%; display: inline-flex; width: 7px; height: 7px; background: #178477; vertical-align: middle; }
+
+/* ── Grain overlay (dark band) ─────────────────────────── */
+@keyframes grain { 0%,100%{transform:translate(0,0)} 20%{transform:translate(-2%,3%)} 40%{transform:translate(3%,-2%)} 60%{transform:translate(-1%,4%)} 80%{transform:translate(4%,-1%)} }
+.grain-bg { position: relative; overflow: hidden; }
+.grain-bg::before { content:''; position:absolute; inset:-60%; width:220%; height:220%; opacity:0.038; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); animation:grain 0.9s steps(1) infinite; pointer-events:none; }
+
+/* ── Link underline slide ──────────────────────────────── */
+.link-slide { position: relative; text-decoration: none; }
+.link-slide::after { content:''; position:absolute; left:0; bottom:-1px; width:0; height:1px; background:currentColor; transition: width 0.3s ease; }
+.link-slide:hover::after { width: 100%; }
+
+/* ── @property for shimmer angle ──────────────────────── */
+@property --shimmer-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+/* ── Shimmer CTA (orbiting border light) ───────────────── */
+@keyframes shimmer-cta-orbit { to { --shimmer-angle: 360deg; } }
+.shimmer-cta { position: relative; display: inline-block; overflow: hidden; }
+.shimmer-cta-border {
+  position: absolute; inset: 0; pointer-events: none;
+  background: conic-gradient(
+    from var(--shimmer-angle) at 50% 50%,
+    transparent 0deg, transparent 330deg,
+    rgba(255,255,255,0.9) 345deg,
+    rgba(255,255,255,0.5) 355deg,
+    transparent 360deg
+  );
+  animation: shimmer-cta-orbit 3s linear infinite;
+}
+.shimmer-cta-body {
+  position: relative; display: block; margin: 1px;
+  background: #121619; color: #fff;
+  padding: 10px 17px; font-size: 13px; font-family: inherit;
+  box-shadow: inset 0 -6px 10px rgba(255,255,255,0.07);
+  transition: box-shadow 0.3s ease;
+  white-space: nowrap;
+}
+.shimmer-cta:hover .shimmer-cta-body { box-shadow: inset 0 -6px 12px rgba(255,255,255,0.18); }
+
+/* ── Interactive hover CTA (dot fill + slide text) ─────── */
+.ihover-cta {
+  position: relative; display: inline-flex; align-items: center; gap: 9px;
+  padding: 11px 18px; background: #f26a3d; color: #16191c;
+  font-size: 13px; font-weight: 500; overflow: hidden;
+  text-decoration: none; cursor: pointer; white-space: nowrap;
+}
+.ihover-dot {
+  display: block; width: 9px; height: 9px; border-radius: 50%;
+  background: #16191c; flex-shrink: 0;
+  transition: transform 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+  position: relative; z-index: 0;
+}
+.ihover-cta:hover .ihover-dot { transform: scale(50); }
+.ihover-label {
+  position: relative; z-index: 1;
+  transition: transform 0.3s ease, opacity 0.22s ease;
+}
+.ihover-cta:hover .ihover-label { transform: translateX(44px); opacity: 0; }
+.ihover-reveal {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 13px; font-weight: 500; z-index: 2;
+  opacity: 0; transform: translateX(44px);
+  transition: transform 0.35s ease 0.06s, opacity 0.24s ease 0.06s;
+}
+.ihover-cta:hover .ihover-reveal { transform: translateX(0); opacity: 1; }
+
+/* ── Dia text reveal (gradient sweep across text) ──────── */
+@keyframes dia-sweep {
+  from { background-position: 0% center; }
+  to   { background-position: 100% center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .marquee-track { animation: none; }
+  .cursor-dot, .cursor-ring { display: none; }
+}

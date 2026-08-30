@@ -1,9 +1,11 @@
 # Sectors Integration Plan
 
-> Status: **core implementation shipped; live validation pending**. The
-> client/provider, core endpoints, request ledger, and market-snapshot
-> path are implemented and live-gated. This document now tracks the
-> remaining parity and enrichment work.
+> Status: **core live path exercised 2026-08-28**. The first Sectors-based
+> market snapshot, native IHSG history, request ledger, parity spot-check,
+> and bounded Tavily context artifact are complete. The Tavily pass is an
+> optional qualitative sidecar and does not replace the structured enrichment
+> work below. This document now tracks the remaining quality and enrichment
+> work.
 
 ## 1. Tiered credit discipline
 
@@ -78,7 +80,7 @@ For a controlled subset (e.g. the 10 Financials names) compare:
 Use `tests/test_provider_parity.py` to lock down a tolerance
 threshold. Surface deltas as a CI artifact.
 
-### P0.6 — Market-wide snapshot generation (shipped; live run pending)
+### P0.6 — Market-wide snapshot generation (shipped; first run `READY_WITH_GAPS`)
 
 Replace the prototype universe with the full Sectors universe in
 `build_snapshot`. Keep the snapshot writer / manifest contract
@@ -103,6 +105,18 @@ Implement `SectorsProvider.get_company_fundamentals()` (Tier 2) and
 `get_foreign_flow()` / `get_broker_activity()` (Tier 3). Populate
 `FundamentalConfirmation` and `FlowConfirmation`. Add a confirmation
 column to `GroupEvidence` (e.g. `fundamental_aligned: bool`).
+
+### P0.10 — Bounded qualitative research context (shipped)
+
+`scripts/enrich_tavily_context.py` can refresh an existing snapshot with three
+official-source Tavily searches and one explicitly requested, depth-1 IDX
+crawl. The output is a separate `tavily_context.json` sidecar and is rendered
+on the methodology and group-explorer pages as `CONTEXT ONLY`.
+
+This is deliberately not P0.9: Tavily results are unstructured web evidence,
+so they cannot establish per-ticker flow, fundamentals, or event confirmation
+without a separately versioned parser and a source-specific completeness
+contract. No Sectors API call is made by the enrichment command.
 
 ## 4. VERIFY BEFORE IMPLEMENTATION
 

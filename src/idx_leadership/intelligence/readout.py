@@ -136,7 +136,7 @@ def build_story_mode(
     evidence_by_group = {e.group or e.group_id: e for e in evidence}
     if highlighted in evidence_by_group and evidence_by_group[highlighted].contradictions:
         item = evidence_by_group[highlighted].contradictions[0]
-        contradiction = item.comment or item.metric
+        contradiction = item.evidence or item.label or item.metric
     return StoryMode(
         market_read=market_read,
         material_shifts=material,

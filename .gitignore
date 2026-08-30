@@ -59,3 +59,17 @@ logs/
 # Misc
 *.bak
 *.tmp
+
+# Web app (Vite/React)
+app/web/node_modules/
+app/web/dist/
+app/web/.vite/
+app/web/.figma/
+app/web/tsconfig.tsbuildinfo
+app/web/public/snapshots/*.json
+!app/web/public/snapshots/.gitkeep
+# Keep the sanitized payloads used by the checked-in SPA contract tests and
+# the default static preview. Other generated exports remain ignored.
+!app/web/public/snapshots/index.json
+!app/web/public/snapshots/snap_sectors_2026-08-27.json
+!app/web/public/snapshots/yf_harness_2026-08-28_adj.json

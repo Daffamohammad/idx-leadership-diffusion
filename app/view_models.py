@@ -292,6 +292,12 @@ class DashboardView:
     quality_layers: tuple[DataQualityLayer, ...]
     frozen_contract_version: str = "brief-v1"
     intelligence_version: str = "intelligence-v1"
+    coverage: Mapping[str, Any] = field(default_factory=dict)
+    provider_provenance: Mapping[str, Any] = field(default_factory=dict)
+    data_warnings: Mapping[str, Any] = field(default_factory=dict)
+    api_credit_audit: Mapping[str, Any] = field(default_factory=dict)
+    methodology_sensitivity: Mapping[str, Any] = field(default_factory=dict)
+    you_context: Mapping[str, Any] = field(default_factory=dict)
 
     def group(self, group_id: str | None) -> GroupView | None:
         if group_id is None:
@@ -384,6 +390,12 @@ def build_dashboard_view(payload: Mapping[str, Any]) -> DashboardView:
         quality_layers=_quality_layers(payload, mode),
         frozen_contract_version="brief-v1",
         intelligence_version="intelligence-v1",
+        coverage=_mapping_or_empty(payload.get("coverage")),
+        provider_provenance=_mapping_or_empty(payload.get("provider_provenance")),
+        data_warnings=_mapping_or_empty(payload.get("data_warnings")),
+        api_credit_audit=_mapping_or_empty(payload.get("api_credit_audit")),
+        methodology_sensitivity=_mapping_or_empty(payload.get("methodology_sensitivity")),
+        you_context=_mapping_or_empty(payload.get("you_context")),
     )
 
 
@@ -919,24 +931,52 @@ def _quality_layers(payload: Mapping[str, Any], mode: str) -> tuple[DataQualityL
         )
 
     quality = payload.get("quality") if isinstance(payload.get("quality"), Mapping) else {}
-    raw_status = str(quality.get("status") or "PROTOTYPE")
-    market_status = (
-        "READY" if mode == "SECTORS_LIVE" and raw_status == "READY" else
-        "FIXTURE" if mode == "SECTORS_FIXTURE" else
-        "PROTOTYPE"
-    )
-    taxonomy_status = "READY" if mode == "SECTORS_LIVE" else (
-        "FIXTURE" if mode == "SECTORS_FIXTURE" else "PROTOTYPE"
-    )
+    raw_status = str(quality.get("status") or "PROTOTYPE").upper().replace(" ", "_")
+    coverage = payload.get("coverage") if isinstance(payload.get("coverage"), Mapping) else {}
+    if mode == "SECTORS_LIVE":
+        valid_statuses = {"READY", "READY_WITH_GAPS", "PARTIAL", "STALE", "FAILED"}
+        market_status = raw_status if raw_status in valid_statuses else "READY_WITH_GAPS"
+        history_pct = coverage.get("price_history_coverage_pct")
+        eligible = coverage.get("eligible_securities")
+        discovered = coverage.get("security_master_total")
+        market_detail = (
+            f"Sectors daily history · {history_pct}% usable · "
+            f"{eligible}/{discovered} eligible"
+            if history_pct is not None and eligible is not None and discovered is not None
+            else "Sectors live snapshot quality report"
+        )
+        taxonomy_pct = coverage.get("taxonomy_coverage_pct")
+        try:
+            taxonomy_complete = taxonomy_pct is not None and float(taxonomy_pct) >= 100
+        except (TypeError, ValueError):
+            taxonomy_complete = False
+        taxonomy_status = "READY" if taxonomy_complete else "READY_WITH_GAPS"
+        taxonomy_detail = f"Sectors structured taxonomy · {taxonomy_pct}% complete" if taxonomy_pct is not None else "Sectors taxonomy coverage report"
+        benchmark_date = quality.get("benchmark_latest_date") or coverage.get("latest_available_benchmark_date")
+        benchmark_status = "READY" if benchmark_date else market_status
+        benchmark_detail = f"Sectors native IHSG · latest {benchmark_date}" if benchmark_date else "Sectors benchmark is unavailable"
+        corporate_detail = "Raw close; corporate-action adjustment semantics UNKNOWN / VERIFY"
+    else:
+        market_status = "FIXTURE" if mode == "SECTORS_FIXTURE" else "PROTOTYPE"
+        taxonomy_status = "FIXTURE" if mode == "SECTORS_FIXTURE" else "PROTOTYPE"
+        market_detail = raw_status
+        taxonomy_detail = "Snapshot taxonomy contract"
+        benchmark_status = market_status
+        benchmark_detail = "Snapshot benchmark artifact"
+        corporate_detail = "Price-basis audit pending live data"
     layers = (
-        DataQualityLayer("Market Data", market_status, raw_status),
-        DataQualityLayer("Taxonomy", taxonomy_status, "Snapshot taxonomy contract"),
-        DataQualityLayer("Benchmark", market_status, "Snapshot benchmark artifact"),
+        DataQualityLayer("Market Data", market_status, market_detail),
+        DataQualityLayer("Taxonomy", taxonomy_status, taxonomy_detail),
+        DataQualityLayer("Benchmark", benchmark_status, benchmark_detail),
         DataQualityLayer("Fundamentals", "DATA GAP", "SECTORS LIVE NOT CONNECTED"),
         DataQualityLayer("Foreign Flow", "DATA GAP", "SECTORS LIVE NOT CONNECTED"),
-        DataQualityLayer("Corporate Actions", "DATA GAP", "Price-basis audit pending live data"),
+        DataQualityLayer("Corporate Actions", "DATA GAP", corporate_detail),
     )
     return layers
+
+
+def _mapping_or_empty(value: Any) -> Mapping[str, Any]:
+    return value if isinstance(value, Mapping) else {}
 
 
 def _history_by_group(rows: Sequence[Mapping[str, Any]]) -> dict[str, tuple[HistoryPoint, ...]]:

@@ -27,6 +27,7 @@ import pandas as pd
 from ..models import (
     GroupSnapshot,
     ManifestEntry,
+    PriceBasis,
     ProviderName,
     ProviderMode,
     SecurityFeatureSnapshot,
@@ -56,6 +57,7 @@ class SnapshotWriter:
         as_of: date,
         provider: ProviderName,
         provider_mode: ProviderMode | None = None,
+        price_basis: PriceBasis | str | None = None,
         universe_version: str,
         taxonomy_version: str,
         eligibility_version: str = "eligibility-v1",
@@ -74,6 +76,9 @@ class SnapshotWriter:
         groups: pd.DataFrame,
         transitions: pd.DataFrame,
         notes: Optional[str] = None,
+        eligible_ticker_set_hash: Optional[str] = None,
+        eligible_ticker_count: int = 0,
+        raw_ticker_count: int = 0,
     ) -> Path:
         target = self.root / snapshot_id
         target.mkdir(parents=True, exist_ok=True)
@@ -107,6 +112,7 @@ class SnapshotWriter:
             latest_date=as_of,
             provider=provider,
             provider_mode=resolved_mode,
+            price_basis=price_basis,
             universe_version=universe_version,
             taxonomy_version=taxonomy_version,
             eligibility_version=eligibility_version,
@@ -124,6 +130,7 @@ class SnapshotWriter:
                     as_of=as_of,
                     provider=provider,
                     provider_mode=resolved_mode,
+                    price_basis=price_basis,
                     market_date=market_date,
                     benchmark_date=benchmark_date,
                     universe_version=universe_version,
@@ -140,6 +147,9 @@ class SnapshotWriter:
                     coverage_pct=coverage_pct,
                     created_at=date.today(),
                     notes=notes,
+                    eligible_ticker_set_hash=eligible_ticker_set_hash,
+                    eligible_ticker_count=eligible_ticker_count,
+                    raw_ticker_count=raw_ticker_count,
                 )
             ],
             notes=[],
@@ -186,6 +196,20 @@ class SnapshotReader:
             "manifest": manifest,
             "change_digest": _read_json_optional(d / "change_digest.json", {}),
             "quality": _read_json_optional(d / "quality.json", {}),
+            "coverage": _read_json_optional(d / "coverage.json", {}),
+            "data_warnings": _read_json_optional(d / "data_warnings.json", {}),
+            "provider_provenance": _read_json_optional(d / "provider_provenance.json", {}),
+            "methodology_sensitivity": _read_json_optional(
+                d / "methodology_sensitivity.json", {}
+            ),
+            "tavily_context": _read_json_optional(d / "tavily_context.json", {}),
+            "you_context": _read_json_optional(d / "you_context.json", {}),
+            "security_master_diagnostics": _read_json_optional(
+                d / "security_master_diagnostics.json", {}
+            ),
+            "history_diagnostics": _read_json_optional(
+                d / "history_diagnostics.json", {}
+            ),
             "evidence": _read_json_optional(d / "evidence.json", []),
             "market_read": _read_json_optional(d / "market_read.json", {}),
             "story_mode": _read_json_optional(d / "story_mode.json", {}),
@@ -225,6 +249,7 @@ class SnapshotReader:
             latest_date=last,
             provider=entries[-1].provider,
             provider_mode=entries[-1].provider_mode,
+            price_basis=entries[-1].price_basis,
             universe_version=entries[-1].universe_version,
             taxonomy_version=entries[-1].taxonomy_version,
             eligibility_version=entries[-1].eligibility_version,

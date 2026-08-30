@@ -94,3 +94,69 @@ def assess_snapshot_comparability(
         warnings=warnings,
     )
 
+
+
+REQUIRED_COMPARABILITY_FIELDS = (
+    "provider_mode",
+    "price_basis",
+    "method_version",
+    "feature_version",
+    "leadership_version",
+    "diffusion_version",
+    "concentration_version",
+    "eligibility_version",
+    "universe_version",
+    "taxonomy_version",
+    "eligible_ticker_set_hash",
+)
+
+
+def check_snapshot_compatibility(
+    current: Mapping[str, Any] | BaseModel,
+    previous: Mapping[str, Any] | BaseModel,
+) -> SnapshotComparability:
+    """Fail-closed compatibility check for persisted snapshots.
+
+    Unlike :func:`assess_snapshot_comparability`, this function:
+
+    * treats **any** missing required field as an immediate rejection, and
+    * checks ``provider_mode`` for cross-provider parity, and
+    * enforces membership parity via ``eligible_ticker_set_hash``.
+
+    Both sides must carry every field in :data:`REQUIRED_COMPARABILITY_FIELDS`
+    with identical values; otherwise the snapshots are ``INCOMPARABLE``.
+    """
+    cur = _mapping(current)
+    prev = _mapping(previous)
+    reasons: list[str] = []
+
+    for field_name in REQUIRED_COMPARABILITY_FIELDS:
+        cur_val = cur.get(field_name)
+        prev_val = prev.get(field_name)
+        if not cur_val or not prev_val:
+            reasons.append(
+                f"missing required field={field_name} (fail-closed)"
+            )
+            return SnapshotComparability(
+                comparable=False,
+                status="INCOMPARABLE",
+                reasons=reasons,
+                warnings=[],
+            )
+        if cur_val != prev_val:
+            reasons.append(
+                f"{field_name} differs: current={cur_val} prior={prev_val}"
+            )
+            return SnapshotComparability(
+                comparable=False,
+                status="INCOMPARABLE",
+                reasons=reasons,
+                warnings=[],
+            )
+
+    return SnapshotComparability(
+        comparable=True,
+        status="COMPATIBLE",
+        reasons=[],
+        warnings=[],
+    )

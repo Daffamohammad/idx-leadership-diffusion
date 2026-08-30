@@ -19,6 +19,8 @@ from .capabilities import (
 )
 from .factory import build_provider_from_config, parse_provider_mode
 from .ledger import RequestLedger
+from .tavily_client import TavilyClient, TavilyError, TavilyResponse
+from .you_client import YouClient, YouError, YouResponse
 
 __all__ = [
     "MarketDataProvider",
@@ -33,6 +35,12 @@ __all__ = [
     "SecurityMasterProvider",
     "TaxonomyProvider",
     "RequestLedger",
+    "TavilyClient",
+    "YouClient",
+    "TavilyError",
+    "YouError",
+    "TavilyResponse",
+    "YouResponse",
     "build_provider_from_config",
     "parse_provider_mode",
 ]

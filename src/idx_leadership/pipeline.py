@@ -17,6 +17,7 @@ scripts and the UI both call it.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 from datetime import date
 from pathlib import Path
@@ -26,14 +27,14 @@ import pandas as pd
 
 from .aggregation.groups import build_group_snapshots, rank_groups
 from .data.manifests import write_manifest
-from .data.comparability import assess_snapshot_comparability
+from .data.comparability import check_snapshot_compatibility
 from .data.quality import assess_quality
 from .data.snapshots import SNAPSHOT_VERSION, SnapshotReader, SnapshotWriter
 from .features.relative_strength import compute_excess_returns
 from .analytics.persistence import compute_persistence
 from .evidence.builder import build_group_evidence
 from .intelligence import build_market_read, build_story_mode
-from .models import ProviderMode
+from .models import PriceBasis, ProviderMode
 from .providers.base import MarketDataProvider
 from .signals.change_digest import build_change_digest
 from .signals.transitions import build_transition_events
@@ -106,6 +107,7 @@ def build_snapshot(
     out_dir: Optional[Path] = None,
     snapshot_id: Optional[str] = None,
     provider_mode: ProviderMode | str | None = None,
+    price_basis: PriceBasis | str | None = None,
 ) -> dict[str, Any]:
     """Run the end-to-end snapshot pipeline.
 
@@ -129,6 +131,26 @@ def build_snapshot(
         else _safe_provider_name(provider)
     )
     resolved_provider_mode = _resolve_provider_mode(provider, provider_mode)
+    if price_basis is None:
+        effective_price_basis = resolve_effective_price_basis(
+            meth, resolved_provider_mode
+        )
+    else:
+        try:
+            effective_price_basis = PriceBasis(str(price_basis)).value
+        except ValueError as exc:
+            raise ValueError(
+                f"Unsupported requested price basis={price_basis!r}"
+            ) from exc
+        if (
+            resolved_provider_mode
+            in {ProviderMode.SECTORS_LIVE, ProviderMode.SECTORS_FIXTURE}
+            and effective_price_basis != PriceBasis.CLOSE.value
+        ):
+            raise ValueError(
+                "Sectors snapshots must use close; adjusted_close is only a "
+                "compatibility alias for the raw close"
+            )
     benchmark_id = universe_cfg.get("benchmark", "^JKSE")
     requested = [row["ticker"] for row in universe_cfg.get("universe", [])]
     today = today_utc()
@@ -159,12 +181,44 @@ def build_snapshot(
         benchmark,
         horizons=horizons,
         as_of=as_of,
-        security_price_col=str(meth.get("price_basis", "adjusted_close")),
+        security_price_col=effective_price_basis,
         tolerance_days=int(meth.get("as_of_tolerance_days", 7)),
     )
     if features.empty:
         _log.warning("no_features_computed as_of=%s", as_of)
     # The aggregation layer merges taxonomy into features internally; do not pre-merge here.
+
+    # Compute eligible ticker set hash from the current universe so the
+    # comparability gate can verify membership parity.
+    from .providers.market_universe import build_market_universe
+    _universe = build_market_universe(
+        security_master_provider=provider,
+        cross_section_provider=provider,
+        event_provider=None,
+        as_of=as_of,
+        price_history=prices,
+    )
+    eligible_tickers = set(
+        _universe.loc[_universe["eligible"], "ticker"].astype(str).tolist()
+    )
+    eligible_ticker_set_hash = (
+        hashlib.sha256(json.dumps(sorted(eligible_tickers)).encode()).hexdigest()[:16]
+        if eligible_tickers
+        else "EMPTY"
+    )
+    eligible_ticker_count = len(eligible_tickers)
+    coverage = _build_pipeline_coverage(
+        universe=_universe,
+        features=features,
+        prices=prices,
+        benchmark=benchmark,
+        quality=quality,
+        as_of=as_of,
+        coverage_gate_pct=float(
+            meth.get("groups", {}).get("minimum_coverage_pct", 60.0)
+        ),
+        provider_mode=resolved_provider_mode,
+    )
 
     # Read only earlier, contract-compatible snapshots.  Directory order is
     # not a point-in-time contract and must never select a future snapshot.
@@ -174,6 +228,7 @@ def build_snapshot(
         "as_of": as_of.isoformat(),
         "provider": provider_name.value,
         "provider_mode": resolved_provider_mode.value,
+        "price_basis": effective_price_basis,
         "universe_version": str(universe_cfg.get("universe_version", "prototype-v1")),
         "taxonomy_version": str(universe_cfg.get("taxonomy_version", "prototype-v1")),
         "eligibility_version": eligibility_version,
@@ -182,6 +237,7 @@ def build_snapshot(
         "leadership_version": leadership_version,
         "diffusion_version": diffusion_version,
         "concentration_version": concentration_version,
+        "eligible_ticker_set_hash": eligible_ticker_set_hash,
     }
     (
         previous_snapshots_by_group,
@@ -232,7 +288,7 @@ def build_snapshot(
         concentration_signed_min_net_to_gross=float(
             concentration_cfg.get("signed_min_net_to_gross", 0.05)
         ),
-        concentration_price_col=str(meth.get("price_basis", "adjusted_close")),
+        concentration_price_col=effective_price_basis,
         taxonomy_level=str(meth.get("groups", {}).get("primary_taxonomy_level", "sector")),
     )
     snapshots = rank_groups(snapshots)
@@ -274,6 +330,7 @@ def build_snapshot(
         as_of=as_of,
         provider=provider_name,
         provider_mode=resolved_provider_mode,
+        price_basis=effective_price_basis,
         universe_version=str(universe_cfg.get("universe_version", "prototype-v1")),
         taxonomy_version=str(universe_cfg.get("taxonomy_version", "prototype-v1")),
         eligibility_version=eligibility_version,
@@ -292,6 +349,9 @@ def build_snapshot(
         groups=_snapshots_to_df(snapshots),
         transitions=_transitions_to_df(transitions),
         notes=";".join(quality.issues) if quality.issues else None,
+        eligible_ticker_set_hash=eligible_ticker_set_hash,
+        eligible_ticker_count=eligible_ticker_count,
+        raw_ticker_count=int(coverage["raw_candidate_constituents"]),
     )
 
     # Change digest
@@ -312,6 +372,7 @@ def build_snapshot(
     story = build_story_mode(change_digest, evidence)
     _atomic_json(target / "change_digest.json", change_digest.to_dict())
     _atomic_json(target / "quality.json", quality.to_dict())
+    _atomic_json(target / "coverage.json", coverage)
     _atomic_json(
         target / "evidence.json",
         [item.model_dump(mode="json") for item in evidence],
@@ -339,6 +400,7 @@ def build_snapshot(
         "story_mode": story.to_dict(),
         "evidence": [item.model_dump(mode="json") for item in evidence],
         "comparability": comparison_audit,
+        "coverage": coverage,
         "provider_mode": resolved_provider_mode.value,
         "groups": _snapshots_to_df(snapshots),
         "transitions": _transitions_to_df(transitions),
@@ -351,6 +413,153 @@ def _resolve_horizons(meth: dict[str, Any]) -> dict[str, int]:
         "5d": int(h.get("short", 5)),
         "20d": int(h.get("primary", 20)),
         "60d": int(h.get("medium", 60)),
+    }
+
+
+def _build_pipeline_coverage(
+    *,
+    universe: pd.DataFrame,
+    features: pd.DataFrame,
+    prices: pd.DataFrame,
+    benchmark: pd.DataFrame,
+    quality: Any,
+    as_of: date,
+    coverage_gate_pct: float,
+    provider_mode: ProviderMode,
+) -> dict[str, Any]:
+    """Persist the same denominator contract for the generic pipeline.
+
+    The market-wide script has its own provider diagnostics, while
+    ``build_snapshot`` is also used by the offline harness.  Keeping the
+    denominator fields here prevents that path from rendering coverage as
+    zero simply because it does not have Sectors pagination metadata.
+    """
+    raw_count = int(len(universe))
+    eligible = (
+        universe["eligible"].astype(bool)
+        if "eligible" in universe.columns
+        else pd.Series(False, index=universe.index)
+    )
+    status = universe.get("acquisition_status")
+    if status is not None:
+        policy_excluded = int((status == "POLICY_EXCLUDED").sum())
+        acquisition_failed = int((status == "ACQUISITION_FAILED").sum())
+        acquisition_empty = int((status == "ACQUISITION_EMPTY").sum())
+        acquired = int((status == "ACQUIRED").sum())
+    else:
+        policy_excluded = int((~eligible).sum())
+        acquisition_failed = 0
+        acquisition_empty = 0
+        acquired = int(eligible.sum())
+    policy_eligible = max(0, raw_count - policy_excluded)
+
+    eligible_tickers = set(
+        universe.loc[eligible, "ticker"].astype(str).tolist()
+    ) if "ticker" in universe.columns else set()
+    observed_tickers: set[str] = set()
+    if not features.empty and "ticker" in features.columns:
+        observed = features[features["ticker"].astype(str).isin(eligible_tickers)]
+        valid_columns = [
+            column
+            for column in ("return_20d", "return_60d")
+            if column in observed.columns
+        ]
+        if valid_columns:
+            observed = observed.dropna(subset=valid_columns)
+        observed_tickers = set(observed["ticker"].astype(str).tolist())
+    observed_count = len(observed_tickers)
+    coverage_pct = (
+        round(observed_count / policy_eligible * 100.0, 2)
+        if policy_eligible
+        else 0.0
+    )
+
+    latest_security_date: str | None = None
+    stale_security_count = 0
+    if not prices.empty and {"ticker", "date"}.issubset(prices.columns):
+        dates = pd.to_datetime(prices["date"], errors="coerce")
+        latest_by_ticker = (
+            pd.DataFrame({"ticker": prices["ticker"], "date": dates})
+            .dropna(subset=["date"])
+            .groupby("ticker")["date"]
+            .max()
+        )
+        if not latest_by_ticker.empty:
+            latest_security_date = latest_by_ticker.max().date().isoformat()
+            stale_security_count = int(
+                ((pd.Timestamp(as_of) - latest_by_ticker).dt.days > 30).sum()
+            )
+    benchmark_dates = (
+        pd.to_datetime(benchmark["date"], errors="coerce").dropna()
+        if not benchmark.empty and "date" in benchmark.columns
+        else pd.Series(dtype="datetime64[ns]")
+    )
+    latest_benchmark_date = (
+        benchmark_dates.max().date().isoformat()
+        if not benchmark_dates.empty
+        else None
+    )
+    exclusion_reasons: dict[str, int] = {}
+    if "exclusion_reason" in universe.columns:
+        excluded = universe.loc[~eligible, "exclusion_reason"]
+        exclusion_reasons = {
+            str(key): int(value) for key, value in excluded.value_counts().items()
+        }
+
+    taxonomy_columns = [
+        column
+        for column in ("sector", "subsector", "industry", "subindustry")
+        if column in universe.columns
+    ]
+    taxonomy_complete = (
+        int(universe[taxonomy_columns].notna().all(axis=1).sum())
+        if taxonomy_columns
+        else 0
+    )
+    return {
+        "as_of": as_of.isoformat(),
+        "provider_mode": provider_mode.value,
+        "is_prefix_sample": False,
+        "discovered_count": raw_count,
+        "used_count": raw_count,
+        "discovered_universe_disclosure": (
+            f"Configured prototype universe: {raw_count} candidates; not full IDX coverage."
+        ),
+        "security_master_pagination_completeness": None,
+        "close_pagination_completeness": None,
+        "pagination_incomplete": False,
+        "security_master_total": raw_count,
+        "history_requested_securities": int(quality.requested_securities),
+        "securities_with_any_price_history": int(quality.loaded_securities),
+        "securities_with_usable_price_history": int(quality.usable_securities),
+        "eligible_securities": int(eligible.sum()),
+        "excluded_securities": policy_excluded,
+        "exclusion_reasons": exclusion_reasons,
+        "taxonomy_complete_securities": taxonomy_complete,
+        "taxonomy_coverage_pct": round(
+            taxonomy_complete / max(1, raw_count) * 100.0, 2
+        ),
+        "latest_available_security_trade_date": latest_security_date,
+        "latest_available_benchmark_date": (
+            latest_benchmark_date
+            or (
+                quality.benchmark_latest_date.isoformat()
+                if quality.benchmark_latest_date
+                else None
+            )
+        ),
+        "stale_security_count": stale_security_count,
+        "duplicate_rows": int(quality.duplicate_ticker_date_rows),
+        "price_history_coverage_pct": float(quality.coverage_pct),
+        "raw_candidate_constituents": raw_count,
+        "policy_eligible_constituents": policy_eligible,
+        "policy_excluded_constituents": policy_excluded,
+        "acquisition_failed_constituents": acquisition_failed,
+        "acquisition_empty_constituents": acquisition_empty,
+        "acquired_constituents": acquired,
+        "observed_eligible_features": observed_count,
+        "coverage_pct": coverage_pct,
+        "coverage_gate_60pct_met": coverage_pct >= float(coverage_gate_pct),
     }
 
 
@@ -379,7 +588,20 @@ def _load_compatible_history(
                 )
                 continue
             entry = entries[0]
-            result = assess_snapshot_comparability(current_contract, entry)
+            # Reject future snapshots before compatibility checking.
+            raw_date = entry.get("as_of") or ""
+            try:
+                snap_as_of = date.fromisoformat(str(raw_date))
+            except (TypeError, ValueError):
+                snap_as_of = None
+            if snap_as_of is None or snap_as_of >= date.fromisoformat(current_contract.get("as_of", "9999-99-99")):
+                audit["snapshots_checked"].append({
+                    "snapshot_id": snapshot_path.name,
+                    "status": "INCOMPATIBLE",
+                    "reasons": ["snapshot is not earlier than current"],
+                })
+                continue
+            result = check_snapshot_compatibility(current_contract, entry)
             audit["snapshots_checked"].append(
                 {
                     "snapshot_id": snapshot_path.name,
@@ -516,6 +738,33 @@ def _resolve_provider_mode(
     if name in {"demo", "demo_fixture"}:
         return ProviderMode.DEMO_FIXTURE
     return ProviderMode.PUBLIC_PROTOTYPE
+
+
+def resolve_effective_price_basis(
+    methodology: dict[str, Any], provider_mode: ProviderMode | str
+) -> str:
+    """Resolve the security-price column used by a snapshot calculation.
+
+    Sectors exposes only ``close``. Its normalized ``adjusted_close`` column
+    is a compatibility alias for that raw value, not evidence of adjustment.
+    Live and Sectors-fixture modes therefore calculate on ``close``; public
+    prototype and demo fixture modes retain the methodology default.
+    """
+
+    mode = (
+        provider_mode
+        if isinstance(provider_mode, ProviderMode)
+        else ProviderMode(str(provider_mode))
+    )
+    configured = methodology.get("price_basis", PriceBasis.ADJUSTED_CLOSE.value)
+    if mode in {ProviderMode.SECTORS_LIVE, ProviderMode.SECTORS_FIXTURE}:
+        configured = PriceBasis.CLOSE.value
+    try:
+        return PriceBasis(str(configured)).value
+    except ValueError as exc:
+        raise ValueError(
+            f"Unsupported effective price basis={configured!r} for mode={mode.value}"
+        ) from exc
 
 
 def _atomic_json(path: Path, payload: Any) -> None:

@@ -6,6 +6,7 @@ provider in tests and dev mode.
 """
 from __future__ import annotations
 
+import math
 import time
 from datetime import date
 from pathlib import Path
@@ -170,7 +171,7 @@ class YFinanceProvider(
                 rows_returned=len(cached.get("rows", [])),
                 elapsed_ms=0.0,
             )
-            return _payload_to_frame(cached)
+            return _payload_to_frame(cached, ticker=ticker)
 
         t0 = time.time()
         rows = self._call_yfinance_with_retry(ticker, start=start, end=end)
@@ -178,9 +179,14 @@ class YFinanceProvider(
         if rows is None:
             self.ledger.record(
                 provider=self.name,
-                endpoint="price_history",
+                endpoint="price_history" if not is_benchmark else "benchmark_history",
                 request_type="single",
-                parameters={"ticker": ticker, "start": start, "end": end},
+                parameters={
+                    "ticker": ticker,
+                    "start": start,
+                    "end": end,
+                    "is_benchmark": is_benchmark,
+                },
                 cache_hit=False,
                 status="failed",
                 rows_returned=0,
@@ -200,7 +206,7 @@ class YFinanceProvider(
             rows_returned=len(rows),
             elapsed_ms=elapsed,
         )
-        return _payload_to_frame({"rows": rows})
+        return _payload_to_frame({"rows": rows}, ticker=ticker)
 
     def _call_yfinance_with_retry(
         self, ticker: str, *, start: date, end: date
@@ -216,7 +222,7 @@ class YFinanceProvider(
                 df = yf.download(
                     tickers=ticker,
                     start=start.isoformat(),
-                    end=(end + pd.Timedelta(days=1)).isoformat(),
+                    end=(pd.Timestamp(end) + pd.Timedelta(days=1)).date().isoformat(),
                     progress=False,
                     auto_adjust=False,
                     threads=False,
@@ -224,19 +230,45 @@ class YFinanceProvider(
                 )
                 if df is None or df.empty:
                     return None
-                if isinstance(df.columns, pd.MultiIndex):
-                    df.columns = df.columns.get_level_values(0)
+
+                close = _select_yfinance_column(df, "Close")
+                adjusted_close = _select_yfinance_column(df, "Adj Close")
+                volume = _select_yfinance_column(df, "Volume")
+                if close is None or adjusted_close is None:
+                    raise ProviderError(
+                        f"yfinance response for {ticker} is missing Close or Adj Close"
+                    )
+
                 rows: list[dict[str, Any]] = []
-                for idx, row in df.iterrows():
+                for idx in df.index:
+                    timestamp = pd.Timestamp(idx)
+                    if timestamp.tzinfo is not None:
+                        timestamp = timestamp.tz_convert(None)
+                    row_date = timestamp.date()
+                    if row_date < start or row_date > end:
+                        continue
+
+                    close_value = _finite_float(close.loc[idx])
+                    adjusted_value = _finite_float(adjusted_close.loc[idx])
+                    if close_value is None or adjusted_value is None:
+                        continue
+                    if close_value <= 0 or adjusted_value <= 0:
+                        continue
+
+                    volume_value = (
+                        _finite_int(volume.loc[idx])
+                        if volume is not None
+                        else None
+                    )
                     rows.append(
                         {
-                            "date": idx.date().isoformat(),
-                            "close": float(row["Close"]),
-                            "adjusted_close": float(row["Adj Close"]),
-                            "volume": int(row["Volume"]) if not pd.isna(row["Volume"]) else None,
+                            "date": row_date.isoformat(),
+                            "close": close_value,
+                            "adjusted_close": adjusted_value,
+                            "volume": volume_value,
                         }
                     )
-                return rows
+                return rows or None
             except Exception as e:  # noqa: BLE001
                 last_err = e
                 if attempt < self.max_retries:
@@ -264,12 +296,22 @@ def _empty_price_frame() -> pd.DataFrame:
     )
 
 
-def _payload_to_frame(payload: dict[str, Any]) -> pd.DataFrame:
+def _payload_to_frame(
+    payload: dict[str, Any], *, ticker: str | None = None
+) -> pd.DataFrame:
     rows = payload.get("rows", [])
     if not rows:
         return _empty_price_frame()
     df = pd.DataFrame(rows)
-    df["date"] = pd.to_datetime(df["date"]).dt.date
+    if "ticker" not in df.columns:
+        if ticker is None:
+            raise ProviderError("yfinance payload is missing ticker identity")
+        df["ticker"] = ticker
+    df["date"] = pd.to_datetime(df["date"], errors="coerce").dt.date
+    df = df[df["date"].notna()].copy()
+    for column in ("close", "adjusted_close", "market_cap"):
+        if column in df.columns:
+            df[column] = pd.to_numeric(df[column], errors="coerce")
     df["currency"] = "IDR"
     if "price_basis" not in df.columns:
         df["price_basis"] = PriceBasis.ADJUSTED_CLOSE.value
@@ -290,3 +332,42 @@ def _payload_to_frame(payload: dict[str, Any]) -> pd.DataFrame:
             "source",
         ]
     ]
+
+
+def _select_yfinance_column(
+    frame: pd.DataFrame, field_name: str
+) -> pd.Series | None:
+    """Select a yfinance field across flat and multi-index responses.
+
+    yfinance has returned both Close, Ticker and Ticker, Close multi-index
+    layouts across releases. Matching the field at either level keeps the
+    provider boundary stable without leaking vendor columns into the
+    canonical frame.
+    """
+    wanted = field_name.casefold()
+    matches: list[int] = []
+    for position, column in enumerate(frame.columns):
+        parts = column if isinstance(column, tuple) else (column,)
+        if any(str(part).strip().casefold() == wanted for part in parts):
+            matches.append(position)
+    if not matches:
+        return None
+    selected = frame.iloc[:, matches[0]]
+    if isinstance(selected, pd.DataFrame):
+        selected = selected.iloc[:, 0]
+    return selected
+
+
+def _finite_float(value: Any) -> float | None:
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return None
+    return number if math.isfinite(number) else None
+
+
+def _finite_int(value: Any) -> int | None:
+    number = _finite_float(value)
+    if number is None:
+        return None
+    return int(number)

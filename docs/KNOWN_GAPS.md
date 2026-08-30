@@ -1,29 +1,38 @@
 # Known Gaps
 
 As of 2026-08-28, the repository is offline-ready and the default suite makes
-no network calls. No live Sectors validation is claimed.
+no network calls. A first live Sectors snapshot was exercised and is labeled
+`READY_WITH_GAPS`; unresolved items below remain explicit.
 
 ## LIVE-BLOCKED
 
-- **Sectors authentication and schema:** no `SECTORS_API_KEY` was available.
-  The minimal validator, sanitization path, contract checks, and request ledger
-  are offline-tested only.
+- **Sectors authentication and schema:** authentication, sanitization, contract
+  checks, request ledger, and market-wide ingestion were exercised. The
+  provider still rate-limited 295 of 962 per-symbol history requests.
 - **Close basis:** raw versus adjusted semantics remain unresolved. See
   `SECTORS_BLOCKERS.md` and `SECTORS_PRICE_BASIS.md`.
-- **IHSG source:** an authoritative Sectors benchmark history and its date/basis
-  contract remain unverified. A public series or cross-sectional mean must not
-  be substituted inside `SECTORS_LIVE`.
-- **Observed credits:** endpoint calls/pages can be planned, but account balance
-  and observed deltas remain `BALANCE UNAVAILABLE` until recorded.
-- **Full-universe pagination and coverage:** live page counts, duplicates, null
-  taxonomy, and terminal-page behavior are not proven.
-- **Provider parity:** Sectors-shaped fixtures validate the comparison pipeline;
-  they are not real public-vs-Sectors parity results.
+- **IHSG source:** the native Sectors `/v2/index-daily/ihsg/` series was used and
+  aligned through 2026-08-27; its broader price-basis contract remains open.
+- **Observed credits:** the live ledger records 975 requests, 454 cache hits,
+  and 226 estimated credits; account balance and actual debit remain
+  `BALANCE UNAVAILABLE`.
+- **Full-universe pagination and coverage:** 962 company rows, complete
+  taxonomy, and zero duplicate rows were observed. The provider now keeps the
+  documented pagination boundaries separate: `limit=200` for structured
+  company screener pages and `limit=30` for full-universe close pages.
+- **Provider parity:** three live close spot-checks matched; market-wide return
+  parity and adjusted-price parity remain unmeasured.
 - **Live state turnover:** churn, reversals, transition matrices, and durations
   have not been measured on Sectors market-wide history.
-- **Enrichment:** free-float historical semantics, foreign-flow coverage, and
-  corporate-action completeness remain live-blocked. Fundamentals and foreign
-  flow stay `UNAVAILABLE` in the intelligence contract.
+- **Enrichment:** free-float historical semantics, structured foreign-flow
+  coverage, and corporate-action completeness remain open. The bounded
+  `scripts.enrich_tavily_context` command can attach first-party qualitative
+  sources for foreign flow, fundamentals, and events without calling Sectors.
+  Those sources are shown as `READY_WITH_GAPS` / `CONTEXT ONLY`; they do not
+  populate the frozen `ConfirmationEvidence` fields or create numeric
+  confirmation metrics. A category with no attached source remains a web
+  `DATA GAP`, while the frozen backend contract retains `UNAVAILABLE` for
+  absent confirmation fields.
 
 ## METHODOLOGY
 
@@ -71,8 +80,9 @@ no network calls. No live Sectors validation is claimed.
   demo targets; mobile optimization is deliberately limited.
 - Demo mode is deterministic and clearly labeled `DEMO FIXTURE`; its values are
   synthetic and must not be quoted as market observations.
-- Confirmation panels intentionally show
-  `DATA GAP — SECTORS LIVE NOT CONNECTED`.
+- Confirmation panels distinguish quantitative `DATA GAP` from optional
+  qualitative Tavily `CONTEXT ONLY` sources. A source link does not imply that
+  the selected group has been confirmed.
 - Historical map tails and group charts depend on comparable snapshot history;
   incompatible provider/method/universe/taxonomy versions are excluded.
 - The UI is an analytical inspection surface, not a trading terminal, portfolio
@@ -88,4 +98,3 @@ no network calls. No live Sectors validation is claimed.
   the current gate uses focused regression tests, `compileall`, and the existing
   project toolchain.
 - HTML export is secondary to the deterministic Markdown brief.
-

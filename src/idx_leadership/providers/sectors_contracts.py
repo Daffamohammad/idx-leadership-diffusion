@@ -56,8 +56,18 @@ def _endpoint_kind(endpoint: str) -> tuple[str, str]:
     path = endpoint.split("?", 1)[0]
     if path == "/v2/companies/":
         return "companies", "one row per listed company"
+    if path.startswith("/v2/daily/"):
+        return "daily", "one row per symbol and market date"
+    if path.startswith("/v2/index-daily/"):
+        return "index_daily", "one row per index and market date"
     if path == "/v2/close/":
         return "close", "one row per symbol and market date"
+    if path == "/v2/subsectors/":
+        return "subsectors", "one row per sector/subsector pair"
+    if path == "/v2/industries/":
+        return "industries", "one row per subsector/industry pair"
+    if path == "/v2/subindustries/":
+        return "subindustries", "one row per industry/subindustry pair"
     if path == "/v2/free-float/":
         return "free_float", "one row per listed company"
     if path == "/v2/suspensions/":
@@ -197,7 +207,7 @@ def validate_sectors_payload(
         if kind == "foreign_flow":
             location = f"$.data[{index}]"
 
-        if kind not in {"foreign_flow", "corporate_actions"}:
+        if kind in {"companies", "daily", "close"}:
             symbol = row.get("symbol")
             if not isinstance(symbol, str) or not symbol.strip():
                 report.issues.append(
@@ -207,15 +217,22 @@ def validate_sectors_payload(
                 )
             else:
                 canonical = symbol.upper().removesuffix(".JK")
-                if canonical in seen_symbols:
+                duplicate_key = canonical
+                if kind == "daily":
+                    duplicate_key = f"{canonical}|{row.get('date')}"
+                if duplicate_key in seen_symbols:
                     report.issues.append(
                         ContractIssue(
                             "DUPLICATE_IDENTIFIER",
                             f"{location}.symbol",
-                            f"duplicate symbol {symbol}",
+                            (
+                                f"duplicate symbol/date {symbol}/{row.get('date')}"
+                                if kind == "daily"
+                                else f"duplicate symbol {symbol}"
+                            ),
                         )
                     )
-                seen_symbols.add(canonical)
+                seen_symbols.add(duplicate_key)
 
         if kind == "companies":
             for key in ("sector", "sub_sector", "industry", "sub_industry"):
@@ -228,7 +245,7 @@ def validate_sectors_payload(
                             "expected string or null",
                         )
                     )
-        elif kind == "close":
+        elif kind in {"daily", "close"}:
             row_date = row.get("date")
             if not _valid_iso_date(row_date):
                 report.issues.append(
@@ -246,6 +263,40 @@ def validate_sectors_payload(
                 report.issues.append(
                     ContractIssue("REQUIRED_TYPE", f"{location}.close", "expected a number")
                 )
+            for key in ("volume", "market_cap"):
+                value = row.get(key)
+                if value is not None and not _is_number(value):
+                    report.issues.append(
+                        ContractIssue(
+                            "OPTIONAL_TYPE",
+                            f"{location}.{key}",
+                            "expected a number or null",
+                        )
+                    )
+        elif kind == "index_daily":
+            row_date = row.get("date")
+            if not _valid_iso_date(row_date):
+                report.issues.append(
+                    ContractIssue("DATE_TYPE", f"{location}.date", "expected YYYY-MM-DD")
+                )
+            if not isinstance(row.get("index_code"), str) or not row.get("index_code", "").strip():
+                report.issues.append(
+                    ContractIssue(
+                        "PRIMARY_IDENTIFIER",
+                        f"{location}.index_code",
+                        "missing non-empty index_code",
+                    )
+                )
+            if not _is_number(row.get("price")):
+                report.issues.append(
+                    ContractIssue("REQUIRED_TYPE", f"{location}.price", "expected a number")
+                )
+        elif kind == "subsectors":
+            _validate_string_fields(row, ("sector", "subsector"), location, report)
+        elif kind == "industries":
+            _validate_string_fields(row, ("subsector", "industry"), location, report)
+        elif kind == "subindustries":
+            _validate_string_fields(row, ("industry", "sub_industry"), location, report)
         elif kind == "free_float":
             if not _is_number(row.get("free_float")):
                 report.issues.append(
@@ -287,6 +338,24 @@ def validate_sectors_payload(
     if raise_on_error:
         report.raise_for_errors()
     return report
+
+
+def _validate_string_fields(
+    row: Mapping[str, Any],
+    fields: tuple[str, ...],
+    location: str,
+    report: ContractReport,
+) -> None:
+    for key in fields:
+        value = row.get(key)
+        if not isinstance(value, str) or not value.strip():
+            report.issues.append(
+                ContractIssue(
+                    "REQUIRED_TYPE",
+                    f"{location}.{key}",
+                    "expected a non-empty string",
+                )
+            )
 
 
 __all__ = [

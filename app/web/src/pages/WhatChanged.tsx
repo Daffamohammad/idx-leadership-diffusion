@@ -1,0 +1,624 @@
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router";
+import { useSnapshot } from "../data/SnapshotProvider";
+import type { BreadthHistoryPoint, SectorData } from "../data/adapter";
+import { LeadershipChip, DiffusionChip, leadershipColor } from "../components/StatusChips";
+import { EmptyState } from "../components/EmptyState";
+import {
+  clampX,
+  clampY,
+  classifyMapPoint,
+  isOutOfXBounds,
+  isOutOfYBounds,
+  mapX,
+  mapY,
+  mapViewDomain,
+  mapViewLabels,
+  mapYBaseline,
+  mapYValue,
+  type MapClassification,
+  type MapViewMode,
+  type MapPlotBounds,
+} from "../data/mapGeometry";
+import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, CartesianGrid } from "recharts";
+import { placeMapLabels } from "../data/mapLabels";
+
+
+function averageBreadthHistory(
+  points: BreadthHistoryPoint[],
+): Array<{ as_of: string; breadth: number }> {
+  const byDate = new Map<string, number[]>();
+  for (const point of points) {
+    const values = byDate.get(point.as_of) ?? [];
+    values.push(point.breadth);
+    byDate.set(point.as_of, values);
+  }
+  return [...byDate.entries()]
+    .map(([as_of, values]) => ({
+      as_of,
+      breadth: values.reduce((sum, value) => sum + value, 0) / values.length,
+    }))
+    .sort((a, b) => a.as_of.localeCompare(b.as_of));
+}
+
+const num = (v: number | null | undefined, suffix = "%") => {
+  const unavailable = v === null || v === undefined || !Number.isFinite(v);
+  return (
+    <span
+      style={{
+        color: unavailable ? "#686e73" : v > 0 ? "#178477" : v < 0 ? "#b34e4c" : "#686e73",
+        fontFamily: "Geist Mono",
+        fontSize: 12,
+      }}
+    >
+      {unavailable ? "—" : `${v > 0 ? "+" : ""}${v.toFixed(1)}${suffix}`}
+    </span>
+  );
+};
+
+const delta = (s: SectorData) =>
+  s.prevBreadth === undefined || s.breadth === null
+    ? null
+    : s.breadth - s.prevBreadth;
+
+function formatAsOf(asOf: string | null | undefined): string {
+  if (!asOf) return "—";
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const [y, m, d] = asOf.split("-");
+  if (!y || !m || !d) return asOf;
+  return `${Number(d)} ${months[Number(m) - 1] ?? m} ${y}`;
+}
+
+function MiniMap({
+  sectors,
+  onSelect,
+  trajectoryAvailable,
+}: {
+  sectors: SectorData[];
+  onSelect: (s: SectorData) => void;
+  trajectoryAvailable: boolean;
+}) {
+  const plot: MapPlotBounds = { left: 46, top: 22, width: 630, height: 270 };
+  const mapMode: MapViewMode = trajectoryAvailable ? "trajectory" : "current";
+  const axisLabels = mapViewLabels(mapMode);
+  const domain = mapViewDomain(mapMode);
+  const yBaseline = mapYBaseline(mapMode);
+  const yAxis = mapY(yBaseline, plot, domain);
+  // The primary trajectory view requires a comparable prior observation.
+  // A first snapshot uses the emitted current breadth level instead.
+  const hasPriorBreadth = trajectoryAvailable;
+  const plottable = sectors.filter((s) => {
+    if (s.excess20d === null) return false;
+    const yValue = mapYValue(s, mapMode);
+    if (yValue === null) return false;
+    const cls = classifyMapPoint(
+      { ...s, excess20d: s.excess20d, breadth: s.breadth, prevBreadth: s.prevBreadth },
+      plot,
+      domain,
+      hasPriorBreadth,
+      mapMode,
+    );
+    return cls.classification === "plottable";
+  });
+  return (
+    <div style={{ background: "#fff", border: "1px solid #dfe2e1", minHeight: 412, position: "relative", overflow: "hidden" }}>
+      <div style={{ padding: "17px 20px 0", display: "flex", justifyContent: "space-between" }}>
+        <div>
+          <div style={{ fontSize: 17, fontWeight: 600 }}>{axisLabels.title}</div>
+          <div className="eyebrow-muted">{axisLabels.subtitle}</div>
+        </div>
+        <span className="eyebrow-muted">Latest snapshot</span>
+      </div>
+        <svg viewBox="0 0 720 348" width="100%" height="348" style={{ display: "block", marginTop: 3 }} aria-label={axisLabels.title}>
+        <rect x="46" y="22" width="630" height="270" fill="#fafaf8" />
+        <rect
+          x={mapX(0, plot, domain)}
+          y={plot.top}
+          width={plot.left + plot.width - mapX(0, plot, domain)}
+          height={yAxis - plot.top}
+          fill="#f6f8f8"
+        />
+        <rect
+          x={plot.left}
+          y={yAxis}
+          width={mapX(0, plot, domain) - plot.left}
+          height={plot.top + plot.height - yAxis}
+          fill="#f9f7f5"
+        />
+        {[46, 151, 256, 361, 466, 571, 676].map((n) => (
+          <line key={n} x1={n} x2={n} y1="22" y2="292" stroke="#dfe2e1" strokeWidth="1" />
+        ))}
+        {[22, 89, 157, 224, 292].map((n) => (
+          <line key={n} x1="46" x2="676" y1={n} y2={n} stroke="#dfe2e1" strokeWidth="1" />
+        ))}
+        <line x1={mapX(0, plot, domain)} x2={mapX(0, plot, domain)} y1={plot.top} y2={plot.top + plot.height} stroke="#b9c0be" />
+        <line x1={plot.left} x2={plot.left + plot.width} y1={yAxis} y2={yAxis} stroke="#b9c0be" />
+        <text x="60" y="43" fill="#778089" fontSize="10" fontFamily="Geist Mono">
+          {mapMode === "current" ? "WEAK / BROAD" : "IMPROVING"}
+        </text>
+        <text x="570" y="43" fill="#315d87" fontSize="10" fontFamily="Geist Mono">
+          {mapMode === "current" ? "STRONG / BROAD" : "LEADING"}
+        </text>
+        <text x="60" y="278" fill="#778089" fontSize="10" fontFamily="Geist Mono">
+          {mapMode === "current" ? "WEAK / NARROW" : "LAGGING"}
+        </text>
+        <text x="560" y="278" fill="#b34e4c" fontSize="10" fontFamily="Geist Mono">
+          {mapMode === "current" ? "STRONG / NARROW" : "WEAKENING"}
+        </text>
+        {sectors.map((s) => {
+          if (s.excess20d === null) return null;
+          const yValue = mapYValue(s, mapMode);
+          if (yValue === null) return null;
+          const isOffScaleY = isOutOfYBounds(yValue, plot, domain);
+          const isOffScaleX = isOutOfXBounds(s.excess20d, plot, domain);
+          const isOffScale = isOffScaleX || isOffScaleY;
+          const py = isOffScaleY ? clampY(yValue, plot, domain) : mapY(yValue, plot, domain);
+          const px = isOffScaleX ? clampX(s.excess20d, plot, domain) : mapX(s.excess20d, plot, domain);
+          const r = 7 + Math.sqrt(Math.max(1, s.constituents)) / 2.2;
+          const c = leadershipColor(s.leadership);
+          return (
+            <g
+              key={s.id}
+              role="button"
+              tabIndex={0}
+              aria-label={`${s.name}: ${s.leadership} leadership, ${s.diffusion} diffusion, 20D excess return ${s.excess20d !== null ? s.excess20d.toFixed(1) : "N/A"}pp${isOffScale ? " (off scale)" : ""}`}
+              onClick={() => onSelect(s)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  onSelect(s);
+                }
+              }}
+              className="map-group"
+              style={{ cursor: "pointer" }}
+            >
+              <title>{`${s.name}: ${s.leadership} / ${s.diffusion}, 20D excess ${s.excess20d !== null ? s.excess20d.toFixed(1) : "N/A"}pp${isOffScale ? " (off scale: value outside domain)" : ""}`}</title>
+              <circle cx={px} cy={py} r={r} fill="#fff" stroke={c} strokeWidth={1.5} />
+              <circle cx={px} cy={py} r={3} fill={c} />
+              {isOffScale && (
+                <polygon points={`${px},${py - r - 8} ${px - 5},${py - r - 2} ${px + 5},${py - r - 2}`} fill={c} opacity={0.7} />
+              )}
+            </g>
+          );
+        })}
+        {(() => {
+          const candidates = plottable.flatMap((s) => {
+            const yValue = mapYValue(s, mapMode);
+            if (yValue === null || s.excess20d === null) return [];
+            return [
+              {
+                id: s.id,
+                text: s.name,
+                x: clampX(s.excess20d, plot, domain),
+                y: clampY(yValue, plot, domain),
+                radius: 7 + Math.sqrt(Math.max(1, s.constituents)) / 2.2,
+                priority: Math.abs(s.excess20d) + Math.abs(yValue - mapYBaseline(mapMode)) * 0.5,
+              },
+            ];
+          });
+          const maxLabels = candidates.length <= 10 ? candidates.length : 5;
+          const positions = placeMapLabels(candidates, {
+            left: plot.left + 4,
+            right: plot.left + plot.width - 4,
+            top: plot.top + 4,
+            bottom: plot.top + plot.height - 4,
+          }, maxLabels);
+          return positions.map((label) => (
+            <text key={`lbl-${label.id}`} x={label.x} y={label.y} textAnchor={label.textAnchor} fill="#16191c" fontSize="10" fontFamily="Geist" pointerEvents="none">
+              {label.text}
+            </text>
+          ));
+        })()}
+        {plottable.length < sectors.length && (() => {
+          const offScale = sectors.length - plottable.length;
+          return (
+            <text x="335" y="318" fill="#8f8f8f" fontSize="9" fontFamily="Geist Mono" textAnchor="middle">
+              {offScale} group(s) off scale — shown at boundary{offScale === 1 ? "" : "s"}
+            </text>
+          );
+        })()}
+        <text x="335" y="335" fill="#686e73" fontSize="10" fontFamily="Geist Mono">{axisLabels.x} (clamped if off scale)</text>
+        <text x="14" y="178" fill="#686e73" fontSize="10" fontFamily="Geist Mono" transform="rotate(-90 14 178)">{axisLabels.y} (clamped if off scale)</text>
+      </svg>
+      <div
+        className="eyebrow-muted"
+        style={{ padding: "0 20px 12px", fontSize: 10 }}
+      >
+        {mapMode === "current"
+          ? "Current snapshot view: points use current breadth; diffusion change awaits comparable prior."
+          : "Comparable snapshot view: points use breadth delta."}
+      </div>
+    </div>
+  );
+}
+
+function ShiftFeed({ items, onSelect }: { items: SectorData[]; onSelect: (s: SectorData) => void }) {
+  return (
+    <div style={{ borderTop: "2px solid #16191c" }}>
+      <div style={{ padding: "12px 0", display: "flex", justifyContent: "space-between" }}>
+        <div style={{ fontSize: 17, fontWeight: 600 }}>Material shifts</div>
+        <span className="eyebrow-muted">Ranked</span>
+      </div>
+      {items.length === 0 && (
+        <p style={{ color: "#686e73", fontSize: 12, padding: "20px 0" }}>
+          No leadership or diffusion transitions detected in this snapshot.
+        </p>
+      )}
+      {items.slice(0, 5).map((s, i) => {
+        const breadthChange = delta(s);
+        return (
+        <button
+          key={s.id}
+          onClick={() => onSelect(s)}
+          style={{
+            width: "100%",
+            display: "grid",
+            gridTemplateColumns: "29px 1fr auto",
+            gap: 8,
+            textAlign: "left",
+            background: "transparent",
+            border: 0,
+            borderTop: "1px solid #dfe2e1",
+            padding: "13px 0",
+            cursor: "pointer",
+          }}
+        >
+          <span className="eyebrow-muted">{String(i + 1).padStart(2, "0")}</span>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 600 }}>{s.name}</div>
+            <div style={{ fontFamily: "Geist Mono", fontSize: 10, color: "#686e73", marginTop: 4 }}>
+              {s.prevLeadership || s.leadership} <span style={{ color: "#f26a3d" }}>→</span> {s.leadership}
+              <br />
+              {s.prevDiffusion || s.diffusion} <span style={{ color: "#f26a3d" }}>→</span> {s.diffusion}
+            </div>
+          </div>
+          <div style={{ textAlign: "right", fontFamily: "Geist Mono", fontSize: 10 }}>
+            {num(s.excess20d)}
+            <br />
+            <span
+              style={{
+                color:
+                  breadthChange === null
+                    ? "#686e73"
+                    : breadthChange >= 0
+                      ? "#178477"
+                      : "#b34e4c",
+              }}
+            >
+              {breadthChange === null ? "—" : `${breadthChange > 0 ? "+" : ""}${breadthChange.toFixed(1)}pp`}
+            </span>
+          </div>
+        </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function buildMarketRead(sectors: SectorData[]): string {
+  if (sectors.length === 0) return "Snapshot contains no groups.";
+  const broadening = sectors.filter((s) => s.diffusion === "BROADENING");
+  const narrowing = sectors.filter((s) => s.diffusion === "NARROWING");
+  const leading = sectors.filter((s) => s.leadership === "LEADING");
+  if (broadening.length === 0 && narrowing.length === 0) {
+    return `Snapshot classifies ${leading.length} group(s) as LEADING; diffusion is STABLE or UNCONFIRMED across the universe.`;
+  }
+  return `Leadership is broadening in ${broadening.length} group(s) and narrowing in ${narrowing.length} group(s); ${leading.length} group(s) are LEADING.`;
+}
+
+function summaryStats(sectors: SectorData[]): Array<[string, string]> {
+  if (sectors.length === 0) {
+    return [
+      ["IDX leadership", "—"],
+      ["Breadth", "—"],
+      ["Broadening groups", "0"],
+      ["Narrowing groups", "0"],
+      ["Data coverage", "—"],
+    ];
+  }
+  const breadthValues = sectors
+    .map((s) => s.breadth)
+    .filter((v): v is number => v !== null && Number.isFinite(v));
+  const breadth = breadthValues.length
+    ? Math.round(breadthValues.reduce((a, b) => a + b, 0) / breadthValues.length)
+    : 0;
+  const broadening = sectors.filter((s) => s.diffusion === "BROADENING").length;
+  const narrowing = sectors.filter((s) => s.diffusion === "NARROWING").length;
+  const classified = sectors.filter(
+    (s) => s.leadership !== "UNCONFIRMED",
+  ).length;
+  return [
+    ["IDX leadership", `${classified}/${sectors.length} classified`],
+    ["Breadth", `${breadth}%`],
+    ["Broadening groups", String(broadening)],
+    ["Narrowing groups", String(narrowing)],
+    ["Data coverage", `${sectors.reduce((a, s) => a + s.eligibleConstituents, 0)} eligible`],
+  ];
+}
+
+function ConstituentCoverage({
+  sectors,
+  constituentsByGroup,
+}: {
+  sectors: SectorData[];
+  constituentsByGroup: Record<string, Array<{ participating: boolean | null; return20d: number | null }> >;
+}) {
+  const visibleSectors = sectors.slice(0, 5);
+  return (
+    <div
+      aria-label="Constituent participation by group"
+      style={{ border: "1px solid #dfe2e1", background: "#fafaf8", padding: "5px 14px" }}
+    >
+      {visibleSectors.map((sector, index) => {
+        const rows = constituentsByGroup[sector.id] ?? [];
+        const available = rows.filter((row) => row.return20d !== null).length;
+        const participating = rows.filter((row) => row.participating === true).length;
+        return (
+          <div
+            key={sector.id}
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: 12,
+              padding: "8px 0",
+              borderBottom: index < visibleSectors.length - 1 ? "1px solid #dfe2e1" : "none",
+              fontSize: 12,
+            }}
+          >
+            <span style={{ fontWeight: 600 }}>{sector.name}</span>
+            <span className="eyebrow-muted">
+              {participating}/{available} outperforming
+            </span>
+          </div>
+        );
+      })}
+      {sectors.length > visibleSectors.length && (
+        <div className="eyebrow-muted" style={{ padding: "8px 0 4px" }}>
+          + {sectors.length - visibleSectors.length} additional groups
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function WhatChanged() {
+  const { data, payload } = useSnapshot();
+  const navigate = useNavigate();
+  const [sort, setSort] = useState<"rank" | "delta">("rank");
+  const sectors = data?.sectors ?? [];
+  const materialChanges = data?.materialChanges ?? [];
+  const breadthHistory = data?.breadthHistory ?? [];
+  const averageHistory = useMemo(
+    () => averageBreadthHistory(breadthHistory),
+    [breadthHistory],
+  );
+  const dataSources = data?.dataSources ?? { breadthHistory: false, constituents: false, fundamentals: false, foreignFlow: false, trajectory: false };
+  const constituentsByGroup = data?.constituentsByGroup ?? {};
+  const ordered = useMemo(
+    () =>
+      [...sectors].sort((a, b) =>
+        sort === "rank"
+          ? (a.rank ?? Number.POSITIVE_INFINITY) -
+            (b.rank ?? Number.POSITIVE_INFINITY)
+          : (delta(b) ?? Number.NEGATIVE_INFINITY) -
+            (delta(a) ?? Number.NEGATIVE_INFINITY),
+      ),
+    [sort, sectors],
+  );
+  if (!data) return null;
+  const select = (s: SectorData) => navigate("/explorer", { state: { sectorId: s.id } });
+
+  const asOf = formatAsOf(payload?.as_of);
+  const marketRead = buildMarketRead(sectors);
+  const stats = summaryStats(sectors);
+
+  return (
+    <div style={{ maxWidth: 1480, margin: "auto", padding: "28px 32px 64px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "end", marginBottom: 16 }}>
+        <div>
+          <div className="eyebrow-muted">Overview / Indonesian Equity Market Intelligence</div>
+          <h1 style={{ fontSize: 30, letterSpacing: "-.045em", margin: "5px 0 0" }}>Market Intelligence</h1>
+        </div>
+        <span className="eyebrow-muted">EOD research / {asOf}</span>
+      </div>
+      <section
+        style={{
+          background: "#121619",
+          color: "white",
+          borderLeft: "3px solid #f26a3d",
+          padding: "24px 27px 0",
+          marginBottom: 22,
+        }}
+      >
+        <div className="eyebrow-muted" style={{ color: "#abb2b3" }}>Market read</div>
+        <div
+          style={{
+            fontSize: 25,
+            letterSpacing: "-.03em",
+            maxWidth: 820,
+            lineHeight: 1.2,
+            margin: "9px 0 25px",
+          }}
+        >
+          {marketRead}
+        </div>
+        <div className="market-read-stats" style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", borderTop: "1px solid #ffffff22" }}>
+          {stats.map(([l, v]) => (
+            <div key={l} style={{ padding: "12px 0 15px", borderRight: "1px solid #ffffff18" }}>
+              <div className="eyebrow-muted" style={{ color: "#abb2b3" }}>{l}</div>
+              <div style={{ fontFamily: "Geist Mono", fontSize: 13, marginTop: 3 }}>{v}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+      <section
+        className="overview-grid"
+        style={{ display: "grid", gridTemplateColumns: "minmax(0,1.85fr) minmax(280px,.85fr)", gap: 24, marginBottom: 38 }}
+      >
+        <MiniMap
+          sectors={sectors}
+          onSelect={select}
+          trajectoryAvailable={dataSources.trajectory}
+        />
+        <ShiftFeed items={materialChanges} onSelect={select} />
+      </section>
+      <section style={{ marginBottom: 38 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "baseline",
+            justifyContent: "space-between",
+            borderTop: "2px solid #16191c",
+            paddingTop: 12,
+          }}
+        >
+          <div>
+            <h2 style={{ fontSize: 18, margin: 0 }}>Leadership tape</h2>
+            <span className="eyebrow-muted">Cross-sectional monitor</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setSort(sort === "rank" ? "delta" : "rank")}
+            style={{ border: "1px solid #dfe2e1", background: "#fafaf8", padding: "6px 9px", fontSize: 11, cursor: "pointer" }}
+          >
+            Sort: {sort === "rank" ? "Rank" : "Δ Breadth"} ↕
+          </button>
+        </div>
+        <div style={{ overflowX: "auto", marginTop: 12, borderTop: "1px solid #dfe2e1" }}>
+          <table style={{ width: "100%", minWidth: 920, borderCollapse: "collapse" }}>
+            <thead style={{ position: "sticky", top: 0, background: "#f3f3f0" }}>
+              <tr>
+                {["Rank", "Group", "Lead", "Diff", "20D Excess", "60D Excess", "Breadth", "Δ Breadth", "Conc.", "Persistence", "Confirmation"].map(
+                  (x, i) => (
+                    <th
+                      key={x}
+                      style={{
+                        padding: "9px 8px",
+                        textAlign: i < 2 ? "left" : "right",
+                        fontFamily: "Geist Mono",
+                        fontSize: 9,
+                        color: "#686e73",
+                        fontWeight: 500,
+                        letterSpacing: ".06em",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {x}
+                    </th>
+                  ),
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              {ordered.map((s) => (
+                <tr key={s.id} onClick={() => select(s)} style={{ borderTop: "1px solid #dfe2e1", cursor: "pointer" }}>
+                  <td style={{ padding: "10px 8px", fontFamily: "Geist Mono", fontSize: 11 }}>{s.rank ?? "—"}</td>
+                  <td style={{ padding: "10px 8px", fontWeight: 600 }}>
+                    <button
+                      type="button"
+                      onClick={() => select(s)}
+                      style={{ border: 0, padding: 0, background: "transparent", color: "inherit", fontWeight: 600, cursor: "pointer", textAlign: "left" }}
+                    >
+                      {s.name}
+                    </button>
+                  </td>
+                  <td style={{ padding: "10px 8px", textAlign: "right" }}>
+                    <LeadershipChip state={s.leadership} small />
+                  </td>
+                  <td style={{ padding: "10px 8px", textAlign: "right" }}>
+                    <DiffusionChip state={s.diffusion} small />
+                  </td>
+                  <td style={{ padding: "10px 8px", textAlign: "right" }}>{num(s.excess20d)}</td>
+                  <td style={{ padding: "10px 8px", textAlign: "right" }}>{num(s.excess60d)}</td>
+                  <td style={{ padding: "10px 8px", textAlign: "right", fontFamily: "Geist Mono", fontSize: 12 }}>{s.breadth === null ? "—" : `${s.breadth}%`}</td>
+                  <td style={{ padding: "10px 8px", textAlign: "right" }}>
+                    {delta(s) === null ? "—" : num(delta(s)!, "pp")}
+                  </td>
+                  <td style={{ padding: "10px 8px", textAlign: "right", fontFamily: "Geist Mono", fontSize: 12 }}>{s.concentration === null ? "—" : `${s.concentration}%`}</td>
+                  <td style={{ padding: "10px 8px", textAlign: "right", fontFamily: "Geist Mono", fontSize: 12 }}>{s.persistence}W</td>
+                  <td
+                    style={{
+                      padding: "10px 8px",
+                      textAlign: "right",
+                      fontFamily: "Geist Mono",
+                      fontSize: 10,
+                      color: s.foreignFlow === "CONFIRMING" ? "#178477" : "#686e73",
+                    }}
+                  >
+                    {s.foreignFlow.replace(/_/g, " ")}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section style={{ borderTop: "2px solid #16191c", paddingTop: 12 }}>
+        <div className="surface-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1.1fr .82fr", gap: 28 }}>
+          <div>
+            <h2 style={{ margin: 0, fontSize: 18 }}>Under the surface</h2>
+            <div className="eyebrow-muted">Average group breadth history</div>
+            <div style={{ marginTop: 12 }}>
+              {dataSources.breadthHistory && averageHistory.length > 0 ? (
+                <ResponsiveContainer width="100%" height={175}>
+                  <AreaChart data={averageHistory} margin={{ top: 18, right: 5, bottom: 0, left: -25 }}>
+                    <CartesianGrid stroke="#dfe2e1" vertical={false} />
+                    <XAxis dataKey="as_of" tickFormatter={(value) => String(value).slice(0, 10)} tick={{ fontFamily: "Geist Mono", fontSize: 9, fill: "#686e73" }} axisLine={false} tickLine={false} />
+                    <YAxis domain={[0, 100]} tick={{ fontFamily: "Geist Mono", fontSize: 9, fill: "#686e73" }} axisLine={false} tickLine={false} />
+                    <Area dataKey="breadth" stroke="#178477" fill="#178477" fillOpacity={0.12} strokeWidth={2} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              ) : (
+                <EmptyState
+                  label="NO TIME SERIES"
+                  title="Per-group breadth history not emitted by the snapshot writer"
+                  body={
+                    <>
+                      The current snapshot bundle (<code>groups.parquet</code>) records only the latest
+                      breadth value. A per-group weekly history will land once
+                      <code> scripts/build_snapshot.py</code> is extended to retain a rolling window.
+                    </>
+                  }
+                  height={175}
+                />
+              )}
+            </div>
+          </div>
+          <div>
+            <div className="eyebrow-muted" style={{ marginTop: 2 }}>Constituent participation matrix</div>
+            {dataSources.constituents ? (
+              <ConstituentCoverage sectors={sectors} constituentsByGroup={constituentsByGroup} />
+            ) : (
+              <EmptyState
+                label="NO CONSTITUENTS"
+                title="Constituent rows are not available in this snapshot"
+                body="The current payload has no feature rows joined to its security master, so participation cannot be shown here."
+                height={175}
+              />
+            )}
+          </div>
+          <div style={{ borderLeft: "1px solid #dfe2e1", paddingLeft: 20 }}>
+            <div className="eyebrow-muted">Evidence stack</div>
+            {dataSources.foreignFlow ? (
+              sectors.slice(0, 5).map((s) => (
+                <div key={s.id} style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid #dfe2e1", padding: "8px 0", fontSize: 12 }}>
+                  <span style={{ color: "#686e73" }}>{s.name} leadership</span>
+                  <b style={{ fontFamily: "Geist Mono", fontSize: 10, color: "#315d87" }}>{s.leadership}</b>
+                </div>
+              ))
+            ) : (
+              <>
+                <EmptyState
+                  label="NO FOREIGN FLOW"
+                  title="Foreign-flow data is not part of the prototype snapshot"
+                  body="The live Sectors flow capability is gated on a credential; offline prototype data does not include it."
+                  height={120}
+                />
+              </>
+            )}
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}

@@ -1,0 +1,601 @@
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+
+import { useSnapshot } from "../data/SnapshotProvider";
+import type { ConstituentData, FlowState, SectorData } from "../data/adapter";
+import { DataStatusChip, LeadershipChip, DiffusionChip } from "../components/StatusChips";
+import { EmptyState } from "../components/EmptyState";
+import {
+  getTavilyCategory,
+  getTavilyCategoryStatus,
+  shortenEvidence,
+  type ResearchContextCategory,
+} from "../data/researchContext";
+import {
+  AreaChart,
+  Area,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ReferenceLine,
+} from "recharts";
+import { leadershipColor } from "../components/StatusChips";
+
+const card: React.CSSProperties = {
+  background: "#ffffff",
+  borderRadius: 6,
+  boxShadow: "rgba(0,0,0,0.08) 0px 0px 0px 1px, rgb(250,250,250) 0px 0px 0px 2px",
+};
+
+function displayMetric(val: number | null | undefined, suffix = "%"): string {
+  if (val === null || val === undefined || !Number.isFinite(val)) return "—";
+  return `${val > 0 ? "+" : ""}${val.toFixed(1)}${suffix}`;
+}
+
+function Num({ val, suffix = "%" }: { val: number | null | undefined; suffix?: string }) {
+  const color =
+    val === null || val === undefined || !Number.isFinite(val)
+      ? "#8f8f8f"
+      : val > 0
+        ? "#1a6e62"
+        : val < 0
+          ? "#8f2424"
+          : "#5a5a5a";
+  return (
+    <span
+      style={{
+        fontFamily: "Geist Mono, monospace",
+        fontSize: 13,
+        fontWeight: 500,
+        color,
+        fontVariantNumeric: "tabular-nums",
+      }}
+    >
+      {displayMetric(val, suffix)}
+    </span>
+  );
+}
+
+function SectionHead({ label }: { label: string }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "32px 0 14px" }}>
+      <span className="eyebrow-muted">{label}</span>
+      <div style={{ flex: 1, height: 1, background: "#ebebeb" }} />
+    </div>
+  );
+}
+
+function MetricCard({
+  label,
+  value,
+  sub,
+  color,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+  color?: string;
+}) {
+  return (
+    <div style={{ ...card, flex: 1, padding: "16px 18px" }}>
+      <div className="eyebrow-muted" style={{ marginBottom: 8 }}>{label}</div>
+      <div
+        style={{
+          fontFamily: "Geist Mono, monospace",
+          fontSize: 24,
+          fontWeight: 500,
+          color: color || "#171717",
+          letterSpacing: "-0.02em",
+          fontVariantNumeric: "tabular-nums",
+        }}
+      >
+        {value}
+      </div>
+      {sub && (
+        <div style={{ fontSize: 11, color: "#666666", marginTop: 4 }}>{sub}</div>
+      )}
+    </div>
+  );
+}
+
+const flowCfg: Record<FlowState, { label: string; color: string }> = {
+  CONFIRMING: { label: "Confirming", color: "#1a6e62" },
+  NEUTRAL: { label: "Neutral", color: "#5a5a5a" },
+  AGAINST: { label: "Against", color: "#8f2424" },
+  DATA_GAP: { label: "Data gap", color: "#7a5010" },
+};
+
+function ConstituentTable({ constituents }: { constituents: ConstituentData[] }) {
+  return (
+    <div style={{ ...card, overflow: "hidden" }}>
+      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <thead>
+          <tr style={{ borderBottom: "1px solid #ebebeb" }}>
+            {["Ticker", "Company", "20D Ret", "20D Exc", "60D Exc", "Part.", "Abs. Move", "Foreign Flow"].map(
+              (col) => (
+                <th
+                  key={col}
+                  style={{
+                    padding: "9px 12px",
+                    fontFamily: "Geist Mono, monospace",
+                    fontSize: 10,
+                    fontWeight: 400,
+                    letterSpacing: "0.06em",
+                    textTransform: "uppercase",
+                    color: "#666666",
+                    textAlign: col === "Ticker" || col === "Company" ? "left" : "right",
+                    background: "#fafafa",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {col}
+                </th>
+              ),
+            )}
+          </tr>
+        </thead>
+        <tbody>
+          {constituents.map((c, i) => {
+            const flow = flowCfg[c.foreignFlow];
+            return (
+              <tr
+                key={c.ticker}
+                style={{ borderBottom: i < constituents.length - 1 ? "1px solid #ebebeb" : "none" }}
+              >
+                <td style={{ padding: "9px 12px", fontFamily: "Geist Mono, monospace", fontSize: 12, fontWeight: 600, color: "#171717" }}>
+                  {c.ticker}
+                </td>
+                <td style={{ padding: "9px 12px", fontSize: 12, color: "#4d4d4d" }}>{c.name}</td>
+                <td style={{ padding: "9px 12px", textAlign: "right" }}>
+                  <Num val={c.return20d} />
+                </td>
+                <td style={{ padding: "9px 12px", textAlign: "right" }}>
+                  <Num val={c.excess20d} />
+                </td>
+                <td style={{ padding: "9px 12px", textAlign: "right" }}>
+                  <Num val={c.excess60d} />
+                </td>
+                <td
+                  style={{
+                    padding: "9px 12px",
+                    textAlign: "right",
+                    fontFamily: "Geist Mono, monospace",
+                    fontSize: 11,
+                    color: c.participating === null ? "#8f8f8f" : c.participating ? "#1a6e62" : "#8f8f8f",
+                  }}
+                >
+                  {c.participating === null ? "—" : c.participating ? "● Yes" : "○ No"}
+                </td>
+                <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "Geist Mono, monospace", fontSize: 12, color: "#171717" }}>
+                  {c.contribution === null ? "—" : `${c.contribution}%`}
+                </td>
+                <td
+                  style={{
+                    padding: "9px 12px",
+                    textAlign: "right",
+                    fontFamily: "Geist Mono, monospace",
+                    fontSize: 11,
+                    color: flow.color,
+                    letterSpacing: "0.03em",
+                  }}
+                >
+                  {flow.label}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function ContribBars({ constituents }: { constituents: ConstituentData[] }) {
+  if (constituents.every((c) => c.contribution === null)) {
+    return (
+      <EmptyState
+        label="NO CONTRIBUTION DATA"
+        title="Contribution percentages are unavailable"
+        body="The snapshot does not contain enough constituent-level return data to calculate this breakdown."
+        height={100}
+      />
+    );
+  }
+  const available = constituents
+    .filter(
+      (c): c is ConstituentData & { contribution: number } => c.contribution !== null,
+    )
+    .sort((a, b) => b.contribution - a.contribution);
+  const top3 = available.slice(0, 3);
+  const topTotal = top3.reduce((s, c) => s + c.contribution, 0);
+  const other = Math.max(0, 100 - topTotal);
+  const rows: Array<{ label: string; val: number; isOther: boolean }> = [
+    ...top3.map((c) => ({ label: c.ticker, val: c.contribution, isOther: false })),
+    { label: "Other", val: other, isOther: true },
+  ];
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      {rows.map((r) => (
+        <div key={r.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span
+            style={{
+              width: 64,
+              fontFamily: "Geist Mono, monospace",
+              fontSize: 11,
+              fontWeight: r.isOther ? 400 : 600,
+              color: r.isOther ? "#8f8f8f" : "#171717",
+            }}
+          >
+            {r.label}
+          </span>
+          <div style={{ flex: 1, height: 6, background: "#ebebeb", borderRadius: 1, overflow: "hidden" }}>
+            <div
+              style={{
+                height: "100%",
+                width: `${r.val}%`,
+                background: r.isOther ? "#c9c9c9" : "#171717",
+                borderRadius: 1,
+                transition: "width 0.3s",
+              }}
+            />
+          </div>
+          <span
+            style={{
+              width: 32,
+              fontFamily: "Geist Mono, monospace",
+              fontSize: 11,
+              color: "#666666",
+              textAlign: "right",
+            }}
+          >
+            {r.val}%
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function findGroupFromLocation(
+  state: unknown,
+  fallbackId: string | undefined,
+  sectors: SectorData[],
+): string {
+  const fromState = (state as { sectorId?: string } | null)?.sectorId;
+  if (fromState && sectors.some((s) => s.id === fromState)) return fromState;
+  if (fallbackId && sectors.some((s) => s.id === fallbackId)) return fallbackId;
+  return sectors[0]?.id ?? "";
+}
+
+function ResearchEvidencePanel({
+  label,
+  category,
+  payload,
+  groupName,
+}: {
+  label: string;
+  category: ResearchContextCategory;
+  payload: Parameters<typeof getTavilyCategory>[0];
+  groupName: string;
+}) {
+  const context = getTavilyCategory(payload, category);
+  const status = getTavilyCategoryStatus(payload, category);
+  const hasContext = context.records.length > 0;
+  const verdict = hasContext ? "CONTEXT ONLY" : status === "FAILED" ? "FAILED" : "DATA GAP";
+  const verdictColor = hasContext ? "#7a5010" : status === "FAILED" ? "#8f2424" : "#7a5010";
+  return (
+    <div style={{ ...card, padding: "16px 18px", minWidth: 0 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 10 }}>
+        <div className="eyebrow-muted">{label}</div>
+        <DataStatusChip status={status} />
+      </div>
+      <p style={{ margin: "0 0 12px", fontSize: 12, color: "#666666", lineHeight: 1.5 }}>
+        {context.note || (hasContext
+          ? "Qualitative web context only; it does not change the confirmation metric."
+          : "No source-backed context is attached to this snapshot.")}
+      </p>
+      {hasContext ? (
+        <>
+          <div style={{ fontSize: 11, color: "#7a5010", marginBottom: 8 }}>
+            Market-level sources; not attributed to {groupName}.
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {context.records.slice(0, 3).map((record) => (
+              <div key={`${record.request_id ?? record.url}-${record.url}`} style={{ borderTop: "1px solid #ebebeb", paddingTop: 9 }}>
+                <a
+                  href={record.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{ color: "#245b76", fontSize: 12, fontWeight: 500, lineHeight: 1.35, textDecoration: "none" }}
+                >
+                  {record.title}
+                </a>
+                <div style={{ marginTop: 4, fontSize: 11, color: "#777777", lineHeight: 1.45 }}>
+                  {shortenEvidence(record.content, 150)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      ) : (
+        <div style={{ fontSize: 12, color: "#8f8f8f" }}>No eligible source was attached.</div>
+      )}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 14 }}>
+        <span style={{ fontSize: 11, color: "#666666" }}>Overall</span>
+        <span
+          style={{
+            fontFamily: "Geist Mono, monospace",
+            fontSize: 10,
+            letterSpacing: "0.071em",
+            textTransform: "uppercase",
+            color: verdictColor,
+            boxShadow: "rgb(235,235,235) 0 0 0 1px",
+            background: "#ffffff",
+            padding: "2px 8px",
+            borderRadius: 4,
+          }}
+        >
+          {verdict}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+export default function GroupExplorer() {
+  const { data } = useSnapshot();
+  const location = useLocation();
+  const [selected, setSelected] = useState<string>("");
+  const sectors = data?.sectors ?? [];
+  const constituentsByGroup = data?.constituentsByGroup ?? {};
+  const dataSources = data?.dataSources ?? { breadthHistory: false, constituents: false, fundamentals: false, foreignFlow: false, trajectory: false };
+  useEffect(() => {
+    if (!selected && sectors.length > 0) {
+      setSelected(findGroupFromLocation(location.state, undefined, sectors));
+    }
+  }, [sectors, location.state, selected]);
+
+  if (!data) return null;
+  if (sectors.length === 0) {
+    return (
+      <div style={{ padding: "36px 40px", maxWidth: 1280, margin: "0 auto" }}>
+        <EmptyState
+          label="NO GROUPS"
+          title="Snapshot contains no group data"
+          body="Export a readable snapshot with `.venv/bin/python -m scripts.export_snapshot_json --latest`, then refresh the app."
+          height={240}
+        />
+      </div>
+    );
+  }
+
+  const sector = sectors.find((s) => s.id === selected) ?? sectors[0];
+  const constituents = constituentsByGroup[sector.id] ?? [];
+  const groupBreadthHistory = data.breadthHistory.filter(
+    (point) => point.group_id === sector.id,
+  );
+  const delta =
+    sector.prevBreadth !== undefined && sector.breadth !== null
+      ? sector.breadth - sector.prevBreadth
+      : undefined;
+
+  return (
+    <div style={{ padding: "36px 40px", maxWidth: 1280, margin: "0 auto" }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 24 }}>
+        <div>
+          <div className="eyebrow-muted" style={{ marginBottom: 8 }}>
+            IDX → Group → {sector.name}
+          </div>
+          <h1
+            style={{
+              fontSize: 30,
+              fontWeight: 400,
+              color: "#171717",
+              letterSpacing: "-1.5px",
+              lineHeight: 1.1,
+              marginBottom: 0,
+            }}
+          >
+            {sector.name}
+          </h1>
+        </div>
+        <select
+          aria-label="Select group"
+          value={sector.id}
+          onChange={(e) => setSelected(e.target.value)}
+          style={{
+            padding: "8px 14px",
+            fontSize: 13,
+            borderRadius: 6,
+            border: "none",
+            boxShadow: "rgb(235,235,235) 0 0 0 1px",
+            background: "#ffffff",
+            color: "#171717",
+            fontFamily: "Geist, sans-serif",
+            cursor: "pointer",
+          }}
+        >
+          {sectors.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div style={{ ...card, padding: "18px 22px", marginBottom: 20 }}>
+        <div style={{ display: "flex", gap: 6, marginBottom: 10, flexWrap: "wrap" }}>
+          <LeadershipChip state={sector.leadership} />
+          <DiffusionChip state={sector.diffusion} />
+          <span
+            style={{
+              fontFamily: "Geist Mono, monospace",
+              fontSize: 11,
+              letterSpacing: "0.065em",
+              textTransform: "uppercase",
+              color: "#666666",
+              boxShadow: "rgb(235,235,235) 0 0 0 1px",
+              background: "#ffffff",
+              padding: "2px 8px",
+              borderRadius: 4,
+            }}
+          >
+            {sector.constituents} constituents
+          </span>
+        </div>
+        <p style={{ fontSize: 13, color: "#4d4d4d", lineHeight: 1.6, maxWidth: 720 }}>
+          {sector.interpretation}
+        </p>
+      </div>
+
+      <div className="explorer-metrics" style={{ display: "flex", gap: 12, marginBottom: 24 }}>
+        <MetricCard
+          label="Relative Leadership"
+          value={displayMetric(sector.excess20d)}
+          sub="20D vs IHSG"
+          color={
+            sector.excess20d === null
+              ? "#8f8f8f"
+              : sector.excess20d >= 0
+                ? "#1a6e62"
+                : "#8f2424"
+          }
+        />
+        <MetricCard
+          label="Breadth"
+          value={displayMetric(sector.breadth)}
+          sub={delta != null ? `${delta > 0 ? "+" : ""}${delta.toFixed(1)}pp vs prev` : "change unavailable"}
+          color={sector.breadth === null ? "#8f8f8f" : "#1a6e62"}
+        />
+        <MetricCard
+          label="Concentration"
+          value={displayMetric(sector.concentration)}
+          sub="Top-3 contribution"
+          color={
+            sector.concentration === null
+              ? "#8f8f8f"
+              : sector.concentration > 60
+                ? "#8f2424"
+                : sector.concentration > 45
+                  ? "#7a5010"
+                  : "#1a6e62"
+          }
+        />
+        <MetricCard
+          label="Constituents"
+          value={String(sector.constituents)}
+          sub={`${sector.eligibleConstituents} eligible / ${sector.constituents} total`}
+        />
+      </div>
+
+      <SectionHead label="Time series" />
+      {dataSources.breadthHistory && groupBreadthHistory.length > 0 ? (
+        <div style={{ ...card, padding: "16px 18px", marginBottom: 12 }}>
+          <div style={{ fontSize: 13, fontWeight: 500, color: "#171717", marginBottom: 8 }}>
+            {sector.name} — breadth history
+          </div>
+          <ResponsiveContainer width="100%" height={180}>
+            <AreaChart data={groupBreadthHistory}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#ebebeb" />
+              <XAxis dataKey="as_of" tickFormatter={(v) => String(v).slice(0, 10)} fontSize={10} />
+              <YAxis domain={[0, 100]} fontSize={10} />
+              <Tooltip />
+              <Area type="monotone" dataKey="breadth" stroke={leadershipColor(sector.leadership)} fill={leadershipColor(sector.leadership)} fillOpacity={0.15} name="Breadth %" />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      ) : (
+        <div style={{ ...card, padding: "16px 18px", marginBottom: 12 }}>
+          <EmptyState
+            label="NO HISTORY"
+            title="Per-group breadth history not emitted"
+            body="Export a snapshot that includes breadth history to see the time series."
+            height={140}
+          />
+        </div>
+      )}
+
+      <SectionHead label="Constituents" />
+      {dataSources.constituents && constituents.length > 0 ? (
+        <>
+          <div style={{ ...card, padding: "16px 18px", marginBottom: 12 }}>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 14 }}>
+              <span style={{ fontSize: 13, fontWeight: 500, color: "#171717" }}>Absolute 20D move contribution</span>
+              <span className="eyebrow-muted">Top-3 absolute move: {displayMetric(sector.concentration)}</span>
+            </div>
+            <ContribBars constituents={constituents} />
+          </div>
+          <ConstituentTable constituents={constituents} />
+        </>
+      ) : (
+        <EmptyState
+          label="NO CONSTITUENTS"
+          title={`No constituents on file for ${sector.name}`}
+          body="No feature rows matched this group in the exported security master, so constituent-level participation cannot be shown."
+          height={140}
+        />
+      )}
+
+      <SectionHead label="Confirmation" />
+      <div className="explorer-confirmation-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 12 }}>
+        <ResearchEvidencePanel
+          label="Fundamentals"
+          category="fundamentals"
+          payload={data.payload}
+          groupName={sector.name}
+        />
+        <ResearchEvidencePanel
+          label="Foreign flow"
+          category="foreign_flow"
+          payload={data.payload}
+          groupName={sector.name}
+        />
+        <ResearchEvidencePanel
+          label="Events / catalyst"
+          category="events"
+          payload={data.payload}
+          groupName={sector.name}
+        />
+      </div>
+
+      <SectionHead label="What could contradict this signal?" />
+      <EmptyState
+        label="NO CONTRADICTION RECORDS"
+        title="Per-group contradiction evidence is not in the web snapshot"
+        body="The current payload does not emit contradiction records, so no generic warning is shown for this group."
+        height={108}
+      />
+
+      <div
+        style={{
+          borderRadius: 6,
+          border: "1px solid #ebebeb",
+          background: "#fafafa",
+          padding: "16px 18px",
+          margin: "12px 0 40px",
+        }}
+      >
+        <div style={{ fontSize: 13, fontWeight: 500, color: "#171717", marginBottom: 8 }}>Screen invalidation</div>
+        <p style={{ fontSize: 12, color: "#666666", margin: 0 }}>
+          Per-group invalidation conditions are not emitted by the current web snapshot.
+          Review the versioned methodology and the next comparable snapshot before treating
+          a state as changed.
+        </p>
+        <p
+          style={{
+            fontSize: 10,
+            color: "#8f8f8f",
+            marginTop: 10,
+            fontFamily: "Geist Mono, monospace",
+            letterSpacing: "0.04em",
+          }}
+        >
+          Screen-state invalidation, not an investment recommendation.
+        </p>
+      </div>
+    </div>
+  );
+}
