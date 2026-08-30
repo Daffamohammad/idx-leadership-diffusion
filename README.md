@@ -12,6 +12,13 @@ coverage, provenance, rate-limit, and data-gap metadata. Tavily is wired as
 an optional qualitative context layer; it never supplies quantitative market
 data.
 
+The hackathon product is intentionally hybrid rather than pretending to be a
+complete production terminal: the market-signal lane is backed by a persisted
+real snapshot, foreign flow is a bounded source-backed sample, and Konglo,
+Themes, and research context are clearly presented as static or analyst-defined
+research layers. The current section-by-section contract is documented in
+[`docs/HYBRID_PRODUCT_MODEL.md`](docs/HYBRID_PRODUCT_MODEL.md).
+
 **This project is an analytical market-intelligence prototype for
 research and educational purposes. It does not provide investment
 advice or personalized recommendations.**
@@ -19,6 +26,7 @@ advice or personalized recommendations.**
 ## Sections
 
 - [What works now](#what-works-now)
+- [Hybrid product model](#hybrid-product-model)
 - [Prototype mode](#prototype-mode)
 - [Demo mode](#demo-mode)
 - [Sectors integration status](#sectors-integration-status)
@@ -42,7 +50,24 @@ A clean Python 3.10+ package that:
 8. exposes a thin Streamlit UI for inspection,
 9. ships a deterministic synthetic-market harness (`tests/synthetic_market.py`,
    scenarios A–G) and a group-size diffusion grid
-   (`scripts/audit_group_size_diffusion.py`) as offline guardrails.
+ (`scripts/audit_group_size_diffusion.py`) as offline guardrails.
+
+## Hybrid product model
+
+The product separates evidence by what a reviewer can reasonably trust in the
+current build:
+
+| Product lane | Sections | Contract |
+| --- | --- | --- |
+| Real snapshot | Overview Sector heatmap, Leadership Map, Groups, Ticker Analysis, What Changed | Persisted market observations and explicit coverage metadata; the current snapshot remains partial and has no comparable prior. |
+| Source-backed sample | Foreign Flow | Real reported observations from a bounded top-list sample; not a full-universe signal. |
+| Static research lens | Konglo Map, Themes Map, Group Explorer for those taxonomies, Themes Explorer | Analyst-defined membership configuration; aggregate metrics may reuse the current snapshot, but the taxonomy is not official IDX data. |
+| Static context | Research Events and optional web-context panels | Persisted descriptive context; never used to create or change quantitative signals. |
+
+This is a deliberate hackathon delivery choice. A repository-local rubric does
+not require full IDX coverage or production deployment; the external event
+rules remain the final authority. The UI labels each lane so a static research
+prototype is not mistaken for live data.
 
 ## What works now
 
@@ -80,9 +105,14 @@ provider connections while rendering.
 | Route | Page | Data source |
 | --- | --- | --- |
 | `/` | `PublicHome` | marketing copy (no data dependency) |
-| `/overview` | `WhatChanged` | real `groups` + `transitions` from the snapshot |
+| `/overview` | `MarketOverview` | real Sector heatmap plus bounded sample and static context sections |
+| `/what-changed` | `WhatChanged` | real current snapshot; prior comparison is shown only when compatible history exists |
 | `/map` | `LeadershipMap` | real `groups` (60D/20D signed excess returns; current breadth, or breadth delta when a comparable prior exists) |
+| `/maps/konglo` | `TaxonomyMapPage` | static analyst-defined membership lens with current-snapshot aggregates |
+| `/maps/themes` | `TaxonomyMapPage` | static analyst-defined membership lens with current-snapshot aggregates |
 | `/explorer` | `GroupExplorer` | real `features` joined to `security_master` per `group_id` |
+| `/themes` | `ThemesExplorer` | static analyst-defined theme lens with current-snapshot aggregates |
+| `/groups` | `MasterGroupTable` | real group cross-section from the snapshot |
 | `/methodology` | `Methodology` | real `manifest`, `quality`, coverage, warnings, plus static method cards |
 
 The map uses an explicitly labeled current-breadth view when the snapshot has
@@ -119,7 +149,7 @@ filter prevents a newer public prototype from silently replacing a live
 Sectors view. Override with `VITE_SNAPSHOT_ID` when intentionally reviewing
 another payload.
 
-### What is real vs design scaffolding
+### What is real vs static or bounded
 
 Real (driven by the snapshot bundle):
 
@@ -131,13 +161,17 @@ Real (driven by the snapshot bundle):
 - sidebar as-of, data-status chip, snapshot id in the header
 - Data Status and Provenance tables on the Methodology page
 
-Design scaffolding and optional context (explicit empty-state, never fake values):
+Static or bounded layers (explicitly labeled, never presented as live signals):
 
 - per-group breadth / performance time series (available when a snapshot
   contains persisted comparable observations)
 - leadership trail lines on the map (same reason)
-- quantitative foreign flow, fundamentals, and events (not emitted by the
-  current intelligence contract)
+- foreign-flow top-list sample with source provenance
+- Konglo and Themes analyst-defined membership lenses
+- qualitative research events and web context
+
+Fundamentals remain a data gap. Unsupported quantitative views render a
+one-line reason rather than a fabricated neutral value.
 
 An existing snapshot can receive a bounded, first-party Tavily research
 context pass without rebuilding or calling Sectors:
