@@ -191,15 +191,20 @@ def build_snapshot(
     # Compute eligible ticker set hash from the current universe so the
     # comparability gate can verify membership parity.
     from .providers.market_universe import build_market_universe
+    acquisition_failed_tickers, acquisition_empty_tickers = _provider_acquisition_sets(
+        provider
+    )
     _universe = build_market_universe(
         security_master_provider=provider,
         cross_section_provider=provider,
         event_provider=None,
         as_of=as_of,
         price_history=prices,
+        acquisition_failures=acquisition_failed_tickers,
+        acquisition_empties=acquisition_empty_tickers,
     )
     eligible_tickers = set(
-        _universe.loc[_universe["eligible"], "ticker"].astype(str).tolist()
+        _universe.loc[_universe["eligible"], "ticker"].astype(str).str.upper().tolist()
     )
     eligible_ticker_set_hash = (
         hashlib.sha256(json.dumps(sorted(eligible_tickers)).encode()).hexdigest()[:16]
@@ -246,6 +251,16 @@ def build_snapshot(
         previous_date,
     ) = _load_compatible_history(reader, current_contract)
 
+    # The group denominator is the policy-eligible taxonomy, while the raw
+    # frame remains available for transparent candidate counts.  Filtering at
+    # this boundary keeps policy-excluded members from silently entering a
+    # group metric merely because the provider returned their price history.
+    raw_candidate_taxonomy = taxonomy.copy()
+    if "ticker" in taxonomy.columns:
+        taxonomy = taxonomy[
+            taxonomy["ticker"].astype(str).str.upper().isin(eligible_tickers)
+        ].copy()
+
     # Build current group snapshots
     snapshots = build_group_snapshots(
         features=features,
@@ -290,6 +305,8 @@ def build_snapshot(
         ),
         concentration_price_col=effective_price_basis,
         taxonomy_level=str(meth.get("groups", {}).get("primary_taxonomy_level", "sector")),
+        raw_candidate_taxonomy=raw_candidate_taxonomy,
+        acquisition_failed_tickers=acquisition_failed_tickers,
     )
     snapshots = rank_groups(snapshots)
 
@@ -785,6 +802,27 @@ def _safe_provider_name(provider) -> Any:
         "demo": ProviderName.FIXTURE,
     }
     return mapping.get(name, ProviderName.YFINANCE)
+
+
+def _provider_acquisition_sets(provider: Any) -> tuple[set[str], set[str]]:
+    """Read optional provider diagnostics without coupling the engine to Sectors.
+
+    Providers that can distinguish a failed request from an empty response
+    expose those rows through ``history_diagnostics``.  Other providers keep
+    the empty sets, preserving the source-neutral pipeline contract.
+    """
+    diagnostics = getattr(provider, "history_diagnostics", {}) or {}
+    failed: set[str] = set()
+    for item in diagnostics.get("failed_symbols", []) or []:
+        ticker = item.get("ticker") if isinstance(item, dict) else item
+        if ticker:
+            failed.add(str(ticker).upper())
+    empty = {
+        str(ticker).upper()
+        for ticker in (diagnostics.get("empty_symbols", []) or [])
+        if ticker
+    }
+    return failed, empty
 
 
 def _snapshots_to_df(snapshots) -> pd.DataFrame:

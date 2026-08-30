@@ -306,6 +306,28 @@ def test_aggregate_taxonomy_returns_data_gap_when_prices_missing():
     assert all(a.data_quality == "DATA_GAP" for a in aggregates)
 
 
+def test_aggregate_taxonomy_preserves_groups_when_price_frame_is_empty():
+    taxonomy = _make_taxonomy(
+        [
+            TaxonomyMembership(
+                ticker=ticker,
+                taxonomy_group_id="G1",
+                taxonomy_group_name="Group 1",
+            )
+            for ticker in ("A.JK", "B.JK")
+        ]
+    )
+    empty_prices = pd.DataFrame(columns=["ticker", "date", "close"])
+
+    aggregates = aggregate_taxonomy(taxonomy, empty_prices, _sample_benchmark())
+
+    assert len(aggregates) == 1
+    assert aggregates[0].taxonomy_group_id == "G1"
+    assert aggregates[0].constituent_count == 2
+    assert aggregates[0].eligible_constituent_count == 0
+    assert aggregates[0].data_quality == "DATA_GAP"
+
+
 def test_load_registry_yaml_handles_extra_keys(tmp_path: Path):
     yaml_path = tmp_path / "test.yaml"
     yaml_path.write_text(

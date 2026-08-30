@@ -52,8 +52,11 @@ def compute_transition(
             diffusion_transition_v2=None,
             leadership_transition=None,
             diffusion_transition=None,
-            breadth_delta=current.breadth_delta,
-            relative_strength_delta=current.relative_strength_level,
+            # A first observation has no comparable prior.  Do not expose
+            # current levels as deltas: downstream UI and materiality logic
+            # must distinguish "no comparison" from a measured zero move.
+            breadth_delta=None,
+            relative_strength_delta=None,
             rank_delta=None,
             materiality_label=MaterialityLabel.STABLE,
             materiality_reason="no previous snapshot",

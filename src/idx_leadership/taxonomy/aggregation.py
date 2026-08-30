@@ -179,11 +179,20 @@ def aggregate_taxonomy(
     The 5/20/60-day horizons are trading-session offsets implemented by the
     same return engine used by the primary sector pipeline.
     """
+    def empty_results() -> list[TaxonomyAggregate]:
+        return [
+            _empty_aggregate(taxonomy, group_id, taxonomy.members_of(group_id))
+            for group_id in taxonomy.groups()
+        ]
+
+    # A taxonomy is still useful when no price rows were acquired: callers
+    # need one explicit DATA_GAP aggregate per group rather than an empty
+    # response that looks like the taxonomy was never evaluated.
     if prices is None or prices.empty:
-        return []
+        return empty_results()
     required_price_cols = {"ticker", "date", "close"}
     if not required_price_cols.issubset(set(prices.columns)):
-        return []
+        return empty_results()
     prices = prices.copy()
     prices["date"] = pd.to_datetime(prices["date"], errors="coerce")
     prices["ticker"] = prices["ticker"].astype(str).str.upper()
@@ -193,16 +202,20 @@ def aggregate_taxonomy(
             "adjusted_close" if "adjusted_close" in prices.columns else "close"
         )
     if resolved_price_col not in prices.columns:
-        return []
+        return empty_results()
     prices[resolved_price_col] = pd.to_numeric(
         prices[resolved_price_col], errors="coerce"
     )
     prices = prices.dropna(subset=["date", resolved_price_col])
     prices = prices[prices[resolved_price_col] > 0]
+    if prices.empty:
+        return empty_results()
 
     resolved_as_of = _as_of_date(as_of)
     if resolved_as_of is not None:
         prices = prices[prices["date"].dt.date <= resolved_as_of]
+        if prices.empty:
+            return empty_results()
 
     benchmark_df = benchmark.copy() if benchmark is not None else pd.DataFrame()
     if not benchmark_df.empty and "date" in benchmark_df.columns:
@@ -388,7 +401,7 @@ def _empty_aggregate(
         taxonomy_kind=taxonomy.taxonomy_kind.value,
         taxonomy_group_id=group_id,
         taxonomy_group_name=(members[0].taxonomy_group_name if members else group_id),
-        constituent_count=len(members),
+        constituent_count=len({m.ticker for m in members}),
         eligible_constituent_count=0,
         coverage_pct=0.0,
         equal_weight_return_20d=None,

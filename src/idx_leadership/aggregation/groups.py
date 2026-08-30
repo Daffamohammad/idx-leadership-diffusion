@@ -70,8 +70,17 @@ def build_group_snapshots(
     remain in the denominator and count toward `missing_count` rather
     than being silently dropped.
     """
-    if features.empty or taxonomy.empty:
+    if taxonomy is None or taxonomy.empty:
         return []
+
+    # Keep the taxonomy as the left-hand side of the join.  Feature-only rows
+    # are not policy-eligible constituents and must not create an artificial
+    # UNCLASSIFIED group (or dilute any group's denominator).  A completely
+    # empty feature frame is still a valid data-gap snapshot: the taxonomy
+    # remains the denominator and every metric below resolves to None.
+    feature_frame = features.copy() if features is not None else pd.DataFrame()
+    if "ticker" not in feature_frame.columns:
+        feature_frame = pd.DataFrame(columns=["ticker"])
 
     # The taxonomy frame is the policy-eligible universe: this is the
     # denominator for the 60% coverage gate. The raw candidate count is
@@ -89,13 +98,31 @@ def build_group_snapshots(
     # pandas suffixes them and taxonomy_path silently loses its hierarchy.
     feature_columns = [
         column
-        for column in features.columns
+        for column in feature_frame.columns
         if column == "ticker" or column not in taxonomy_base.columns
     ]
+    feature_frame = (
+        feature_frame[feature_columns]
+        .drop_duplicates(subset=["ticker"], keep="last")
+        .copy()
+    )
     merged = taxonomy_base.merge(
-        features[feature_columns], on="ticker", how="outer"
+        feature_frame, on="ticker", how="left"
     )
     merged["group_id"] = merged["group_id"].fillna("UNCLASSIFIED")
+    # Missing feature columns are intentionally represented as NaN so a
+    # missing acquisition remains visible without turning a data-gap run into
+    # a KeyError in the metric calculations.
+    for column in (
+        "return_5d",
+        "return_20d",
+        "return_60d",
+        "excess_return_5d",
+        "excess_return_20d",
+        "excess_return_60d",
+    ):
+        if column not in merged.columns:
+            merged[column] = np.nan
 
     prev_by_group: dict[str, GroupSnapshot] = {}
     if previous_groups:

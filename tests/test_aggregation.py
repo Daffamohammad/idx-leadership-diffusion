@@ -177,6 +177,31 @@ def test_group_denominators_retain_constituents_missing_features(
     assert financials.breadth_missing_count == 1
 
 
+def test_group_snapshots_keep_taxonomy_groups_when_features_are_empty(
+    prices_df, taxonomy_df
+):
+    """A failed acquisition must produce explicit group-level data gaps."""
+    snapshots = build_group_snapshots(
+        features=pd.DataFrame(),
+        taxonomy=taxonomy_df,
+        snapshot_date=date(2026, 8, 20),
+        prices=prices_df.iloc[0:0],
+        horizons={"5d": 5, "20d": 20, "60d": 60},
+        min_constituents=1,
+        min_coverage_pct=0.0,
+    )
+
+    assert {snapshot.group_id for snapshot in snapshots} == {
+        "Financials",
+        "Telecom",
+        "Industrial",
+        "Consumer",
+    }
+    assert all(snapshot.leadership_state == LeadershipState.UNCONFIRMED for snapshot in snapshots)
+    assert all(snapshot.eligible_count == 0 for snapshot in snapshots)
+    assert all(snapshot.missing_count == snapshot.constituent_count for snapshot in snapshots)
+
+
 def test_leadership_classification_uses_primary_20d_excess_return(
     prices_df, taxonomy_df
 ):
