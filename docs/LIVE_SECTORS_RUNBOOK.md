@@ -6,6 +6,13 @@ market-wide bundle is reproducible but currently `READY_WITH_GAPS` because
 the provider rate-limited part of the per-symbol history batch; the gap is
 preserved in the snapshot and diagnostics.
 
+For the current deterministic market-wide workflow, use
+[`FULL_LIVE_RUNBOOK.md`](FULL_LIVE_RUNBOOK.md) first. It is the canonical
+path for the uncapped `refresh_and_export --full-live` gate and records the
+current 962-company / 1,008-credit preflight blocker. The bounded commands
+below remain useful for contract diagnostics and must not be presented as
+full IDX coverage.
+
 ## Before the live run
 
 1. Work from a real Git checkout and confirm the intended branch:

@@ -1,9 +1,11 @@
 # Next Iteration
 
-> Updated during the **Frontier Pass #2 live integration** (2026-08-28).
-> The first credentialed Sectors snapshot and live parity spot-check are
-> complete. This file now tracks the remaining hardening work; the live
-> bundle is `READY_WITH_GAPS`, not a demo fallback.
+> Updated during the **full-live gate audit** (2026-08-31).
+> The first credentialed Sectors snapshot remains a bounded 500/962
+> `READY_WITH_GAPS` snapshot. Full-universe refresh is not complete: the
+> deterministic preflight is currently `BLOCKED` at 1,008 planned credits
+> against the 1,000-credit ceiling, and a later provider transport attempt
+> produced no new snapshot. See `FULL_LIVE_RUNBOOK.md`.
 
 ## P0 — Live Sectors validation (core evidence complete; follow-ups remain)
 
@@ -46,7 +48,7 @@
   decision is escalated to D013 follow-up.
 - **Risk:** may still be UNKNOWN; the runbook's rollback applies.
 
-### P0.3 — Live market-wide snapshot (complete; `READY_WITH_GAPS`)
+### P0.3 — Live market-wide snapshot (bounded evidence complete; full-live pending)
 
 - **Trigger:** P0.1 PASS; benchmark source resolved.
 - **Required inputs:** key, as-of date.
@@ -56,12 +58,19 @@
   .venv/bin/python -m scripts.build_market_snapshot --as-of YYYY-MM-DD --allow-live --allow-credit-spend
   ```
 
-- **Expected outputs:** `data/snapshots/sectors/sectors_<asof>/`,
+- **Expected outputs:** `data/snapshots/snap_sectors_<asof>/`,
   `manifest.json` with `provider_mode=SECTORS_LIVE` and all version
-  fields.
-- **Observed:** snapshot readable, 99.2% usable requested-history coverage
-  for the 500-row used sample (265 policy-eligible), native Sectors IHSG
-  through 2026-08-27, and explicit prefix-sample disclosure.
+  fields, only after the strict full-live gates pass.
+- **Observed:** the persisted snapshot is readable with 99.2% requested-history
+  coverage for the 500-row used sample (265 policy-eligible), native Sectors
+  IHSG through 2026-08-27, and explicit prefix-sample disclosure.
+- **Current blocker:** `refresh_and_export --full-live` now removes the
+  bounded caps and requires strict pagination, history, price-basis,
+  benchmark, enrichment, and credit gates. The no-network plan is 1,008
+  baseline credits, above the hard 1,000-credit ceiling. No new snapshot,
+  export, or index is written when the gate fails.
+- **Next action:** resolve the provider/budget blocker, rerun the safe
+  preflight, then run the credentialed command in `FULL_LIVE_RUNBOOK.md`.
 
 ### P0.4 — Live credit audit
 
