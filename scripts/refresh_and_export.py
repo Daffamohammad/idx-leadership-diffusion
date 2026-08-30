@@ -26,6 +26,9 @@ Behavior by mode:
     is NOT updated. Safe to run at any time.
   - --allow-live --allow-credit-spend: runs a paid live refresh,
     exports the resulting snapshot, and updates index.json atomically.
+  - --full-live: removes the bounded symbol/page caps and enables the
+    strict data gates in the child builder; a failed gate stops before
+    snapshot persistence and therefore before export/index updates.
 
 This wrapper preserves the partial-universe disclosure and ensures
 the browser payload is always in sync with the latest live snapshot.
@@ -115,6 +118,11 @@ def main() -> int:
         sys.executable, "-m", "scripts.build_market_snapshot",
         "--max-estimated-credits", str(args.max_estimated_credits),
     ]
+    if args.full_live:
+        # Full-live publication is strict: the child must pass pagination,
+        # history, price-basis, benchmark, and credit gates before it can
+        # create a snapshot for export.
+        cmd.append("--require-complete")
     if effective_max_symbols is not None:
         cmd.extend(["--max-symbols", str(effective_max_symbols)])
     if effective_max_pages is not None:
