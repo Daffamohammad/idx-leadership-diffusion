@@ -213,6 +213,24 @@ export default function LeadershipMap() {
     );
     return cls.classification === "plottable";
   });
+  const classifications = visible.map((s) =>
+    classifyMapPoint(
+      { ...s, excess20d: s.excess20d, breadth: s.breadth, prevBreadth: s.prevBreadth },
+      plot,
+      domain,
+      hasPriorBreadth,
+      mapMode,
+    ).classification,
+  );
+  const offScaleCount = classifications.filter(
+    (classification) => classification === "off-scale-x" || classification === "off-scale-y",
+  ).length;
+  const missingMetricCount = classifications.filter(
+    (classification) => classification === "missing-metric",
+  ).length;
+  const missingPriorCount = classifications.filter(
+    (classification) => classification === "missing-prior",
+  ).length;
   const labelPositions = useMemo(() => {
     const material = labelMaterialPoints(visible, mapMode, plot, domain);
     return placeMapLabels(
@@ -620,11 +638,15 @@ export default function LeadershipMap() {
               </text>
             );
           })}
-          {plottable.length < visible.length && (() => {
-            const offScale = visible.length - plottable.length;
+          {(offScaleCount > 0 || missingMetricCount > 0 || missingPriorCount > 0) && (() => {
+            const notes = [
+              offScaleCount > 0 ? `${offScaleCount} group(s) off scale — shown at boundary${offScaleCount === 1 ? "" : "s"}` : "",
+              missingMetricCount > 0 ? `${missingMetricCount} group(s) not plotted — missing metric` : "",
+              missingPriorCount > 0 ? `${missingPriorCount} group(s) not plotted — missing comparable prior` : "",
+            ].filter(Boolean).join(" · ");
             return (
               <text x="580" y="458" fontFamily="Geist Mono" fontSize="9" fill="#8f8f8f" textAnchor="middle">
-                {offScale} group(s) off scale — shown at boundary{offScale === 1 ? "" : "s"}
+                {notes}
               </text>
             );
           })()}

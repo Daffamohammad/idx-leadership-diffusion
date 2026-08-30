@@ -58,6 +58,25 @@ function fmtPct(v: number | null | undefined): string {
     : `${v > 0 ? "+" : ""}${v.toFixed(1)}%`;
 }
 
+function fmtPp(v: number | null | undefined): string {
+  return v === null || v === undefined || !Number.isFinite(v)
+    ? "—"
+    : `${v > 0 ? "+" : ""}${v.toFixed(1)}pp`;
+}
+
+function breadthDeltaFor(s: SectorData): number | null {
+  if (
+    s.breadth === null ||
+    s.breadth === undefined ||
+    s.prevBreadth === undefined ||
+    !Number.isFinite(s.breadth) ||
+    !Number.isFinite(s.prevBreadth)
+  ) {
+    return null;
+  }
+  return s.breadth - s.prevBreadth;
+}
+
 function signColor(v: number | null | undefined): string {
   if (v === null || v === undefined || !Number.isFinite(v)) return "#8f8f8f";
   if (v > 0) return "#1a6e62";
@@ -65,12 +84,11 @@ function signColor(v: number | null | undefined): string {
   return "#5a5a5a";
 }
 
-// durable contract: returns the absolute-move top-3 share rendered as a 0–100% string,
-// or "—" when no concentration is available. Used by every row in the column.
+// The adapter exposes concentration on a 0–100 percentage scale.
 function top3Label(c: number | null | undefined): string {
   return c === null || c === undefined || !Number.isFinite(c)
     ? "—"
-    : `${(c * 100).toFixed(0)}%`;
+    : `${c.toFixed(0)}%`;
 }
 
 // durable contract: turns (Leadership, PrevLeadership) into a short transition tag
@@ -85,7 +103,9 @@ function transitionLabel(s: SectorData): string {
 // using the diff between eligible and raw constituents. Drives the chip column.
 function dataStatusForSector(s: SectorData): "READY" | "READY_WITH_GAPS" | "DATA_GAP" {
   if (s.eligibleConstituents === 0) return "DATA_GAP";
-  if (s.diffusion === "UNCONFIRMED") return "READY_WITH_GAPS";
+  if (s.diffusion === "UNCONFIRMED" || s.missingConstituents > 0) {
+    return "READY_WITH_GAPS";
+  }
   return "READY";
 }
 
@@ -107,8 +127,8 @@ function compare(a: SectorData, b: SectorData, key: SortKey, dir: SortDir): numb
     case "breadth":
       return mult * ((a.breadth ?? MISSING) - (b.breadth ?? MISSING));
     case "breadthDelta": {
-      const da = (a.breadth ?? 0) - (a.prevBreadth ?? a.breadth ?? 0);
-      const db = (b.breadth ?? 0) - (b.prevBreadth ?? b.breadth ?? 0);
+      const da = breadthDeltaFor(a) ?? MISSING;
+      const db = breadthDeltaFor(b) ?? MISSING;
       return mult * (da - db);
     }
     case "diffusion":
@@ -278,7 +298,7 @@ export default function MasterGroupTable() {
                 onClick={() => handleSort("breadthDelta")}
                 role="button"
               >
-                Δ Breadth{arrow("breadthDelta")}
+                Δ Breadth (pp){arrow("breadthDelta")}
               </th>
               <th style={headerCell} onClick={() => handleSort("diffusion")} role="button">
                 Diffusion{arrow("diffusion")}
@@ -316,7 +336,7 @@ export default function MasterGroupTable() {
           </thead>
           <tbody>
             {rows.map((s) => {
-              const breadthDelta = (s.breadth ?? 0) - (s.prevBreadth ?? s.breadth ?? 0);
+              const breadthDelta = breadthDeltaFor(s);
               const coveragePct = s.constituents > 0
                 ? (s.eligibleConstituents / s.constituents) * 100
                 : 0;
@@ -350,7 +370,7 @@ export default function MasterGroupTable() {
                   </td>
                   <td style={{ ...bodyCell, textAlign: "right" }}>{breadthText}</td>
                   <td style={{ ...bodyCell, textAlign: "right", color: signColor(breadthDelta) }}>
-                    {fmtPct(breadthDelta)}
+                    {fmtPp(breadthDelta)}
                   </td>
                   <td style={bodyCell}>
                     <DiffusionChip state={s.diffusion} small />

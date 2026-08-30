@@ -100,6 +100,24 @@ function MiniMap({
     );
     return cls.classification === "plottable";
   });
+  const classifications = sectors.map((s) =>
+    classifyMapPoint(
+      { ...s, excess20d: s.excess20d, breadth: s.breadth, prevBreadth: s.prevBreadth },
+      plot,
+      domain,
+      hasPriorBreadth,
+      mapMode,
+    ).classification,
+  );
+  const offScaleCount = classifications.filter(
+    (classification) => classification === "off-scale-x" || classification === "off-scale-y",
+  ).length;
+  const missingMetricCount = classifications.filter(
+    (classification) => classification === "missing-metric",
+  ).length;
+  const missingPriorCount = classifications.filter(
+    (classification) => classification === "missing-prior",
+  ).length;
   return (
     <div style={{ background: "#fff", border: "1px solid #dfe2e1", minHeight: 412, position: "relative", overflow: "hidden" }}>
       <div style={{ padding: "17px 20px 0", display: "flex", justifyContent: "space-between" }}>
@@ -209,11 +227,15 @@ function MiniMap({
             </text>
           ));
         })()}
-        {plottable.length < sectors.length && (() => {
-          const offScale = sectors.length - plottable.length;
+        {(offScaleCount > 0 || missingMetricCount > 0 || missingPriorCount > 0) && (() => {
+          const notes = [
+            offScaleCount > 0 ? `${offScaleCount} group(s) off scale — shown at boundary${offScaleCount === 1 ? "" : "s"}` : "",
+            missingMetricCount > 0 ? `${missingMetricCount} group(s) not plotted — missing metric` : "",
+            missingPriorCount > 0 ? `${missingPriorCount} group(s) not plotted — missing comparable prior` : "",
+          ].filter(Boolean).join(" · ");
           return (
             <text x="335" y="318" fill="#8f8f8f" fontSize="9" fontFamily="Geist Mono" textAnchor="middle">
-              {offScale} group(s) off scale — shown at boundary{offScale === 1 ? "" : "s"}
+              {notes}
             </text>
           );
         })()}
@@ -320,8 +342,8 @@ function summaryStats(sectors: SectorData[]): Array<[string, string]> {
     .map((s) => s.breadth)
     .filter((v): v is number => v !== null && Number.isFinite(v));
   const breadth = breadthValues.length
-    ? Math.round(breadthValues.reduce((a, b) => a + b, 0) / breadthValues.length)
-    : 0;
+    ? `${Math.round(breadthValues.reduce((a, b) => a + b, 0) / breadthValues.length)}%`
+    : "—";
   const broadening = sectors.filter((s) => s.diffusion === "BROADENING").length;
   const narrowing = sectors.filter((s) => s.diffusion === "NARROWING").length;
   const classified = sectors.filter(
@@ -329,7 +351,7 @@ function summaryStats(sectors: SectorData[]): Array<[string, string]> {
   ).length;
   return [
     ["IDX leadership", `${classified}/${sectors.length} classified`],
-    ["Breadth", `${breadth}%`],
+    ["Breadth", breadth],
     ["Broadening groups", String(broadening)],
     ["Narrowing groups", String(narrowing)],
     ["Data coverage", `${sectors.reduce((a, s) => a + s.eligibleConstituents, 0)} eligible`],
@@ -407,7 +429,7 @@ function ConstituentCoverage({
           >
             <span style={{ fontWeight: 600 }}>{sector.name}</span>
             <span className="eyebrow-muted">
-              {participating}/{available} outperforming
+              {available > 0 ? `${participating}/${available} outperforming` : "—"}
             </span>
           </div>
         );
@@ -642,7 +664,7 @@ export default function WhatChanged() {
                     {delta(s) === null ? "—" : num(delta(s)!, "pp")}
                   </td>
                   <td style={{ padding: "10px 8px", textAlign: "right", fontFamily: "Geist Mono", fontSize: 12 }}>{s.concentration === null ? "—" : `${s.concentration}%`}</td>
-                  <td style={{ padding: "10px 8px", textAlign: "right", fontFamily: "Geist Mono", fontSize: 12 }}>{s.persistence}W</td>
+                  <td style={{ padding: "10px 8px", textAlign: "right", fontFamily: "Geist Mono", fontSize: 12 }}>{s.persistence} obs.</td>
                   <td
                     style={{
                       padding: "10px 8px",
@@ -682,8 +704,8 @@ export default function WhatChanged() {
                   body={
                     <>
                       The current snapshot bundle (<code>groups.parquet</code>) records only the latest
-                      breadth value. A per-group weekly history will land once
-                      <code> scripts/build_snapshot.py</code> is extended to retain a rolling window.
+                      breadth value. A per-group rolling snapshot history will land once
+                      the snapshot export is extended to retain compatible prior observations.
                     </>
                   }
                   height={175}

@@ -358,11 +358,12 @@ export default function GroupExplorer() {
   const constituentsByGroup = data?.constituentsByGroup ?? {};
   const groupPriceHistory = data?.groupPriceHistory ?? {};
   const dataSources = data?.dataSources ?? { breadthHistory: false, constituents: false, fundamentals: false, foreignFlow: false, trajectory: false };
+  const queryGroup = new URLSearchParams(location.search).get("group") ?? undefined;
   useEffect(() => {
-    if (!selected && sectors.length > 0) {
-      setSelected(findGroupFromLocation(location.state, undefined, sectors));
+    if (sectors.length > 0) {
+      setSelected(findGroupFromLocation(location.state, queryGroup, sectors));
     }
-  }, [sectors, location.state, selected]);
+  }, [sectors, location.state, queryGroup]);
 
   if (!data) return null;
   if (sectors.length === 0) {
@@ -457,7 +458,7 @@ export default function GroupExplorer() {
             {sector.eligibleConstituents} eligible / {sector.constituents} total
           </span>
           <span style={{ fontFamily: "Geist Mono", fontSize: 11, color: "#666666" }}>
-            Leading for {sector.persistence} session{sector.persistence !== 1 ? "s" : ""}
+            Leadership state persisted for {sector.persistence} observation{sector.persistence !== 1 ? "s" : ""}
           </span>
           {sector.prevLeadership && (
             <span style={{ fontFamily: "Geist Mono", fontSize: 10, color: "#7a5010", border: "1px solid #ebebeb", padding: "2px 6px", borderRadius: 4 }}>
@@ -470,10 +471,10 @@ export default function GroupExplorer() {
         </p>
         <div style={{ marginTop: 10, display: "flex", gap: 16, flexWrap: "wrap", fontSize: 11, color: "#666666", fontFamily: "Geist Mono" }}>
           <span>20D Excess <b style={{ color: sector.excess20d !== null && sector.excess20d >= 0 ? "#1a6e62" : "#8f2424" }}>{displayMetric(sector.excess20d, "pp")}</b></span>
-          <span>Breadth <b>{displayMetric(sector.breadth)}</b> {delta !== undefined ? <span style={{ color: delta !== null && delta > 0 ? "#1a6e62" : delta !== null && delta < 0 ? "#8f2424" : "#666" }}>({delta === null ? "Δ unavailable" : `${delta > 0 ? "+" : ""}${delta.toFixed(1)}pp / 5D`})</span> : ""}</span>
+          <span>Breadth <b>{displayMetric(sector.breadth)}</b> {delta !== undefined ? <span style={{ color: delta !== null && delta > 0 ? "#1a6e62" : delta !== null && delta < 0 ? "#8f2424" : "#666" }}>({delta === null ? "Δ unavailable" : `${delta > 0 ? "+" : ""}${delta.toFixed(1)}pp vs prior observation`})</span> : ""}</span>
           <span>Top-3 <b>{displayMetric(sector.concentration)}</b></span>
-          {sector.constituents - sector.eligibleConstituents > 0 && (
-            <span style={{ color: "#7a5010" }}>{sector.constituents - sector.eligibleConstituents} excluded: {sector.missingConstituents} missing</span>
+          {sector.missingConstituents > 0 && (
+            <span style={{ color: "#7a5010" }}>{sector.missingConstituents} constituent{sector.missingConstituents !== 1 ? "s" : ""} missing from the 20D metric</span>
           )}
         </div>
         <div style={{ marginTop: 8, fontSize: 10, color: "#8f8f8f" }}>
