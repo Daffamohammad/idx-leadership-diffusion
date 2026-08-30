@@ -202,6 +202,7 @@ class SnapshotReader:
             "methodology_sensitivity": _read_json_optional(
                 d / "methodology_sensitivity.json", {}
             ),
+            "api_credit_audit": _read_json_optional(d / "api_credit_audit.json", {}),
             "tavily_context": _read_json_optional(d / "tavily_context.json", {}),
             "you_context": _read_json_optional(d / "you_context.json", {}),
             "security_master_diagnostics": _read_json_optional(

@@ -1549,7 +1549,4558 @@
     },
     "notes": "You.com evidence is source-backed qualitative context only. It does not populate fundamentals, foreign-flow, event, leadership, breadth, diffusion, or confirmation metrics."
   },
-  "api_credit_audit": null,
+  "api_credit_audit": {
+    "provider_mode": "SECTORS_LIVE",
+    "ledger_path": "/Users/daffa/Hackathon/idx-leadership-diffusion/data/raw/sectors_live/20260829T012027Z_request_ledger.jsonl",
+    "ledger_entries": 518,
+    "requests": 518,
+    "cache_hits": 518,
+    "estimated_credits_total": 0.0,
+    "budget_reserved_credits_total": 0.0,
+    "budget_limit": 1000.0,
+    "credit_balance": "UNAVAILABLE",
+    "by_endpoint": {
+      "/v2/close/": {
+        "requests": 6,
+        "cache_hits": 6,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 6
+        }
+      },
+      "/v2/companies/": {
+        "requests": 10,
+        "cache_hits": 10,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 10
+        }
+      },
+      "/v2/daily/AADI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/AALI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ABBA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ABDA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ABMM.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ACES.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ACRO.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ACST.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ADCP.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ADES.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ADHI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ADMF.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ADMG.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ADMR.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ADRO.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/AEGS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/AGAR.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/AGII.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/AGRO.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/AGRS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/AHAP.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/AIMS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/AISA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/AKKU.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/AKPI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/AKRA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/AKSI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ALDO.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ALII.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ALKA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ALMI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ALTO.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/AMAG.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/AMAN.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/AMAR.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/AMFG.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/AMIN.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/AMMN.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/AMMS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/AMOR.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/AMRT.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ANDI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ANJT.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ANTM.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/APEX.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/APIC.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/APII.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/APLI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/APLN.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ARCI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/AREA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ARGO.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ARII.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ARKA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ARKO.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ARMY.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ARNA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ARTA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ARTI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ARTO.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ASBI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ASDM.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ASGR.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ASHA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ASII.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ASJT.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ASLC.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ASLI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ASMI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ASPI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ASPR.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ASRI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ASRM.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ASSA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ATAP.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ATIC.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ATLA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/AUTO.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/AVIA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/AWAN.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/AXIO.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/AYAM.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/AYLS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BABP.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BABY.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BACA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BACH.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BAIK.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BAJA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BALI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BANK.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BAPA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BAPI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BATA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BATR.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BAUT.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BAYU.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BBCA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BBHI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BBKP.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BBLD.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BBMD.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BBNI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BBRI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BBRM.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BBSI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BBSS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BBTN.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BBYB.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BCAP.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BCIC.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BCIP.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BDKR.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BDMN.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BEBS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BEEF.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BEER.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BEKS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BELI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BELL.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BESS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BEST.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BFIN.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BGTG.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BHAT.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BHIT.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BIKA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BIKE.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BIMA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BINA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BINO.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BIPI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BIPP.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BIRD.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BISI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BJBR.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BJTM.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BKDP.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BKSL.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BKSW.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BLES.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BLOG.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BLTA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BLTZ.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BLUE.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BMAS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BMBL.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BMHS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BMRI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BMSR.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BMTR.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BNBA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BNBR.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BNGA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BNII.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BNLI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BOAT.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BOBA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BOGA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BOLA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BOLT.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BOSS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BPFI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BPII.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BPTR.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BRAM.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BREN.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BRIS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BRMS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BRNA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BRPT.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BRRC.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BSBK.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BSDE.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BSIM.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BSML.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BSSR.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BSWD.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BTEK.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BTEL.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BTON.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BTPN.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BTPS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BUAH.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BUDI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BUKA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BUKK.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BULL.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BUMI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BUVA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BVIC.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BWPT.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/BYAN.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CAKK.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CAMP.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CANI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CARE.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CARS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CASA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CASH.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CASS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CBDK.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CBMF.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CBPE.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CBRE.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CBUT.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CCSI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CDIA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CEKA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CENT.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CFIN.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CGAS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CHEK.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CHEM.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CHIP.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CINT.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CITA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CITY.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CLAY.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CLEO.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CLPI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CMNP.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CMNT.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CMPP.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CMRY.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CNKO.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CNMA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/COAL.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/COCO.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/COIN.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/COWL.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CPIN.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CPRI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CPRO.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CRAB.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CRSN.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CSAP.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CSIS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CSMI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CSRA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CTBN.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CTRA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CTTH.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CUAN.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/CYBR.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DAAZ.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DADA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DART.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DATA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DAYA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DCII.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DEAL.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DEFI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DEPO.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DEWA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DEWI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DFAM.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DGIK.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DGNS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DGWG.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DIGI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DILD.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DIVA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DKFT.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DKHH.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DLTA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DMAS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DMMX.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DMND.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DNAR.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DNET.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DOID.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DOOH.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DOSS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DPNS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DPUM.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DRMA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DSFI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DSNG.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DSSA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DUCK.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DUTI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DVLA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DWGL.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/DYAN.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/EAST.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ECII.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/EDGE.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/EKAD.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ELIT.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ELPI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ELSA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ELTY.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/EMAS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/EMDE.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/EMMI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/EMTK.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ENAK.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ENRG.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ENVY.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ENZO.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/EPAC.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/EPMT.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ERAA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ERAL.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ERTX.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ESIP.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ESSA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ESTA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ESTI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ETWA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/EURO.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/EXCL.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/FAPA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/FAST.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/FASW.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/FILM.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/FIMP.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/FIRE.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/FISH.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/FITT.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/FLMC.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/FMII.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/FOLK.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/FOOD.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/FORE.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/FORU.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/FPNI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/FUJI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/FUTR.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/FWCT.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/GAMA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/GDST.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/GDYR.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/GEMA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/GEMS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/GGRM.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/GGRP.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/GHON.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/GIAA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/GJTL.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/GLOB.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/GLVA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/GMFI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/GMTD.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/GOLD.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/GOLF.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/GOLL.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/GOOD.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/GOTO.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/GPRA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/GPSO.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/GRIA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/GRPH.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/GRPM.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/GSMF.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/GTBO.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/GTRA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/GTSI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/GULA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/GUNA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/GWSA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/GZCO.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/HADE.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/HAIS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/HAJJ.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/HALO.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/HATM.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/HBAT.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/HDFA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/HDIT.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/HEAL.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/HELI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/HERO.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/HEXA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/HGII.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/HILL.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/HITS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/HKMU.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/HMSP.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/HOKI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/HOME.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/HOMI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/HOPE.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/HOTL.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/HRME.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/HRTA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/HRUM.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/HUMI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/HYGN.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/IATA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/IBFN.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/IBOS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/IBST.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ICBP.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ICON.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/IDEA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/IDPR.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/IFII.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/IFSH.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/IGAR.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/IIKP.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/IKAI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/IKAN.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/IKBI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/IKPM.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/IMAS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/IMJS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/IMPC.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/INAF.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/INAI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/INCF.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/INCI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/INCO.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/INDF.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/INDO.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/INDR.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/INDS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/INDX.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/INDY.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/INET.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/INKP.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/INOV.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/INPC.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/INPP.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/INPS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/INRU.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/INTA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/INTD.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/INTP.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/IOTF.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/IPAC.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/IPCC.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/IPCM.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/IPOL.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/IPPE.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/IPTV.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/IRRA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/IRSX.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ISAP.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ISAT.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ISEA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ISSP.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ITIC.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ITMA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/ITMG.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/JARR.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/JAST.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/JATI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/JAWA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/JAYA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/JECC.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/JECX.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/JELI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/JGLE.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/JIHD.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/JKON.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/JMAS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/JPFA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/JRPT.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/JSKY.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/JSMR.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/JSPT.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/JTPE.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KAEF.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KAQI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KARW.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KAYU.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KBAG.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KBLI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KBLM.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KBLV.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KBRI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KDSI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KDTN.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KEEN.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KEJU.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KETR.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KIAS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KICI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KIJA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KING.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KINO.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KIOS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KJEN.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KKES.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KKGI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KLAS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KLBF.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KLIN.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KMDS.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KMTR.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KOBX.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KOCI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KOIN.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KOKA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KONI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KOPI.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KOTA.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/daily/KPIG.JK/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/index-daily/ihsg/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      },
+      "/v2/suspensions/": {
+        "requests": 1,
+        "cache_hits": 1,
+        "estimated_credits": 0.0,
+        "budget_reserved_credits": 0.0,
+        "statuses": {
+          "ok": 1
+        }
+      }
+    },
+    "note": "Estimated credits use documented per-endpoint rules. The separate budget reserve includes retry attempts and is a client-side ceiling; balance/actual debit was not exposed to this client.",
+    "actual_credit_cost": 0.0,
+    "notes": "Sectors actual cost = 0 (all requests served from cache). Tavily actual cost = 1.0 (historical, attached to prototype snapshot yf_harness_2026-08-28_adj)."
+  },
   "security_master_diagnostics": {
     "raw_rows": 962,
     "unique_rows": 962,

@@ -98,6 +98,17 @@ def test_write_and_read_snapshot(tmp_snap_root):
     assert not loaded["groups"].empty
 
 
+def test_read_snapshot_preserves_optional_credit_audit(tmp_snap_root):
+    as_of = date(2026, 8, 20)
+    target = _write_minimal_snapshot(tmp_snap_root, "snap_credit_audit", as_of)
+    audit = {"actual_credit_cost": 0.0, "estimated_credits_total": 1.5}
+    (target / "api_credit_audit.json").write_text(json.dumps(audit), encoding="utf-8")
+
+    loaded = SnapshotReader(root=tmp_snap_root).load("snap_credit_audit")
+
+    assert loaded["api_credit_audit"] == audit
+
+
 def test_aggregate_manifest_orders_by_date(tmp_snap_root):
     _write_minimal_snapshot(tmp_snap_root, "snap_2026-08-13", date(2026, 8, 13))
     _write_minimal_snapshot(tmp_snap_root, "snap_2026-08-20", date(2026, 8, 20))
