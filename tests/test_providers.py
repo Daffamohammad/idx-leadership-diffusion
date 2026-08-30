@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import sys
 import tempfile
 from datetime import date
 from pathlib import Path
@@ -12,6 +13,7 @@ import pytest
 from idx_leadership.providers.factory import build_provider_from_config
 from idx_leadership.providers.fixture import FixtureProvider
 from idx_leadership.providers.ledger import RequestLedger
+from idx_leadership.providers.public import YFinanceProvider
 from idx_leadership.providers.sectors import SectorsProvider
 from idx_leadership.providers.capabilities import CapabilitySet
 from idx_leadership.utils.errors import ProviderError
@@ -97,3 +99,74 @@ def test_ledger_redacts_secrets():
     assert isinstance(h, str) and len(h) == 16
     # hashed value is not equal to a naive str()
     assert h != "secret-123"[:16]
+
+
+def test_yfinance_rows_are_normalized_with_ticker_identity(tmp_path, monkeypatch):
+    from idx_leadership.data import RawCache
+
+    provider = YFinanceProvider(
+        cache=RawCache(root=tmp_path / "cache"),
+        ledger=RequestLedger(path=tmp_path / "ledger.jsonl"),
+        max_retries=0,
+    )
+    monkeypatch.setattr(
+        provider,
+        "_call_yfinance_with_retry",
+        lambda ticker, *, start, end: [
+            {
+                "date": "2026-08-19",
+                "close": 100.0,
+                "adjusted_close": 99.0,
+                "volume": 10,
+            }
+        ],
+    )
+
+    prices = provider.get_price_history(
+        ["BBCA.JK"], start=date(2026, 8, 19), end=date(2026, 8, 20)
+    )
+
+    assert list(prices["ticker"]) == ["BBCA.JK"]
+    assert prices.iloc[0]["adjusted_close"] == 99.0
+
+
+def test_yfinance_multiindex_response_is_parsed_without_vendor_columns(
+    tmp_path, monkeypatch
+):
+    import types
+
+    columns = pd.MultiIndex.from_tuples(
+        [
+            ("BBCA.JK", "Close"),
+            ("BBCA.JK", "Adj Close"),
+            ("BBCA.JK", "Volume"),
+        ]
+    )
+    fake_yfinance = types.SimpleNamespace(
+        download=lambda **kwargs: pd.DataFrame(
+            [[100.0, 99.0, 10.0]],
+            index=pd.to_datetime(["2026-08-19"]),
+            columns=columns,
+        )
+    )
+    monkeypatch.setitem(sys.modules, "yfinance", fake_yfinance)
+    from idx_leadership.data import RawCache
+
+    provider = YFinanceProvider(
+        cache=RawCache(root=tmp_path / "cache"),
+        ledger=RequestLedger(path=tmp_path / "ledger.jsonl"),
+        max_retries=0,
+    )
+
+    rows = provider._call_yfinance_with_retry(
+        "BBCA.JK", start=date(2026, 8, 19), end=date(2026, 8, 20)
+    )
+
+    assert rows == [
+        {
+            "date": "2026-08-19",
+            "close": 100.0,
+            "adjusted_close": 99.0,
+            "volume": 10,
+        }
+    ]

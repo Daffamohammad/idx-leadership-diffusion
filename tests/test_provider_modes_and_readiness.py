@@ -20,6 +20,7 @@ from idx_leadership.providers.sectors_contracts import validate_sectors_payload
 from idx_leadership.utils.errors import NormalizationError, ProviderError
 from scripts.audit_price_basis import LIVE_BLOCKED, main as price_basis_main
 from scripts.audit_sectors_credit import BALANCE_UNAVAILABLE, build_credit_audit
+from scripts.build_market_snapshot import _live_credit_preflight
 from scripts.compare_providers import (
     PARITY_CLASSIFICATIONS,
     PARITY_COLUMNS,
@@ -67,6 +68,14 @@ def test_live_mode_does_not_downgrade_without_credentials(monkeypatch):
     assert provider.mode is ProviderMode.SECTORS_LIVE
     with pytest.raises(ProviderError, match="credential missing"):
         provider.get_security_master()
+
+
+def test_factory_live_provider_defaults_to_1000_credit_ceiling(monkeypatch):
+    monkeypatch.setenv("SECTORS_API_KEY", "test-only-key")
+    provider = build_provider_from_config(
+        mode=ProviderMode.SECTORS_LIVE, allow_live=True
+    )
+    assert provider.client.max_estimated_credits == 1_000.0
 
 
 @pytest.mark.parametrize(
@@ -231,7 +240,43 @@ def test_refresh_plan_has_calls_pages_cache_hits_but_no_credit_number():
     assert report["totals"]["expected_http_calls"] >= 1
     assert report["totals"]["expected_pages"] >= 3
     assert report["totals"]["expected_cache_hits"] >= 1
+    market_close = next(
+        row for row in report["requests"] if row["request_category"] == "market_close"
+    )
+    assert market_close["expected_pages"] == 3  # close feed is capped at 30/page
+    benchmark = next(
+        row for row in report["requests"] if row["request_category"] == "benchmark"
+    )
+    assert benchmark["expected_http_calls"] == 1  # native IHSG route
     assert report["credit_estimate"] == "NOT CALCULATED — credit cost is not inferred"
+
+
+def test_live_credit_preflight_is_network_free_and_bounded(tmp_path):
+    report = _live_credit_preflight(
+        snapshot_root=tmp_path / "snapshots",
+        config_path="config/providers.yaml",
+        requested_as_of=None,
+        max_pages=None,
+        max_symbols=None,
+        max_estimated_credits=1_000.0,
+    )
+    assert report["status"] == "READY"
+    assert report["planned_baseline_reserve"] == 963.0
+    assert report["components"]["companies_identity_and_taxonomy"] == 10
+    assert report["components"]["daily_history_calls"] == 950
+
+
+def test_live_credit_preflight_blocks_before_live_work(tmp_path):
+    report = _live_credit_preflight(
+        snapshot_root=tmp_path / "snapshots",
+        config_path="config/providers.yaml",
+        requested_as_of=None,
+        max_pages=None,
+        max_symbols=None,
+        max_estimated_credits=962.0,
+    )
+    assert report["status"] == "BLOCKED"
+    assert "exceeds cap" in report["reason"]
 
 
 def _frame(ticker: str, day: str, value: float, column: str) -> pd.DataFrame:

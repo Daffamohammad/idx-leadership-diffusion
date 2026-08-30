@@ -8,10 +8,13 @@ from idx_leadership.providers.sectors import SectorsProvider
 from idx_leadership.providers.sectors_normalizers import (
     normalize_companies,
     normalize_close_cross_section,
+    normalize_daily_history,
     normalize_free_float,
     normalize_foreign_flow,
+    normalize_index_daily,
     normalize_suspensions,
 )
+from idx_leadership.utils.errors import CreditBudgetExceeded
 from datetime import date
 
 
@@ -47,6 +50,25 @@ def test_normalize_companies_skips_empty_symbol():
     assert df.empty
 
 
+def test_normalize_companies_flattens_query_values():
+    rows = [
+        {
+            "symbol": "BBCA",
+            "company_name": "BCA",
+            "query_values": {
+                "sector": "Financials",
+                "sub_sector": "Banks",
+                "industry": "Banks",
+                "sub_industry": "Banks",
+                "listing_board": "Main",
+            },
+        }
+    ]
+    df = normalize_companies(rows)
+    assert df.iloc[0]["sector"] == "Financials"
+    assert df.iloc[0]["listing_board"] == "Main"
+
+
 def test_normalize_close_cross_section():
     rows = [
         {"symbol": "BBCA.JK", "date": "2026-08-20", "close": 6175},
@@ -65,6 +87,20 @@ def test_normalize_close_cross_section_rejects_bad_price():
     df = normalize_close_cross_section(rows, as_of=date(2026, 8, 20))
     assert len(df) == 1
     assert df.iloc[0]["ticker"] == "B.JK"
+
+
+def test_normalize_daily_history_and_index_daily():
+    daily = normalize_daily_history(
+        {"results": [{"symbol": "BBCA", "date": "2026-08-20", "close": 6175, "volume": 100}]}
+    )
+    index = normalize_index_daily(
+        {"results": [{"index_code": "IHSG", "date": "2026-08-20", "price": 7000}]},
+        benchmark_id="IHSG",
+    )
+    assert daily.iloc[0]["ticker"] == "BBCA.JK"
+    assert daily.iloc[0]["volume"] == 100
+    assert index.iloc[0]["index_code"] == "IHSG"
+    assert index.iloc[0]["close"] == 7000
 
 
 def test_normalize_free_float():
@@ -149,6 +185,85 @@ def test_sectors_provider_with_fake_transport_returns_master():
     assert len(rows) == 1
     assert rows[0].ticker == "BBCA.JK"
     assert rows[0].sector == "Financials"
+
+
+def test_sectors_provider_merges_structured_taxonomy_query_values():
+    p = SectorsProvider(api_key="K")
+
+    def paginate(path, params=None, page_limit=None, **kwargs):
+        if params and params.get("include_query_values") == "true":
+            return [
+                {
+                    "symbol": "BBCA",
+                    "company_name": "BCA",
+                    "query_values": {
+                        "sector": "Financials",
+                        "sub_sector": "Banks",
+                        "industry": "Banks",
+                        "sub_industry": "Banks",
+                        "listing_board": "Main",
+                    },
+                }
+            ]
+        return [{"symbol": "BBCA", "company_name": "BCA"}]
+
+    p.client.paginate = paginate
+    rows = p.get_security_master()
+    assert rows[0].sector == "Financials"
+    assert rows[0].listing_board == "Main"
+    assert p.security_master_diagnostics["taxonomy_query_rows"] == 1
+
+
+def test_live_price_history_uses_per_symbol_daily_route():
+    p = SectorsProvider(api_key="K", allow_live=True)
+    calls = []
+
+    def get(path, params=None, **kwargs):
+        calls.append((path, params))
+        return type("R", (), {
+            "payload": {"results": [
+                {"symbol": "BBCA.JK", "date": "2026-08-19", "close": 6100, "volume": 10},
+                {"symbol": "BBCA.JK", "date": "2026-08-20", "close": 6175, "volume": 11},
+            ]}
+        })()
+
+    p.client.get = get
+    result = p.get_price_history(
+        ["BBCA.JK"], start=date(2026, 8, 1), end=date(2026, 8, 20)
+    )
+    assert len(result) == 2
+    assert calls[0][0] == "/v2/daily/BBCA.JK/"
+    assert calls[0][1]["start"] == "2026-08-01"
+
+
+def test_live_price_history_propagates_credit_ceiling():
+    provider = SectorsProvider(
+        api_key="K", allow_live=True, max_estimated_credits=0.0
+    )
+    with pytest.raises(CreditBudgetExceeded, match="credit budget exhausted"):
+        provider.get_price_history(
+            ["BBCA.JK"], start=date(2026, 8, 1), end=date(2026, 8, 20)
+        )
+
+
+def test_live_benchmark_uses_native_index_daily_route():
+    p = SectorsProvider(api_key="K", allow_live=True)
+    calls = []
+
+    def get(path, params=None, **kwargs):
+        calls.append(path)
+        return type("R", (), {
+            "payload": {"results": [
+                {"index_code": "IHSG", "date": "2026-08-20", "price": 7000}
+            ]}
+        })()
+
+    p.client.get = get
+    result = p.get_benchmark_history(
+        "IHSG", start=date(2026, 8, 1), end=date(2026, 8, 20)
+    )
+    assert len(result) == 1
+    assert calls == ["/v2/index-daily/ihsg/"]
 
 
 def test_sectors_provider_passes_configured_api_root_to_client():

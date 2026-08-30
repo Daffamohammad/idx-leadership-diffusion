@@ -14,8 +14,10 @@ from app.data_quality import (
     render_endpoint_status,
 )
 from app.story_mode import build_story_card, render_what_changed
+from idx_leadership.intelligence.readout import build_story_mode
 from idx_leadership.models import (
     ConcentrationMetrics,
+    ContradictionRecord,
     DiffusionState,
     EvidenceRecord,
     GroupEvidence,
@@ -115,6 +117,28 @@ def test_build_story_card_contradictions_surface():
     card = build_story_card(cur, None, ev)
     metrics = [c["metric"] for c in card.contradictions]
     assert "leading_but_narrowing" in metrics
+
+
+def test_build_story_mode_reads_normalized_contradiction_evidence():
+    evidence = GroupEvidence(
+        group_id="Energy",
+        as_of=date(2026, 8, 20),
+        leadership_state=LeadershipState.LEADING,
+        diffusion_state=DiffusionState.NARROWING,
+        contradictions=[
+            ContradictionRecord(
+                metric="leading_but_narrowing",
+                label="LEADING + NARROWING_FRAGILE",
+                evidence="Participation is narrowing.",
+            )
+        ],
+    )
+    story = build_story_mode(
+        {"events": [{"group": "Energy", "materiality_label": "NARROWING"}]},
+        [evidence],
+    )
+    assert story.highlighted_group == "Energy"
+    assert story.contradiction == "Participation is narrowing."
 
 
 def test_render_what_changed_markdown():

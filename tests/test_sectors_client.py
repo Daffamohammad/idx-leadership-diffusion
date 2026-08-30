@@ -14,7 +14,7 @@ from idx_leadership.providers.sectors_client import (
     SectorsClient,
     _estimated_credit_cost,
 )
-from idx_leadership.utils.errors import ProviderError
+from idx_leadership.utils.errors import CreditBudgetExceeded, ProviderError
 
 
 def _transport_ok(method, url, params, headers):
@@ -73,6 +73,30 @@ def test_paginate_walks_pages(tmp_path):
     c = _client(tmp_path, transport=_transport_paginated)
     rows = c.paginate("/v2/close/", {}, page_limit=10, max_rows=30)
     assert len(rows) >= 5
+
+
+def test_paginate_records_partial_when_page_cap_hides_next_page(tmp_path):
+    def transport(method, url, params, headers):
+        return 200, {
+            "results": [{"symbol": "A.JK"}],
+            "pagination": {"has_next": True, "next_offset": 30},
+        }
+
+    c = _client(tmp_path, transport=transport)
+    c.paginate("/v2/close/", {"limit": 30}, page_limit=1)
+
+    assert c.last_pagination_diagnostics["capped_by_max_pages"] is True
+    assert c.last_pagination_diagnostics["incomplete"] is True
+    assert c.last_pagination_diagnostics["completeness"] == "PARTIAL"
+
+
+def test_paginate_does_not_call_exact_end_partial(tmp_path):
+    c = _client(tmp_path, transport=_transport_ok)
+    c.paginate("/v2/close/", {"limit": 30}, page_limit=1)
+
+    assert c.last_pagination_diagnostics["capped_by_max_pages"] is False
+    assert c.last_pagination_diagnostics["incomplete"] is False
+    assert c.last_pagination_diagnostics["completeness"] == "COMPLETE"
 
 
 def test_retry_on_429(tmp_path):
@@ -174,3 +198,64 @@ def test_estimated_credit_cost_for_per_page():
 def test_estimated_credit_cost_for_per_100_companies():
     payload = [{"x": i} for i in range(150)]
     assert _estimated_credit_cost("/v2/free-float/", payload) == 2.0  # ceil(150/100)
+
+
+def test_credit_budget_blocks_before_next_http_request(tmp_path):
+    calls = {"n": 0}
+
+    def transport(method, url, params, headers):
+        calls["n"] += 1
+        return 200, {"results": [], "pagination": {"has_next": False}}
+
+    c = _client(tmp_path, transport=transport, max_estimated_credits=1.0)
+    c.get("/v2/close/", {"date": "2026-08-20"})
+    with pytest.raises(CreditBudgetExceeded, match="credit budget exhausted"):
+        c.get("/v2/close/", {"date": "2026-08-21"})
+    assert calls["n"] == 1
+    assert c.budget_reserved_credits == 1.0
+
+
+def test_credit_budget_reserves_retry_attempts(tmp_path):
+    calls = {"n": 0}
+
+    def transport(method, url, params, headers):
+        calls["n"] += 1
+        return (429, {"error": "RATE_LIMIT_EXCEEDED"}) if calls["n"] == 1 else (200, {"results": []})
+
+    c = _client(
+        tmp_path,
+        transport=transport,
+        max_retries=1,
+        max_estimated_credits=1.0,
+    )
+    with pytest.raises(CreditBudgetExceeded, match="credit budget exhausted"):
+        c.get("/v2/close/", {})
+    assert calls["n"] == 1
+    assert c.budget_reserved_credits == 1.0
+
+
+def test_credit_budget_requires_documented_companies_query_cost(tmp_path):
+    calls = {"n": 0}
+
+    def transport(method, url, params, headers):
+        calls["n"] += 1
+        return 200, {"results": []}
+
+    c = _client(tmp_path, transport=transport, max_estimated_credits=1.0)
+    with pytest.raises(CreditBudgetExceeded, match="cannot certify endpoint pricing"):
+        c.get("/v2/companies/", {})
+    assert calls["n"] == 0
+
+
+def test_structured_companies_query_has_known_budget_cost(tmp_path):
+    c = _client(
+        tmp_path,
+        transport=lambda method, url, params, headers: (200, {"results": []}),
+        max_estimated_credits=1.0,
+    )
+    response = c.get(
+        "/v2/companies/",
+        {"where": "symbol IS NOT NULL", "limit": 200, "offset": 0},
+    )
+    assert response.status == 200
+    assert c.budget_reserved_credits == 1.0

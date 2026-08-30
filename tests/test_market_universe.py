@@ -137,3 +137,51 @@ def test_default_config():
     assert cfg.exclude_delisted is True
     assert cfg.exclude_suspended is True
     assert cfg.min_history_days == 60
+
+
+def test_liquidity_and_staleness_are_explicit_exclusions():
+    as_of = date(2026, 8, 20)
+    master = [_entry("LIQ.JK"), _entry("STALE.JK"), _entry("ALT.JK")]
+    master[-1] = master[-1].model_copy(update={"common_equity_status": "NON_COMMON_EQUITY"})
+    rows = []
+    rows.extend(
+        {
+            "ticker": "LIQ.JK",
+            "date": as_of - pd.Timedelta(days=i),
+            "close": 100.0,
+            "volume": 10,
+        }
+        for i in range(60)
+    )
+    rows.extend(
+        {
+            "ticker": "STALE.JK",
+            "date": as_of - pd.Timedelta(days=40 + i),
+            "close": 100.0,
+            "volume": 10_000_000,
+        }
+        for i in range(60)
+    )
+    rows.extend(
+        {
+            "ticker": "ALT.JK",
+            "date": as_of - pd.Timedelta(days=i),
+            "close": 100.0,
+            "volume": 10_000_000,
+        }
+        for i in range(60)
+    )
+    p = _StubProvider(master, {})
+    df = build_market_universe(
+        security_master_provider=p,
+        cross_section_provider=p,
+        event_provider=None,
+        as_of=as_of,
+        config=EligibilityConfig(min_median_daily_value=100_000),
+        price_history=pd.DataFrame(rows),
+        security_master=master,
+    )
+    reasons = dict(zip(df["ticker"], df["exclusion_reason"]))
+    assert reasons["LIQ.JK"] == "insufficient_liquidity"
+    assert reasons["STALE.JK"] == "stale_price"
+    assert reasons["ALT.JK"] == "non_common_equity"

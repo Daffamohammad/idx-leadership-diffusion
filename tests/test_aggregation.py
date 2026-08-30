@@ -39,6 +39,32 @@ def test_build_group_snapshots_basic(prices_df, benchmark_df, taxonomy_df):
     assert "Consumer" in gids
 
 
+def test_group_snapshot_preserves_taxonomy_path_when_features_include_taxonomy(
+    prices_df, benchmark_df, taxonomy_df
+):
+    """A shared feature/taxonomy frame must not suffix away the hierarchy."""
+    as_of = date(2026, 8, 20)
+    features = compute_excess_returns(
+        prices_df,
+        benchmark_df,
+        horizons={"5d": 5, "20d": 20, "60d": 60},
+        as_of=as_of,
+    ).merge(taxonomy_df[["ticker", "sector", "subsector"]], on="ticker", how="left")
+
+    snapshots = build_group_snapshots(
+        features=features,
+        taxonomy=taxonomy_df,
+        snapshot_date=as_of,
+        prices=prices_df,
+        horizons={"5d": 5, "20d": 20, "60d": 60},
+        min_constituents=1,
+        min_coverage_pct=0.0,
+    )
+
+    financials = next(item for item in snapshots if item.group_id == "Financials")
+    assert financials.taxonomy_path == ["Financials", "Banks"]
+
+
 def test_rank_groups_assigns_ranks(prices_df, benchmark_df, taxonomy_df):
     as_of = date(2026, 8, 20)
     features = compute_excess_returns(prices_df, benchmark_df, horizons={"5d": 5, "20d": 20, "60d": 60}, as_of=as_of)
@@ -120,6 +146,35 @@ def test_build_group_snapshots_uses_configured_v2_engines(
     assert financials.diffusion_state_v2 == DiffusionStateV2.BROADENING_FIRM
     # The legacy field remains a deliberate v1 projection for old consumers.
     assert financials.diffusion_state.value == "BROADENING"
+
+
+def test_group_denominators_retain_constituents_missing_features(
+    prices_df, benchmark_df, taxonomy_df
+):
+    as_of = date(2026, 8, 20)
+    features = compute_excess_returns(
+        prices_df,
+        benchmark_df,
+        horizons={"5d": 5, "20d": 20, "60d": 60},
+        as_of=as_of,
+    )
+    features = features[features["ticker"] != "BBCA.JK"]
+
+    snapshots = build_group_snapshots(
+        features=features,
+        taxonomy=taxonomy_df,
+        snapshot_date=as_of,
+        prices=prices_df,
+        horizons={"5d": 5, "20d": 20, "60d": 60},
+        min_constituents=1,
+        min_coverage_pct=0.0,
+    )
+
+    financials = next(s for s in snapshots if s.group_id == "Financials")
+    assert financials.constituent_count == 4
+    assert financials.eligible_count == 3
+    assert financials.missing_count == 1
+    assert financials.breadth_missing_count == 1
 
 
 def test_leadership_classification_uses_primary_20d_excess_return(

@@ -178,3 +178,39 @@ def test_assess_quality_detects_duplicates(prices_df, benchmark_df):
         today=date(2026, 8, 20),
     )
     assert r.duplicate_ticker_date_rows > 0
+
+
+def test_assess_quality_distinguishes_loaded_from_usable_history(benchmark_df):
+    prices = pd.DataFrame(
+        [
+            {
+                "ticker": "LONG.JK",
+                "date": date(2026, 6, 1) + pd.Timedelta(days=i),
+                "close": 100.0 + i,
+                "adjusted_close": 100.0 + i,
+            }
+            for i in range(60)
+        ]
+        + [
+            {
+                "ticker": "SHORT.JK",
+                "date": date(2026, 8, 19),
+                "close": 100.0,
+                "adjusted_close": 100.0,
+            }
+        ]
+    )
+    r = assess_quality(
+        requested_tickers=["LONG.JK", "SHORT.JK"],
+        prices=prices,
+        benchmark=benchmark_df,
+        today=date(2026, 8, 20),
+        min_history_days=60,
+    )
+
+    assert r.status == DataQualityStatus.READY_WITH_GAPS
+    assert r.loaded_securities == 2
+    assert r.usable_securities == 1
+    assert r.coverage_pct == 50.0
+    assert r.latest_common_date == date(2026, 7, 30)
+    assert any("insufficient_history" in issue for issue in r.issues)
