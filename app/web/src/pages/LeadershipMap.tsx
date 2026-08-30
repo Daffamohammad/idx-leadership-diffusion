@@ -21,6 +21,7 @@ import {
 } from "../data/mapGeometry";
 import { leadershipColor } from "../components/StatusChips";
 import { placeMapLabels } from "../data/mapLabels";
+import { EvidenceBadge } from "../components/EvidenceModel";
 
 const stateOrder: LeadershipState[] = [
   "LEADING",
@@ -293,8 +294,11 @@ export default function LeadershipMap() {
         }}
       >
         <div>
-          <div className="eyebrow-muted" style={{ color: "#438b82" }}>
-            {axisLabels.title}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <div className="eyebrow-muted" style={{ color: "#438b82" }}>
+              {axisLabels.title}
+            </div>
+            <EvidenceBadge kind="SNAPSHOT" compact />
           </div>
           <h1
             style={{

@@ -9,6 +9,7 @@ import ResearchEvents from "../components/ResearchEvents";
 import ForeignFlowSample from "../components/ForeignFlowSample";
 import type { TaxonomyKind } from "../data/snapshot";
 import { formatDateLabel, formatEnumLabel } from "../data/format";
+import { EvidenceBadge } from "../components/EvidenceModel";
 
 const TAXONOMY_BY_PATH: Record<string, TaxonomyKind> = {
   "/maps/konglo": "KONGLO",
@@ -71,7 +72,10 @@ export default function TaxonomyMapPage() {
         }}
       >
         <div>
-          <div className="eyebrow-muted">{KIND_LABEL[taxonomyKind]} taxonomy map</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <div className="eyebrow-muted">{KIND_LABEL[taxonomyKind]} taxonomy map</div>
+            <EvidenceBadge kind="PROTOTYPE" compact />
+          </div>
           <h1 style={{ margin: "6px 0 4px", fontSize: 30, letterSpacing: "-.02em" }}>
             {view?.taxonomy_name ?? `${KIND_LABEL[taxonomyKind]} taxonomy`}
           </h1>
@@ -94,7 +98,7 @@ export default function TaxonomyMapPage() {
             <span>Provider mode: {formatEnumLabel(providerMode)}</span>
             <span>·</span>
             <span>
-              {taxonomyKind === "KONGLO" ? "Analyst-defined prototype" : "Analyst-defined prototype taxonomy"}
+              Static membership definition · aggregate metrics from current snapshot
             </span>
           </div>
         </div>

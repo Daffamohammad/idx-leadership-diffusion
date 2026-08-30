@@ -5,6 +5,7 @@ import { normalizeDataStatus, type DataStatus, type SnapshotPayload } from "../d
 import type { AdaptedSnapshot } from "../data/adapter";
 import { buildDiffusionReadiness } from "../data/readiness";
 import { formatCountLabel, formatDateLabel, formatEnumLabel } from "../data/format";
+import { EvidenceModel } from "../components/EvidenceModel";
 import {
   getTavilyCategory,
   getTavilyCategoryStatus,
@@ -419,6 +420,46 @@ export default function Methodology() {
     { label: "Taxonomy Coverage", value: coverage?.taxonomy_coverage_pct !== undefined ? `${coverage.taxonomy_coverage_pct}%` : "—" },
   ];
   const exclusionRows = Object.entries(coverage?.exclusion_reasons ?? {}).map(([reason, count]) => ({ reason, count }));
+  const taxonomyViews = data?.taxonomyViews ?? {};
+  const snapshotCoverage = isPrefixSample && discoveredCount && usedCount
+    ? `${usedCount} of ${discoveredCount} discovered`
+    : `${formatCountLabel(data?.sectors.length ?? 0, "sector group")}`;
+  const evidenceLanes = [
+    {
+      kind: "SNAPSHOT" as const,
+      title: "Market signal",
+      detail: `Real persisted ${formatEnumLabel(providerMode ?? "market")} observations power returns, breadth, leadership, and constituent metrics.`,
+      meta: `${snapshotCoverage} · ${formatDateLabel(data?.payload.as_of)}`,
+      to: "/overview",
+      actionLabel: "Open real snapshot",
+    },
+    {
+      kind: "SAMPLE" as const,
+      title: "Foreign flow",
+      detail: "Source-backed top-list observations are useful context, but they are not a full-universe live feed or confirmation signal.",
+      meta: data?.foreignFlow
+        ? `${formatCountLabel(data.foreignFlow.marketDayCount, "market date")} · ${formatCountLabel(data.foreignFlow.companyObservationCount, "company observation")}`
+        : "No sample attached",
+      to: "/overview#foreign-flow-sample",
+      actionLabel: "Open sample",
+    },
+    {
+      kind: "PROTOTYPE" as const,
+      title: "Konglo and Themes",
+      detail: "Membership definitions are static analyst research lenses. Their aggregate metrics reuse the current snapshot but are not official IDX classifications.",
+      meta: `${formatCountLabel(taxonomyViews.konglo?.groups.length ?? 0, "Konglo group")} · ${formatCountLabel(taxonomyViews.themes?.groups.length ?? 0, "theme")}`,
+      to: "/maps/konglo",
+      actionLabel: "Open prototype lens",
+    },
+    {
+      kind: "CONTEXT" as const,
+      title: "Research context",
+      detail: "Events and web research are frozen with the snapshot as descriptive context. They do not create or alter quantitative signals.",
+      meta: `${formatCountLabel(data?.researchEvents.length ?? 0, "dated event")} · descriptive only`,
+      to: "/overview#research-events",
+      actionLabel: "Open context",
+    },
+  ];
   return (
     <div className="content-shell" style={{ padding: '36px var(--page-gutter)', maxWidth: 'var(--content-max)' }}>
       <div style={{ marginBottom: 36 }}>
@@ -429,6 +470,11 @@ export default function Methodology() {
           Transparent documentation of analytical definitions, data sources, and coverage gaps.
         </p>
       </div>
+
+      <EvidenceModel
+        lanes={evidenceLanes}
+        intro="This hackathon product is intentionally hybrid: the quantitative market lane is snapshot-backed, while bounded samples and static research lenses remain clearly separated."
+      />
 
       {/* Prefix Sample Warning */}
       {isPrefixSample && discoveredCount && (

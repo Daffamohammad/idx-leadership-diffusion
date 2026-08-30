@@ -9,6 +9,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
 import { useSnapshot } from "../data/SnapshotProvider";
 import PriceChart from "../components/PriceChart";
+import { EvidenceBadge } from "../components/EvidenceModel";
 import TradingViewWidget from "../components/TradingViewWidget";
 import { formatDateLabel, formatEnumLabel, formatIdrCompact } from "../data/format";
 
@@ -108,7 +109,10 @@ export default function TickerAnalysis() {
         }}
       >
         <div>
-          <div className="eyebrow-muted">Ticker analysis</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <div className="eyebrow-muted">Ticker analysis</div>
+            <EvidenceBadge kind="SNAPSHOT" compact />
+          </div>
           <h1 style={{ margin: "6px 0 4px", fontSize: 32, letterSpacing: "-.02em" }}>
             {security?.name ?? ticker}
           </h1>

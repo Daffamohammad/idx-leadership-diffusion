@@ -12,6 +12,7 @@
 
 import type { ForeignFlowAdapted } from "../data/adapter";
 import { formatCountLabel, formatDateLabel, formatEnumLabel, formatIdrCompact } from "../data/format";
+import { EvidenceBadge } from "./EvidenceModel";
 
 interface ForeignFlowSampleProps {
   sample: ForeignFlowAdapted | null;
@@ -27,6 +28,7 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
   if (!sample) {
     return (
       <section
+      id="foreign-flow-sample"
         aria-label="Foreign flow sample"
         style={{
           border: "1px dashed #dfe2e1",
@@ -67,7 +69,10 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
       }}
     >
       <header>
-        <div className="eyebrow-muted">Foreign-flow sample</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+          <div className="eyebrow-muted">Foreign-flow sample</div>
+          <EvidenceBadge kind="SAMPLE" compact />
+        </div>
         <h2 style={{ margin: "6px 0 4px", fontSize: 22, letterSpacing: "-.02em" }}>
           Multi-date foreign flow · source-backed top-list
         </h2>
@@ -81,7 +86,7 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
             color: "#686e73",
           }}
         >
-          <span>Sample only · bounded top-list</span>
+          <span>Persisted source-backed sample · bounded top-list</span>
           <span>·</span>
           <span>As of {formatDateLabel(sample.asOfMax || asOf) || "n/a"}</span>
           <span>·</span>

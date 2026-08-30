@@ -23,6 +23,7 @@ import {
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, CartesianGrid } from "recharts";
 import { placeMapLabels } from "../data/mapLabels";
 import { formatDateLabel, formatEnumLabel, formatSnapshotId } from "../data/format";
+import { EvidenceBadge } from "../components/EvidenceModel";
 
 
 function averageBreadthHistory(
@@ -484,7 +485,10 @@ export default function WhatChanged() {
     <div className="content-shell-wide" style={{ maxWidth: "var(--content-wide-max)", padding: "28px var(--page-gutter) 64px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "end", marginBottom: 16 }}>
         <div>
-          <div className="eyebrow-muted">Indonesian Equities · Market Intelligence</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <div className="eyebrow-muted">Indonesian Equities · Market Intelligence</div>
+            <EvidenceBadge kind="SNAPSHOT" compact />
+          </div>
           <h1 style={{ fontSize: 30, letterSpacing: "-.045em", margin: "5px 0 0" }}>{hasComparable ? "WHAT CHANGED?" : "CURRENT SNAPSHOT"}</h1>
         </div>
         <span className="eyebrow-muted">EOD research / {asOf} · {hasComparable ? "comparable prior available" : "change comparison unavailable"}</span>

@@ -4,6 +4,7 @@
 // into quantitative confirmation.
 
 import type { ResearchEventView } from "../data/adapter";
+import { EvidenceBadge } from "./EvidenceModel";
 
 interface ResearchEventsProps {
   events: ResearchEventView[];
@@ -31,6 +32,7 @@ export default function ResearchEvents({
   if (!events.length) {
     return (
       <section
+        id="research-events"
         aria-label="Research events"
         style={{
           border: "1px dashed #dfe2e1",
@@ -38,7 +40,10 @@ export default function ResearchEvents({
           background: "#faf9f6",
         }}
       >
-        <div className="eyebrow-muted">Research events</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+          <div className="eyebrow-muted">Research events</div>
+          <EvidenceBadge kind="CONTEXT" compact />
+        </div>
         <p style={{ margin: "8px 0 0", fontSize: 13, color: "#686e73" }}>
           {emptyMessage}
         </p>
@@ -50,6 +55,7 @@ export default function ResearchEvents({
 
   return (
     <section
+      id="research-events"
       aria-label="Research events"
       style={{
         border: "1px solid #dfe2e1",
@@ -58,7 +64,10 @@ export default function ResearchEvents({
       }}
     >
       <header style={{ marginBottom: 12 }}>
-        <div className="eyebrow-muted">Research events</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+          <div className="eyebrow-muted">Research events</div>
+          <EvidenceBadge kind="CONTEXT" compact />
+        </div>
         <h2 style={{ margin: "6px 0 4px", fontSize: 20 }}>
           {sliced.length} dated event{sliced.length === 1 ? "" : "s"} · context only
         </h2>
@@ -70,7 +79,7 @@ export default function ResearchEvents({
             fontFamily: "Geist Mono, monospace",
           }}
         >
-          Events are source-backed observations; they never become signals.
+          Events are persisted source-backed observations; they remain descriptive context and never become signals.
         </p>
       </header>
       <ol style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 12 }}>

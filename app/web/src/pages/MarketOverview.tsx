@@ -13,6 +13,7 @@ import ForeignFlowSample from "../components/ForeignFlowSample";
 import ResearchEvents from "../components/ResearchEvents";
 import type { TaxonomyKind } from "../data/snapshot";
 import { formatDateLabel, formatEnumLabel, formatSnapshotId } from "../data/format";
+import { EvidenceBadge } from "../components/EvidenceModel";
 
 const KIND_LABELS: Record<TaxonomyKind, string> = {
   SECTOR: "Sector",
@@ -86,7 +87,10 @@ export default function MarketOverview() {
         }}
       >
         <div>
-          <div className="eyebrow-muted">Market overview</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <div className="eyebrow-muted">Market overview</div>
+            <EvidenceBadge kind="SNAPSHOT" compact />
+          </div>
           <h1 style={{ margin: "6px 0 4px", fontSize: 32, letterSpacing: "-.02em" }}>
             IDX leadership & diffusion
           </h1>
@@ -106,6 +110,9 @@ export default function MarketOverview() {
             <span>·</span>
             <span>Snapshot: {formatSnapshotId(adapted.payload.snapshot_id, adapted.payload.as_of)}</span>
           </div>
+          <p style={{ margin: "10px 0 0", color: "#686e73", fontSize: 12, lineHeight: 1.5 }}>
+            Real market snapshot first. Static research lenses and bounded samples are labeled in their sections.
+          </p>
         </div>
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
           <Link

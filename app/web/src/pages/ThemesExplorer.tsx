@@ -5,6 +5,7 @@ import type { TaxonomyGroupAggregate, TaxonomyView } from "../data/snapshot";
 import { LeadershipChip, DiffusionChip, DataStatusChip } from "../components/StatusChips";
 import { EmptyState } from "../components/EmptyState";
 import { formatDateLabel, formatEnumLabel } from "../data/format";
+import { EvidenceBadge } from "../components/EvidenceModel";
 
 const THEMES_TAXONOMY_ID = "themes";
 
@@ -67,16 +68,19 @@ export default function ThemesExplorer() {
   return (
     <section style={{ padding: "0 0 80px" }}>
       <header style={{ marginBottom: 18 }}>
-        <div
-          style={{
-            fontFamily: "Geist Mono, ui-monospace, monospace",
-            fontSize: 11,
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            color: "#8f8f8f",
-          }}
-        >
-          Themes Explorer · {taxonomyView.taxonomy_version}
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+          <div
+            style={{
+              fontFamily: "Geist Mono, ui-monospace, monospace",
+              fontSize: 11,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: "#8f8f8f",
+            }}
+          >
+            Themes Explorer · {taxonomyView.taxonomy_version}
+          </div>
+          <EvidenceBadge kind="PROTOTYPE" compact />
         </div>
         <h1
           style={{
@@ -90,9 +94,9 @@ export default function ThemesExplorer() {
           Theme browser
         </h1>
         <p style={{ margin: 0, color: "#686e73", fontSize: 13, maxWidth: 720 }}>
-          Analyst-defined themes for cross-sector pattern exploration. Themes are research lenses,
-          not authoritative taxonomies. Multiple memberships are allowed and never double-counted
-          across themes.
+          Static analyst-defined themes for cross-sector pattern exploration. Aggregate metrics use
+          the current snapshot, while the membership lens is not an authoritative taxonomy. Multiple
+          memberships are allowed and never double-counted across themes.
         </p>
         <div style={{ marginTop: 10 }}>
           <span

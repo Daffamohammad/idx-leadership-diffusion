@@ -4,6 +4,7 @@ import { useSnapshot } from "../data/SnapshotProvider";
 import type { SectorData } from "../data/adapter";
 import { LeadershipChip, DiffusionChip, DataStatusChip } from "../components/StatusChips";
 import { EmptyState } from "../components/EmptyState";
+import { EvidenceBadge } from "../components/EvidenceModel";
 import { formatEnumLabel } from "../data/format";
 
 type SortKey =
@@ -192,16 +193,19 @@ export default function MasterGroupTable() {
   return (
     <section className="content-shell" style={{ padding: "0 var(--page-gutter) 80px" }}>
       <header style={{ marginBottom: 24 }}>
-        <div
-          style={{
-            fontFamily: "Geist Mono, ui-monospace, monospace",
-            fontSize: 11,
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            color: "#8f8f8f",
-          }}
-        >
-          Master Group Table
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+          <div
+            style={{
+              fontFamily: "Geist Mono, ui-monospace, monospace",
+              fontSize: 11,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: "#8f8f8f",
+            }}
+          >
+            Master Group Table
+          </div>
+          <EvidenceBadge kind="SNAPSHOT" compact />
         </div>
         <h1
           style={{
@@ -215,8 +219,8 @@ export default function MasterGroupTable() {
           Analytical scanner
         </h1>
         <p style={{ margin: 0, color: "#686e73", fontSize: 13, maxWidth: 720 }}>
-          Sortable cross-section of every group. Read columns left-to-right to evaluate
-          leadership, breadth, diffusion, concentration, and confirmation independently.
+          Sortable cross-section of every group in the real persisted market snapshot. Read columns
+          left-to-right to evaluate leadership, breadth, diffusion, concentration, and confirmation independently.
         </p>
       </header>
 

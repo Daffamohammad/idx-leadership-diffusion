@@ -16,6 +16,7 @@ import type {
 } from "../data/adapter";
 import type { ForeignFlowDirection, TaxonomyKind } from "../data/snapshot";
 import { formatDateLabel, formatEnumLabel } from "../data/format";
+import { EvidenceBadge } from "./EvidenceModel";
 
 const TAXONOMY_ORDER: TaxonomyKind[] = ["SECTOR", "KONGLO", "THEMES"];
 
@@ -234,6 +235,7 @@ export default function MarketHeatmap({
 
   const asOfLabel = asOf ? formatDateLabel(asOf) : "snapshot";
   const legend = legendForMetric(metric);
+  const evidenceKind = taxonomyKind === "SECTOR" ? "SNAPSHOT" : "PROTOTYPE";
 
   return (
     <section
@@ -256,8 +258,11 @@ export default function MarketHeatmap({
         }}
       >
         <div>
-          <div className="eyebrow-muted" id="heatmap-title">
-            Market heatmap
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <div className="eyebrow-muted" id="heatmap-title">
+              Market heatmap
+            </div>
+            <EvidenceBadge kind={evidenceKind} compact />
           </div>
           <h2 style={{ margin: "6px 0 4px", fontSize: 22, letterSpacing: "-.02em" }}>
             {taxonomyNames[taxonomyKind] ?? taxonomyKind}
@@ -274,7 +279,11 @@ export default function MarketHeatmap({
           >
             <span>As of {asOfLabel}</span>
             <span>·</span>
-            <span>Analyst-defined taxonomy</span>
+            <span>
+              {taxonomyKind === "SECTOR"
+                ? "Real persisted market observations"
+                : "Static membership definition · current snapshot aggregates"}
+            </span>
             <span>·</span>
             <span>No recommendation language</span>
           </div>

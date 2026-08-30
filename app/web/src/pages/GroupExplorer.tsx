@@ -31,6 +31,7 @@ import {
 import { leadershipColor } from "../components/StatusChips";
 import PriceChart from "../components/PriceChart";
 import { formatDateLabel, formatEnumLabel, formatSnapshotId } from "../data/format";
+import { EvidenceBadge } from "../components/EvidenceModel";
 
 const card: React.CSSProperties = {
   background: "#ffffff",
@@ -314,14 +315,17 @@ function TaxonomyGroupDetail({
           <Link to={backPath} style={{ color: "#686e73", fontSize: 12, textDecoration: "none" }}>
             ← Back to {group.taxonomyKind === "KONGLO" ? "Konglo" : "Themes"} map
           </Link>
-          <div className="eyebrow-muted" style={{ marginTop: 16, marginBottom: 8 }}>
-            {group.taxonomyName} · group detail
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginTop: 16, marginBottom: 8 }}>
+            <div className="eyebrow-muted">
+              {group.taxonomyName} · group detail
+            </div>
+            <EvidenceBadge kind="PROTOTYPE" compact />
           </div>
           <h1 style={{ margin: 0, fontSize: 30, fontWeight: 400, letterSpacing: "-1.5px" }}>
             {group.name}
           </h1>
           <p style={{ margin: "8px 0 0", color: "#686e73", fontSize: 13, lineHeight: 1.5 }}>
-            Source-backed aggregate for the current snapshot. This is a research lens, not an official IDX classification.
+            Aggregate metrics use the current snapshot, while membership definitions remain a static analyst research lens. This is not an official IDX classification.
           </p>
         </div>
         <Link to="/overview" style={{ padding: "9px 13px", border: "1px solid #202325", color: "#202325", textDecoration: "none", fontSize: 12 }}>
