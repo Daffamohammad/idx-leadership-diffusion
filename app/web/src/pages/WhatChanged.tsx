@@ -22,7 +22,7 @@ import {
 } from "../data/mapGeometry";
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, CartesianGrid } from "recharts";
 import { placeMapLabels } from "../data/mapLabels";
-import { formatDateLabel, formatEnumLabel } from "../data/format";
+import { formatDateLabel, formatEnumLabel, formatSnapshotId } from "../data/format";
 
 
 function averageBreadthHistory(
@@ -567,7 +567,7 @@ export default function WhatChanged() {
       <section style={{ background: "#fff", border: "1px solid #dfe2e1", padding: "16px 18px", marginBottom: 22 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
           <div className="eyebrow-muted">{hasComparable ? "What changed since prior snapshot" : "What is available now"}</div>
-          <span className="eyebrow-muted">{hasComparable ? `vs ${payload?.previous_snapshot_id ?? "prior"}` : "Current levels only"}</span>
+          <span className="eyebrow-muted">{hasComparable ? `vs ${formatSnapshotId(payload?.previous_snapshot_id)}` : "Current levels only"}</span>
         </div>
         {!hasComparable ? (
           <div className="current-levels-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 16, fontSize: 12, lineHeight: 1.5 }}>

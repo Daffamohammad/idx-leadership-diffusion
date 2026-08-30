@@ -4,6 +4,7 @@ import { Link } from "react-router";
 import PriceChart from "../components/PriceChart";
 import { EmptyState } from "../components/EmptyState";
 import { useSnapshot } from "../data/SnapshotProvider";
+import { formatSnapshotId } from "../data/format";
 
 /**
  * A snapshot-backed chart route used to validate the chart component without
@@ -103,7 +104,7 @@ export default function ChartDemo() {
       )}
 
       <div style={{ marginTop: 16, display: "flex", gap: 16, flexWrap: "wrap", fontSize: 11, color: "#747a7d", fontFamily: "Geist Mono, monospace" }}>
-        <span>Snapshot: {data.payload.snapshot_id}</span>
+        <span>Snapshot: {formatSnapshotId(data.payload.snapshot_id, data.payload.as_of)}</span>
         <span>Source: {source}</span>
         <span>As of: {data.payload.as_of}</span>
         <Link to="/explorer" style={{ color: "#245b76" }}>Open group explorer →</Link>

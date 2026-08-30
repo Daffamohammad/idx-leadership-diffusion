@@ -62,6 +62,15 @@ export function formatDateLabel(value: string | null | undefined): string {
   return `${Number(day)} ${months[Number(month) - 1] ?? month} ${year}`;
 }
 
+/** Keep internal snapshot identifiers out of visible copy. */
+export function formatSnapshotId(
+  snapshotId: string | null | undefined,
+  asOf?: string | null,
+): string {
+  const sourceDate = asOf || String(snapshotId ?? "").match(/(\d{4}-\d{2}-\d{2})/)?.[1];
+  return sourceDate ? formatDateLabel(sourceDate) : formatEnumLabel(snapshotId);
+}
+
 export function formatCountLabel(count: number, singular: string, plural = `${singular}s`): string {
   return `${count} ${count === 1 ? singular : plural}`;
 }

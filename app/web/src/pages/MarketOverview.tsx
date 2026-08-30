@@ -12,7 +12,7 @@ import MarketHeatmap from "../components/MarketHeatmap";
 import ForeignFlowSample from "../components/ForeignFlowSample";
 import ResearchEvents from "../components/ResearchEvents";
 import type { TaxonomyKind } from "../data/snapshot";
-import { formatDateLabel, formatEnumLabel } from "../data/format";
+import { formatDateLabel, formatEnumLabel, formatSnapshotId } from "../data/format";
 
 const KIND_LABELS: Record<TaxonomyKind, string> = {
   SECTOR: "Sector",
@@ -104,7 +104,7 @@ export default function MarketOverview() {
             <span>·</span>
             <span>Provider mode: {formatEnumLabel(providerMode)}</span>
             <span>·</span>
-            <span>Snapshot: {adapted.payload.snapshot_id}</span>
+            <span>Snapshot: {formatSnapshotId(adapted.payload.snapshot_id, adapted.payload.as_of)}</span>
           </div>
         </div>
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>

@@ -30,7 +30,7 @@ import {
 } from "recharts";
 import { leadershipColor } from "../components/StatusChips";
 import PriceChart from "../components/PriceChart";
-import { formatDateLabel, formatEnumLabel } from "../data/format";
+import { formatDateLabel, formatEnumLabel, formatSnapshotId } from "../data/format";
 
 const card: React.CSSProperties = {
   background: "#ffffff",
@@ -383,7 +383,7 @@ function TaxonomyGroupDetail({
       </div>
 
       <div style={{ marginTop: 12, color: "#686e73", fontSize: 11, lineHeight: 1.5 }}>
-        Snapshot: {data.payload.snapshot_id} · As of {formatDateLabel(data.payload.as_of)} · Memberships are retained from the versioned taxonomy definition.
+        Snapshot: {formatSnapshotId(data.payload.snapshot_id, data.payload.as_of)} · As of {formatDateLabel(data.payload.as_of)} · Memberships are retained from the versioned taxonomy definition.
       </div>
     </div>
   );

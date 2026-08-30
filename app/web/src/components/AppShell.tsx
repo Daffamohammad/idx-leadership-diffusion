@@ -4,7 +4,7 @@ import ThemeToggle from "./ThemeToggle";
 import { BrandLockup } from "./BrandMark";
 import type { SnapshotContextValue } from "../data/SnapshotContext";
 import { normalizeDataStatus } from "../data/snapshot";
-import { formatDateLabel, formatEnumLabel } from "../data/format";
+import { formatDateLabel, formatEnumLabel, formatSnapshotId } from "../data/format";
 
 const navItems = [
   { path: "/what-changed", label: "What Changed", index: "01" },
@@ -287,7 +287,7 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
               ? "Loading snapshot…"
               : snap.error
                 ? "Snapshot unavailable"
-            : providerLabel + " · " + (statusLabel ?? "Ready") + " · Snapshot " + (snap.snapshotId ?? "—")}
+            : providerLabel + " · " + (statusLabel ?? "Ready") + " · Snapshot " + formatSnapshotId(snap.snapshotId, snap.payload?.as_of)}
           </span>
           <ThemeToggle />
           <button
