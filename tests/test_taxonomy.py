@@ -274,6 +274,8 @@ def test_build_taxonomy_payload_includes_metadata():
     payload = build_taxonomy_payload(taxonomy, aggregates, as_of="2026-08-28")
     assert payload["taxonomy_id"] == "test"
     assert payload["benchmark_id"] == "^JKSE"
+    assert payload["schema_version"] == "taxonomy-view-v2"
+    assert payload["memberships"][0]["ticker"] == "A.JK"
     assert payload["groups"]
 
 

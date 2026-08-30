@@ -376,6 +376,18 @@ export type TaxonomySourceKind =
   | "PRIMARY_INDEX"
   | "THIRD_PARTY";
 
+export type TaxonomyMembershipType = "PRIMARY" | "SECONDARY" | "EXCLUDED";
+
+export interface TaxonomyMembershipData {
+  ticker: string;
+  taxonomy_group_id: string;
+  taxonomy_group_name: string;
+  membership_type: TaxonomyMembershipType;
+  confidence: number;
+  source: string;
+  source_as_of?: string | null;
+}
+
 export interface TaxonomyGroupAggregate {
   taxonomy_group_id: string;
   taxonomy_group_name: string;
@@ -426,6 +438,7 @@ export interface TaxonomyView {
   calculation?: Record<string, unknown>;
   calculation_coverage?: Record<string, unknown>;
   comparability?: Record<string, unknown>;
+  memberships?: TaxonomyMembershipData[];
   groups: TaxonomyGroupAggregate[];
 }
 

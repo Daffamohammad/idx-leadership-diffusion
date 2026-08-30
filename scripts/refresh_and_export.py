@@ -29,23 +29,34 @@ Behavior by mode:
 
 This wrapper preserves the partial-universe disclosure and ensures
 the browser payload is always in sync with the latest live snapshot.
+
+For a complete live run, pass ``--full-live`` together with both explicit
+live/spend acknowledgements. The complete run uses the latest discovered
+universe and unbounded pagination; it never silently falls back to the
+bounded 500-symbol smoke configuration.
 """
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 from datetime import date
 from pathlib import Path
 
-from idx_leadership.utils import data_root, project_root
+from idx_leadership.utils import data_root, load_project_env, project_root
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(prog="refresh_and_export")
     parser.add_argument("--as-of", type=str, default=None,
                         help="Market date (YYYY-MM-DD). Default: latest.")
+    parser.add_argument(
+        "--full-live", action="store_true",
+        help="Use the latest discovered universe and all provider pages. "
+             "Requires --allow-live and --allow-credit-spend.",
+    )
     parser.add_argument("--max-symbols", type=int, default=500,
                         help="Max symbols to fetch (default: 500)")
     parser.add_argument("--max-pages", type=int, default=5,
@@ -68,6 +79,20 @@ def main() -> int:
              "client-side ESTIMATE only; provider balance is UNAVAILABLE.",
     )
     args = parser.parse_args()
+    load_project_env()
+
+    effective_max_symbols = None if args.full_live else args.max_symbols
+    effective_max_pages = None if args.full_live else args.max_pages
+
+    blockers = _operator_blockers(args)
+    if blockers:
+        print(json.dumps({
+            "status": "BLOCKED",
+            "mode": "FULL_LIVE" if args.full_live else "BOUNDED_LIVE",
+            "blockers": blockers,
+            "next_action": blockers[0]["next_action"],
+        }, indent=2))
+        return 2
 
     project_root_path = project_root()
     snapshot_root = data_root() / "snapshots"
@@ -89,9 +114,11 @@ def main() -> int:
     cmd = [
         sys.executable, "-m", "scripts.build_market_snapshot",
         "--max-estimated-credits", str(args.max_estimated_credits),
-        "--max-symbols", str(args.max_symbols),
-        "--max-pages", str(args.max_pages),
     ]
+    if effective_max_symbols is not None:
+        cmd.extend(["--max-symbols", str(effective_max_symbols)])
+    if effective_max_pages is not None:
+        cmd.extend(["--max-pages", str(effective_max_pages)])
     preflight_only = not args.allow_live
     if preflight_only:
         cmd.append("--preflight-only")
@@ -179,6 +206,40 @@ def main() -> int:
     print("Refresh-and-export complete")
     print("=" * 60)
     return 0
+
+
+def _operator_blockers(args: argparse.Namespace) -> list[dict[str, str]]:
+    """Return actionable blockers before invoking the snapshot builder.
+
+    This is intentionally local and network-free. The builder still performs
+    the authoritative validation after loading the project environment.
+    """
+    blockers: list[dict[str, str]] = []
+    if args.full_live and not args.allow_live:
+        blockers.append({
+            "code": "LIVE_ACK_REQUIRED",
+            "reason": "Full live mode requires the explicit --allow-live acknowledgement.",
+            "next_action": "Re-run with --allow-live after reviewing the preflight estimate.",
+        })
+    if args.full_live and not args.allow_credit_spend:
+        blockers.append({
+            "code": "CREDIT_ACK_REQUIRED",
+            "reason": "Full live mode requires the explicit --allow-credit-spend acknowledgement.",
+            "next_action": "Re-run with --allow-credit-spend only after approving the client-side credit ceiling.",
+        })
+    if args.allow_live and not args.allow_credit_spend:
+        blockers.append({
+            "code": "CREDIT_ACK_REQUIRED",
+            "reason": "A live Sectors request cannot run without the credit-spend acknowledgement.",
+            "next_action": "Add --allow-credit-spend or run without --allow-live for preflight-only mode.",
+        })
+    if args.full_live and args.allow_live and args.allow_credit_spend and not os.environ.get("SECTORS_API_KEY", "").strip():
+        blockers.append({
+            "code": "SECTORS_API_KEY_UNAVAILABLE",
+            "reason": "The Sectors API key is not available in the local environment.",
+            "next_action": "Store SECTORS_API_KEY in the local .env or shell environment, then rerun the bounded preflight before approving spend.",
+        })
+    return blockers
 
 
 def _read_manifest_entry(snapshot_dir: Path) -> dict | None:

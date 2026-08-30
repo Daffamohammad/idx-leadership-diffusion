@@ -19,6 +19,8 @@ import type {
   SnapshotBreadthHistoryPoint,
   GroupPriceHistoryPoint,
   TaxonomyGroupAggregate,
+  TaxonomyMembershipData,
+  TaxonomyMembershipType,
   TaxonomyKind,
   TaxonomyView,
 } from "./snapshot";
@@ -109,6 +111,7 @@ export interface TaxonomyGroupData {
   sampleForeignFlowIdr: number | null;
   sampleForeignFlowDirection: ForeignFlowDirection | null;
   breakdown: Record<string, number>;
+  memberships: TaxonomyMembershipData[];
 }
 
 export interface ForeignFlowMarketSummary {
@@ -369,6 +372,35 @@ function normalizeTaxonomyView(value: unknown): TaxonomyView | null {
   const kindRaw = typeof raw.taxonomy_kind === "string"
     ? raw.taxonomy_kind.toUpperCase()
     : "SECTOR";
+  const memberships = Array.isArray(raw.memberships)
+    ? raw.memberships.flatMap((membership): TaxonomyMembershipData[] => {
+        if (!membership || typeof membership !== "object") return [];
+        const item = membership as Record<string, unknown>;
+        if (typeof item.ticker !== "string" || typeof item.taxonomy_group_id !== "string") {
+          return [];
+        }
+        const membershipType = typeof item.membership_type === "string"
+          ? item.membership_type.toUpperCase()
+          : "PRIMARY";
+        return [{
+          ticker: item.ticker,
+          taxonomy_group_id: item.taxonomy_group_id,
+          taxonomy_group_name:
+            typeof item.taxonomy_group_name === "string"
+              ? item.taxonomy_group_name
+              : item.taxonomy_group_id,
+          membership_type: (["PRIMARY", "SECONDARY", "EXCLUDED"].includes(membershipType)
+            ? membershipType
+            : "PRIMARY") as TaxonomyMembershipType,
+          confidence:
+            typeof item.confidence === "number" && Number.isFinite(item.confidence)
+              ? item.confidence
+              : 1,
+          source: typeof item.source === "string" ? item.source : "",
+          source_as_of: typeof item.source_as_of === "string" ? item.source_as_of : null,
+        }];
+      })
+    : [];
   return {
     schema_version: typeof raw.schema_version === "string" ? raw.schema_version : "taxonomy-view-v1",
     taxonomy_id: raw.taxonomy_id,
@@ -434,6 +466,7 @@ function normalizeTaxonomyView(value: unknown): TaxonomyView | null {
       typeof raw.comparability === "object" && raw.comparability !== null
         ? (raw.comparability as Record<string, unknown>)
         : undefined,
+    memberships,
     groups,
   };
 }
@@ -445,6 +478,9 @@ function adaptTaxonomyView(view: TaxonomyView): {
   const groupData: Record<string, TaxonomyGroupData> = {};
   let primary: TaxonomyGroupData | null = null;
   for (const group of view.groups) {
+    const memberships = (view.memberships ?? []).filter(
+      (membership) => membership.taxonomy_group_id === group.taxonomy_group_id,
+    );
     const data: TaxonomyGroupData = {
       id: group.taxonomy_group_id,
       name: group.taxonomy_group_name,
@@ -475,6 +511,7 @@ function adaptTaxonomyView(view: TaxonomyView): {
           : null,
       sampleForeignFlowDirection: group.sample_foreign_flow_direction ?? null,
       breakdown: group.membership_kind_breakdown ?? {},
+      memberships,
     };
     groupData[group.taxonomy_group_id] = data;
     if (!primary || data.constituents > primary.constituents) {

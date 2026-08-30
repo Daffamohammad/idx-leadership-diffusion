@@ -434,7 +434,7 @@ def build_taxonomy_payload(
 ) -> dict[str, Any]:
     """Wrap a :class:`Taxonomy` and its aggregates into a serializable dict."""
     return {
-        "schema_version": "taxonomy-view-v1",
+        "schema_version": "taxonomy-view-v2",
         "taxonomy_id": taxonomy.taxonomy_id,
         "taxonomy_name": taxonomy.taxonomy_name,
         "taxonomy_version": taxonomy.taxonomy_version,
@@ -446,5 +446,9 @@ def build_taxonomy_payload(
         "benchmark_id": benchmark_id,
         "as_of": str(as_of) if as_of else None,
         "coverage": taxonomy._coverage_payload(),
+        # Keep the source-backed membership records beside the aggregates so
+        # downstream group detail views can explain who belongs to a
+        # prototype taxonomy without reverse-engineering the YAML registry.
+        "memberships": [membership.to_dict() for membership in taxonomy.memberships],
         "groups": [aggregate.to_dict() for aggregate in aggregates],
     }
