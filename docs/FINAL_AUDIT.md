@@ -29,28 +29,27 @@ into signal inputs.
 
 ```
 branch:        main
-HEAD:          cc84ba5
+review baseline HEAD: cc84ba5
 origin/main:   eba6544
-ahead:         6 commits
+review baseline ahead: 6 commits
 behind:        0
-status:        modified (independent-review changes pending commit; no untracked product files)
+post-review status: clean (audit fixes committed locally; no untracked product files)
 ```
 
-6 most recent commits:
+Earlier review-related commits:
 ```
+2f39f4d fix: preserve data gaps and comparable deltas
+89d4bac fix: correct snapshot map and group drilldown UI
+15faf9b docs: record independent audit and provenance caveats
 cc84ba5 docs(audit): final adversarial review — IDX-IC fix, BBCA resolution, FINAL_AUDIT
 f1409a7 feat(research): activate Tavily + YOU.com research pass with structured evidence
-6457c7d docs: SECTORS_MIGRATION_READINESS — verified readiness snapshot
-b41c376 feat(ui): P1 — Master Group Table + Themes Explorer
-eeec7ec feat(ui): What Changed wiring, LeadershipMap workspace, GroupExplorer upgrade, Sectors migration contract
-ffb914a feat(ui): implementation pass — taxonomy maps, ticker analysis, foreign-flow sample, research events
 ```
 
 ## 3. Test / Build Results
 
 | Command | Exit | Result |
 | --- | --- | --- |
-| `git rev-list --left-right --count origin/main...HEAD` | 0 | ahead 6, behind 0 |
+| `git rev-list --left-right --count origin/main...HEAD` | 0 | review branch ahead of origin; no push performed |
 | `.venv/bin/pytest -q` | 0 | **493 passed** (host validation; Bun/TSX IPC requires host access) |
 | `app/web/node_modules/.bin/tsc --noEmit --project app/web/tsconfig.json` | 0 | clean, no output |
 | `npm run build --prefix app/web` | 0 | success, 631 modules, 846.59 kB bundle |
@@ -417,8 +416,8 @@ None.
 
 ## 19. Final Handoff Decision
 
-- Git state verified: main @ cc84ba5, ahead6; independent-review changes are
-  present in the worktree and have not been committed or pushed
+- Git state verified: main; worktree clean; independent-review changes are
+  committed locally and have not been pushed
 - 493 tests pass on the host rerun; typecheck clean; build success
 - Research artifacts (63 obs / 137 sources / 65 audit entries) audited
 - Tavily + YOU.com verified live (not stubbed)
@@ -438,4 +437,5 @@ None.
 - BBCA 2021-10-13: resolved as 5-for-1 split via BBCA primary source
 
 The implementation review is complete. The requested engineering fixes are
-validated locally; publication/commit remains intentionally outside this audit.
+validated and committed locally; publication/push remains intentionally outside
+this audit.
