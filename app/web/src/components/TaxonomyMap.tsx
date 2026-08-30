@@ -13,6 +13,8 @@
 import { useMemo, useState } from "react";
 import type { TaxonomyGroupData } from "../data/adapter";
 import type { ForeignFlowDirection, TaxonomyKind } from "../data/snapshot";
+import { formatCountLabel, formatEnumLabel } from "../data/format";
+import { placeMapLabels } from "../data/mapLabels";
 interface TaxonomyMapProps {
   taxonomyGroups: Record<string, TaxonomyGroupData>;
   foreignFlow: { groupSummaries: Array<{ groupId: string; direction: ForeignFlowDirection; netValueIdr: number }> } | null;
@@ -22,7 +24,8 @@ interface TaxonomyMapProps {
   onSelectGroup?: (groupId: string) => void;
 }
 
-const PLOT = { left: 60, top: 30, width: 540, height: 320 };
+const VIEWBOX = { width: 1000, height: 500 };
+const PLOT = { left: 118, top: 32, width: 820, height: 390 };
 const DOMAIN = { xMin: -15, xMax: 15, yMin: 0, yMax: 100 };
 const KIND_LABEL: Record<TaxonomyKind, string> = {
   SECTOR: "Sector",
@@ -50,6 +53,17 @@ function colorFor(leadership: string, diffusion: string): string {
   return "#7c858c";
 }
 
+function shortName(name: string): string {
+  return name.length > 22 ? `${name.slice(0, 20)}…` : name;
+}
+
+function dataGapReason(group: TaxonomyGroupData): string {
+  if (group.constituents === 0) return "No constituents";
+  if (group.eligible === 0) return "No eligible history";
+  if (group.diffusion === "UNCONFIRMED") return "No comparable prior";
+  return "Coverage incomplete";
+}
+
 export default function TaxonomyMap({
   taxonomyGroups,
   foreignFlow,
@@ -59,14 +73,34 @@ export default function TaxonomyMap({
   onSelectGroup,
 }: TaxonomyMapProps) {
   const [hoverId, setHoverId] = useState<string | null>(null);
-  const groups = useMemo(
+  const allGroups = useMemo(
     () =>
       Object.values(taxonomyGroups)
         .filter((group) => group.taxonomyKind === taxonomyKind)
-        .filter((group) => group.excess20d !== null && group.breadth !== null)
         .sort((a, b) => b.constituents - a.constituents),
     [taxonomyGroups, taxonomyKind],
   );
+  const groups = useMemo(
+    () => allGroups.filter((group) => group.excess20d !== null && group.breadth !== null),
+    [allGroups],
+  );
+  const labelPositions = useMemo(() => {
+    const candidates = groups.map((group) => ({
+      id: `${group.taxonomyId}::${group.id}`,
+      text: shortName(group.name),
+      x: scaleX(group.excess20d ?? 0),
+      y: scaleY(group.breadth ?? 0),
+      radius: Math.max(8, Math.min(22, Math.sqrt(group.constituents) * 2.4)),
+      priority: group.constituents * 10 + Math.abs(group.excess20d ?? 0),
+    }));
+    return placeMapLabels(candidates, {
+      left: PLOT.left + 8,
+      right: PLOT.left + PLOT.width - 8,
+      top: PLOT.top + 8,
+      bottom: PLOT.top + PLOT.height - 8,
+    }, candidates.length);
+  }, [groups]);
+  const activeGroup = groups.find((group) => `${group.taxonomyId}::${group.id}` === hoverId) ?? null;
   const foreignByGroup: Record<string, ForeignFlowDirection> = {};
   if (foreignFlow) {
     for (const summary of foreignFlow.groupSummaries) {
@@ -74,7 +108,7 @@ export default function TaxonomyMap({
     }
   }
 
-  if (groups.length === 0) {
+  if (allGroups.length === 0) {
     return (
       <section
         aria-labelledby={`map-${taxonomyKind}-title`}
@@ -126,8 +160,8 @@ export default function TaxonomyMap({
       <svg
         role="img"
         aria-label={`${title} map`}
-        viewBox={`0 0 ${PLOT.left + PLOT.width + 30} ${PLOT.top + PLOT.height + 50}`}
-        style={{ width: "100%", maxWidth: 720, height: "auto" }}
+        viewBox={`0 0 ${VIEWBOX.width} ${VIEWBOX.height}`}
+        style={{ width: "100%", height: "auto", display: "block", marginTop: 8 }}
       >
         <rect
           x={PLOT.left}
@@ -194,16 +228,16 @@ export default function TaxonomyMap({
 
         {/* Quadrant annotations — centered within each quadrant */}
         <text x={scaleX(7.5)} y={scaleY(78)} fontSize={10} fontFamily="Geist Mono, monospace" fill="#178477" opacity={0.7} textAnchor="middle">
-          leading · broadening
+          Leading · Broadening
         </text>
         <text x={scaleX(7.5)} y={scaleY(22)} fontSize={10} fontFamily="Geist Mono, monospace" fill="#a35535" opacity={0.7} textAnchor="middle">
-          leading · narrowing
+          Leading · Narrowing
         </text>
         <text x={scaleX(-7.5)} y={scaleY(78)} fontSize={10} fontFamily="Geist Mono, monospace" fill="#a35535" opacity={0.7} textAnchor="middle">
-          lagging · broadening
+          Lagging · Broadening
         </text>
         <text x={scaleX(-7.5)} y={scaleY(22)} fontSize={10} fontFamily="Geist Mono, monospace" fill="#8f2424" opacity={0.7} textAnchor="middle">
-          lagging · narrowing
+          Lagging · Narrowing
         </text>
 
         {groups.map((group) => {
@@ -211,26 +245,24 @@ export default function TaxonomyMap({
           const y = scaleY(group.breadth ?? 0);
           const radius = Math.max(8, Math.min(22, Math.sqrt(group.constituents) * 2.4));
           const colour = colorFor(group.leadership, group.diffusion);
-          const flow = foreignByGroup[group.id];
-          const isHover = hoverId === `${group.taxonomyId}::${group.id}`;
-          // Label alignment: keep within plot horizontal bounds and flip
-          // vertically when the bubble sits near the bottom edge so the
-          // name does not collide with x-axis tick labels.
-          const isNearBottom = y + radius + 14 > PLOT.top + PLOT.height;
-          const labelY = isNearBottom ? y - radius - 8 : y + radius + 14;
-          const flowLabelY = isNearBottom ? y - radius - 20 : y + radius + 26;
-          const labelX = Math.max(PLOT.left + 36, Math.min(PLOT.left + PLOT.width - 36, x));
-          const labelAnchor = x < PLOT.left + 44 ? "start" : x > PLOT.left + PLOT.width - 44 ? "end" : "middle";
+          const groupKey = `${group.taxonomyId}::${group.id}`;
+          const isHover = hoverId === groupKey;
           return (
             <g
-              key={`${group.taxonomyId}::${group.id}`}
+              key={groupKey}
               tabIndex={0}
               role="button"
-              aria-label={`${group.name}: ${group.leadership.toLowerCase()} / ${group.diffusion.toLowerCase()}, ${group.constituents} tickers`}
-              onMouseEnter={() => setHoverId(`${group.taxonomyId}::${group.id}`)}
+              aria-label={`${group.name}: ${formatEnumLabel(group.leadership)} / ${formatEnumLabel(group.diffusion)}, ${formatCountLabel(group.constituents, "ticker")}`}
+              onMouseEnter={() => setHoverId(groupKey)}
               onMouseLeave={() => setHoverId(null)}
-              onFocus={() => setHoverId(`${group.taxonomyId}::${group.id}`)}
+              onFocus={() => setHoverId(groupKey)}
               onBlur={() => setHoverId(null)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  onSelectGroup?.(group.id);
+                }
+              }}
               onClick={() => onSelectGroup?.(group.id)}
               style={{ cursor: "pointer", outline: "none" }}
             >
@@ -267,33 +299,85 @@ export default function TaxonomyMap({
               >
                 {String(group.constituents)}
               </text>
-              <text
-                x={labelX}
-                y={labelY}
-                textAnchor={labelAnchor}
-                fontSize={11}
-                fontFamily="Geist Mono, monospace"
-                fill="#202325"
-                dominantBaseline={isNearBottom ? "auto" : "hanging"}
-              >
-                {group.name.length > 18 ? `${group.name.slice(0, 16)}…` : group.name}
-              </text>
-              {flow && (
-                <text
-                  x={labelX}
-                  y={flowLabelY}
-                  textAnchor={labelAnchor}
-                  fontSize={10}
-                  fontFamily="Geist Mono, monospace"
-                  fill={flow === "NET_BUY" ? "#178477" : flow === "NET_SELL" ? "#8f2424" : "#7c858c"}
-                >
-                  {flow === "NET_BUY" ? "▲" : flow === "NET_SELL" ? "▼" : "≈"} flow sample
-                </text>
-              )}
             </g>
           );
         })}
+        {labelPositions.map((label) => {
+          const isActive = hoverId === label.id;
+          const targetX = label.targetX ?? label.x;
+          const targetY = label.targetY ?? label.y;
+          const hasLeader = Math.hypot(label.x - targetX, label.y - targetY) > 16;
+          return (
+            <g key={`label-${label.id}`} pointerEvents="none">
+              {hasLeader && (
+                <line
+                  x1={targetX}
+                  y1={targetY}
+                  x2={label.x}
+                  y2={label.y - 3}
+                  stroke={isActive ? "#202325" : "#9aa19f"}
+                  strokeWidth={isActive ? 1.2 : 0.8}
+                />
+              )}
+              <text
+                x={label.x}
+                y={label.y}
+                textAnchor={label.textAnchor}
+                fontSize={isActive ? 12 : 11}
+                fontFamily="Geist Mono, monospace"
+                fontWeight={isActive ? 600 : 400}
+                fill="#202325"
+                dominantBaseline="hanging"
+              >
+                {label.text}
+              </text>
+            </g>
+          );
+        })}
+        {activeGroup && (
+          <g pointerEvents="none">
+            <rect x={PLOT.left + PLOT.width - 286} y={8} width={278} height={48} fill="#202325" opacity={0.96} />
+            <text x={PLOT.left + PLOT.width - 272} y={25} fill="#fff" fontSize={12} fontFamily="Geist" fontWeight={600}>
+              {shortName(activeGroup.name)}
+            </text>
+            <text x={PLOT.left + PLOT.width - 272} y={43} fill="#d8dedc" fontSize={10} fontFamily="Geist Mono, monospace">
+              {formatEnumLabel(activeGroup.leadership)} · {formatEnumLabel(activeGroup.diffusion)} · {formatCountLabel(activeGroup.constituents, "ticker")}
+            </text>
+          </g>
+        )}
+        {groups.length === 0 && (
+          <text x={PLOT.left + PLOT.width / 2} y={PLOT.top + PLOT.height / 2} textAnchor="middle" fill="#686e73" fontSize={13} fontFamily="Geist">
+            No plottable groups in this snapshot
+          </text>
+        )}
       </svg>
+
+      <div
+        className="map-summary-grid"
+        aria-label={`${KIND_LABEL[taxonomyKind]} groups list`}
+        style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8, marginTop: 12 }}
+      >
+        {allGroups.map((group) => {
+          const groupKey = `${group.taxonomyId}::${group.id}`;
+          const isDataGap = group.excess20d === null || group.breadth === null || group.dataQuality === "DATA_GAP";
+          const flow = foreignByGroup[group.id];
+          return (
+            <button
+              key={`summary-${groupKey}`}
+              type="button"
+              onClick={() => onSelectGroup?.(group.id)}
+              onFocus={() => setHoverId(groupKey)}
+              onBlur={() => setHoverId(null)}
+              style={{ display: "grid", gap: 3, textAlign: "left", padding: "9px 10px", border: "1px solid #dfe2e1", background: isDataGap ? "#f1f2f0" : "#fff", color: "#202325", cursor: "pointer", minWidth: 0 }}
+            >
+              <span style={{ fontSize: 12, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{group.name}</span>
+              <span style={{ fontFamily: "Geist Mono, monospace", fontSize: 10, color: isDataGap ? "#686e73" : "#7c858c" }}>
+                {isDataGap ? `Data gap · ${dataGapReason(group)}` : `${formatEnumLabel(group.leadership)} · ${formatEnumLabel(group.diffusion)}${flow ? ` · ${formatEnumLabel(flow)} flow` : ""}`}
+              </span>
+            </button>
+          );
+        })}
+      </div>
 
       <footer
         style={{
@@ -310,6 +394,8 @@ export default function TaxonomyMap({
         <span>Bubble size ∝ √(constituents)</span>
         <span>·</span>
         <span>Off-scale = dashed ring at plot boundary</span>
+        <span>·</span>
+        <span>Use the group list below for keyboard access</span>
         <span>·</span>
         <span>Source: Python taxonomy aggregation</span>
       </footer>

@@ -16,6 +16,15 @@
   --color-weakening: #ad6765;
 }
 
+:root {
+  --content-max: 1280px;
+  --content-wide-max: 1480px;
+  --page-gutter: clamp(16px, 3vw, 40px);
+  --card-gap: clamp(12px, 1.7vw, 24px);
+  --table-cell-x: clamp(8px, 1vw, 14px);
+  --table-cell-y: 10px;
+}
+
 html, body, #root { height: 100%; }
 body { margin: 0; background: #ffffff; color: #16191c; font-family: 'Geist', system-ui, sans-serif; font-size: 14px; -webkit-font-smoothing: antialiased; }
 body.custom-cursor-enabled { cursor: none; }
@@ -32,11 +41,30 @@ button:focus-visible, a:focus-visible, select:focus-visible { outline: 2px solid
 .scroll-thin::-webkit-scrollbar { width: 5px; height: 5px; }.scroll-thin::-webkit-scrollbar-thumb { background: #dfe2e1; }
 .recharts-wrapper { font-family: 'Geist', system-ui, sans-serif; }
 .recharts-cartesian-axis-tick-value { font-family: 'Geist Mono', monospace; }
+.content-shell {
+  width: 100%;
+  max-width: var(--content-max);
+  margin-inline: auto;
+  padding-inline: var(--page-gutter);
+  box-sizing: border-box;
+}
+.content-shell-wide {
+  width: 100%;
+  max-width: var(--content-wide-max);
+  margin-inline: auto;
+  padding-inline: var(--page-gutter);
+  box-sizing: border-box;
+}
+.table-scroll { overflow-x: auto; max-width: 100%; }
+.table-scroll > table { min-width: max-content; }
+.table-cell { padding: var(--table-cell-y) var(--table-cell-x); }
 @media (max-width: 900px) {
   .public-grid, .overview-grid, .surface-grid { grid-template-columns: 1fr !important; }
   .desktop-only { display: none !important; }
   .market-read-stats { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
   .map-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .themes-browser-grid { grid-template-columns: 1fr !important; }
+  .themes-detail-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
   .explorer-metrics { flex-wrap: wrap; }
   .explorer-metrics > * { flex: 1 1 calc(50% - 6px) !important; min-width: 0; }
   .explorer-confirmation-grid, .method-research-grid { grid-template-columns: 1fr !important; }
@@ -46,6 +74,10 @@ button:focus-visible, a:focus-visible, select:focus-visible { outline: 2px solid
   .workspace-header .workspace-asof, .workspace-header .workspace-separator { display: none; }
   .workspace-header .workspace-home { padding-inline: 6px !important; }
   .surface-grid > div[style*="border-left"] { border-left: 0 !important; padding-left: 0 !important; }
+  .content-shell, .content-shell-wide { padding-inline: 20px; }
+  .map-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .summary-strips { grid-template-columns: 1fr !important; }
+  .current-levels-grid { grid-template-columns: 1fr !important; }
 }
 
 @media (max-width: 560px) {

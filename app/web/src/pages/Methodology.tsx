@@ -309,7 +309,7 @@ function EvidenceMatrix({
   ];
 
   return (
-    <div style={{ ...card, overflow: 'hidden', marginBottom: 40 }}>
+    <div className="table-scroll" style={{ ...card, marginBottom: 40 }}>
       <div style={{ padding: '14px 18px', borderBottom: '1px solid #ebebeb' }}>
         <div className="eyebrow-muted">Evidence matrix</div>
         <h2 style={{ fontSize: 18, margin: '4px 0 0', color: '#171717' }}>
@@ -319,7 +319,7 @@ function EvidenceMatrix({
           One row per evidence layer. Status and source coverage are reported separately.
         </p>
       </div>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+      <table style={{ width: '100%', minWidth: 980, borderCollapse: 'collapse', fontSize: 12 }}>
         <thead>
           <tr>
             {["Layer", "Status", "Source", "As of", "Coverage", "Quantitative?", "Signal eligible?", "Limitation"].map((label) => (
@@ -420,7 +420,7 @@ export default function Methodology() {
   ];
   const exclusionRows = Object.entries(coverage?.exclusion_reasons ?? {}).map(([reason, count]) => ({ reason, count }));
   return (
-    <div style={{ padding: '36px 40px', maxWidth: 1200, margin: '0 auto' }}>
+    <div className="content-shell" style={{ padding: '36px var(--page-gutter)', maxWidth: 'var(--content-max)' }}>
       <div style={{ marginBottom: 36 }}>
         <h1 style={{ fontSize: 30, fontWeight: 400, color: '#171717', letterSpacing: '-1.5px', lineHeight: 1.1, marginBottom: 8 }}>
           Methodology &amp; Data Quality
@@ -453,8 +453,8 @@ export default function Methodology() {
 
       {/* Data Status */}
       <SectionHead label="Data Status" />
-      <div style={{ ...card, overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <div className="table-scroll" style={{ ...card }}>
+        <table style={{ width: '100%', minWidth: 760, borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid #ebebeb' }}>
               {['Data Layer', 'Status', 'As of', 'Notes'].map(col => (

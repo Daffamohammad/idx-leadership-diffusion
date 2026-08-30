@@ -51,11 +51,12 @@ export default function TaxonomyMapPage() {
 
   return (
     <main
+      className="content-shell"
       style={{
-        padding: "32px 36px 56px",
+        padding: "32px var(--page-gutter) 56px",
         display: "grid",
-        gap: 24,
-        maxWidth: 1280,
+        gap: "var(--card-gap)",
+        maxWidth: "var(--content-max)",
         margin: "0 auto",
       }}
     >

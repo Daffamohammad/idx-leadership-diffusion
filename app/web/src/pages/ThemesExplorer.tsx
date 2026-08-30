@@ -134,6 +134,7 @@ export default function ThemesExplorer() {
       </header>
 
       <div
+        className="themes-browser-grid"
         style={{
           display: "grid",
           gridTemplateColumns: "320px 1fr",
@@ -255,6 +256,7 @@ export default function ThemesExplorer() {
               </header>
 
               <div
+                className="themes-detail-metrics"
                 style={{
                   display: "grid",
                   gridTemplateColumns: "repeat(4, minmax(0, 1fr))",

@@ -149,16 +149,16 @@ function MiniMap({
         <line x1={mapX(0, plot, domain)} x2={mapX(0, plot, domain)} y1={plot.top} y2={plot.top + plot.height} stroke="#b9c0be" />
         <line x1={plot.left} x2={plot.left + plot.width} y1={yAxis} y2={yAxis} stroke="#b9c0be" />
         <text x="60" y="43" fill="#778089" fontSize="10" fontFamily="Geist Mono">
-          {mapMode === "current" ? "WEAK / BROAD" : "IMPROVING"}
+          {mapMode === "current" ? "Weak / broad" : "Improving"}
         </text>
         <text x="570" y="43" fill="#315d87" fontSize="10" fontFamily="Geist Mono">
-          {mapMode === "current" ? "STRONG / BROAD" : "LEADING"}
+          {mapMode === "current" ? "Strong / broad" : "Leading"}
         </text>
         <text x="60" y="278" fill="#778089" fontSize="10" fontFamily="Geist Mono">
-          {mapMode === "current" ? "WEAK / NARROW" : "LAGGING"}
+          {mapMode === "current" ? "Weak / narrow" : "Lagging"}
         </text>
         <text x="560" y="278" fill="#b34e4c" fontSize="10" fontFamily="Geist Mono">
-          {mapMode === "current" ? "STRONG / NARROW" : "WEAKENING"}
+          {mapMode === "current" ? "Strong / narrow" : "Weakening"}
         </text>
         {sectors.map((s) => {
           if (s.excess20d === null) return null;
@@ -481,7 +481,7 @@ export default function WhatChanged() {
   const changes = categorizeChanges(sectors);
 
   return (
-    <div style={{ maxWidth: 1480, margin: "auto", padding: "28px 32px 64px" }}>
+    <div className="content-shell-wide" style={{ maxWidth: "var(--content-wide-max)", padding: "28px var(--page-gutter) 64px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "end", marginBottom: 16 }}>
         <div>
           <div className="eyebrow-muted">Indonesian Equities · Market Intelligence</div>
@@ -525,7 +525,7 @@ export default function WhatChanged() {
         </div>
       </section>
       {/* Compact market-level summary strips — master §8 */}
-      <section style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 18 }}>
+      <section className="summary-strips" style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 12, marginBottom: 18 }}>
         <div style={{ background: "#faf9f6", border: "1px solid #dfe2e1", padding: "12px 14px" }}>
           <div className="eyebrow-muted" style={{ marginBottom: 8 }}>Leadership states</div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 6, fontFamily: "Geist Mono", fontSize: 11 }}>
@@ -538,12 +538,18 @@ export default function WhatChanged() {
         </div>
         <div style={{ background: "#faf9f6", border: "1px solid #dfe2e1", padding: "12px 14px" }}>
           <div className="eyebrow-muted" style={{ marginBottom: 8 }}>Diffusion</div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 6, fontFamily: "Geist Mono", fontSize: 11 }}>
-            <span>Broadening <b>{diffCounts.BROADENING}</b></span>
-            <span>Stable <b>{diffCounts.STABLE}</b></span>
-            <span>Narrowing <b>{diffCounts.NARROWING}</b></span>
-            <span>Unconfirmed <b>{diffCounts.UNCONFIRMED}</b></span>
-          </div>
+          {hasComparable ? (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 6, fontFamily: "Geist Mono", fontSize: 11 }}>
+              <span>Broadening <b>{diffCounts.BROADENING}</b></span>
+              <span>Stable <b>{diffCounts.STABLE}</b></span>
+              <span>Narrowing <b>{diffCounts.NARROWING}</b></span>
+              <span>Unconfirmed <b>{diffCounts.UNCONFIRMED}</b></span>
+            </div>
+          ) : (
+            <div style={{ fontSize: 11, lineHeight: 1.45, color: "#686e73" }}>
+              Current diffusion state is unconfirmed for {diffCounts.UNCONFIRMED} groups. A compatible prior is required to measure broadening or narrowing.
+            </div>
+          )}
           {!hasComparable && <div style={{ marginTop: 6, fontSize: 10, color: "#7a5010" }}>Diffusion change unavailable without comparable prior</div>}
         </div>
         <div style={{ background: "#faf9f6", border: "1px solid #dfe2e1", padding: "12px 14px" }}>
@@ -564,7 +570,7 @@ export default function WhatChanged() {
           <span className="eyebrow-muted">{hasComparable ? `vs ${payload?.previous_snapshot_id ?? "prior"}` : "Current levels only"}</span>
         </div>
         {!hasComparable ? (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 16, fontSize: 12, lineHeight: 1.5 }}>
+          <div className="current-levels-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 16, fontSize: 12, lineHeight: 1.5 }}>
             <div>
               <div style={{ fontWeight: 600, marginBottom: 4 }}>You can use this snapshot for</div>
               <div>Current leadership, breadth, excess return, and concentration levels.</div>

@@ -190,7 +190,7 @@ export default function MasterGroupTable() {
   const arrow = (key: SortKey) => (sortKey === key ? (sortDir === "asc" ? " ▲" : " ▼") : "");
 
   return (
-    <section style={{ padding: "0 0 80px" }}>
+    <section className="content-shell" style={{ padding: "0 var(--page-gutter) 80px" }}>
       <header style={{ marginBottom: 24 }}>
         <div
           style={{

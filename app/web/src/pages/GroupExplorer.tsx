@@ -118,15 +118,15 @@ const flowCfg: Record<FlowState, { label: string; color: string }> = {
 
 function ConstituentTable({ constituents }: { constituents: ConstituentData[] }) {
   return (
-    <div style={{ ...card, overflow: "hidden" }}>
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+    <div className="table-scroll" style={{ ...card }}>
+      <table style={{ width: "100%", minWidth: 760, borderCollapse: "collapse" }}>
         <thead>
           <tr style={{ borderBottom: "1px solid #ebebeb" }}>
             {["Ticker", "Company", "20D Ret", "20D Exc", "60D Exc", "Part.", "Abs. Move", "Foreign Flow"].map(
               (col) => (
                 <th
                   key={col}
-                  style={{
+                style={{
                     padding: "9px 12px",
                     fontFamily: "Geist Mono, monospace",
                     fontSize: 10,
@@ -308,7 +308,7 @@ function TaxonomyGroupDetail({
       : `${value >= 0 ? "+" : ""}${value.toFixed(1)}${suffix}`;
 
   return (
-    <div className="taxonomy-detail-page" style={{ padding: "36px 40px", maxWidth: 1280, margin: "0 auto" }}>
+    <div className="taxonomy-detail-page content-shell" style={{ padding: "36px var(--page-gutter)", maxWidth: "var(--content-max)" }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 20, marginBottom: 24, flexWrap: "wrap" }}>
         <div>
           <Link to={backPath} style={{ color: "#686e73", fontSize: 12, textDecoration: "none" }}>
@@ -523,7 +523,7 @@ export default function GroupExplorer() {
       : undefined;
 
   return (
-    <div style={{ padding: "36px 40px", maxWidth: 1280, margin: "0 auto" }}>
+    <div className="content-shell" style={{ padding: "36px var(--page-gutter)", maxWidth: "var(--content-max)" }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 24 }}>
         <div>
           <div className="eyebrow-muted" style={{ marginBottom: 8 }}>
