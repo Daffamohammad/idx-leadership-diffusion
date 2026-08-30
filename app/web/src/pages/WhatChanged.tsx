@@ -22,6 +22,7 @@ import {
 } from "../data/mapGeometry";
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, CartesianGrid } from "recharts";
 import { placeMapLabels } from "../data/mapLabels";
+import { formatDateLabel, formatEnumLabel } from "../data/format";
 
 
 function averageBreadthHistory(
@@ -62,11 +63,7 @@ const delta = (s: SectorData) =>
     : s.breadth - s.prevBreadth;
 
 function formatAsOf(asOf: string | null | undefined): string {
-  if (!asOf) return "—";
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  const [y, m, d] = asOf.split("-");
-  if (!y || !m || !d) return asOf;
-  return `${Number(d)} ${months[Number(m) - 1] ?? m} ${y}`;
+  return formatDateLabel(asOf);
 }
 
 function MiniMap({
@@ -289,9 +286,9 @@ function ShiftFeed({ items, onSelect }: { items: SectorData[]; onSelect: (s: Sec
           <div>
             <div style={{ fontSize: 13, fontWeight: 600 }}>{s.name}</div>
             <div style={{ fontFamily: "Geist Mono", fontSize: 10, color: "#686e73", marginTop: 4 }}>
-              {s.prevLeadership || s.leadership} <span style={{ color: "#f26a3d" }}>→</span> {s.leadership}
+              {formatEnumLabel(s.prevLeadership || s.leadership)} <span style={{ color: "#f26a3d" }}>→</span> {formatEnumLabel(s.leadership)}
               <br />
-              {s.prevDiffusion || s.diffusion} <span style={{ color: "#f26a3d" }}>→</span> {s.diffusion}
+              {formatEnumLabel(s.prevDiffusion || s.diffusion)} <span style={{ color: "#f26a3d" }}>→</span> {formatEnumLabel(s.diffusion)}
             </div>
           </div>
           <div style={{ textAlign: "right", fontFamily: "Geist Mono", fontSize: 10 }}>
@@ -317,24 +314,28 @@ function ShiftFeed({ items, onSelect }: { items: SectorData[]; onSelect: (s: Sec
   );
 }
 
-function buildMarketRead(sectors: SectorData[]): string {
+function buildMarketRead(sectors: SectorData[], hasComparable: boolean): string {
   if (sectors.length === 0) return "Snapshot contains no groups.";
   const broadening = sectors.filter((s) => s.diffusion === "BROADENING");
   const narrowing = sectors.filter((s) => s.diffusion === "NARROWING");
   const leading = sectors.filter((s) => s.leadership === "LEADING");
-  if (broadening.length === 0 && narrowing.length === 0) {
-    return `Snapshot classifies ${leading.length} group(s) as LEADING; diffusion is STABLE or UNCONFIRMED across the universe.`;
+  if (!hasComparable) {
+    return `Current snapshot has ${leading.length} leading group${leading.length === 1 ? "" : "s"}; diffusion change is unavailable until a compatible prior is available.`;
   }
-  return `Leadership is broadening in ${broadening.length} group(s) and narrowing in ${narrowing.length} group(s); ${leading.length} group(s) are LEADING.`;
+  if (broadening.length === 0 && narrowing.length === 0) {
+    return `The snapshot has ${leading.length} leading group${leading.length === 1 ? "" : "s"}; diffusion change is not confirmed across the universe.`;
+  }
+  return `Leadership is broadening in ${broadening.length} group${broadening.length === 1 ? "" : "s"} and narrowing in ${narrowing.length === 1 ? "" : "s"}; ${leading.length} group${leading.length === 1 ? "" : "s"} are leading.`;
 }
 
-function summaryStats(sectors: SectorData[]): Array<[string, string]> {
+function summaryStats(sectors: SectorData[], hasComparable: boolean): Array<[string, string]> {
+  const unavailableChange = hasComparable ? null : "Unavailable";
   if (sectors.length === 0) {
     return [
       ["IDX leadership", "—"],
       ["Breadth", "—"],
-      ["Broadening groups", "0"],
-      ["Narrowing groups", "0"],
+      ["Broadening groups", unavailableChange ?? "0"],
+      ["Narrowing groups", unavailableChange ?? "0"],
       ["Data coverage", "—"],
     ];
   }
@@ -352,8 +353,8 @@ function summaryStats(sectors: SectorData[]): Array<[string, string]> {
   return [
     ["IDX leadership", `${classified}/${sectors.length} classified`],
     ["Breadth", breadth],
-    ["Broadening groups", String(broadening)],
-    ["Narrowing groups", String(narrowing)],
+    ["Broadening groups", unavailableChange ?? String(broadening)],
+    ["Narrowing groups", unavailableChange ?? String(narrowing)],
     ["Data coverage", `${sectors.reduce((a, s) => a + s.eligibleConstituents, 0)} eligible`],
   ];
 }
@@ -471,22 +472,22 @@ export default function WhatChanged() {
   const select = (s: SectorData) => navigate("/explorer", { state: { sectorId: s.id } });
 
   const asOf = formatAsOf(payload?.as_of);
-  const marketRead = buildMarketRead(sectors);
-  const stats = summaryStats(sectors);
+  const hasComparable = dataSources.trajectory;
+  const marketRead = buildMarketRead(sectors, hasComparable);
+  const stats = summaryStats(sectors, hasComparable);
   const leadCounts = leadershipCounts(sectors);
   const diffCounts = diffusionCounts(sectors);
   const confCounts = confirmationCounts(sectors);
   const changes = categorizeChanges(sectors);
-  const hasComparable = dataSources.trajectory;
 
   return (
     <div style={{ maxWidth: 1480, margin: "auto", padding: "28px 32px 64px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "end", marginBottom: 16 }}>
         <div>
           <div className="eyebrow-muted">Indonesian Equities · Market Intelligence</div>
-          <h1 style={{ fontSize: 30, letterSpacing: "-.045em", margin: "5px 0 0" }}>WHAT CHANGED?</h1>
+          <h1 style={{ fontSize: 30, letterSpacing: "-.045em", margin: "5px 0 0" }}>{hasComparable ? "WHAT CHANGED?" : "CURRENT SNAPSHOT"}</h1>
         </div>
-        <span className="eyebrow-muted">EOD research / {asOf} · {hasComparable ? "comparable prior available" : "no comparable prior — diffusion change unavailable"}</span>
+        <span className="eyebrow-muted">EOD research / {asOf} · {hasComparable ? "comparable prior available" : "change comparison unavailable"}</span>
       </div>
       <section
         style={{
@@ -509,6 +510,11 @@ export default function WhatChanged() {
         >
           {marketRead}
         </div>
+        {!hasComparable && (
+          <div style={{ margin: "0 0 20px", padding: "10px 12px", border: "1px solid #ffffff33", color: "#f6d4b9", fontSize: 12, lineHeight: 1.5 }}>
+            Change comparison unavailable. This view reports current levels only until a second compatible snapshot is persisted.
+          </div>
+        )}
         <div className="market-read-stats" style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", borderTop: "1px solid #ffffff22" }}>
           {stats.map(([l, v]) => (
             <div key={l} style={{ padding: "12px 0 15px", borderRight: "1px solid #ffffff18" }}>
@@ -554,14 +560,20 @@ export default function WhatChanged() {
       {/* WHAT CHANGED categorical digest */}
       <section style={{ background: "#fff", border: "1px solid #dfe2e1", padding: "16px 18px", marginBottom: 22 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
-          <div className="eyebrow-muted">What changed since prior snapshot</div>
-          <span className="eyebrow-muted">{hasComparable ? `vs ${payload?.previous_snapshot_id ?? "prior"}` : "No comparable prior — current levels only"}</span>
+          <div className="eyebrow-muted">{hasComparable ? "What changed since prior snapshot" : "What is available now"}</div>
+          <span className="eyebrow-muted">{hasComparable ? `vs ${payload?.previous_snapshot_id ?? "prior"}` : "Current levels only"}</span>
         </div>
         {!hasComparable ? (
-          <p style={{ margin: 0, fontSize: 12, color: "#686e73", lineHeight: 1.5 }}>
-            No comparable prior snapshot is available. Current breadth can be shown, but diffusion change cannot yet be classified.
-            Persist a second compatible snapshot to enable broadening / narrowing classification.
-          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 16, fontSize: 12, lineHeight: 1.5 }}>
+            <div>
+              <div style={{ fontWeight: 600, marginBottom: 4 }}>You can use this snapshot for</div>
+              <div>Current leadership, breadth, excess return, and concentration levels.</div>
+            </div>
+            <div>
+              <div style={{ fontWeight: 600, marginBottom: 4 }}>Still unavailable</div>
+              <div>Broadening, narrowing, and material change versus a prior snapshot.</div>
+            </div>
+          </div>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16, fontSize: 12, lineHeight: 1.5 }}>
             <div>
@@ -674,7 +686,7 @@ export default function WhatChanged() {
                       color: s.foreignFlow === "CONFIRMING" ? "#178477" : "#686e73",
                     }}
                   >
-                    {s.foreignFlow.replace(/_/g, " ")}
+                    {formatEnumLabel(s.foreignFlow)}
                   </td>
                 </tr>
               ))}
@@ -701,13 +713,7 @@ export default function WhatChanged() {
                 <EmptyState
                   label="NO TIME SERIES"
                   title="Per-group breadth history not emitted by the snapshot writer"
-                  body={
-                    <>
-                      The current snapshot bundle (<code>groups.parquet</code>) records only the latest
-                      breadth value. A per-group rolling snapshot history will land once
-                      the snapshot export is extended to retain compatible prior observations.
-                    </>
-                  }
+                  body="The current snapshot contains only the latest breadth level. A comparable prior snapshot is required before a per-group time series can be shown safely."
                   height={175}
                 />
               )}
@@ -732,7 +738,7 @@ export default function WhatChanged() {
               sectors.slice(0, 5).map((s) => (
                 <div key={s.id} style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid #dfe2e1", padding: "8px 0", fontSize: 12 }}>
                   <span style={{ color: "#686e73" }}>{s.name} leadership</span>
-                  <b style={{ fontFamily: "Geist Mono", fontSize: 10, color: "#315d87" }}>{s.leadership}</b>
+                  <b style={{ fontFamily: "Geist Mono", fontSize: 10, color: "#315d87" }}>{formatEnumLabel(s.leadership)}</b>
                 </div>
               ))
             ) : (

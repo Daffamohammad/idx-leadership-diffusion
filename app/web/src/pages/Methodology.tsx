@@ -4,6 +4,7 @@ import { DataStatusChip } from "../components/StatusChips";
 import { normalizeDataStatus, type DataStatus, type SnapshotPayload } from "../data/snapshot";
 import type { AdaptedSnapshot } from "../data/adapter";
 import { buildDiffusionReadiness } from "../data/readiness";
+import { formatCountLabel, formatDateLabel, formatEnumLabel } from "../data/format";
 import {
   getTavilyCategory,
   getTavilyCategoryStatus,
@@ -31,7 +32,7 @@ function formatQualityIssues(issues: string[] | undefined): string | undefined {
     if (listIssue) {
       const symbols = listIssue[2].split(/,\s*/).filter(Boolean);
       const label = listIssue[1] === "failed_securities" ? "failed history requests" : "insufficient history";
-      return `${label}: ${symbols.length} security(ies) (full list remains in snapshot diagnostics)`;
+      return `${label}: ${formatCountLabel(symbols.length, "security")} (full list remains in snapshot diagnostics)`;
     }
     return issue;
   });
@@ -65,8 +66,8 @@ function researchCategoryNote(
   const total = tavilyCount + youCount;
   if (total > 0) {
     const parts: string[] = [];
-    if (tavilyCount > 0) parts.push(`${tavilyCount} Tavily source(s)`);
-    if (youCount > 0) parts.push(`${youCount} You.com source(s)`);
+    if (tavilyCount > 0) parts.push(formatCountLabel(tavilyCount, "Tavily source"));
+    if (youCount > 0) parts.push(formatCountLabel(youCount, "You.com source"));
     return `${parts.join(" + ")} attached; qualitative context only, not normalized into a confirmation metric.`;
   }
   const tavilyFailed = getTavilyCategoryStatus(payload, category) === "FAILED";
@@ -90,7 +91,7 @@ function combinedCategoryStatus(
 }
 
 function buildDataRows(payload: SnapshotPayload | null): DataRow[] {
-  const asOf = payload?.as_of ?? "—";
+  const asOf = formatDateLabel(payload?.as_of);
   const q = payload?.quality;
   const status: DataStatus = normalizeDataStatus(q?.status) ?? "PARTIAL";
   const qualityNote = formatCoreDataNote(q);
@@ -123,7 +124,7 @@ function buildDataRows(payload: SnapshotPayload | null): DataRow[] {
         ? `Sectors structured taxonomy; ${taxonomyCoverage ?? "—"}% coverage in the persisted report.`
         : `Prototype taxonomy coverage: ${taxonomyCoverage ?? "—"}%; mapping is provider-specific and not authoritative.`,
     },
-    { label: "Benchmark (IHSG)", status: benchmarkStatus, asOf, note: q?.benchmark_latest_date ? `Latest benchmark: ${q.benchmark_latest_date}` : "Benchmark date not present in the snapshot." },
+    { label: "Benchmark (IHSG)", status: benchmarkStatus, asOf, note: q?.benchmark_latest_date ? `Latest benchmark: ${formatDateLabel(q.benchmark_latest_date)}` : "Benchmark date not present in the snapshot." },
     { label: "Diffusion Comparison", status: diffusionReadiness.status, asOf, note: diffusionReadiness.note },
     ...researchRows,
   ];
@@ -146,7 +147,7 @@ const methodCards = [
     title: "Diffusion",
     def: "Change in participation breadth between observations, with a group-size-aware floor.",
     formula: "Breadth Change = Breadth(t) − Breadth(t−1)",
-    detail: "The configured diffusion classifier applies broadening and narrowing thresholds plus minimum constituent requirements. UNCONFIRMED means either the data does not contain a comparable prior breadth observation, or the group fails the configured evidence floor; it is never silently treated as STABLE.",
+    detail: "The configured diffusion classifier applies broadening and narrowing thresholds plus minimum constituent requirements. Unconfirmed means either the data does not contain a comparable prior breadth observation, or the group fails the configured evidence floor; it is never silently treated as Stable.",
   },
   {
     title: "Concentration",
@@ -158,7 +159,7 @@ const methodCards = [
     title: "Confirmation",
     def: "Independent fundamental and flow evidence aligned with the leadership signal.",
     formula: "— qualitative composite",
-    detail: "Tavily can attach first-party research context, but web sources are not a normalized per-ticker metric. Confirmation remains DATA GAP unless the snapshot emits structured, comparable fundamental and flow observations.",
+    detail: "Tavily can attach first-party research context, but web sources are not a normalized per-ticker metric. Confirmation remains a data gap unless the snapshot emits structured, comparable fundamental and flow observations.",
   },
 ];
 
@@ -177,7 +178,7 @@ function EvidenceMatrix({
   adapted: AdaptedSnapshot | null;
   manifestEntries: SnapshotPayload["manifest"]["entries"][number] | undefined;
 }) {
-  const asOf = manifestEntries?.as_of ?? "—";
+  const asOf = formatDateLabel(manifestEntries?.as_of);
   const providerMode = manifestEntries?.provider_mode ?? "PUBLIC_PROTOTYPE";
   const fk = adapted?.foreignFlow;
   const coverage = adapted?.coverageHonest;
@@ -269,8 +270,8 @@ function EvidenceMatrix({
       name: "Foreign flow",
       status: layerStatus("foreign_flow"),
       source: "IDNFinancials secondary articles (top-buy / top-sell lists)",
-      asOf: fk?.asOfMax ?? "—",
-      coverage: fk ? `${fk.marketDayCount} market dates · ${fk.companyObservationCount} obs` : "—",
+      asOf: formatDateLabel(fk?.asOfMax),
+      coverage: fk ? `${formatCountLabel(fk.marketDayCount, "market date")} · ${formatCountLabel(fk.companyObservationCount, "observation")}` : "—",
       quant: "quantitative (sample)",
       signalEligible: fk?.signalEligible ?? false,
       limitation: "Top-list sample, not full market. Net-only for company rows.",
@@ -283,7 +284,7 @@ function EvidenceMatrix({
       coverage: "0%",
       quant: "n/a",
       signalEligible: false,
-      limitation: "No structured per-ticker parser; DATA GAP",
+      limitation: "No structured per-ticker parser; data gap",
     },
     {
       name: "Events",
@@ -315,8 +316,7 @@ function EvidenceMatrix({
           Layer · status · source · coverage
         </h2>
         <p style={{ margin: '6px 0 0', fontSize: 11, fontFamily: 'Geist Mono, monospace', color: '#666666' }}>
-          One row per evidence layer. Status uses READY / READY_WITH_GAPS / DATA_GAP / UNCONFIRMED /
-          CONTEXT_ONLY / SAMPLE_ONLY.
+          One row per evidence layer. Status and source coverage are reported separately.
         </p>
       </div>
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
@@ -344,12 +344,12 @@ function EvidenceMatrix({
           {layers.map((row, index) => (
             <tr key={row.name} style={{ borderBottom: index < layers.length - 1 ? '1px solid #f0f0f0' : 'none' }}>
               <td style={{ padding: '10px 14px', fontWeight: 600 }}>{row.name}</td>
-              <td style={{ padding: '10px 14px', fontFamily: 'Geist Mono, monospace' }}>{row.status}</td>
+              <td style={{ padding: '10px 14px', fontFamily: 'Geist Mono, monospace' }}>{formatEnumLabel(row.status)}</td>
               <td style={{ padding: '10px 14px', color: '#4d4d4d' }}>{row.source}</td>
-              <td style={{ padding: '10px 14px', fontFamily: 'Geist Mono, monospace' }}>{row.asOf}</td>
+              <td style={{ padding: '10px 14px', fontFamily: 'Geist Mono, monospace', whiteSpace: 'nowrap' }}>{row.asOf}</td>
               <td style={{ padding: '10px 14px', fontFamily: 'Geist Mono, monospace' }}>{row.coverage}</td>
               <td style={{ padding: '10px 14px' }}>{row.quant}</td>
-              <td style={{ padding: '10px 14px' }}>{row.signalEligible ? "yes" : "no"}</td>
+              <td style={{ padding: '10px 14px' }}>{row.signalEligible ? "Yes" : "No"}</td>
               <td style={{ padding: '10px 14px', color: '#666666' }}>{row.limitation}</td>
             </tr>
           ))}
@@ -509,19 +509,19 @@ export default function Methodology() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {[
           attachedResearchSources + attachedYouSources > 0
-            ? `Tavily provides ${attachedResearchSources} and You.com provides ${attachedYouSources} qualitative source(s); the numeric confirmation layer remains a DATA GAP because no per-ticker or per-group fundamentals, flow, or event metrics are emitted.`
+            ? `Tavily provides ${formatCountLabel(attachedResearchSources, "source")} and You.com provides ${formatCountLabel(attachedYouSources, "source")} as qualitative context; the numeric confirmation layer remains a data gap because no per-ticker or per-group fundamentals, flow, or event metrics are emitted.`
             : isLiveSectors
-              ? 'Fundamentals, foreign-flow, and event layers are not emitted by the current live snapshot; Confirmation is therefore a DATA GAP.'
-              : 'Fundamentals, foreign-flow, and event layers are not emitted by the current snapshot; Confirmation is therefore a DATA GAP.',
+              ? 'Fundamentals, foreign-flow, and event layers are not emitted by the current live snapshot; confirmation is therefore a data gap.'
+              : 'Fundamentals, foreign-flow, and event layers are not emitted by the current snapshot; confirmation is therefore a data gap.',
           ...(isLiveSectors
-            ? ['Sectors did not expose an explicit instrument-type field in the sampled company response; unresolved rows remain UNKNOWN / VERIFY.']
+            ? ['Sectors did not expose an explicit instrument-type field in the sampled company response; unresolved rows remain unknown and require verification.']
             : []),
           ...(hasBreadthHistory
             ? []
             : ['Per-group rolling breadth and performance history is not emitted; current breadth describes the latest eligible cross-section only.']),
         ].map((msg, i) => (
           <div key={i} style={{ display: 'flex', gap: 12, padding: '12px 14px', borderRadius: 6, border: '1px solid #ebebeb', background: '#fafafa' }}>
-            <span style={{ fontFamily: 'Geist Mono, monospace', fontSize: 10, fontWeight: 500, letterSpacing: '0.07em', textTransform: 'uppercase', color: '#7a5010', flexShrink: 0, paddingTop: 1 }}>DATA GAP</span>
+            <span style={{ fontFamily: 'Geist Mono, monospace', fontSize: 10, fontWeight: 500, letterSpacing: '0.04em', color: '#7a5010', flexShrink: 0, paddingTop: 1 }}>Data gap</span>
             <span style={{ fontSize: 13, color: '#4d4d4d', lineHeight: 1.55 }}>{msg}</span>
           </div>
         ))}
@@ -587,7 +587,7 @@ export default function Methodology() {
                 </div>
                 <p style={{ margin: '0 0 12px', fontSize: 12, color: '#666666', lineHeight: 1.5 }}>
                   {context.note || (context.records.length > 0
-                    ? `${context.records.length} You.com source(s) attached; qualitative context only, not normalized into a confirmation metric.`
+                    ? `${formatCountLabel(context.records.length, "You.com source")} attached; qualitative context only, not normalized into a confirmation metric.`
                     : 'No source-backed context attached; quantitative confirmation is not evaluated.')}
                 </p>
                 {context.research_answer && (
@@ -625,7 +625,7 @@ export default function Methodology() {
               <span className="eyebrow-muted">Evidence boundary</span>
               <span style={{ fontSize: 12, color: '#4d4d4d' }}>
                 {youContext.status === 'REQUESTED' ? 'You.com requested' : 'You.com not requested'}
-                {attachedYouSources > 0 ? ` · ${attachedYouSources} source(s) attached` : ''}
+                {attachedYouSources > 0 ? ` · ${formatCountLabel(attachedYouSources, "source")} attached` : ''}
                 {' · context only; metrics are unchanged'}
               </span>
             </div>
@@ -721,12 +721,12 @@ export default function Methodology() {
       <SectionHead label="Provenance" />
       <div style={{ ...card, overflow: 'hidden', marginBottom: 40 }}>
         {[
-          ["Core Data Source", manifestEntries?.provider?.toUpperCase() ?? "—"],
-          ["Execution Mode", manifestEntries?.provider_mode ?? "—"],
+          ["Core Data Source", formatEnumLabel(manifestEntries?.provider)],
+          ["Execution Mode", formatEnumLabel(manifestEntries?.provider_mode)],
           ["Benchmark", "IHSG"],
           ["Method Version", manifestEntries?.method_version ?? "—"],
           ["Diffusion Version", manifestEntries?.diffusion_version ?? "—"],
-          ["Snapshot Date", manifestEntries?.as_of ?? "—"],
+          ["Snapshot Date", formatDateLabel(manifestEntries?.as_of)],
         ].map(([label, val], i, arr) => (
           <div key={String(label)} style={{ display: 'flex', padding: '10px 16px', borderBottom: i < arr.length - 1 ? '1px solid #ebebeb' : 'none' }}>
             <span style={{ width: 200, fontSize: 12, color: '#666666' }}>{label}</span>

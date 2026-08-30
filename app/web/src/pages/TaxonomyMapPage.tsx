@@ -8,6 +8,7 @@ import TaxonomyMap from "../components/TaxonomyMap";
 import ResearchEvents from "../components/ResearchEvents";
 import ForeignFlowSample from "../components/ForeignFlowSample";
 import type { TaxonomyKind } from "../data/snapshot";
+import { formatDateLabel, formatEnumLabel } from "../data/format";
 
 const TAXONOMY_BY_PATH: Record<string, TaxonomyKind> = {
   "/maps/konglo": "KONGLO",
@@ -45,7 +46,7 @@ export default function TaxonomyMapPage() {
   }
 
   const view = adapted.taxonomyViews[taxonomyKind.toLowerCase()];
-  const asOf = adapted.payload.as_of;
+  const asOf = formatDateLabel(adapted.payload.as_of);
   const providerMode = adapted.payload.manifest?.entries?.[0]?.provider_mode ?? "PUBLIC_PROTOTYPE";
 
   return (
@@ -85,14 +86,14 @@ export default function TaxonomyMapPage() {
           >
             <span>Taxonomy version: {view?.taxonomy_version ?? "—"}</span>
             <span>·</span>
-            <span>Source kind: {view?.source_kind ?? "—"}</span>
+            <span>Source kind: {formatEnumLabel(view?.source_kind)}</span>
             <span>·</span>
             <span>As of {asOf}</span>
             <span>·</span>
-            <span>Provider mode: {providerMode}</span>
+            <span>Provider mode: {formatEnumLabel(providerMode)}</span>
             <span>·</span>
             <span>
-              {taxonomyKind === "KONGLO" ? "ANALYST_DEFINED_PROTOTYPE" : "ANALYST-DEFINED PROTOTYPE TAXONOMY"}
+              {taxonomyKind === "KONGLO" ? "Analyst-defined prototype" : "Analyst-defined prototype taxonomy"}
             </span>
           </div>
         </div>

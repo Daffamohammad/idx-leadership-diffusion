@@ -12,6 +12,7 @@ import MarketHeatmap from "../components/MarketHeatmap";
 import ForeignFlowSample from "../components/ForeignFlowSample";
 import ResearchEvents from "../components/ResearchEvents";
 import type { TaxonomyKind } from "../data/snapshot";
+import { formatDateLabel, formatEnumLabel } from "../data/format";
 
 const KIND_LABELS: Record<TaxonomyKind, string> = {
   SECTOR: "Sector",
@@ -53,7 +54,7 @@ export default function MarketOverview() {
     );
   }
 
-  const asOf = adapted.payload.as_of;
+  const asOf = formatDateLabel(adapted.payload.as_of);
   const providerMode = adapted.payload.manifest?.entries?.[0]?.provider_mode ?? "PUBLIC_PROTOTYPE";
 
   // Build taxonomyIds map for the heatmap.
@@ -100,7 +101,7 @@ export default function MarketOverview() {
           >
             <span>As of {asOf}</span>
             <span>·</span>
-            <span>Provider mode: {providerMode}</span>
+            <span>Provider mode: {formatEnumLabel(providerMode)}</span>
             <span>·</span>
             <span>Snapshot: {adapted.payload.snapshot_id}</span>
           </div>

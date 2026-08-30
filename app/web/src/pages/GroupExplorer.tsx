@@ -30,6 +30,7 @@ import {
 } from "recharts";
 import { leadershipColor } from "../components/StatusChips";
 import PriceChart from "../components/PriceChart";
+import { formatDateLabel, formatEnumLabel } from "../data/format";
 
 const card: React.CSSProperties = {
   background: "#ffffff",
@@ -159,6 +160,9 @@ function ConstituentTable({ constituents }: { constituents: ConstituentData[] })
                   >
                     {c.ticker}
                   </Link>
+                </td>
+                <td style={{ padding: "9px 12px", fontSize: 12, color: "#4d4d4d", maxWidth: 220 }}>
+                  {c.name || "—"}
                 </td>
                 <td style={{ padding: "9px 12px", textAlign: "right" }}>
                   <Num val={c.return20d} />
@@ -330,7 +334,7 @@ function TaxonomyGroupDetail({
           <LeadershipChip state={group.leadership as Parameters<typeof LeadershipChip>[0]["state"]} />
           <DiffusionChip state={group.diffusion as Parameters<typeof DiffusionChip>[0]["state"]} />
           <span style={{ fontFamily: "Geist Mono, monospace", fontSize: 11, color: "#666", border: "1px solid #ebebeb", padding: "2px 8px", borderRadius: 4 }}>
-            {group.dataQuality.replace(/_/g, " ")}
+            {formatEnumLabel(group.dataQuality)}
           </span>
           <span style={{ fontFamily: "Geist Mono, monospace", fontSize: 11, color: "#666" }}>
             {group.eligible} eligible / {group.constituents} total
@@ -361,12 +365,12 @@ function TaxonomyGroupDetail({
                   <td style={{ padding: "10px 12px", fontFamily: "Geist Mono, monospace", fontSize: 12, fontWeight: 600 }}>
                     <Link to={`/ticker/${encodeURIComponent(member.ticker)}`} style={{ color: "#171717" }}>{member.ticker}</Link>
                   </td>
-                  <td style={{ padding: "10px 12px", textAlign: "right", fontSize: 12 }}>{member.membership_type.toLowerCase()}</td>
+                  <td style={{ padding: "10px 12px", textAlign: "right", fontSize: 12 }}>{formatEnumLabel(member.membership_type)}</td>
                   <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "Geist Mono, monospace", fontSize: 12 }}>{Math.round(member.confidence * 100)}%</td>
                   <td style={{ padding: "10px 12px", fontSize: 12, maxWidth: 360 }}>
                     {member.source ? <a href={member.source} target="_blank" rel="noreferrer">Source</a> : "—"}
                   </td>
-                  <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "Geist Mono, monospace", fontSize: 11, color: "#666", whiteSpace: "nowrap" }}>{member.source_as_of ?? "—"}</td>
+                  <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "Geist Mono, monospace", fontSize: 11, color: "#666", whiteSpace: "nowrap" }}>{formatDateLabel(member.source_as_of)}</td>
                 </tr>
               ))}
             </tbody>
@@ -379,7 +383,7 @@ function TaxonomyGroupDetail({
       </div>
 
       <div style={{ marginTop: 12, color: "#686e73", fontSize: 11, lineHeight: 1.5 }}>
-        Snapshot: {data.payload.snapshot_id} · As of {data.payload.as_of ?? "—"} · Memberships are retained from the versioned taxonomy definition.
+        Snapshot: {data.payload.snapshot_id} · As of {formatDateLabel(data.payload.as_of)} · Memberships are retained from the versioned taxonomy definition.
       </div>
     </div>
   );
@@ -399,7 +403,7 @@ function ResearchEvidencePanel({
   const context = getTavilyCategory(payload, category);
   const status = getTavilyCategoryStatus(payload, category);
   const hasContext = context.records.length > 0;
-  const verdict = hasContext ? "CONTEXT ONLY" : status === "FAILED" ? "FAILED" : "DATA GAP";
+  const verdict = hasContext ? "CONTEXT_ONLY" : status === "FAILED" ? "FAILED" : "DATA_GAP";
   const verdictColor = hasContext ? "#7a5010" : status === "FAILED" ? "#8f2424" : "#7a5010";
   return (
     <div style={{ ...card, padding: "16px 18px", minWidth: 0 }}>
@@ -453,7 +457,7 @@ function ResearchEvidencePanel({
             borderRadius: 4,
           }}
         >
-          {verdict}
+          {formatEnumLabel(verdict)}
         </span>
       </div>
     </div>
@@ -586,7 +590,7 @@ export default function GroupExplorer() {
           </span>
           {sector.prevLeadership && (
             <span style={{ fontFamily: "Geist Mono", fontSize: 10, color: "#7a5010", border: "1px solid #ebebeb", padding: "2px 6px", borderRadius: 4 }}>
-              {sector.prevLeadership} → {sector.leadership}
+              {formatEnumLabel(sector.prevLeadership)} → {formatEnumLabel(sector.leadership)}
             </span>
           )}
         </div>
@@ -602,7 +606,7 @@ export default function GroupExplorer() {
           )}
         </div>
         <div style={{ marginTop: 8, fontSize: 10, color: "#8f8f8f" }}>
-          {sector.diffusion === "UNCONFIRMED" ? "No comparable prior snapshot is available. Current breadth can be shown, but diffusion change cannot yet be classified." : `Diffusion: ${sector.diffusion}${sector.prevDiffusion ? ` (prev ${sector.prevDiffusion})` : ""}`}
+          {sector.diffusion === "UNCONFIRMED" ? "No comparable prior snapshot is available. Current breadth can be shown, but diffusion change cannot yet be classified." : `Diffusion: ${formatEnumLabel(sector.diffusion)}${sector.prevDiffusion ? ` (previous ${formatEnumLabel(sector.prevDiffusion)})` : ""}`}
         </div>
       </div>
 

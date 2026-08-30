@@ -4,6 +4,7 @@ import { useSnapshot } from "../data/SnapshotProvider";
 import type { TaxonomyGroupAggregate, TaxonomyView } from "../data/snapshot";
 import { LeadershipChip, DiffusionChip, DataStatusChip } from "../components/StatusChips";
 import { EmptyState } from "../components/EmptyState";
+import { formatDateLabel, formatEnumLabel } from "../data/format";
 
 const THEMES_TAXONOMY_ID = "themes";
 
@@ -108,7 +109,7 @@ export default function ThemesExplorer() {
               background: "#fff",
             }}
           >
-            Source kind · {taxonomyView.source_kind}
+            Source kind · {formatEnumLabel(taxonomyView.source_kind)}
           </span>
           <Link
             to="/maps/themes"
@@ -351,7 +352,7 @@ export default function ThemesExplorer() {
                           color: "#202325",
                         }}
                       >
-                        <span>{k.replace(/_/g, " ")}</span>
+                        <span>{formatEnumLabel(k)}</span>
                         <span
                           style={{
                             fontFamily: "Geist Mono, ui-monospace, monospace",
@@ -379,7 +380,7 @@ export default function ThemesExplorer() {
                   }}
                 >
                   <strong style={{ color: "#202325" }}>Foreign-flow sample:</strong>{" "}
-                  {selected.sample_foreign_flow_direction ?? "—"} ({selected.sample_foreign_flow_idr.toLocaleString("id-ID")} IDR).
+                  {formatEnumLabel(selected.sample_foreign_flow_direction)} ({selected.sample_foreign_flow_idr.toLocaleString("id-ID")} IDR).
                   Sample is bounded to published top-buy / top-sell lists and does not represent
                   full market totals.
                 </div>

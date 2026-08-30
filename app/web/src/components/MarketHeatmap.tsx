@@ -15,11 +15,12 @@ import type {
   TaxonomyGroupData,
 } from "../data/adapter";
 import type { ForeignFlowDirection, TaxonomyKind } from "../data/snapshot";
+import { formatDateLabel, formatEnumLabel } from "../data/format";
 
 const TAXONOMY_ORDER: TaxonomyKind[] = ["SECTOR", "KONGLO", "THEMES"];
 
 
-export type HeatmapMetric = "excess20d" | "excess60d" | "breadth" | "leadership";
+export type HeatmapMetric = "excess20d" | "excess60d" | "breadth" | "leadership" | "diffusion";
 
 interface MarketHeatmapProps {
   taxonomyGroups: Record<string, TaxonomyGroupData>;
@@ -28,12 +29,6 @@ interface MarketHeatmapProps {
   foreignFlow: ForeignFlowAdapted | null;
   asOf: string | null;
   onSelectGroup?: (taxonomyKind: TaxonomyKind, taxonomyId: string, groupId: string) => void;
-}
-
-function formatSigned(value: number | null, places = 1): string {
-  if (value === null || value === undefined || !Number.isFinite(value)) return "—";
-  const rounded = value.toFixed(places);
-  return value >= 0 ? `+${rounded}` : rounded;
 }
 
 function colorFor(value: number | null, metric: HeatmapMetric): string {
@@ -46,6 +41,7 @@ function colorFor(value: number | null, metric: HeatmapMetric): string {
       case 1: return "#178477"; // LEADING
       case 0.66: return "#3f9985";
       case 0.33: return "#c69f4a"; // IMPROVING
+      case -0.33: return "#a35535"; // WEAKENING
       case -1: return "#8f2424"; // LAGGING
       default: return "#7c858c";
     }
@@ -55,6 +51,11 @@ function colorFor(value: number | null, metric: HeatmapMetric): string {
     if (value >= 50) return "#3f9985";
     if (value >= 35) return "#c69f4a";
     return "#8f2424";
+  }
+  if (metric === "diffusion") {
+    if (value > 0) return "#178477";
+    if (value < 0) return "#8f2424";
+    return "#7c858c";
   }
   // Excess return — symmetric scale.
   const clamped = Math.max(-15, Math.min(15, value));
@@ -80,6 +81,8 @@ function metricLabel(metric: HeatmapMetric): string {
       return "Breadth (% constituents outperforming)";
     case "leadership":
       return "Leadership state";
+    case "diffusion":
+      return "Diffusion state";
   }
 }
 
@@ -100,7 +103,62 @@ function metricValue(group: TaxonomyGroupData, metric: HeatmapMetric): number | 
         default: return 0;
       }
     }
+    case "diffusion": {
+      switch (group.diffusion) {
+        case "BROADENING": return 1;
+        case "NARROWING": return -1;
+        case "STABLE": return 0;
+        default: return null;
+      }
+    }
   }
+}
+
+function legendForMetric(metric: HeatmapMetric): Array<{ label: string; color: string }> {
+  switch (metric) {
+    case "excess20d":
+    case "excess60d":
+      return [
+        { label: "−15pp", color: colorFor(-15, metric) },
+        { label: "0", color: colorFor(0, metric) },
+        { label: "+15pp", color: colorFor(15, metric) },
+      ];
+    case "breadth":
+      return [
+        { label: "Low", color: colorFor(20, metric) },
+        { label: "Mid", color: colorFor(50, metric) },
+        { label: "High", color: colorFor(80, metric) },
+      ];
+    case "leadership":
+      return [
+        { label: "Leading", color: colorFor(1, metric) },
+        { label: "Improving", color: colorFor(0.33, metric) },
+        { label: "Weakening", color: colorFor(-0.33, metric) },
+        { label: "Lagging", color: colorFor(-1, metric) },
+        { label: "Unconfirmed", color: colorFor(null, metric) },
+      ];
+    case "diffusion":
+      return [
+        { label: "Broadening", color: colorFor(1, metric) },
+        { label: "Stable", color: colorFor(0, metric) },
+        { label: "Narrowing", color: colorFor(-1, metric) },
+        { label: "Unconfirmed", color: colorFor(null, metric) },
+      ];
+  }
+}
+
+function dataGapReason(group: TaxonomyGroupData): string {
+  if (group.constituents === 0) return "No constituents";
+  if (group.eligible === 0) return "No eligible history";
+  if (group.diffusion === "UNCONFIRMED") return "No comparable prior";
+  return "Coverage incomplete";
+}
+
+function metricDisplay(group: TaxonomyGroupData, metric: HeatmapMetric, value: number | null): string {
+  if (metric === "leadership") return formatEnumLabel(group.leadership);
+  if (metric === "diffusion") return formatEnumLabel(group.diffusion);
+  if (metric === "breadth") return value === null ? "Data gap" : `${value.toFixed(0)}%`;
+  return value === null ? "Data gap" : `${value >= 0 ? "+" : ""}${value.toFixed(1)}pp`;
 }
 
 function directionBadge(direction: ForeignFlowDirection | null): string {
@@ -174,7 +232,8 @@ export default function MarketHeatmap({
     );
   }
 
-  const asOfLabel = asOf ?? "snapshot";
+  const asOfLabel = asOf ? formatDateLabel(asOf) : "snapshot";
+  const legend = legendForMetric(metric);
 
   return (
     <section
@@ -215,7 +274,7 @@ export default function MarketHeatmap({
           >
             <span>As of {asOfLabel}</span>
             <span>·</span>
-            <span>Prototype taxonomy (analyst-defined)</span>
+            <span>Analyst-defined taxonomy</span>
             <span>·</span>
             <span>No recommendation language</span>
           </div>
@@ -300,6 +359,7 @@ export default function MarketHeatmap({
                   ["excess60d", "60D excess"],
                   ["breadth", "Breadth"],
                   ["leadership", "Leadership"],
+                  ["diffusion", "Diffusion"],
                 ] as Array<[HeatmapMetric, string]>
               ).map(([key, label]) => {
                 const isActive = metric === key;
@@ -330,6 +390,23 @@ export default function MarketHeatmap({
       </header>
 
       <div
+        aria-label={`${metricLabel(metric)} legend`}
+        style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10, fontSize: 11, color: "#686e73" }}
+      >
+        <span style={{ fontFamily: "Geist Mono, monospace", color: "#202325" }}>Legend · {metricLabel(metric)}</span>
+        {legend.map((item) => (
+          <span key={item.label} style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+            <span aria-hidden="true" style={{ width: 12, height: 12, background: item.color, border: "1px solid rgba(0,0,0,.12)" }} />
+            {item.label}
+          </span>
+        ))}
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+          <span aria-hidden="true" style={{ width: 12, height: 12, background: "#f1f2f0", border: "1px dashed #9aa19f" }} />
+          Data gap
+        </span>
+      </div>
+
+      <div
         role="grid"
         aria-label={`Heatmap of ${taxonomyKind} groups by ${metricLabel(metric)}`}
         style={{
@@ -342,7 +419,9 @@ export default function MarketHeatmap({
           const value = metricValue(group, metric);
           const flow = foreignByGroup.get(group.id);
           const isPrototype = group.prototype;
-          const ariaLabel = `${group.name}: ${metricLabel(metric)} ${formatSigned(value)}, leadership ${group.leadership}, diffusion ${group.diffusion}, ${group.constituents} ${group.constituents === 1 ? "ticker" : "tickers"}.`;
+          const isDataGap = group.dataQuality === "DATA_GAP" || value === null;
+          const gapReason = dataGapReason(group);
+          const ariaLabel = `${group.name}: ${metricLabel(metric)} ${isDataGap ? `data gap, ${gapReason.toLowerCase()}` : metricDisplay(group, metric, value)}, leadership ${formatEnumLabel(group.leadership)}, diffusion ${formatEnumLabel(group.diffusion)}, ${group.constituents} ${group.constituents === 1 ? "ticker" : "tickers"}.`;
           return (
             <button
               key={`${group.taxonomyId}::${group.id}`}
@@ -352,12 +431,12 @@ export default function MarketHeatmap({
                 onSelectGroup?.(group.taxonomyKind, group.taxonomyId, group.id)
               }
               style={{
-                background: colorFor(value, metric),
-                border: "1px solid rgba(0,0,0,0.08)",
+                background: isDataGap ? "#f1f2f0" : colorFor(value, metric),
+                border: isDataGap ? "1px dashed #a7afac" : "1px solid rgba(0,0,0,0.08)",
                 padding: "12px 12px 10px",
                 minHeight: 96,
                 textAlign: "left",
-                color: "#101215",
+                color: isDataGap ? "#686e73" : "#101215",
                 cursor: "pointer",
                 display: "grid",
                 gap: 4,
@@ -373,7 +452,7 @@ export default function MarketHeatmap({
                   color: "rgba(16,18,21,0.75)",
                 }}
               >
-                <span>{group.taxonomyKind.toLowerCase()}</span>
+                <span>{formatEnumLabel(group.taxonomyKind)}</span>
                 {isPrototype && (
                   <span
                     title="Analyst-defined prototype taxonomy"
@@ -383,7 +462,7 @@ export default function MarketHeatmap({
                       border: "1px solid rgba(0,0,0,0.15)",
                     }}
                   >
-                    prototype
+                    Prototype
                   </span>
                 )}
               </div>
@@ -407,10 +486,12 @@ export default function MarketHeatmap({
               >
                 {value === null || value === undefined ? (
                   <span style={{ color: "#686e73", fontSize: 12, fontWeight: 400 }}>
-                    data gap
+                    Data gap · {gapReason}
                   </span>
                 ) : metric === "leadership" ? (
-                  group.leadership.toLowerCase().replace(/_/g, " ")
+                  formatEnumLabel(group.leadership)
+                ) : metric === "diffusion" ? (
+                  formatEnumLabel(group.diffusion)
                 ) : metric === "breadth" ? (
                   `${value.toFixed(0)}%`
                 ) : (
@@ -427,7 +508,7 @@ export default function MarketHeatmap({
                 }}
               >
                 <span>{group.constituents} {group.constituents === 1 ? "ticker" : "tickers"}</span>
-                <span>{group.leadership.toLowerCase().replace(/_/g, " ")}</span>
+                <span>{formatEnumLabel(group.leadership)}</span>
               </div>
               {flow && (
                 <div

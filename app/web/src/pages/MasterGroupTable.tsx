@@ -4,6 +4,7 @@ import { useSnapshot } from "../data/SnapshotProvider";
 import type { SectorData } from "../data/adapter";
 import { LeadershipChip, DiffusionChip, DataStatusChip } from "../components/StatusChips";
 import { EmptyState } from "../components/EmptyState";
+import { formatEnumLabel } from "../data/format";
 
 type SortKey =
   | "name"
@@ -96,7 +97,7 @@ function top3Label(c: number | null | undefined): string {
 function transitionLabel(s: SectorData): string {
   return !s.prevLeadership || s.prevLeadership === s.leadership
     ? "—"
-    : `${s.prevLeadership} → ${s.leadership}`;
+    : `${formatEnumLabel(s.prevLeadership)} → ${formatEnumLabel(s.leadership)}`;
 }
 
 // durable contract: groups data quality into READY / READY_WITH_GAPS / DATA_GAP
@@ -347,7 +348,7 @@ export default function MasterGroupTable() {
                 <tr key={s.id}>
                   <td style={{ ...bodyCell, fontWeight: 500 }}>
                     <Link
-                      to={`/explorer?group=${encodeURIComponent(s.id)}`}
+                      to={`/explorer?taxonomy=SECTOR&group=${encodeURIComponent(s.id)}`}
                       style={{ color: "#202325", textDecoration: "none", borderBottom: "1px dotted #b9c0be" }}
                     >
                       {s.name}
@@ -357,7 +358,7 @@ export default function MasterGroupTable() {
                     <LeadershipChip state={s.leadership} small />
                   </td>
                   <td style={{ ...bodyCell, color: "#686e73", fontSize: 11 }}>
-                    {s.prevLeadership ?? "—"}
+                    {formatEnumLabel(s.prevLeadership)}
                   </td>
                   <td style={{ ...bodyCell, fontSize: 11, color: "#202325" }}>
                     {transitionLabel(s)}
@@ -379,7 +380,7 @@ export default function MasterGroupTable() {
                     {top3Label(s.concentration)}
                   </td>
                   <td style={{ ...bodyCell, color: "#5a5a5a", fontSize: 11 }}>
-                    {s.foreignFlow.replace("_", " ")}
+                    {formatEnumLabel(s.foreignFlow)}
                   </td>
                   <td style={{ ...bodyCell, textAlign: "right", color: "#5a5a5a" }}>
                     {s.eligibleConstituents}/{s.constituents}
@@ -400,7 +401,7 @@ export default function MasterGroupTable() {
       <p style={{ marginTop: 12, color: "#8f8f8f", fontSize: 11, lineHeight: 1.5 }}>
         Concentration column reflects absolute-move top-3 share (equal-weighted group return).
         Breadth Δ requires a comparable prior snapshot — where comparability is unavailable,
-        diffusion displays as UNCONFIRMED. Confirmation is a sample-only foreign-flow signal,
+        diffusion displays as Unconfirmed. Confirmation is a sample-only foreign-flow signal,
         labeled accordingly.
       </p>
     </section>

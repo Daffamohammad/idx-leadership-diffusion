@@ -10,7 +10,7 @@ import { Link, useParams } from "react-router";
 import { useSnapshot } from "../data/SnapshotProvider";
 import PriceChart from "../components/PriceChart";
 import TradingViewWidget from "../components/TradingViewWidget";
-import { formatIdrCompact } from "../data/format";
+import { formatDateLabel, formatEnumLabel, formatIdrCompact } from "../data/format";
 
 export default function TickerAnalysis() {
   const { ticker: rawTicker } = useParams<{ ticker: string }>();
@@ -129,9 +129,9 @@ export default function TickerAnalysis() {
               </>
             )}
             <span>·</span>
-            <span>As of {asOf}</span>
+            <span>As of {formatDateLabel(asOf)}</span>
             <span>·</span>
-            <span>Provider mode: {providerMode}</span>
+            <span>Provider mode: {formatEnumLabel(providerMode)}</span>
           </div>
         </div>
         <Link
@@ -162,7 +162,7 @@ export default function TickerAnalysis() {
             value: row.benchmark,
           }))}
           asOf={asOf}
-          source={`Persisted snapshot · ${providerMode} · ${priceBasis}`}
+          source={`Persisted snapshot · ${formatEnumLabel(providerMode)} · ${formatEnumLabel(priceBasis)}`}
           metricLabel="Rebased index (start = 100)"
           referenceValue={100}
         />
@@ -314,12 +314,12 @@ export default function TickerAnalysis() {
               </tr>
             </thead>
             <tbody>
-              <tr><td>as_of</td><td>{feature.as_of}</td></tr>
-              <tr><td>latest_close</td><td>{feature.latest_close ?? "—"}</td></tr>
-              <tr><td>return_20d</td><td>{feature.return_20d ?? "—"}</td></tr>
-              <tr><td>excess_return_20d</td><td>{feature.excess_return_20d ?? "—"}</td></tr>
-              <tr><td>excess_return_60d</td><td>{feature.excess_return_60d ?? "—"}</td></tr>
-              <tr><td>relative_strength_level</td><td>{feature.relative_strength_level ?? "—"}</td></tr>
+              <tr><td>{formatEnumLabel("as_of")}</td><td>{formatDateLabel(feature.as_of)}</td></tr>
+              <tr><td>{formatEnumLabel("latest_close")}</td><td>{feature.latest_close ?? "—"}</td></tr>
+              <tr><td>{formatEnumLabel("return_20d")}</td><td>{feature.return_20d ?? "—"}</td></tr>
+              <tr><td>{formatEnumLabel("excess_return_20d")}</td><td>{feature.excess_return_20d ?? "—"}</td></tr>
+              <tr><td>{formatEnumLabel("excess_return_60d")}</td><td>{feature.excess_return_60d ?? "—"}</td></tr>
+              <tr><td>{formatEnumLabel("relative_strength_level")}</td><td>{feature.relative_strength_level ?? "—"}</td></tr>
             </tbody>
           </table>
         ) : (

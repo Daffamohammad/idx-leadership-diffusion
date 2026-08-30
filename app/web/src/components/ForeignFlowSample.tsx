@@ -11,7 +11,7 @@
 // `foreign_flow_sample` envelope. The component never recomputes.
 
 import type { ForeignFlowAdapted } from "../data/adapter";
-import { formatIdrCompact } from "../data/format";
+import { formatCountLabel, formatDateLabel, formatEnumLabel, formatIdrCompact } from "../data/format";
 
 interface ForeignFlowSampleProps {
   sample: ForeignFlowAdapted | null;
@@ -50,9 +50,9 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
   ] as const;
 
   const signalThreshold = [
-    ["Market days ≥ 5", sample.coverageGateMet ? "met" : "review"],
-    [`${formatPercent(sample.mappedCompanyObservationPct, 100)} mapped coverage`, sample.coverageGateMet ? "met" : "review"],
-    ["Regime diversity", sample.regimeDiversity ? "yes" : "no"],
+    ["Market days ≥ 5", sample.coverageGateMet ? "Met" : "Review"],
+    [`${formatPercent(sample.mappedCompanyObservationPct, 100)} mapped coverage`, sample.coverageGateMet ? "Met" : "Review"],
+    ["Regime diversity", sample.regimeDiversity ? "Yes" : "No"],
   ];
 
   return (
@@ -81,16 +81,16 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
             color: "#686e73",
           }}
         >
-          <span>Sample-only · SAMPLE ONLY</span>
+          <span>Sample only · bounded top-list</span>
           <span>·</span>
-          <span>As of {sample.asOfMax || asOf || "n/a"}</span>
+          <span>As of {formatDateLabel(sample.asOfMax || asOf) || "n/a"}</span>
           <span>·</span>
-          <span>{sample.marketDayCount} market dates</span>
+          <span>{formatCountLabel(sample.marketDayCount, "market date")}</span>
           <span>·</span>
-          <span>{sample.companyObservationCount} company observations</span>
+          <span>{formatCountLabel(sample.companyObservationCount, "company observation")}</span>
           <span>·</span>
           <span>
-            signal eligibility: {sample.signalEligible ? "yes" : "review"}
+            signal eligibility: {sample.signalEligible ? "Eligible" : "Review"}
           </span>
         </div>
       </header>
@@ -123,7 +123,7 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
                     : "#7c858c",
             }}
           >
-            {sample.lastMarketDirection}
+            {formatEnumLabel(sample.lastMarketDirection)}
           </div>
           <p style={{ margin: "6px 0 0", fontSize: 12, color: "#686e73" }}>
             Reported market total (one observation per market date).
@@ -150,7 +150,7 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
                     : "#7c858c",
             }}
           >
-            {sample.lastSampleDirection}
+            {formatEnumLabel(sample.lastSampleDirection)}
           </div>
           <p style={{ margin: "6px 0 0", fontSize: 12, color: "#686e73" }}>
             Top-list company rows. Distinct from market totals by design.
@@ -171,7 +171,7 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
               marginTop: 4,
             }}
           >
-            {sample.marketSampleAligned ? "aligned" : "divergent"}
+            {sample.marketSampleAligned ? "Aligned" : "Divergent"}
           </div>
           <p style={{ margin: "6px 0 0", fontSize: 12, color: "#686e73" }}>
             Sample is not a market-wide observation; divergence is expected.
@@ -290,7 +290,7 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
                   fontSize: 11,
                 }}
               >
-                · {row.observedRows} observation(s)
+                · {formatCountLabel(row.observedRows, "observation")}
               </span>
             </li>
           ))}
@@ -355,7 +355,7 @@ function DailyBars({
             }}
             title={`${row.asOf} · ${formatIdrCompact(row.netValueIdr)}`}
           >
-            <div style={{ color: "#686e73" }}>{row.asOf.slice(5)}</div>
+            <div style={{ color: "#686e73" }}>{formatDateLabel(row.asOf).replace(/ \d{4}$/, "")}</div>
             <div
               style={{
                 background: colour,
@@ -424,7 +424,7 @@ function TopList({
                     marginLeft: 6,
                   }}
                 >
-                  {row.asOf}
+                  {formatDateLabel(row.asOf)}
                 </span>
               </span>
               <span style={{ color: accent, fontFamily: "Geist Mono, monospace" }}>
