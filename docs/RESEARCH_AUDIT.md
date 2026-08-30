@@ -41,14 +41,14 @@ Every API call is recorded in `data/research/_audit.jsonl` with:
 | Workstream | Status | Tavily calls | YOU calls | Observations | Sources |
 | --- | --- | --- | --- | --- | --- |
 | `idu` (IDX universe discovery) | DONE | 3 | 3 | 3 | 21 |
-| `taxonomy` (IDX-IC + sector spot-checks) | DONE | 9 | 4 | 1 + 3 spot-check sources | 15 |
+| `taxonomy` (IDX-IC + sector spot-checks) | DONE | 8 | 2 | 1 + 3 spot-check sources | 15 |
 | `konglo` (conglomerate ownership) | DONE | 10 | 10 | 20 | 40 |
 | `themes` (analyst-defined theme evidence) | DONE | 6 | 6 | 12 | 24 |
-| `foreign_flow` (publication discovery) | DONE | 3 | 6 | 9 | 15 |
+| `foreign_flow` (publication discovery) | DONE | 3 | 3 | 9 | 15 |
 | `corp_actions` (BBCA 2021-10-13 case) | DONE | 2 | 0 | 4 | 4 |
 | `benchmark` (IHSG / ^JKSE) | DONE | 2 | 2 | 4 | 8 |
 | `free_float` (publication discovery) | DONE | 2 | 0 | 4 | 4 |
-| `corp_actions` (BBCA 2021-10-13 case) | DONE | 2 | 0 | 4 + 1 resolution file | 4 |
+| `methodology` (breadth / relative strength / concentration references) | DONE | 3 | 0 | 6 | 6 |
 
 ## 3. Material Findings
 
@@ -74,7 +74,7 @@ this is the authoritative source for the bounded-sample foreign-flow expansion.
 A concrete quantitative observation was also located in an OJK press release:
 
 > "Foreign investors recorded a net sell of IDR23.34 trillion in the equity market."
-> Source: `https://ojk.go.id/en/berita-dan-kegiatan/siaran-pers/...`
+> Source: `https://ojk.go.id/en/berita-dan-kegiatan/siaran-pers/Pages/March-2026-Board-of-Commissioners-Meeting-Financial-Services-Sector-Stability-Remains-Maintained.aspx`
 
 This is **market-level**, **monthly periodicity**, **units = IDR trillion**, and
 must NOT be relabeled as daily / per-ticker foreign flow.
@@ -85,10 +85,31 @@ the IHSG Composite; this aligns with current yfinance usage and the prototype as
 
 ### Corporate action evidence (`BBCA.JK` 2021-10-13)
 Tavily returned 2 sources discussing BBCA corporate actions around that date. The
-**specific event on 2021-10-13** still requires verification against the IDX
-corporate-actions endpoint (`/v2/company/corporate-actions/{symbol}/`) during the
-Sectors migration pass; current yfinance `adjusted_close` adjustment should not be
-patched manually without that confirmation.
+persisted resolution records the event as a **5-for-1 stock split effective
+2021-10-13**, based on the BBCA official press release. The resolution is an
+evidence record, not a new hard-coded adjustment: the current yfinance
+`adjusted_close` path handles the split without a manual pipeline patch.
+
+## 7. Independent provenance spot-check (Codex review)
+
+The BBCA issuer page was fetched independently during the engineering review and
+confirms that BBCA began trading at the new price on 2021-10-13 after a 1:5
+stock split. The persisted resolution now points to the complete issuer URL and
+uses the project's issuer-source tier (`2`). The OJK result cited in the
+foreign-flow workstream was also checked as market-level context; it must not be
+interpreted as a BBCA-specific or daily per-ticker observation.
+
+The IDX products/index page returned HTTP 403 from the review environment, so the
+11-sector declaration is supported here by the persisted Sectors snapshot and the
+recorded IDX source, but was not independently re-extracted from the live IDX page
+in this review.
+
+Several Tier 4/5 search hits in the analyst-defined theme and conglomerate
+workstreams did not establish the claimed Indonesian issuer or theme membership
+when spot-checked (some snippets were generic finance pages or unrelated
+constituent/linguistics pages). The affected rows remain `UNVERIFIED` /
+`PROVISIONAL` and are not signal inputs; they must not be promoted into the
+analyst-curated configuration without issuer-level corroboration.
 
 ## 4. Conflicts Found
 
@@ -137,7 +158,7 @@ applied changes:
    `Adj Close` auto-handles; no manual pipeline correction needed.
    Persisted at `data/research/corp_actions/bbca_2021_10_13_resolution.json`.
 
-## 6. Unresolved Research Gaps
+## 8. Unresolved Research Gaps
 
 - Per-ticker foreign-flow daily series at scale — IDX monthly aggregate is the
   only authoritative public observation; finer-grained per-ticker values would
@@ -146,24 +167,24 @@ applied changes:
 - Industry / sub-industry classifications for every prototype ticker (BBCA,
   BBRI, …) — IDX-IC public page was located but not crawl-extracted in this
   pass; the field exists in Sectors master when migrated.
-- BBCA.JK 2021-10-13 specific corporate-action event — corporate-actions
-  endpoint in Sectors will resolve during the migration pass.
 - Tier-1 issuer-website confirmation for every Konglo candidate — currently
   PROVISIONAL; only Salim/Sinar Mas/Astra have multi-source convergence in
   this pass. 20 PROVISIONAL observations saved for next pass.
 
-## 7. Live Sectors Status
+## 9. Live Sectors Status
 
 **Live Sectors API calls during this pass: 0.** Confirmed by absence of
 `sectors_client` provider requests in the audit log. Migration remains gated
 on operator authorization.
 
-## 8. Recommendations for Codex
+## 10. Recommendations for Codex
 
 - Spot-check 3-5 observations against the cited URLs.
 - Confirm that `signal_eligible=false` on the foreign-flow sample is consistent
   with the monthly authoritative source's coverage.
 - Verify the IDX-IC taxonomy declaration in `docs/SECTORS_MIGRATION_CONTRACT.md`
-  matches the canonical 10 sectors listed in §3 above.
+  matches the canonical 11 sectors listed in §3 above.
 - Confirm no API keys were committed; the audit log is at
-  `data/research/_audit.jsonl` (60 entries, no `Authorization` headers).
+  `data/research/_audit.jsonl` (65 entries, no `Authorization` headers).
+- Keep the spot-checked Tier 4/5 theme and conglomerate rows discovery-only until
+  issuer-level or other primary evidence is added.

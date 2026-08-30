@@ -3,13 +3,13 @@
   "entity_type": "corporate_action",
   "claim_type": "resolution",
   "claim": "BBCA 5-for-1 stock split effective 2021-10-13, IDX-approved, nominal 1:5 ratio. yfinance Adj Close auto-adjusts; no manual pipeline correction required.",
-  "source_url": "https://www.bca.co.id/en/tentang-bca/media-riset/pressroom/siaran-pers/2021/10/13/08/12/saham-bbca-resmi-diperdagangkan-",
+  "source_url": "https://www.bca.co.id/en/tentang-bca/media-riset/pressroom/siaran-pers/2021/10/13/08/12/saham-bbca-resmi-diperdagangkan-dengan-harga-baru",
   "publisher": "bca.co.id",
   "published_at": "2021-10-13",
   "retrieved_at": "2026-08-30T22:16:00Z",
   "search_provider": "tavily",
-  "source_tier": 1,
+  "source_tier": 2,
   "confidence": "VERIFIED",
   "verification_status": "RESOLVED",
-  "notes": "Primary source: PT Bank Central Asia official press release (Tier 1). Corroborated by alphaspread.com, stockevents.app, investing.com (Tier 3). Split ratio 1:5 means each BBCA share became 5 shares. The project's price_basis is adjusted_close for yfinance, so historical returns calculated via features/returns.py (default price_col='adjusted_close') auto-handle this event. Verified via grep on src/idx_leadership/features/returns.py:25 (default price_col='adjusted_close')."
+  "notes": "Primary issuer source: PT Bank Central Asia official press release (project source tier 2). Additional stockevents.app and digrin.com hits are project tier 5 discovery context and are not relied upon for the resolution. Split ratio 1:5 means each BBCA share became 5 shares. The project's price_basis is adjusted_close for yfinance, so historical returns calculated via features/returns.py (default price_col='adjusted_close') auto-handle this event."
 }

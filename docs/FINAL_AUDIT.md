@@ -19,22 +19,26 @@ with special attention to:
 - secret / redaction safety
 - no-live-Sectors guarantee
 
-One defect was found and fixed during the audit (see §17). All other
-claims held up against direct evidence.
+The prior audit recorded four research/document corrections. This independent
+engineering review found and fixed additional data-contract, empty-data, and UI
+defects (see §17). The research artifacts remain useful evidence workpapers, but
+several Tier 4/5 candidate hits are still discovery-only and were not promoted
+into signal inputs.
 
 ## 2. Git State
 
 ```
 branch:        main
-HEAD:          f1409a7
+HEAD:          cc84ba5
 origin/main:   eba6544
-ahead:         5 commits
+ahead:         6 commits
 behind:        0
-status:        clean (0 files modified, 0 untracked)
+status:        modified (independent-review changes pending commit; no untracked product files)
 ```
 
-5 most recent commits:
+6 most recent commits:
 ```
+cc84ba5 docs(audit): final adversarial review — IDX-IC fix, BBCA resolution, FINAL_AUDIT
 f1409a7 feat(research): activate Tavily + YOU.com research pass with structured evidence
 6457c7d docs: SECTORS_MIGRATION_READINESS — verified readiness snapshot
 b41c376 feat(ui): P1 — Master Group Table + Themes Explorer
@@ -46,17 +50,17 @@ ffb914a feat(ui): implementation pass — taxonomy maps, ticker analysis, foreig
 
 | Command | Exit | Result |
 | --- | --- | --- |
-| `git rev-list --left-right --count origin/main...HEAD` | 0 | ahead 5, behind 0 |
-| `.venv/bin/pytest -q` | 0 | **491 passed** in 11.29s |
+| `git rev-list --left-right --count origin/main...HEAD` | 0 | ahead 6, behind 0 |
+| `.venv/bin/pytest -q` | 0 | **493 passed** (host validation; Bun/TSX IPC requires host access) |
 | `app/web/node_modules/.bin/tsc --noEmit --project app/web/tsconfig.json` | 0 | clean, no output |
-| `npm run build --prefix app/web` | 0 | success, 629 modules, 845.42 kB bundle |
+| `npm run build --prefix app/web` | 0 | success, 631 modules, 846.59 kB bundle |
 | `.venv/bin/pytest tests/test_no_lookahead.py tests/test_no_lookahead_synthetic.py tests/test_snapshot_comparability.py tests/test_comparability_and_adapter.py -q` | 0 | 42 passed |
 | `.venv/bin/pytest tests/test_diffusion_group_size.py tests/test_states.py tests/test_transitions.py tests/test_state_turnover.py -q` | 0 | 39 passed |
 | `.venv/bin/pytest tests/test_concentration.py tests/test_concentration_v2.py -q` | 0 | 19 passed |
 | `.venv/bin/pytest tests/test_research_pass_driver.py -q` | 0 | 9 passed |
 | `.venv/bin/pytest tests/test_synthetic_scenarios.py -q` | 0 | 19 passed |
 
-**Total:** 491 tests passing across 60+ files; no failures, no warnings
+**Total:** 493 tests passing across 60+ files; no failures, no warnings
 beyond the standard Vite bundle-size advisory.
 
 ## 4. Research Artifact Integrity
@@ -262,25 +266,26 @@ shows the honest "no comparable prior" message. Verified in
 
 ## 12. UI Routes + Visual QA
 
-All 11 SPA routes loaded successfully in browser smoke test
-(`http://127.0.0.1:5187`):
+All 11 SPA routes were navigated successfully in browser smoke test
+(`http://127.0.0.1:5174`); the final browser console had 0 errors:
 
-| Route | Heading | Alerts |
-| --- | --- | --- |
-| `/` | "See where leadership is moving..." | 0 |
-| `/what-changed` | "WHAT CHANGED?" | 0 |
-| `/overview` | "IDX leadership & diffusion" | 0 |
-| `/map` | "Leadership × Current Breadth Map" | 0 |
-| `/maps/konglo` | "Konglo (verified corporate ecosystems, prototype)" | 0 |
-| `/maps/themes` | "Themes (analyst-defined prototype)" | 0 |
-| `/explorer` | "Basic Materials" | 0 |
-| `/groups` | "Analytical scanner" | 0 |
-| `/themes` | "Theme browser" | 0 |
-| `/methodology` | "Methodology & Data Quality" | 1 (Partial-universe honesty badge) |
-| `/ticker/BBCA.JK` | "PT Bank Central Asia Tbk." | 0 |
+| Route | Result |
+| --- | --- |
+| `/` | loaded |
+| `/what-changed` | loaded |
+| `/overview` | loaded |
+| `/map` | loaded |
+| `/maps/konglo` | loaded |
+| `/maps/themes` | loaded |
+| `/explorer` | loaded |
+| `/groups` | loaded |
+| `/themes` | loaded |
+| `/methodology` | loaded; partial-universe disclosure expected |
+| `/ticker/BBCA.JK` | loaded |
 
-Provenance trace: Master Group Table row click → `/explorer?group=basic-materials`
-→ renders "Basic Materials". UI-to-snapshot drilldown chain works.
+Provenance trace: Master Group Table row click → `/explorer?group=financials`
+→ renders "Financials". UI-to-snapshot drilldown chain works, including direct
+query-string navigation.
 
 No recommendation language, no broker-terminal signals, no false
 empty cards.
@@ -290,8 +295,8 @@ empty cards.
 UI → snapshot → canonical → raw path verified for `/groups` row click:
 - `/groups` renders rows from `data.sectors[]` (adapted from
   `app/web/public/snapshots/yf_harness_2026-08-28_adj.json` → `groups[]`).
-- Click → `/explorer?group=basic-materials` → drilldown reads
-  `data.sectors[]` again plus `data.constituentsByGroup['basic-materials']`.
+- Click → `/explorer?group=financials` → drilldown reads
+  `data.sectors[]` again plus `data.constituentsByGroup['financials']`.
 - Constituent data flows from `features[]` in the same snapshot.
 
 Foreign-flow observations in `data/research/foreign_flow/` are NOT
@@ -334,8 +339,8 @@ final audit, a targeted Tavily query resolved the event without Sectors:
 | Event | BBCA 5-for-1 stock split |
 | Effective date | 2021-10-13 |
 | Split ratio | 1:5 (1 share → 5 new shares) |
-| Primary source | PT Bank Central Asia official press release: `https://www.bca.co.id/en/tentang-bca/media-riset/pressroom/siaran-pers/2021/10/13/08/12/saham-bbca-resmi-diperdagangkan-` (Tier 1) |
-| Corroboration | alphaspread.com, stockevents.app, investing.com (Tier 3) |
+| Primary source | PT Bank Central Asia official press release: `https://www.bca.co.id/en/tentang-bca/media-riset/pressroom/siaran-pers/2021/10/13/08/12/saham-bbca-resmi-diperdagangkan-dengan-harga-baru` (project tier 2) |
+| Corroboration | stockevents.app and digrin.com (project tier 5; discovery-only) |
 | Pipeline handling | **Auto-adjusted by yfinance `Adj Close`**; default `price_col="adjusted_close"` in `features/returns.py:25` |
 | Manual patch needed? | **NO** |
 | Resolution persisted | `data/research/corp_actions/bbca_2021_10_13_resolution.json` |
@@ -352,6 +357,13 @@ default. No future Sectors resolution needed.
 | RESEARCH_AUDIT.md had duplicated block (research-pass text remained alongside the corrected paragraph) | LOW | Removed duplicate block. |
 | BBCA 2021-10-13 left as "deferred to Sectors" | MEDIUM | Resolved as 5-for-1 stock split via BBCA primary source; yfinance `Adj Close` auto-handles; no manual patch needed. |
 | Stale observation count in audit log (60 → 65 after targeted re-verification calls) | LOW | This audit reflects the final 65. |
+| First-observation transitions copied current breadth/relative-strength values into delta fields | HIGH | Deltas now remain unavailable until a comparable prior exists; regression test added. |
+| Generic pipeline did not carry provider acquisition failures into the eligibility denominator or filter taxonomy to eligible tickers | HIGH | Provider diagnostics are propagated; policy taxonomy is filtered while raw candidates remain disclosed. |
+| Group aggregation used an outer join and dropped taxonomy groups when features were empty | HIGH | Taxonomy is the left-hand policy denominator; empty groups emit explicit data-gap snapshots. |
+| Taxonomy aggregation returned no group rows for empty or entirely out-of-window prices | MEDIUM | One explicit data-gap aggregate is retained per taxonomy group; regression coverage added. |
+| Master Group Table double-scaled Top-3 contribution and displayed missing breadth deltas as `0.0%` | HIGH | Adapter/UI unit contract is corrected; unavailable breadth deltas render as `—` and Top-3 is scaled once. |
+| Master Group Table links supplied `?group=` but Group Explorer ignored the query parameter | MEDIUM | Explorer hydrates selection from the URL and direct drilldown now renders the requested group. |
+| UI labeled observation-count persistence/history as weeks and conflated missing metrics with off-scale map points | MEDIUM | Copy now says observations/rolling snapshots; map footers distinguish off-scale, missing metric, and missing prior. |
 
 ## 18. Remaining Issues (Classified)
 
@@ -366,7 +378,10 @@ None.
   Searches did not land on Reuters / Bloomberg / Kontan / CNBC tier-3
   hosts in this pass. Future passes should issue targeted tier-3
   queries for high-impact facts. (Already noted in `RESEARCH_AUDIT.md`
-  §6.)
+  §8.)
+- **Candidate-source relevance is uneven**: spot checks found several Tier 4/5
+  theme or conglomerate results that do not substantiate issuer membership.
+  Rows remain `UNVERIFIED` / `PROVISIONAL` and should stay discovery-only.
 
 ### LOW
 - Prototype universe coverage: 10/11 IDX-IC sectors (Infrastructures missing
@@ -402,8 +417,9 @@ None.
 
 ## 19. Final Handoff Decision
 
-- Git state verified: main @ f1409a7, ahead5, clean
-- 491 tests pass; typecheck clean; build success
+- Git state verified: main @ cc84ba5, ahead6; independent-review changes are
+  present in the worktree and have not been committed or pushed
+- 493 tests pass on the host rerun; typecheck clean; build success
 - Research artifacts (63 obs / 137 sources / 65 audit entries) audited
 - Tavily + YOU.com verified live (not stubbed)
 - Source-quality leakage checked: 17/63 tier-1/2, none promoted into signal-eligible config without analyst verification
@@ -414,10 +430,12 @@ None.
 - Diffusion UNCONFIRMED handling: verified
 - Concentration weighting: equal-weight language consistent in UI
 - Konglo + Themes: research PROVISIONAL, analyst-curated config separate
-- UI: 11 routes load, 0 alerts (Methodology alert = honest partial-universe badge)
+- UI: sampled routes load without application errors; Methodology's partial-
+  universe badge remains an honest data-quality disclosure
 - Provenance trace: Master Group Table → /explorer drilldown verified
 - Secrets: 0 real keys persisted (1 test sentinel in driver test)
 - No-live-Sectors: 0 calls in audit log
 - BBCA 2021-10-13: resolved as 5-for-1 split via BBCA primary source
 
-All gates passed. The repository is ready for Codex independent review.
+The implementation review is complete. The requested engineering fixes are
+validated locally; publication/commit remains intentionally outside this audit.
