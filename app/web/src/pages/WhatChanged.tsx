@@ -577,7 +577,7 @@ export default function WhatChanged() {
             </div>
             <div>
               <div style={{ fontWeight: 600, marginBottom: 4 }}>Still unavailable</div>
-              <div>Broadening, narrowing, and material change versus a prior snapshot.</div>
+              <div>No comparable change set available. Broadening, narrowing, and material change versus a prior snapshot remain unavailable.</div>
             </div>
           </div>
         ) : (
