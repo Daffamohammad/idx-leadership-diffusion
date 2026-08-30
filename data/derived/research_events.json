@@ -1,0 +1,140 @@
+{
+  "schema_version": "research-events-v1",
+  "provider_mode": "PUBLIC_PROTOTYPE",
+  "event_count": 5,
+  "events": [
+    {
+      "event_id": "BBCA_ex_dividend_2026-08-31",
+      "event_date": "2026-08-31",
+      "published_at": "2026-08-20T08:45:00+07:00",
+      "ticker": "BBCA.JK",
+      "sector_id": "Financials",
+      "konglo_id": "KONGLO_HARTONO",
+      "theme_ids": [
+        "THEME_MAJOR_BANKS"
+      ],
+      "category": "dividend",
+      "title": "BBCA ex-dividend in regular and negotiated markets",
+      "summary": "BBCA scheduled a IDR 25 per-share interim dividend, with cum-date 28 August and ex-date 31 August 2026 in the regular and negotiated markets.",
+      "source_url": "https://www.idnfinancials.com/news/67653/bbca-to-pay-idr-3-trillion-interim-dividend-djarum-gets-largest-share",
+      "source_name": "IDNFinancials",
+      "provider": "direct_source_review",
+      "quantitative_use": false,
+      "status": "PUBLISHED"
+    },
+    {
+      "event_id": "BBRI_buyback_start_2026-06-12",
+      "event_date": "2026-06-12",
+      "published_at": "2026-06-12T16:05:00+07:00",
+      "ticker": "BBRI.JK",
+      "sector_id": "Financials",
+      "konglo_id": null,
+      "theme_ids": [
+        "THEME_MAJOR_BANKS"
+      ],
+      "category": "corporate_action",
+      "title": "BBRI begins IDR 500 billion MESOP buyback window",
+      "summary": "BBRI announced a maximum IDR 500 billion share buyback for its MESOP programme, scheduled from 12 June through 11 September 2026.",
+      "source_url": "https://www.idnfinancials.com/id/news/64734/bbri-buyback-saham-rp500-miliar-untuk-program-mesop",
+      "source_name": "IDNFinancials",
+      "provider": "direct_source_review",
+      "quantitative_use": false,
+      "status": "PUBLISHED"
+    },
+    {
+      "event_id": "TLKM_mdi_review_2026-07-31",
+      "event_date": "2026-07-31",
+      "published_at": "2026-07-31T13:00:00+07:00",
+      "ticker": "TLKM.JK",
+      "sector_id": "Telecom",
+      "konglo_id": null,
+      "theme_ids": [
+        "THEME_DIGITAL_TELECOM"
+      ],
+      "category": "corporate_action",
+      "title": "TelkomMetra reviews strategic options for MDI Ventures",
+      "summary": "TelkomMetra was reported to be reviewing strategic options, including a possible sale, for MDI Ventures; no final decision had been announced.",
+      "source_url": "https://www.idnfinancials.com/id/news/66849/anak-usaha-tlkm-kaji-penjualan-mdi-ventures-senilai-us830-juta",
+      "source_name": "IDNFinancials",
+      "provider": "direct_source_review",
+      "quantitative_use": false,
+      "status": "PUBLISHED"
+    },
+    {
+      "event_id": "BUMI_foreign_net_sell_volume_2026-07-07",
+      "event_date": "2026-07-07",
+      "published_at": "2026-07-07T21:40:00+07:00",
+      "ticker": "BUMI.JK",
+      "sector_id": "Energy",
+      "konglo_id": null,
+      "theme_ids": [
+        "THEME_COAL_ENERGY"
+      ],
+      "category": "other_sourced_event",
+      "title": "BUMI leads foreign net-sell volume list",
+      "summary": "BUMI recorded a foreign net sell of 217.09 million shares on 7 July 2026; this is a volume observation, not a filing or value-based flow metric.",
+      "source_url": "https://www.idnfinancials.com/news/65755/foreign-trading-net-selling-1-04-billion-shares-bumi-tops-sell-list",
+      "source_name": "IDNFinancials",
+      "provider": "direct_source_review",
+      "quantitative_use": false,
+      "status": "PUBLISHED"
+    },
+    {
+      "event_id": "BBCA_director_purchases_2026-03-25",
+      "event_date": "2026-03-25",
+      "published_at": "2026-03-26T08:44:00+07:00",
+      "ticker": "BBCA.JK",
+      "sector_id": "Financials",
+      "konglo_id": "KONGLO_HARTONO",
+      "theme_ids": [
+        "THEME_MAJOR_BANKS"
+      ],
+      "category": "other_sourced_event",
+      "title": "BBCA directors and commissioner purchase shares",
+      "summary": "Six directors and one commissioner reported purchases made on 16 and 25 March 2026 for long-term investment.",
+      "source_url": "https://www.idnfinancials.com/news/62470/price-drops-ahead-of-dividend-bbca-directors-commissioner-buy-shares",
+      "source_name": "IDNFinancials",
+      "provider": "direct_source_review",
+      "quantitative_use": false,
+      "status": "PUBLISHED"
+    }
+  ],
+  "sources": [
+    {
+      "source_url": "https://www.idnfinancials.com/news/67653/bbca-to-pay-idr-3-trillion-interim-dividend-djarum-gets-largest-share",
+      "source_name": "IDNFinancials",
+      "provider": "direct_source_review",
+      "published_at": "2026-08-20T08:45:00+07:00"
+    },
+    {
+      "source_url": "https://www.idnfinancials.com/id/news/64734/bbri-buyback-saham-rp500-miliar-untuk-program-mesop",
+      "source_name": "IDNFinancials",
+      "provider": "direct_source_review",
+      "published_at": "2026-06-12T16:05:00+07:00"
+    },
+    {
+      "source_url": "https://www.idnfinancials.com/id/news/66849/anak-usaha-tlkm-kaji-penjualan-mdi-ventures-senilai-us830-juta",
+      "source_name": "IDNFinancials",
+      "provider": "direct_source_review",
+      "published_at": "2026-07-31T13:00:00+07:00"
+    },
+    {
+      "source_url": "https://www.idnfinancials.com/news/65755/foreign-trading-net-selling-1-04-billion-shares-bumi-tops-sell-list",
+      "source_name": "IDNFinancials",
+      "provider": "direct_source_review",
+      "published_at": "2026-07-07T21:40:00+07:00"
+    },
+    {
+      "source_url": "https://www.idnfinancials.com/news/62470/price-drops-ahead-of-dividend-bbca-directors-commissioner-buy-shares",
+      "source_name": "IDNFinancials",
+      "provider": "direct_source_review",
+      "published_at": "2026-03-26T08:44:00+07:00"
+    }
+  ],
+  "source_reconciliation": {
+    "status": "VERIFIED",
+    "verified_at": "2026-08-30",
+    "method": "direct article review",
+    "quantitative_use": false
+  }
+}

@@ -1,0 +1,122 @@
+// ResearchEvents — timeline of normalized, source-backed events.
+//
+// Events are explicitly context only. They are NEVER scored or turned
+// into quantitative confirmation.
+
+import type { ResearchEventView } from "../data/adapter";
+
+interface ResearchEventsProps {
+  events: ResearchEventView[];
+  limit?: number;
+  emptyMessage?: string;
+}
+
+const CATEGORY_LABEL: Record<string, string> = {
+  earnings: "Earnings",
+  dividend: "Dividend",
+  rights_issue: "Rights issue",
+  stock_split: "Stock split",
+  suspension: "Suspension",
+  index_inclusion: "Index inclusion",
+  corporate_action: "Corporate action",
+  major_filing: "Major filing",
+  other_sourced_event: "Other sourced event",
+};
+
+export default function ResearchEvents({
+  events,
+  limit,
+  emptyMessage = "No research events in the current snapshot.",
+}: ResearchEventsProps) {
+  if (!events.length) {
+    return (
+      <section
+        aria-label="Research events"
+        style={{
+          border: "1px dashed #dfe2e1",
+          padding: 22,
+          background: "#faf9f6",
+        }}
+      >
+        <div className="eyebrow-muted">Research events</div>
+        <p style={{ margin: "8px 0 0", fontSize: 13, color: "#686e73" }}>
+          {emptyMessage}
+        </p>
+      </section>
+    );
+  }
+  const sorted = [...events].sort((a, b) => b.eventDate.localeCompare(a.eventDate));
+  const sliced = typeof limit === "number" ? sorted.slice(0, limit) : sorted;
+
+  return (
+    <section
+      aria-label="Research events"
+      style={{
+        border: "1px solid #dfe2e1",
+        padding: 22,
+        background: "#faf9f6",
+      }}
+    >
+      <header style={{ marginBottom: 12 }}>
+        <div className="eyebrow-muted">Research events</div>
+        <h2 style={{ margin: "6px 0 4px", fontSize: 20 }}>
+          {sliced.length} dated event{sliced.length === 1 ? "" : "s"} · context only
+        </h2>
+        <p
+          style={{
+            margin: 0,
+            fontSize: 11,
+            color: "#686e73",
+            fontFamily: "Geist Mono, monospace",
+          }}
+        >
+          Events are source-backed observations; they never become signals.
+        </p>
+      </header>
+      <ol style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 12 }}>
+        {sliced.map((event) => (
+          <li
+            key={event.eventId}
+            style={{
+              borderLeft: "3px solid #c69f4a",
+              paddingLeft: 12,
+              display: "grid",
+              gap: 4,
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 8,
+                alignItems: "center",
+                fontSize: 11,
+                color: "#686e73",
+                fontFamily: "Geist Mono, monospace",
+              }}
+            >
+              <span>{event.eventDate}</span>
+              <span>·</span>
+              <span>{CATEGORY_LABEL[event.category] ?? event.category}</span>
+              <span>·</span>
+              <span>{event.ticker}</span>
+              {event.provider && (
+                <>
+                  <span>·</span>
+                  <span>{event.provider}</span>
+                </>
+              )}
+            </div>
+            <div style={{ fontWeight: 600 }}>{event.title}</div>
+            <div style={{ fontSize: 13, color: "#202325" }}>{event.summary}</div>
+            <div style={{ fontSize: 11, color: "#686e73" }}>
+              <a href={event.sourceUrl} target="_blank" rel="noreferrer">
+                {event.sourceName}
+              </a>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}

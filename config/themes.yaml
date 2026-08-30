@@ -1,0 +1,93 @@
+# Themes taxonomy (analyst prototype)
+# ──────────────────────────────────────────────────────────────────────
+# Theme lenses are research overlays that re-bin tickers by cross-sector
+# theme (banks, coal/energy, renewables, EV/materials, healthcare, etc.).
+#
+# This is **not** an authoritative classification. It is explicitly
+# labelled `ANALYST_DEFINED_PROTOTYPE` and used as a research lens.
+#
+# Aggregation rule:
+#   * PRIMARY memberships are the default assignment for a theme.
+#   * A ticker may belong to MULTIPLE themes as `SECONDARY`; the
+#     aggregation engine counts the ticker once per theme, but the
+#     breadth denominator remains the ticker count for that theme.
+#   * Themes with zero PRIMARY tickers are surfaced but marked
+#     `DATA_GAP`.
+
+taxonomy_id: themes
+taxonomy_name: "Themes (analyst-defined prototype)"
+taxonomy_version: themes-prototype-v1
+taxonomy_kind: THEMES
+source_kind: ANALYST_DEFINED
+source_as_of: "2026-08-30"
+membership_policy: MULTI
+provider_mode: PUBLIC_PROTOTYPE
+
+taxonomies:
+  - taxonomy_id: themes
+    taxonomy_name: "Themes (analyst-defined prototype)"
+    taxonomy_version: themes-prototype-v1
+    taxonomy_kind: THEMES
+    source_kind: ANALYST_DEFINED
+    source_as_of: "2026-08-30"
+    membership_policy: MULTI
+    provider_mode: PUBLIC_PROTOTYPE
+
+    memberships:
+      # Major banks
+      - { ticker: BBCA.JK, taxonomy_group_id: THEME_MAJOR_BANKS, taxonomy_group_name: "Major banks", confidence: 0.95, source: "Public listings — IDX classification" }
+      - { ticker: BBRI.JK, taxonomy_group_id: THEME_MAJOR_BANKS, taxonomy_group_name: "Major banks", confidence: 0.95, source: "Public listings — IDX classification" }
+      - { ticker: BMRI.JK, taxonomy_group_id: THEME_MAJOR_BANKS, taxonomy_group_name: "Major banks", confidence: 0.95, source: "Public listings — IDX classification" }
+      - { ticker: BBNI.JK, taxonomy_group_id: THEME_MAJOR_BANKS, taxonomy_group_name: "Major banks", confidence: 0.95, source: "Public listings — IDX classification" }
+      - { ticker: BRIS.JK, taxonomy_group_id: THEME_MAJOR_BANKS, taxonomy_group_name: "Major banks", confidence: 0.9, source: "Public listings — IDX classification" }
+      - { ticker: BNGA.JK, taxonomy_group_id: THEME_MAJOR_BANKS, taxonomy_group_name: "Major banks", confidence: 0.85, source: "Public listings — IDX classification" }
+      - { ticker: ARTO.JK, taxonomy_group_id: THEME_DIGITAL_FINANCE, taxonomy_group_name: "Digital finance", confidence: 0.9, source: "Public listings — Digital Banks" }
+
+      # Coal & energy
+      - { ticker: PTBA.JK, taxonomy_group_id: THEME_COAL_ENERGY, taxonomy_group_name: "Coal & energy", confidence: 0.9, source: "Public listings — Coal" }
+      - { ticker: ADRO.JK, taxonomy_group_id: THEME_COAL_ENERGY, taxonomy_group_name: "Coal & energy", confidence: 0.9, source: "Public listings — Coal" }
+      - { ticker: ITMG.JK, taxonomy_group_id: THEME_COAL_ENERGY, taxonomy_group_name: "Coal & energy", confidence: 0.9, source: "Public listings — Coal" }
+      - { ticker: HRUM.JK, taxonomy_group_id: THEME_COAL_ENERGY, taxonomy_group_name: "Coal & energy", confidence: 0.9, source: "Public listings — Coal" }
+      - { ticker: PGAS.JK, taxonomy_group_id: THEME_COAL_ENERGY, taxonomy_group_name: "Coal & energy", confidence: 0.85, source: "Public listings — Gas Distribution" }
+
+      # Renewables
+      - { ticker: BREN.JK, taxonomy_group_id: THEME_RENEWABLES, taxonomy_group_name: "Renewables", confidence: 0.85, source: "Public listings — green energy" }
+      - { ticker: CUAN.JK, taxonomy_group_id: THEME_RENEWABLES, taxonomy_group_name: "Renewables", confidence: 0.8, source: "Public listings — green energy" }
+
+      # Digital & telecommunications
+      - { ticker: TLKM.JK, taxonomy_group_id: THEME_DIGITAL_TELECOM, taxonomy_group_name: "Digital & telecommunications", confidence: 0.95, source: "Public listings" }
+      - { ticker: ISAT.JK, taxonomy_group_id: THEME_DIGITAL_TELECOM, taxonomy_group_name: "Digital & telecommunications", confidence: 0.95, source: "Public listings" }
+      - { ticker: EXCL.JK, taxonomy_group_id: THEME_DIGITAL_TELECOM, taxonomy_group_name: "Digital & telecommunications", confidence: 0.95, source: "Public listings" }
+      - { ticker: EMTK.JK, taxonomy_group_id: THEME_DIGITAL_TELECOM, taxonomy_group_name: "Digital & telecommunications", confidence: 0.7, source: "Public listings — Media" }
+
+      # Infrastructure
+      - { ticker: JSMR.JK, taxonomy_group_id: THEME_INFRASTRUCTURE, taxonomy_group_name: "Infrastructure", confidence: 0.9, source: "Public listings — Toll Roads" }
+      - { ticker: WIKA.JK, taxonomy_group_id: THEME_INFRASTRUCTURE, taxonomy_group_name: "Infrastructure", confidence: 0.9, source: "Public listings — Construction" }
+      - { ticker: PTPP.JK, taxonomy_group_id: THEME_INFRASTRUCTURE, taxonomy_group_name: "Infrastructure", confidence: 0.9, source: "Public listings — Construction" }
+      - { ticker: WSKT.JK, taxonomy_group_id: THEME_INFRASTRUCTURE, taxonomy_group_name: "Infrastructure", confidence: 0.85, source: "Public listings — Construction" }
+      - { ticker: INTP.JK, taxonomy_group_id: THEME_INFRASTRUCTURE, taxonomy_group_name: "Infrastructure", confidence: 0.85, source: "Public listings — Cement" }
+      - { ticker: SMGR.JK, taxonomy_group_id: THEME_INFRASTRUCTURE, taxonomy_group_name: "Infrastructure", confidence: 0.85, source: "Public listings — Cement" }
+
+      # EV / materials
+      - { ticker: ANTM.JK, taxonomy_group_id: THEME_EV_MATERIALS, taxonomy_group_name: "EV & materials", confidence: 0.85, source: "Public listings — Mining Diversified" }
+      - { ticker: INCO.JK, taxonomy_group_id: THEME_EV_MATERIALS, taxonomy_group_name: "EV & materials", confidence: 0.9, source: "Public listings — Nickel" }
+      - { ticker: MDKA.JK, taxonomy_group_id: THEME_EV_MATERIALS, taxonomy_group_name: "EV & materials", confidence: 0.85, source: "Public listings" }
+      - { ticker: ESSA.JK, taxonomy_group_id: THEME_EV_MATERIALS, taxonomy_group_name: "EV & materials", confidence: 0.75, source: "Public listings — Fertilizers" }
+      - { ticker: BRPT.JK, taxonomy_group_id: THEME_EV_MATERIALS, taxonomy_group_name: "EV & materials", confidence: 0.8, source: "Public listings — Petrochemicals" }
+
+      # Consumer defensive
+      - { ticker: ICBP.JK, taxonomy_group_id: THEME_CONSUMER_DEFENSIVE, taxonomy_group_name: "Consumer defensive", confidence: 0.9, source: "Public listings — Food" }
+      - { ticker: INDF.JK, taxonomy_group_id: THEME_CONSUMER_DEFENSIVE, taxonomy_group_name: "Consumer defensive", confidence: 0.9, source: "Public listings — Food" }
+      - { ticker: MYOR.JK, taxonomy_group_id: THEME_CONSUMER_DEFENSIVE, taxonomy_group_name: "Consumer defensive", confidence: 0.9, source: "Public listings — Food" }
+      - { ticker: UNVR.JK, taxonomy_group_id: THEME_CONSUMER_DEFENSIVE, taxonomy_group_name: "Consumer defensive", confidence: 0.85, source: "Public listings — Household" }
+      - { ticker: SIDO.JK, taxonomy_group_id: THEME_CONSUMER_DEFENSIVE, taxonomy_group_name: "Consumer defensive", confidence: 0.7, source: "Public listings — Pharmaceuticals" }
+
+      # Healthcare
+      - { ticker: MIKA.JK, taxonomy_group_id: THEME_HEALTHCARE, taxonomy_group_name: "Healthcare", confidence: 0.9, source: "Public listings — Hospitals" }
+      - { ticker: SILO.JK, taxonomy_group_id: THEME_HEALTHCARE, taxonomy_group_name: "Healthcare", confidence: 0.9, source: "Public listings — Hospitals" }
+      - { ticker: HEAL.JK, taxonomy_group_id: THEME_HEALTHCARE, taxonomy_group_name: "Healthcare", confidence: 0.9, source: "Public listings — Hospitals" }
+      - { ticker: KLBF.JK, taxonomy_group_id: THEME_HEALTHCARE, taxonomy_group_name: "Healthcare", confidence: 0.85, source: "Public listings — Pharmaceuticals" }
+
+      # Digital & tech as second lens
+      - { ticker: GOTO.JK, taxonomy_group_id: THEME_DIGITAL_FINANCE, taxonomy_group_name: "Digital finance", confidence: 0.85, source: "Public listings" }
+      - { ticker: BUKA.JK, taxonomy_group_id: THEME_DIGITAL_FINANCE, taxonomy_group_name: "Digital finance", confidence: 0.8, source: "Public listings" }

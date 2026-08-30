@@ -1,0 +1,87 @@
+# Konglo / controlling-shareholder ecosystem taxonomy (prototype)
+#
+# This research lens is deliberately narrow. A membership is included only
+# when an official company source supports the relationship. It is not an
+# official IDX classification, a complete beneficial-ownership graph, or a
+# claim that every company is controlled in the same legal manner.
+
+taxonomy_id: konglo
+taxonomy_name: "Konglo (verified corporate ecosystems, prototype)"
+taxonomy_version: konglo-verified-prototype-v2
+taxonomy_kind: KONGLO
+source_kind: ANALYST_DEFINED
+source_as_of: "2026-08-27"
+membership_policy: PRIMARY_ONLY
+provider_mode: PUBLIC_PROTOTYPE
+
+memberships:
+  # Salim / Indofood. Anthoni Salim is President Director of INDF and ICBP.
+  - ticker: INDF.JK
+    taxonomy_group_id: KONGLO_SALIM
+    taxonomy_group_name: "Salim / Indofood ecosystem"
+    confidence: 0.95
+    source: "https://www.indofood.com/leader/anthoni-salim"
+    source_as_of: "2026-08-27"
+  - ticker: ICBP.JK
+    taxonomy_group_id: KONGLO_SALIM
+    taxonomy_group_name: "Salim / Indofood ecosystem"
+    confidence: 0.95
+    source: "https://www.indofood.com/leader/anthoni-salim"
+    source_as_of: "2026-08-27"
+
+  # Astra / Jardine. Astra owns 59.5% of United Tractors.
+  - ticker: ASII.JK
+    taxonomy_group_id: KONGLO_ASTRA
+    taxonomy_group_name: "Astra / Jardine ecosystem"
+    confidence: 1.0
+    source: "https://www.astra.co.id/en/investor-relations/shareholding"
+    source_as_of: "2025-12-31"
+  - ticker: UNTR.JK
+    taxonomy_group_id: KONGLO_ASTRA
+    taxonomy_group_name: "Astra / Jardine ecosystem"
+    confidence: 1.0
+    source: "https://www.astra.co.id/en/business/heavy-equipment-mining-construction-and-energy/united-tractors"
+    source_as_of: "2026-08-27"
+
+  # Hartono / Dwimuria. BCA identifies Dwimuria and the Hartono brothers as
+  # its controlling-shareholder chain.
+  - ticker: BBCA.JK
+    taxonomy_group_id: KONGLO_HARTONO
+    taxonomy_group_name: "Hartono / Dwimuria ecosystem"
+    confidence: 1.0
+    source: "https://www.bca.co.id/en/tentang-bca/Hubungan-Investor/Informasi-Saham/Komposisi-Pemegang-Saham"
+    source_as_of: "2025-12-31"
+
+  # Sinar Mas Land. Only BSDE is inside the bounded prototype universe, so
+  # this group remains explicitly too small for a confirmed signal.
+  - ticker: BSDE.JK
+    taxonomy_group_id: KONGLO_SINARMAS
+    taxonomy_group_name: "Sinar Mas Land ecosystem"
+    confidence: 0.95
+    source: "https://www.sinarmasland.com/investors/information-disclosure-statement"
+    source_as_of: "2026-08-27"
+
+  # Barito Pacific. Official group sources identify TPIA as controlled by
+  # Barito Pacific. BREN is intentionally omitted because it is outside the
+  # bounded yfinance prototype universe.
+  - ticker: BRPT.JK
+    taxonomy_group_id: KONGLO_BARITO
+    taxonomy_group_name: "Barito Pacific / Prajogo ecosystem"
+    confidence: 1.0
+    source: "https://www.barito-pacific.com/newsroom/official-statement-from-barito-pacific-group"
+    source_as_of: "2026-08-27"
+  - ticker: TPIA.JK
+    taxonomy_group_id: KONGLO_BARITO
+    taxonomy_group_name: "Barito Pacific / Prajogo ecosystem"
+    confidence: 1.0
+    source: "https://www.barito-pacific.com/newsroom/official-statement-from-barito-pacific-group"
+    source_as_of: "2026-08-27"
+
+  # EMTEK. The bounded universe does not include SCMA, so this remains a
+  # one-name descriptive group and cannot receive a confirmed signal.
+  - ticker: EMTK.JK
+    taxonomy_group_id: KONGLO_EMTEK
+    taxonomy_group_name: "EMTEK ecosystem"
+    confidence: 1.0
+    source: "https://cms.emtek.co.id/media/annual_report_attachment_en/gcib/AR-EMTEK-2025.pdf"
+    source_as_of: "2025-12-31"
