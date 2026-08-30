@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import { useSnapshot } from "../data/SnapshotProvider";
 import type { ConstituentData, FlowState, SectorData } from "../data/adapter";
@@ -22,6 +22,7 @@ import {
   ReferenceLine,
 } from "recharts";
 import { leadershipColor } from "../components/StatusChips";
+import PriceChart from "../components/PriceChart";
 
 const card: React.CSSProperties = {
   background: "#ffffff",
@@ -145,9 +146,13 @@ function ConstituentTable({ constituents }: { constituents: ConstituentData[] })
                 style={{ borderBottom: i < constituents.length - 1 ? "1px solid #ebebeb" : "none" }}
               >
                 <td style={{ padding: "9px 12px", fontFamily: "Geist Mono, monospace", fontSize: 12, fontWeight: 600, color: "#171717" }}>
-                  {c.ticker}
+                  <Link
+                    to={`/ticker/${c.ticker}`}
+                    style={{ color: "#171717", textDecoration: "underline" }}
+                  >
+                    {c.ticker}
+                  </Link>
                 </td>
-                <td style={{ padding: "9px 12px", fontSize: 12, color: "#4d4d4d" }}>{c.name}</td>
                 <td style={{ padding: "9px 12px", textAlign: "right" }}>
                   <Num val={c.return20d} />
                 </td>
@@ -351,6 +356,7 @@ export default function GroupExplorer() {
   const [selected, setSelected] = useState<string>("");
   const sectors = data?.sectors ?? [];
   const constituentsByGroup = data?.constituentsByGroup ?? {};
+  const groupPriceHistory = data?.groupPriceHistory ?? {};
   const dataSources = data?.dataSources ?? { breadthHistory: false, constituents: false, fundamentals: false, foreignFlow: false, trajectory: false };
   useEffect(() => {
     if (!selected && sectors.length > 0) {
@@ -377,6 +383,11 @@ export default function GroupExplorer() {
   const groupBreadthHistory = data.breadthHistory.filter(
     (point) => point.group_id === sector.id,
   );
+  const groupPricePoints = groupPriceHistory[sector.id] ?? [];
+  const manifestEntry = data.payload.manifest.entries[0];
+  const chartSource = manifestEntry?.provider
+    ? `${manifestEntry.provider} snapshot`
+    : "Snapshot data";
   const delta =
     sector.prevBreadth !== undefined && sector.breadth !== null
       ? sector.breadth - sector.prevBreadth
@@ -427,7 +438,7 @@ export default function GroupExplorer() {
       </div>
 
       <div style={{ ...card, padding: "18px 22px", marginBottom: 20 }}>
-        <div style={{ display: "flex", gap: 6, marginBottom: 10, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 6, marginBottom: 10, flexWrap: "wrap", alignItems: "center" }}>
           <LeadershipChip state={sector.leadership} />
           <DiffusionChip state={sector.diffusion} />
           <span
@@ -443,12 +454,31 @@ export default function GroupExplorer() {
               borderRadius: 4,
             }}
           >
-            {sector.constituents} constituents
+            {sector.eligibleConstituents} eligible / {sector.constituents} total
           </span>
+          <span style={{ fontFamily: "Geist Mono", fontSize: 11, color: "#666666" }}>
+            Leading for {sector.persistence} session{sector.persistence !== 1 ? "s" : ""}
+          </span>
+          {sector.prevLeadership && (
+            <span style={{ fontFamily: "Geist Mono", fontSize: 10, color: "#7a5010", border: "1px solid #ebebeb", padding: "2px 6px", borderRadius: 4 }}>
+              {sector.prevLeadership} → {sector.leadership}
+            </span>
+          )}
         </div>
         <p style={{ fontSize: 13, color: "#4d4d4d", lineHeight: 1.6, maxWidth: 720 }}>
           {sector.interpretation}
         </p>
+        <div style={{ marginTop: 10, display: "flex", gap: 16, flexWrap: "wrap", fontSize: 11, color: "#666666", fontFamily: "Geist Mono" }}>
+          <span>20D Excess <b style={{ color: sector.excess20d !== null && sector.excess20d >= 0 ? "#1a6e62" : "#8f2424" }}>{displayMetric(sector.excess20d, "pp")}</b></span>
+          <span>Breadth <b>{displayMetric(sector.breadth)}</b> {delta !== undefined ? <span style={{ color: delta !== null && delta > 0 ? "#1a6e62" : delta !== null && delta < 0 ? "#8f2424" : "#666" }}>({delta === null ? "Δ unavailable" : `${delta > 0 ? "+" : ""}${delta.toFixed(1)}pp / 5D`})</span> : ""}</span>
+          <span>Top-3 <b>{displayMetric(sector.concentration)}</b></span>
+          {sector.constituents - sector.eligibleConstituents > 0 && (
+            <span style={{ color: "#7a5010" }}>{sector.constituents - sector.eligibleConstituents} excluded: {sector.missingConstituents} missing</span>
+          )}
+        </div>
+        <div style={{ marginTop: 8, fontSize: 10, color: "#8f8f8f" }}>
+          {sector.diffusion === "UNCONFIRMED" ? "No comparable prior snapshot is available. Current breadth can be shown, but diffusion change cannot yet be classified." : `Diffusion: ${sector.diffusion}${sector.prevDiffusion ? ` (prev ${sector.prevDiffusion})` : ""}`}
+        </div>
       </div>
 
       <div className="explorer-metrics" style={{ display: "flex", gap: 12, marginBottom: 24 }}>
@@ -518,17 +548,74 @@ export default function GroupExplorer() {
         </div>
       )}
 
-      <SectionHead label="Constituents" />
+      <SectionHead label="Price context" />
+      {groupPricePoints.length > 0 ? (
+        <div style={{ ...card, padding: "16px 18px", marginBottom: 12 }}>
+          <PriceChart
+            groupName={sector.name}
+            points={groupPricePoints.map((point) => ({
+              date: point.date,
+              value: point.value,
+            }))}
+            benchmarkPoints={groupPricePoints
+              .filter((point) => point.benchmark !== null)
+              .map((point) => ({
+                date: point.date,
+                value: point.benchmark,
+              }))}
+            asOf={data.payload.as_of}
+            source={chartSource}
+            metricLabel="Equal-weight group index · rebased to 100"
+            referenceValue={100}
+            height={300}
+          />
+          <div style={{ marginTop: 10, fontSize: 11, color: "#777777", lineHeight: 1.45 }}>
+            Descriptive equal-weight group performance versus IHSG. This chart is
+            presentation-only and does not change leadership or diffusion signals.
+          </div>
+        </div>
+      ) : (
+        <div style={{ ...card, padding: "16px 18px", marginBottom: 12 }}>
+          <EmptyState
+            label="NO PRICE SERIES"
+            title="Group price history is unavailable"
+            body="The selected snapshot does not emit a safe chart series for this group. No demonstration values are shown."
+            height={140}
+          />
+        </div>
+      )}
+
+      <SectionHead label="Constituents — driver decomposition" />
       {dataSources.constituents && constituents.length > 0 ? (
         <>
           <div style={{ ...card, padding: "16px 18px", marginBottom: 12 }}>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 14 }}>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
               <span style={{ fontSize: 13, fontWeight: 500, color: "#171717" }}>Absolute 20D move contribution</span>
-              <span className="eyebrow-muted">Top-3 absolute move: {displayMetric(sector.concentration)}</span>
+              <span className="eyebrow-muted">Top-3 absolute move: {displayMetric(sector.concentration)} · top-1 capped at 100% · equal-weight convention</span>
             </div>
+            <p style={{ fontSize: 11, color: "#666", lineHeight: 1.5, margin: "0 0 12px" }}>
+              {(() => {
+                const part = constituents.filter((c) => c.participating === true).length;
+                const total = constituents.filter((c) => c.excess20d !== null).length;
+                const conc = sector.concentration ?? 0;
+                if (conc > 60) return `Performance is carried by a few names (${conc}% top-3) — narrow and fragile.`;
+                if (conc > 45) return `Performance is moderately concentrated (${conc}% top-3) — check breadth for confirmation.`;
+                if (part / Math.max(1, total) > 0.6) return `Broad participation: ${part}/${total} outperforming — move is supported by multiple names.`;
+                return `Mixed participation: ${part}/${total} outperforming — internally diverging.`;
+              })()}
+            </p>
             <ContribBars constituents={constituents} />
+            <div style={{ marginTop: 12, display: "flex", gap: 16, fontSize: 11, color: "#666", fontFamily: "Geist Mono", flexWrap: "wrap" }}>
+              <span>Positive contributors: {constituents.filter((c) => c.excess20d !== null && c.excess20d > 0).length}</span>
+              <span>Negative contributors: {constituents.filter((c) => c.excess20d !== null && c.excess20d <= 0).length}</span>
+              <span>Participating: {constituents.filter((c) => c.participating).length}/{constituents.filter((c) => c.excess20d !== null).length}</span>
+            </div>
           </div>
           <ConstituentTable constituents={constituents} />
+          <div style={{ marginTop: 8, fontSize: 10, color: "#8f8f8f", lineHeight: 1.4 }}>
+            Methodology: per-constituent |return_20d| sorted descending; top-N shares = sum(|ret_i|)/sum(|ret_all|). Signed attribution (Buy/Sell) is separate and undefined when net is unstable.
+            Equal-weight convention; no market-cap weighting.
+          </div>
         </>
       ) : (
         <EmptyState

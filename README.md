@@ -23,6 +23,7 @@ advice or personalized recommendations.**
 - [Demo mode](#demo-mode)
 - [Sectors integration status](#sectors-integration-status)
 - [Live Sectors + Tavily refresh](#live-sectors--tavily-refresh)
+- [Foreign-flow discovery and sample calculation](#foreign-flow-discovery-and-sample-calculation)
 - [Architecture](#architecture)
 - [Methodology](#method-overview)
 - [Known limitations](#known-limitations)
@@ -166,6 +167,32 @@ The command never calls the Sectors provider and never creates per-ticker
 metrics.  The result is stored in `you_context.json` and rendered on the
 Methodology page alongside the Tavily panel; both layers carry
 `quantitative_use: false` and remain qualitative provenance only.
+
+## Foreign-flow discovery and sample calculation
+
+The repository also contains a bounded foreign-flow methodology harness. The
+discovery record in `data/fixtures/foreign_flow_discovery.json` documents the
+Tavily and You.com queries, the first-party IDX candidate page, and the two
+dated secondary reports used for a small company sample. It does not claim
+that a stable full-universe daily per-ticker feed was found.
+
+The numeric input is intentionally manual and auditable:
+`data/fixtures/foreign_flow_sample.csv` contains two market-wide observations
+and published top-buy/top-sell company rows. Company rows remain net-only;
+missing buy/sell components are never inferred. The calculator uses pandas to
+validate the input, preserve reported market net values, flag rounding
+variance in rounded market components, and map only tickers present in the
+persisted security master:
+
+```bash
+.venv/bin/python scripts/calculate_foreign_flow_sample.py
+```
+
+The deterministic result is written to
+`data/derived/foreign_flow_sample.json` with `READY_WITH_GAPS` status. It is
+sample evidence only and is explicitly disabled from leadership, diffusion,
+and confirmation calculations. No network request is made and the Sectors
+API is not called by this command.
 
 ## Prototype mode
 

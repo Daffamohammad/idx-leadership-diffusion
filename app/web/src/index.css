@@ -61,6 +61,9 @@ button:focus-visible, a:focus-visible, select:focus-visible { outline: 2px solid
 .cursor-ring { position: fixed; width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgba(22,25,28,0.3); pointer-events: none; z-index: 99998; top: -14px; left: -14px; transition: width 0.25s ease, height 0.25s ease, border-color 0.25s ease; will-change: transform; }
 .map-group:focus-visible { outline: 2px solid #f26a3d; outline-offset: 3px; }
 .cursor-ring.cursor-hover { width: 44px; height: 44px; border-color: #f26a3d; }
+html.dark .cursor-dot { background: #e8edf2; }
+html.dark .cursor-ring { border-color: rgba(232,237,242,0.38); }
+html.dark .cursor-ring.cursor-hover { border-color: #f26a3d; }
 
 /* ── Text reveal ───────────────────────────────────────── */
 @keyframes word-up { from { transform: translateY(115%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }

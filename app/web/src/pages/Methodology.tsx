@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useSnapshot } from "../data/SnapshotProvider";
 import { DataStatusChip } from "../components/StatusChips";
 import { normalizeDataStatus, type DataStatus, type SnapshotPayload } from "../data/snapshot";
+import type { AdaptedSnapshot } from "../data/adapter";
 import { buildDiffusionReadiness } from "../data/readiness";
 import {
   getTavilyCategory,
@@ -166,6 +167,194 @@ function SectionHead({ label }: { label: string }) {
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '36px 0 14px' }}>
       <span className="eyebrow-muted">{label}</span>
       <div style={{ flex: 1, height: 1, background: '#ebebeb' }} />
+    </div>
+  );
+}
+function EvidenceMatrix({
+  adapted,
+  manifestEntries,
+}: {
+  adapted: AdaptedSnapshot | null;
+  manifestEntries: SnapshotPayload["manifest"]["entries"][number] | undefined;
+}) {
+  const asOf = manifestEntries?.as_of ?? "—";
+  const providerMode = manifestEntries?.provider_mode ?? "PUBLIC_PROTOTYPE";
+  const fk = adapted?.foreignFlow;
+  const coverage = adapted?.coverageHonest;
+  const ev = adapted?.researchEvents ?? [];
+  const taxonomy = adapted?.taxonomyViews ?? {};
+
+  const layerStatus = (kind: string) => {
+    if (kind === "prices") return providerMode;
+    if (kind === "benchmark") return "READY";
+    if (kind === "sectors") return providerMode === "SECTORS_LIVE" ? "READY" : "PROTOTYPE_CONFIG";
+    if (kind === "konglo") {
+      const v = taxonomy.konglo;
+      return v ? "ANALYST_DEFINED" : "DATA_GAP";
+    }
+    if (kind === "themes") {
+      const v = taxonomy.themes;
+      return v ? "ANALYST_DEFINED" : "DATA_GAP";
+    }
+    if (kind === "foreign_flow") {
+      return fk ? (fk.signalEligible ? "READY_WITH_GAPS" : "SAMPLE_ONLY") : "DATA_GAP";
+    }
+    if (kind === "fundamentals") return "DATA_GAP";
+    if (kind === "events") return ev.length > 0 ? "CONTEXT_ONLY" : "UNAVAILABLE";
+    if (kind === "tradingview") return "CONTEXT_ONLY";
+    return "—";
+  };
+
+  const layers: Array<{
+    name: string;
+    status: string;
+    source: string;
+    asOf: string;
+    coverage: string;
+    quant: string;
+    signalEligible: boolean;
+    limitation: string;
+  }> = [
+    {
+      name: "Prices",
+      status: layerStatus("prices"),
+      source: providerMode === "SECTORS_LIVE" ? "Sectors API (read-only)" : "yfinance (cached)",
+      asOf,
+      coverage: coverage?.coverage_pct ? `${coverage.coverage_pct.toFixed(1)}%` : "—",
+      quant: "quantitative",
+      signalEligible: true,
+      limitation: providerMode === "PUBLIC_PROTOTYPE" ? "Adj-close vs close basis explicit" : "—",
+    },
+    {
+      name: "Benchmark",
+      status: layerStatus("benchmark"),
+      source: "^JKSE / IHSG",
+      asOf,
+      coverage: "n/a",
+      quant: "quantitative",
+      signalEligible: true,
+      limitation: "IHSG only — no cross-country index",
+    },
+    {
+      name: "Sectors",
+      status: layerStatus("sectors"),
+      source: providerMode === "SECTORS_LIVE" ? "Sectors API taxonomy" : "Prototype universe.yaml",
+      asOf,
+      coverage: coverage?.taxonomy_coverage_pct ? `${coverage.taxonomy_coverage_pct}%` : "—",
+      quant: "quantitative",
+      signalEligible: true,
+      limitation: "Coarse prototype labels",
+    },
+    {
+      name: "Konglo",
+      status: layerStatus("konglo"),
+      source: taxonomy.konglo?.taxonomy_id ? `config/konglo.yaml (${taxonomy.konglo.taxonomy_version})` : "—",
+      asOf,
+      coverage: fk?.mappedCompanyObservationPct ? `${fk.mappedCompanyObservationPct.toFixed(1)}% mapped` : "—",
+      quant: "context",
+      signalEligible: false,
+      limitation: "Analyst-defined prototype",
+    },
+    {
+      name: "Themes",
+      status: layerStatus("themes"),
+      source: taxonomy.themes?.taxonomy_id ? `config/themes.yaml (${taxonomy.themes.taxonomy_version})` : "—",
+      asOf,
+      coverage: "—",
+      quant: "context",
+      signalEligible: false,
+      limitation: "Analyst-defined prototype; multi-theme not aggregated cross-theme",
+    },
+    {
+      name: "Foreign flow",
+      status: layerStatus("foreign_flow"),
+      source: "IDNFinancials secondary articles (top-buy / top-sell lists)",
+      asOf: fk?.asOfMax ?? "—",
+      coverage: fk ? `${fk.marketDayCount} market dates · ${fk.companyObservationCount} obs` : "—",
+      quant: "quantitative (sample)",
+      signalEligible: fk?.signalEligible ?? false,
+      limitation: "Top-list sample, not full market. Net-only for company rows.",
+    },
+    {
+      name: "Fundamentals",
+      status: layerStatus("fundamentals"),
+      source: "—",
+      asOf: "—",
+      coverage: "0%",
+      quant: "n/a",
+      signalEligible: false,
+      limitation: "No structured per-ticker parser; DATA GAP",
+    },
+    {
+      name: "Events",
+      status: layerStatus("events"),
+      source: ev.length > 0 ? "Tavily + You.com bounded discovery" : "—",
+      asOf: ev[0]?.publishedAt ?? "—",
+      coverage: `${ev.length} events`,
+      quant: "context",
+      signalEligible: false,
+      limitation: "Context only — never signals",
+    },
+    {
+      name: "TradingView",
+      status: layerStatus("tradingview"),
+      source: "TradingView embed (CDN)",
+      asOf: "live",
+      coverage: "—",
+      quant: "context",
+      signalEligible: false,
+      limitation: "Widget unavailable when CDN blocked",
+    },
+  ];
+
+  return (
+    <div style={{ ...card, overflow: 'hidden', marginBottom: 40 }}>
+      <div style={{ padding: '14px 18px', borderBottom: '1px solid #ebebeb' }}>
+        <div className="eyebrow-muted">Evidence matrix</div>
+        <h2 style={{ fontSize: 18, margin: '4px 0 0', color: '#171717' }}>
+          Layer · status · source · coverage
+        </h2>
+        <p style={{ margin: '6px 0 0', fontSize: 11, fontFamily: 'Geist Mono, monospace', color: '#666666' }}>
+          One row per evidence layer. Status uses READY / READY_WITH_GAPS / DATA_GAP / UNCONFIRMED /
+          CONTEXT_ONLY / SAMPLE_ONLY.
+        </p>
+      </div>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+        <thead>
+          <tr>
+            {["Layer", "Status", "Source", "As of", "Coverage", "Quantitative?", "Signal eligible?", "Limitation"].map((label) => (
+              <th
+                key={label}
+                align="left"
+                style={{
+                  borderBottom: '1px solid #ebebeb',
+                  padding: '10px 14px',
+                  fontSize: 11,
+                  fontFamily: 'Geist Mono, monospace',
+                  color: '#666666',
+                  textTransform: 'uppercase',
+                }}
+              >
+                {label}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {layers.map((row, index) => (
+            <tr key={row.name} style={{ borderBottom: index < layers.length - 1 ? '1px solid #f0f0f0' : 'none' }}>
+              <td style={{ padding: '10px 14px', fontWeight: 600 }}>{row.name}</td>
+              <td style={{ padding: '10px 14px', fontFamily: 'Geist Mono, monospace' }}>{row.status}</td>
+              <td style={{ padding: '10px 14px', color: '#4d4d4d' }}>{row.source}</td>
+              <td style={{ padding: '10px 14px', fontFamily: 'Geist Mono, monospace' }}>{row.asOf}</td>
+              <td style={{ padding: '10px 14px', fontFamily: 'Geist Mono, monospace' }}>{row.coverage}</td>
+              <td style={{ padding: '10px 14px' }}>{row.quant}</td>
+              <td style={{ padding: '10px 14px' }}>{row.signalEligible ? "yes" : "no"}</td>
+              <td style={{ padding: '10px 14px', color: '#666666' }}>{row.limitation}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -548,6 +737,7 @@ export default function Methodology() {
           <div className="eyebrow-muted">Full method reference: docs/METHODOLOGY.md</div>
         </div>
       </div>
+      <EvidenceMatrix adapted={data ?? null} manifestEntries={manifestEntries} />
     </div>
   );
 }

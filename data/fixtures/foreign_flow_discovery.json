@@ -1,0 +1,57 @@
+{
+  "schema_version": "foreign-flow-discovery-v1",
+  "status": "READY_WITH_GAPS",
+  "discovery_providers": [
+    "tavily",
+    "you"
+  ],
+  "source_policy": [
+    "Prefer first-party IDX/OJK/KSEI pages for a future structured feed.",
+    "Use secondary publications only as explicitly labelled sample evidence.",
+    "Never convert qualitative search context into a numeric metric."
+  ],
+  "queries": [
+    {
+      "provider": "tavily",
+      "query": "IDX Indonesia daily foreign investor net buy net sell stock ticker data API",
+      "purpose": "Find official daily or market-level flow publications."
+    },
+    {
+      "provider": "tavily",
+      "query": "Indonesia daily foreign flow per stock net buy net sell BBCA BBRI IDX",
+      "purpose": "Find a dated per-company sample when a structured first-party endpoint is unavailable."
+    },
+    {
+      "provider": "you",
+      "query": "Indonesia IDX foreign investor net buy net sell official market data",
+      "purpose": "Cross-check first-party IDX/OJK/KSEI discovery candidates."
+    }
+  ],
+  "sources": [
+    {
+      "url": "https://www.idx.co.id/en/market-data/statistical-reports/digital-statistic/monthly/equity-trading-by-investor/total-trading-by-investor-s-type-and-net-purchase-by-foreigners",
+      "publisher": "Indonesia Stock Exchange",
+      "role": "first_party_discovery_candidate",
+      "quantitative_use": false,
+      "note": "Official investor-type and foreign net-purchase publication candidate; no automated extraction is included in this sample."
+    },
+    {
+      "url": "https://www.idnfinancials.com/news/67352/foreign-trading-records-net-buy-bbca-leads-top-buys",
+      "publisher": "IDNFinancials",
+      "role": "dated_market_and_company_sample",
+      "quantitative_use": true,
+      "as_of": "2026-08-12",
+      "note": "Published market totals and top net-buy/net-sell rows are manually normalized in foreign_flow_sample.csv."
+    },
+    {
+      "url": "https://www.idnfinancials.com/news/67999/foreign-trading-is-a-net-sell-bbri-top-sell-idr-274-billion",
+      "publisher": "IDNFinancials",
+      "role": "dated_market_and_company_sample",
+      "quantitative_use": true,
+      "as_of": "2026-08-27",
+      "note": "Published regular-market totals and top net-buy/net-sell rows are manually normalized in foreign_flow_sample.csv."
+    }
+  ],
+  "not_found": "A bounded discovery did not establish a stable, directly downloadable first-party daily per-ticker flow feed suitable for full-universe confirmation.",
+  "calculation_boundary": "Only the explicit normalized rows are calculated; search summaries and qualitative sidecars remain non-quantitative."
+}

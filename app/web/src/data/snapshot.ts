@@ -24,6 +24,19 @@ export type DataStatus =
   | "DATA_GAP"
   | "UNAVAILABLE";
 
+export type ForeignFlowDirection = "NET_BUY" | "NET_SELL" | "FLAT" | "UNCONFIRMED";
+export type ForeignFlowScope = "MARKET_TOTAL" | "TOP_LIST_SAMPLE" | "GROUP_SAMPLE";
+export type ResearchEventCategory =
+  | "earnings"
+  | "dividend"
+  | "rights_issue"
+  | "stock_split"
+  | "suspension"
+  | "index_inclusion"
+  | "corporate_action"
+  | "major_filing"
+  | "other_sourced_event";
+
 /** Normalize persisted backend status values before they reach presentation components. */
 export function normalizeDataStatus(status: string | null | undefined): DataStatus | null {
   if (!status) return null;
@@ -190,6 +203,274 @@ export interface SnapshotBreadthHistoryPoint {
   group_excess_return_20d: number | null;
 }
 
+export interface GroupPriceHistoryPoint {
+  date: string;
+  value: number;
+  benchmark: number | null;
+}
+
+// ────────────────────────────────────────────────────────────────────────
+// Foreign flow sample envelope (added 2026-08-30)
+// ────────────────────────────────────────────────────────────────────────
+
+export interface ForeignFlowObservation {
+  as_of: string;
+  scope: ForeignFlowScope | string;
+  ticker: string | null;
+  group_id: string | null;
+  taxonomy_version: string;
+  mapping_status: string;
+  market_scope: string;
+  net_value_idr: number | null;
+  buy_value_idr: number | null;
+  sell_value_idr: number | null;
+  direction: ForeignFlowDirection;
+  reconciliation_status: string;
+  reconciliation_delta_idr: number | null;
+  source_url: string;
+  source_published_at: string;
+  source_kind: string;
+  source_name: string;
+  source_locator: string;
+  quantitative_use: boolean;
+}
+
+export interface ForeignFlowDailyMarket {
+  as_of: string;
+  scope: string;
+  net_value_idr: number;
+  direction: ForeignFlowDirection;
+  coverage_scope: string;
+}
+
+export interface ForeignFlowDailySample {
+  as_of: string;
+  scope: string;
+  sample_net_value_idr: number;
+  direction: ForeignFlowDirection;
+  observed_company_count: number;
+  mapped_company_count: number;
+  positive_company_count: number;
+  negative_company_count: number;
+  coverage_scope: string;
+}
+
+export interface ForeignFlowGroupSummary {
+  as_of: string;
+  group_id: string;
+  taxonomy_version: string;
+  net_value_idr: number;
+  direction: ForeignFlowDirection;
+  observed_company_count: number;
+  positive_company_count: number;
+  negative_company_count: number;
+  mapping_status: string;
+  scope: string;
+}
+
+export interface ForeignFlowRolling {
+  as_of: string;
+  rolling_3d_sample_net_value_idr: number;
+  window_size: number;
+  direction: ForeignFlowDirection;
+}
+
+export interface ForeignFlowBreadth {
+  sample_positive_day_count: number;
+  sample_negative_day_count: number;
+  market_positive_day_count: number;
+  market_negative_day_count: number;
+  last_sample_direction: ForeignFlowDirection;
+  last_market_direction: ForeignFlowDirection;
+  market_sample_aligned: boolean;
+}
+
+export interface ForeignFlowSignalEligibility {
+  market_day_count: number;
+  company_observation_count: number;
+  mapped_company_observation_pct: number;
+  market_days_meets_threshold: boolean;
+  company_rows_meets_threshold: boolean;
+  mapped_pct_meets_threshold: boolean;
+  sample_diagnostics_met?: boolean;
+  full_universe_coverage_met?: boolean;
+  coverage_gate_met: boolean;
+  missing_dates: string[];
+  stale_dates: string[];
+  regime_diversity: boolean;
+  signal_eligible: boolean;
+}
+
+export interface ForeignFlowCoverage {
+  market_observation_count: number;
+  market_day_count: number;
+  company_observation_count: number;
+  unique_company_ticker_count: number;
+  mapped_company_observation_count: number;
+  mapped_ticker_count: number;
+  unmapped_tickers: string[];
+  mapped_company_observation_pct: number;
+  coverage_label: string;
+  synthetic_test_rows: number;
+}
+
+export interface ForeignFlowProvenance {
+  source_url: string;
+  source_name: string;
+  source_kind: string;
+  source_published_at: string;
+  source_locators: string[];
+  observed_rows: number;
+  quantitative_use: boolean;
+  numeric_role: string;
+}
+
+export interface ForeignFlowSample {
+  schema_version: string;
+  provider_mode: string;
+  status: DataStatus | string;
+  as_of: { min: string; max: string };
+  quantitative_use: boolean;
+  scope: string;
+  calculation: Record<string, unknown>;
+  coverage: ForeignFlowCoverage;
+  quality: {
+    rows_validated: number;
+    reconciliation_status_counts: Record<string, number>;
+    reported_net_preserved: boolean;
+    missing_company_buy_sell_not_inferred: boolean;
+    missing_dates: string[];
+    stale_dates: string[];
+  };
+  market_observations: ForeignFlowObservation[];
+  company_observations: ForeignFlowObservation[];
+  daily_market_totals: ForeignFlowDailyMarket[];
+  daily_company_samples: ForeignFlowDailySample[];
+  group_summaries: ForeignFlowGroupSummary[];
+  rolling_sample_flow: ForeignFlowRolling[];
+  breadth_observed: ForeignFlowBreadth;
+  signal_eligibility: ForeignFlowSignalEligibility;
+  provenance: ForeignFlowProvenance[];
+  synthetic_test_only: ForeignFlowObservation[];
+  source_discovery: Record<string, unknown>;
+  limitations: string[];
+  context_compatibility?: {
+    role: string;
+    snapshot_as_of?: string | null;
+    snapshot_provider_mode?: string;
+    source_provider_mode?: string;
+    cross_provider_context?: boolean;
+    used_in_leadership_or_diffusion?: boolean;
+    reason?: string;
+  };
+}
+
+// ────────────────────────────────────────────────────────────────────────
+// Taxonomy views (sector / Konglo / Themes)
+// ────────────────────────────────────────────────────────────────────────
+
+export type TaxonomyKind = "SECTOR" | "KONGLO" | "THEMES";
+export type TaxonomySourceKind =
+  | "PROTOTYPE_CONFIG"
+  | "ANALYST_DEFINED"
+  | "PRIMARY_INDEX"
+  | "THIRD_PARTY";
+
+export interface TaxonomyGroupAggregate {
+  taxonomy_group_id: string;
+  taxonomy_group_name: string;
+  constituent_count: number;
+  eligible_constituent_count: number;
+  coverage_pct: number;
+  equal_weight_return_20d: number | null;
+  equal_weight_return_60d: number | null;
+  excess_return_20d: number | null;
+  excess_return_60d: number | null;
+  benchmark_return_20d: number | null;
+  benchmark_return_60d: number | null;
+  breadth_outperforming: number | null;
+  prev_breadth_outperforming: number | null;
+  breadth_delta: number | null;
+  leadership_state: string;
+  diffusion_state: string;
+  concentration_top3: number | null;
+  map_x: number | null;
+  map_y: number | null;
+  off_scale: boolean;
+  data_quality: string;
+  prototype: boolean;
+  membership_kind_breakdown?: Record<string, number>;
+  sample_foreign_flow_idr?: number | null;
+  sample_foreign_flow_direction?: ForeignFlowDirection | null;
+}
+
+export interface TaxonomyView {
+  schema_version: string;
+  taxonomy_id: string;
+  taxonomy_name: string;
+  taxonomy_version: string;
+  taxonomy_kind: TaxonomyKind;
+  source_kind: TaxonomySourceKind;
+  source_as_of?: string | null;
+  membership_policy: string;
+  provider_mode: string;
+  snapshot_provider_mode?: string;
+  taxonomy_definition_provider_mode?: string;
+  source_snapshot_id?: string;
+  source_snapshot_price_basis?: string;
+  previous_snapshot_id?: string | null;
+  point_in_time_eligible?: boolean;
+  benchmark_id?: string;
+  as_of?: string | null;
+  coverage?: Record<string, unknown>;
+  calculation?: Record<string, unknown>;
+  calculation_coverage?: Record<string, unknown>;
+  comparability?: Record<string, unknown>;
+  groups: TaxonomyGroupAggregate[];
+}
+
+// ────────────────────────────────────────────────────────────────────────
+// Research events
+// ────────────────────────────────────────────────────────────────────────
+
+export interface ResearchEventRow {
+  event_id: string;
+  event_date: string;
+  published_at: string;
+  ticker: string;
+  sector_id: string | null;
+  konglo_id: string | null;
+  theme_ids: string[];
+  category: ResearchEventCategory | string;
+  title: string;
+  summary: string;
+  source_url: string;
+  source_name: string;
+  provider: string;
+  quantitative_use: boolean;
+  status: string;
+}
+
+export interface ResearchEventBundle {
+  schema_version: string;
+  provider_mode: string;
+  event_count?: number;
+  as_of?: string | null;
+  events: ResearchEventRow[];
+  sources: Array<{
+    source_url: string;
+    source_name: string;
+    provider: string;
+    published_at?: string;
+  }>;
+  context_compatibility?: {
+    role: string;
+    snapshot_provider_mode?: string;
+    used_in_leadership_or_diffusion?: boolean;
+    publication_cutoff_enforced?: boolean;
+  };
+}
+
 export interface SnapshotPayload {
   schema_version: string;
   snapshot_id: string;
@@ -213,6 +494,12 @@ export interface SnapshotPayload {
   // New exports use an array of persisted absolute breadth observations.
   // Legacy payloads may still carry an empty object.
   breadth_history: SnapshotBreadthHistoryPoint[] | Record<string, unknown>;
+  // Descriptive equal-weight group index, rebased to 100. This is chart-only
+  // data and is never consumed by the analytical signal pipeline.
+  group_price_history?: Record<string, GroupPriceHistoryPoint[]>;
+  // Real per-ticker persisted prices, rebased to 100 with an aligned IHSG
+  // benchmark. Never synthesized from return features.
+  ticker_price_history?: Record<string, GroupPriceHistoryPoint[]>;
   endpoints: unknown[];
   security_master?: Array<{
     ticker: string;
@@ -221,4 +508,8 @@ export interface SnapshotPayload {
     sector?: string;
   }>;
   change_digest?: Record<string, unknown>;
+  // Added 2026-08-30:
+  taxonomy_views?: Record<string, TaxonomyView>;
+  foreign_flow_sample?: ForeignFlowSample;
+  research_events?: ResearchEventBundle;
 }

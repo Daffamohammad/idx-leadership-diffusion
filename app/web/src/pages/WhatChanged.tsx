@@ -336,6 +336,46 @@ function summaryStats(sectors: SectorData[]): Array<[string, string]> {
   ];
 }
 
+function leadershipCounts(sectors: SectorData[]) {
+  return {
+    LEADING: sectors.filter((s) => s.leadership === "LEADING").length,
+    IMPROVING: sectors.filter((s) => s.leadership === "IMPROVING").length,
+    WEAKENING: sectors.filter((s) => s.leadership === "WEAKENING").length,
+    LAGGING: sectors.filter((s) => s.leadership === "LAGGING").length,
+    UNCONFIRMED: sectors.filter((s) => s.leadership === "UNCONFIRMED").length,
+  };
+}
+
+function diffusionCounts(sectors: SectorData[]) {
+  const broadening = sectors.filter((s) => String(s.diffusion).startsWith("BROADENING")).length;
+  const stable = sectors.filter((s) => s.diffusion === "STABLE").length;
+  const narrowing = sectors.filter((s) => String(s.diffusion).startsWith("NARROWING")).length;
+  const unconfirmed = sectors.filter((s) => s.diffusion === "UNCONFIRMED").length;
+  return { BROADENING: broadening, STABLE: stable, NARROWING: narrowing, UNCONFIRMED: unconfirmed };
+}
+
+function confirmationCounts(sectors: SectorData[]) {
+  // Foreign flow confirmation is DATA_GAP in prototype; surface honest counts
+  const confirming = sectors.filter((s) => s.foreignFlow === "CONFIRMING").length;
+  const against = sectors.filter((s) => s.foreignFlow === "AGAINST").length;
+  const neutral = sectors.filter((s) => s.foreignFlow === "NEUTRAL").length;
+  const gap = sectors.filter((s) => s.foreignFlow === "DATA_GAP").length;
+  return { CONFIRMING: confirming, AGAINST: against, NEUTRAL: neutral, GAP: gap };
+}
+
+function categorizeChanges(sectors: SectorData[]) {
+  const newLeaders = sectors.filter((s) => s.prevLeadership && s.prevLeadership !== "LEADING" && s.leadership === "LEADING");
+  const lostLeaders = sectors.filter((s) => s.prevLeadership === "LEADING" && s.leadership !== "LEADING");
+  const improvingToLeading = sectors.filter((s) => s.prevLeadership === "IMPROVING" && s.leadership === "LEADING");
+  const leadingToWeakening = sectors.filter((s) => s.prevLeadership === "LEADING" && s.leadership === "WEAKENING");
+  const withDelta = sectors.filter((s) => delta(s) !== null) as Array<SectorData & { breadth: number }>;
+  const fastestExpansion = [...withDelta].sort((a,b) => (delta(b) ?? -Infinity) - (delta(a) ?? -Infinity)).slice(0,3);
+  const fastestContraction = [...withDelta].sort((a,b) => (delta(a) ?? Infinity) - (delta(b) ?? Infinity)).slice(0,3);
+  const withConc = sectors.filter((s) => s.concentration !== null).sort((a,b) => (b.concentration ?? 0) - (a.concentration ?? 0));
+  const highConcentration = withConc.slice(0,3);
+  return { newLeaders, lostLeaders, improvingToLeading, leadingToWeakening, fastestExpansion, fastestContraction, highConcentration };
+}
+
 function ConstituentCoverage({
   sectors,
   constituentsByGroup,
@@ -411,15 +451,20 @@ export default function WhatChanged() {
   const asOf = formatAsOf(payload?.as_of);
   const marketRead = buildMarketRead(sectors);
   const stats = summaryStats(sectors);
+  const leadCounts = leadershipCounts(sectors);
+  const diffCounts = diffusionCounts(sectors);
+  const confCounts = confirmationCounts(sectors);
+  const changes = categorizeChanges(sectors);
+  const hasComparable = dataSources.trajectory;
 
   return (
     <div style={{ maxWidth: 1480, margin: "auto", padding: "28px 32px 64px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "end", marginBottom: 16 }}>
         <div>
-          <div className="eyebrow-muted">Overview / Indonesian Equity Market Intelligence</div>
-          <h1 style={{ fontSize: 30, letterSpacing: "-.045em", margin: "5px 0 0" }}>Market Intelligence</h1>
+          <div className="eyebrow-muted">Indonesian Equities · Market Intelligence</div>
+          <h1 style={{ fontSize: 30, letterSpacing: "-.045em", margin: "5px 0 0" }}>WHAT CHANGED?</h1>
         </div>
-        <span className="eyebrow-muted">EOD research / {asOf}</span>
+        <span className="eyebrow-muted">EOD research / {asOf} · {hasComparable ? "comparable prior available" : "no comparable prior — diffusion change unavailable"}</span>
       </div>
       <section
         style={{
@@ -450,6 +495,68 @@ export default function WhatChanged() {
             </div>
           ))}
         </div>
+      </section>
+      {/* Compact market-level summary strips — master §8 */}
+      <section style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 18 }}>
+        <div style={{ background: "#faf9f6", border: "1px solid #dfe2e1", padding: "12px 14px" }}>
+          <div className="eyebrow-muted" style={{ marginBottom: 8 }}>Leadership states</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 6, fontFamily: "Geist Mono", fontSize: 11 }}>
+            <span>Leading <b>{leadCounts.LEADING}</b></span>
+            <span>Improving <b>{leadCounts.IMPROVING}</b></span>
+            <span>Weakening <b>{leadCounts.WEAKENING}</b></span>
+            <span>Lagging <b>{leadCounts.LAGGING}</b></span>
+            <span style={{ gridColumn: "1 / -1", color: "#686e73" }}>Unconfirmed <b>{leadCounts.UNCONFIRMED}</b></span>
+          </div>
+        </div>
+        <div style={{ background: "#faf9f6", border: "1px solid #dfe2e1", padding: "12px 14px" }}>
+          <div className="eyebrow-muted" style={{ marginBottom: 8 }}>Diffusion</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 6, fontFamily: "Geist Mono", fontSize: 11 }}>
+            <span>Broadening <b>{diffCounts.BROADENING}</b></span>
+            <span>Stable <b>{diffCounts.STABLE}</b></span>
+            <span>Narrowing <b>{diffCounts.NARROWING}</b></span>
+            <span>Unconfirmed <b>{diffCounts.UNCONFIRMED}</b></span>
+          </div>
+          {!hasComparable && <div style={{ marginTop: 6, fontSize: 10, color: "#7a5010" }}>Diffusion change unavailable without comparable prior</div>}
+        </div>
+        <div style={{ background: "#faf9f6", border: "1px solid #dfe2e1", padding: "12px 14px" }}>
+          <div className="eyebrow-muted" style={{ marginBottom: 8 }}>Confirmation</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 6, fontFamily: "Geist Mono", fontSize: 11 }}>
+            <span>Confirming <b>{confCounts.CONFIRMING}</b></span>
+            <span>Against <b>{confCounts.AGAINST}</b></span>
+            <span>Neutral <b>{confCounts.NEUTRAL}</b></span>
+            <span style={{ color: "#7a5010" }}>Data gap <b>{confCounts.GAP}</b></span>
+          </div>
+          <div style={{ marginTop: 6, fontSize: 10, color: "#7a5010" }}>Foreign flow: sample only, not full universe</div>
+        </div>
+      </section>
+      {/* WHAT CHANGED categorical digest */}
+      <section style={{ background: "#fff", border: "1px solid #dfe2e1", padding: "16px 18px", marginBottom: 22 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
+          <div className="eyebrow-muted">What changed since prior snapshot</div>
+          <span className="eyebrow-muted">{hasComparable ? `vs ${payload?.previous_snapshot_id ?? "prior"}` : "No comparable prior — current levels only"}</span>
+        </div>
+        {!hasComparable ? (
+          <p style={{ margin: 0, fontSize: 12, color: "#686e73", lineHeight: 1.5 }}>
+            No comparable prior snapshot is available. Current breadth can be shown, but diffusion change cannot yet be classified.
+            Persist a second compatible snapshot to enable broadening / narrowing classification.
+          </p>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16, fontSize: 12, lineHeight: 1.5 }}>
+            <div>
+              <div style={{ fontWeight: 600, marginBottom: 4 }}>Leadership transitions</div>
+              <div>New leadership: {changes.newLeaders.length ? changes.newLeaders.map((s) => s.name).join(", ") : "—"}</div>
+              <div>Leadership lost: {changes.lostLeaders.length ? changes.lostLeaders.map((s) => s.name).join(", ") : "—"}</div>
+              <div>Improving → Leading: {changes.improvingToLeading.length ? changes.improvingToLeading.map((s) => s.name).join(", ") : "—"}</div>
+              <div>Leading → Weakening: {changes.leadingToWeakening.length ? changes.leadingToWeakening.map((s) => s.name).join(", ") : "—"}</div>
+            </div>
+            <div>
+              <div style={{ fontWeight: 600, marginBottom: 4 }}>Breadth & concentration movers</div>
+              <div>Fastest breadth expansion: {changes.fastestExpansion.length ? changes.fastestExpansion.map((s) => `${s.name} (${(delta(s) ?? 0).toFixed(1)}pp)`).join(", ") : "—"}</div>
+              <div>Fastest breadth contraction: {changes.fastestContraction.length ? changes.fastestContraction.map((s) => `${s.name} (${(delta(s) ?? 0).toFixed(1)}pp)`).join(", ") : "—"}</div>
+              <div>Highest concentration: {changes.highConcentration.length ? changes.highConcentration.map((s) => `${s.name} ${s.concentration}%`).join(", ") : "—"}</div>
+            </div>
+          </div>
+        )}
       </section>
       <section
         className="overview-grid"

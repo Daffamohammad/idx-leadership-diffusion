@@ -6,10 +6,13 @@ import type { SnapshotContextValue } from "../data/SnapshotContext";
 import { normalizeDataStatus } from "../data/snapshot";
 
 const navItems = [
-  { path: "/overview", label: "Overview", index: "01" },
-  { path: "/map", label: "Leadership Map", index: "02" },
-  { path: "/explorer", label: "Groups", index: "03" },
-  { path: "/methodology", label: "Methodology", index: "04" },
+  { path: "/what-changed", label: "What Changed", index: "01" },
+  { path: "/overview", label: "Overview", index: "02" },
+  { path: "/map", label: "Leadership Map", index: "03" },
+  { path: "/maps/konglo", label: "Konglo Map", index: "04" },
+  { path: "/maps/themes", label: "Themes Map", index: "05" },
+  { path: "/explorer", label: "Groups", index: "06" },
+  { path: "/methodology", label: "Methodology", index: "07" },
 ];
 
 interface Props {

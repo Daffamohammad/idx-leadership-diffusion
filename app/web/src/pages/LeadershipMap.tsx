@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { useSnapshot } from "../data/SnapshotProvider";
 import type { LeadershipState, SectorData } from "../data/adapter";
@@ -172,10 +172,15 @@ export default function LeadershipMap() {
   const navigate = useNavigate();
   const { data } = useSnapshot();
   const [filter, setFilter] = useState<"ALL" | LeadershipState>("ALL");
+  const [search, setSearch] = useState("");
+  const [trajectoryWindow, setTrajectoryWindow] = useState<"current" | "5" | "10" | "20">("current");
   // Trails removed: trajectory data is only available when the
   // comparability record confirms a persisted comparable snapshot.
   // Synthesized trail dots are explicitly disallowed.
   const [selected, setSelected] = useState<SectorData | null>(null);
+  // URL state sync for selected group
+  const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
+  const urlGroup = params.get("group");
   const sectors = data?.sectors ?? [];
   const dataSources = data?.dataSources ?? { breadthHistory: false, constituents: false, fundamentals: false, foreignFlow: false, trajectory: false };
   const mapMode: MapViewMode = dataSources.trajectory ? "trajectory" : "current";
@@ -185,8 +190,12 @@ export default function LeadershipMap() {
   const yBaseline = mapYBaseline(mapMode);
   const yAxis = mapY(yBaseline, plot, domain);
   const visible = useMemo(
-    () => sectors.filter((s) => filter === "ALL" || s.leadership === filter),
-    [filter, sectors],
+    () => sectors.filter((s) => {
+      const stateMatch = filter === "ALL" || s.leadership === filter;
+      const searchMatch = !search || s.name.toLowerCase().includes(search.toLowerCase()) || s.id.toLowerCase().includes(search.toLowerCase());
+      return stateMatch && searchMatch;
+    }),
+    [filter, sectors, search],
   );
   // The primary trajectory view requires a comparable prior for its breadth
   // delta. A first snapshot uses the emitted current breadth level instead.
@@ -232,6 +241,26 @@ export default function LeadershipMap() {
       3,
     );
   }, [domain, mapMode, visible, yBaseline]);
+
+  // URL state: hydrate selected from ?group= param
+  useEffect(() => {
+    if (!urlGroup) return;
+    const match = sectors.find((s) => s.id === urlGroup);
+    if (match) setSelected(match);
+  }, [urlGroup, sectors]);
+
+  // Persist selected group to URL
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    if (selected) {
+      url.searchParams.set("group", selected.id);
+    } else {
+      url.searchParams.delete("group");
+    }
+    window.history.replaceState(null, "", url.toString());
+  }, [selected]);
+
   if (!data) return null;
   const focus = selected;
 
@@ -321,25 +350,58 @@ export default function LeadershipMap() {
           Current snapshot: points use the emitted 20D breadth level. Diffusion change and trajectories remain unavailable until a persisted comparable prior snapshot exists.
         </p>
       )}
-      <div style={{ display: "flex", gap: 6, marginBottom: 14, flexWrap: "wrap" }}>
-        {["ALL", ...filterStates].map((value) => (
+      <div style={{ display: "flex", gap: 10, marginBottom: 14, flexWrap: "wrap", alignItems: "center" }}>
+        <input
+          aria-label="Search groups"
+          placeholder="Search group…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{ border: "1px solid #dfe2e1", padding: "6px 10px", fontSize: 12, minWidth: 180, fontFamily: "Geist, sans-serif" }}
+        />
+        <select
+          aria-label="Trajectory window"
+          value={trajectoryWindow}
+          onChange={(e) => setTrajectoryWindow(e.target.value as "current" | "5" | "10" | "20")}
+          style={{ border: "1px solid #dfe2e1", padding: "6px 10px", fontSize: 11, fontFamily: "Geist Mono" }}
+        >
+          <option value="current">Current</option>
+          <option value="5">5 sessions</option>
+          <option value="10">10 sessions</option>
+          <option value="20">20 sessions</option>
+        </select>
+        {trajectoryWindow !== "current" && !dataSources.trajectory && (
+          <span style={{ fontSize: 10, color: "#7a5010" }}>Trajectory unavailable — no comparable prior</span>
+        )}
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          {["ALL", ...filterStates].map((value) => (
+            <button
+              type="button"
+              key={value}
+              onClick={() => setFilter(value as "ALL" | LeadershipState)}
+              style={{
+                border: `1px solid ${filter === value ? "#d97956" : "#dfe2e1"}`,
+                background: filter === value ? "#f5e6df" : "#faf9f6",
+                color: "#202325",
+                padding: "5px 9px",
+                fontFamily: "Geist Mono",
+                fontSize: 10,
+                cursor: "pointer",
+              }}
+            >
+              {value}
+            </button>
+          ))}
+        </div>
+        {(filter !== "ALL" || search) && (
           <button
             type="button"
-            key={value}
-            onClick={() => setFilter(value as "ALL" | LeadershipState)}
-            style={{
-              border: `1px solid ${filter === value ? "#d97956" : "#dfe2e1"}`,
-              background: filter === value ? "#f5e6df" : "#faf9f6",
-              color: "#202325",
-              padding: "5px 9px",
-              fontFamily: "Geist Mono",
-              fontSize: 10,
-              cursor: "pointer",
-            }}
+            onClick={() => { setFilter("ALL"); setSearch(""); }}
+            style={{ border: "1px solid #dfe2e1", background: "#fff", padding: "5px 9px", fontSize: 11, cursor: "pointer" }}
           >
-            {value}
+            Clear
           </button>
-        ))}
+        )}
+        <span className="eyebrow-muted" style={{ marginLeft: "auto" }}>{visible.length}/{sectors.length} groups</span>
       </div>
       <div
         style={{
@@ -356,7 +418,10 @@ export default function LeadershipMap() {
         }}
         aria-label="Snapshot coverage"
       >
-        <span style={{ fontWeight: 600, color: "#202325" }}>Coverage</span>
+        <span style={{ fontWeight: 600, color: "#202325" }}>Coverage funnel</span>
+        <span>
+          Discovered: <strong>{data?.payload.coverage?.discovered_count ?? data?.coverageHonest?.raw_candidate_constituents ?? 0}</strong>
+        </span>
         <span>
           Raw: <strong>{data?.coverageHonest?.raw_candidate_constituents ?? 0}</strong>
         </span>
@@ -378,6 +443,14 @@ export default function LeadershipMap() {
             <span style={{ color: "#ad6765" }}>60% gate not met</span>
           )}
         </span>
+        {data?.payload.coverage?.exclusion_reasons && Object.keys(data.payload.coverage.exclusion_reasons).length > 0 && (
+          <span style={{ fontSize: 10 }}>
+            Exclusions: {Object.entries(data.payload.coverage.exclusion_reasons).map(([k,v]) => `${k}:${v}`).join(" · ")}
+          </span>
+        )}
+      </div>
+      <div style={{ fontSize: 10, color: "#8f8f8f", margin: "0 0 8px", fontFamily: "Geist Mono" }}>
+        Funnel: Discovered universe → security-master valid → taxonomy mapped → price-history usable → freshness valid → liquidity eligible → analytical universe. Counts and exclusion reasons are explicit.
       </div>
       <div
         className="leadership-map-frame"
