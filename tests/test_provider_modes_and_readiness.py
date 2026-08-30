@@ -261,8 +261,11 @@ def test_live_credit_preflight_is_network_free_and_bounded(tmp_path):
         max_estimated_credits=1_000.0,
     )
     assert report["status"] == "READY"
-    assert report["planned_baseline_reserve"] == 963.0
+    # The runner now fetches the complete latest close cross-section after
+    # the date-discovery probe, so the plan includes 32 close pages.
+    assert report["planned_baseline_reserve"] == 995.0
     assert report["components"]["companies_identity_and_taxonomy"] == 10
+    assert report["components"]["full_universe_close_pages"] == 32
     assert report["components"]["daily_history_calls"] == 950
 
 
