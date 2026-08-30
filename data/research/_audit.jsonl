@@ -58,3 +58,8 @@
 {"ts": "2026-08-30T14:13:47Z", "provider": "tavily", "endpoint": "/search", "query": "market breadth definition methodology academic", "status": "ok", "max_results": 2}
 {"ts": "2026-08-30T14:13:48Z", "provider": "tavily", "endpoint": "/search", "query": "relative strength index construction methodology", "status": "ok", "max_results": 2}
 {"ts": "2026-08-30T14:13:51Z", "provider": "tavily", "endpoint": "/search", "query": "concentration measure HHI market equity", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T15:02:12Z", "provider": "tavily", "endpoint": "/search", "query": "IDX Indonesia Classification IDX-IC sector industry mapping", "status": "ok", "max_results": 5}
+{"ts": "2026-08-30T15:02:12Z", "provider": "you", "endpoint": "/v1/search", "query": "IDX IC sector industry classification listed companies", "status": "ok", "count": 4}
+{"ts": "2026-08-30T15:02:12Z", "provider": "tavily", "endpoint": "/search", "query": "BBCA.JK sector industry sub-industry", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T15:02:12Z", "provider": "tavily", "endpoint": "/search", "query": "ANTM.JK sector industry sub-industry", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T15:02:12Z", "provider": "tavily", "endpoint": "/search", "query": "TLKM.JK sector industry sub-industry", "status": "ok", "max_results": 2}

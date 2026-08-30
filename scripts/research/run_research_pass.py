@@ -308,9 +308,9 @@ def ws_taxonomy(tavily: TavilyClient, you: YouClient) -> tuple[list[Observation]
         confidence="SUPPORTED",
         verification_status="UNVERIFIED",
         notes=("IDX-IC public page is the authoritative endpoint; canonical sectors are "
-               "Energy, Basic Materials, Industrials, Consumer Non-Cyclicals, Consumer "
+               "11: Energy, Basic Materials, Industrials, Consumer Non-Cyclicals, Consumer "
                "Cyclicals, Healthcare, Financials, Technology, Infrastructures, "
-               "Transportation & Logistics, Properties & Real Estate."),
+               "Transportation & Logistic, Properties & Real Estate."),
     ))
     for ticker in ["BBCA", "ANTM", "TLKM"]:
         q = f"{ticker}.JK sector industry sub-industry"

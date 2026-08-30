@@ -393,8 +393,8 @@ credentials loaded from `.env` (`TAVILY_API_KEY`, `YOU_API_KEY`).
 
 | Provider | Live exercised | Endpoint | Status | Calls in pass |
 | --- | --- | --- | --- | --- |
-| Tavily   | YES | `https://api.tavily.com/search` | LIVE VERIFIED | 35 / 35 OK |
-| YOU.com  | YES | `https://ydc-index.io/v1/search` | LIVE VERIFIED | 25 / 25 OK |
+| Tavily   | YES | `https://api.tavily.com/search` | LIVE VERIFIED | 39 / 39 OK |
+| YOU.com  | YES | `https://ydc-index.io/v1/search` | LIVE VERIFIED | 26 / 26 OK |
 
 Live Sectors API calls: **0** (gated by design).
 
@@ -417,13 +417,23 @@ Live Sectors API calls: **0** (gated by design).
   `source_url`, `publisher`, `search_provider`, `source_tier`,
   `confidence`, `verification_status`.
 - `data/research/<workstream>/sources.jsonl` — raw search hits.
-- `data/research/_audit.jsonl` — 60 lines, every API call, no secrets.
-- `docs/RESEARCH_AUDIT.md` — operator-facing audit document.
+- `data/research/_audit.jsonl` — 65 lines, every API call, no secrets.
+- `data/research/corp_actions/bbca_2021_10_13_resolution.json` —
+  BBCA 5-for-1 split resolution (Tier 1 source: bca.co.id press release).
+- `docs/RESEARCH_AUDIT.md` — operator-facing research audit document.
+- `docs/FINAL_AUDIT.md` — adversarial final review before handoff.
 
 ### Material findings
 
-- **IDX-IC taxonomy**: 10 canonical sectors confirmed via IDX Stock Index
-  Handbook v1.2; this is the production target for Sectors migration.
+- **IDX-IC taxonomy**: **11 canonical sectors** confirmed via IDX Stock
+  Index Handbook v1.2 (idx.co.id) and corroborated by the Sectors
+  persisted snapshot (`data/snapshots/snap_sectors_2026-08-27/
+  groups.parquet`, 11 group_ids). The 11 sectors are: Energy, Basic
+  Materials, Industrials, Consumer Non-Cyclicals, Consumer Cyclicals,
+  Healthcare, Financials, Technology, Infrastructures, Transportation
+  & Logistic, Properties & Real Estate. Prototype `config/universe.yaml`
+  currently covers **10 of 11** (missing `Infrastructures`); this is
+  prototype-coverage limitation, not an authoritative taxonomy defect.
 - **Foreign-flow authoritative source**: IDX publishes per-investor-type
   net-purchase data at a stable monthly URL; an OJK press release
   contained a concrete market-level quantitative observation
@@ -431,18 +441,20 @@ Live Sectors API calls: **0** (gated by design).
   must NOT be relabeled as daily or per-ticker observations.
 - **IHSG benchmark**: confirmed via IDX handbook that ^JKSE is the Yahoo
   Finance proxy; current yfinance usage aligns.
-- **BBCA 2021-10-13 corporate action**: corporate-actions endpoint during
-  Sectors migration will resolve; do not manually patch `adjusted_close`.
+- **BBCA 2021-10-13 corporate action**: **RESOLVED during final audit**
+  as a 5-for-1 stock split (1:5 ratio). Primary source: PT Bank Central
+  Asia official press release (bca.co.id). The project's default
+  `price_col="adjusted_close"` in `src/idx_leadership/features/
+  returns.py:25` causes yfinance's auto-adjusted series to handle
+  this event without manual patching. Resolution file:
+  `data/research/corp_actions/bbca_2021_10_13_resolution.json`.
 
 ### Unresolved gaps for Codex
 
-- Tier-1 issuer-website confirmation for every Konglo candidate
-  (currently PROVISIONAL).
-- IDX-IC per-ticker industry / sub-industry (only sector today).
-- Per-ticker daily foreign-flow series (requires Sectors
+- **IDX-IC per-ticker industry / sub-industry** mapping (only `sector`
+  field exposed today; future Sectors migration exposes all four levels).
+- **Per-ticker daily foreign-flow series** (requires Sectors
   `/v2/foreign-flow/{symbol}/`).
-- BBCA 2021-10-13 specific corporate-action event.
-
 ### Source-quality tier distribution (top 10 domains)
 
 | Domain | Hits |

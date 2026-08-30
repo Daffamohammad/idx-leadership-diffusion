@@ -11,7 +11,7 @@
 - **live request performed**: yes
 - **status**: **LIVE VERIFIED**
 - **endpoint**: `https://api.tavily.com/search` (also `extract`)
-- **successful calls in this pass**: 35 / 35 (no failures)
+- **successful calls in this pass**: 39 / 39 (no failures; refresh + final-audit re-verification calls added)
 
 ### YOU.com
 - **integration found**: yes, `src/idx_leadership/providers/you_client.py`
@@ -19,7 +19,7 @@
 - **live request performed**: yes
 - **status**: **LIVE VERIFIED**
 - **endpoint**: `https://ydc-index.io/v1/search` (also `v1/contents`)
-- **successful calls in this pass**: 25 / 25 (no failures; some cache hits on repeated queries)
+- **successful calls in this pass**: 26 / 26 (no failures)
 
 Both providers operate in `allow_live=True` mode for this research pass. Both refuse
 requests when `allow_live=False` (verified — `TavilyError: Tavily live request disabled`).
@@ -34,7 +34,7 @@ Every API call is recorded in `data/research/_audit.jsonl` with:
 - max_results / count
 - error message (truncated, key-redacted via `_redact`)
 
-60 calls total (35 Tavily + 25 YOU.com). No API keys persisted in any artifact.
+65 calls total (39 Tavily + 26 YOU.com). No API keys persisted in any artifact.
 
 ## 2. Research Areas Completed
 
@@ -48,26 +48,20 @@ Every API call is recorded in `data/research/_audit.jsonl` with:
 | `corp_actions` (BBCA 2021-10-13 case) | DONE | 2 | 0 | 4 | 4 |
 | `benchmark` (IHSG / ^JKSE) | DONE | 2 | 2 | 4 | 8 |
 | `free_float` (publication discovery) | DONE | 2 | 0 | 4 | 4 |
-| `methodology` (breadth / HHI / RS) | DONE | 3 | 0 | 6 | 6 |
-
-All structured observations persisted to `data/research/<workstream>/observations.jsonl`;
-all raw search hits to `data/research/<workstream>/sources.jsonl`.
+| `corp_actions` (BBCA 2021-10-13 case) | DONE | 2 | 0 | 4 + 1 resolution file | 4 |
 
 ## 3. Material Findings
 
 ### IDX-IC taxonomy
 The **IDX Indonesia Classification (IDX-IC)** is an authoritative sector / sub-sector /
-industry / sub-industry taxonomy published by IDX. The canonical 10 sectors are:
+industry / sub-industry taxonomy published by IDX. IDX-IC has **11 canonical sectors** (Energy, Basic Materials, Industrials, Consumer Non-Cyclicals, Consumer Cyclicals, Healthcare, Financials, Technology, Infrastructures, Transportation & Logistic, Properties & Real Estate).
 
-> Energy, Basic Materials, Industrials, Consumer Non-Cyclicals, Consumer Cyclicals,
-> Healthcare, Financials, Technology, Infrastructures, Transportation & Logistics,
-> Properties & Real Estate.
+This taxonomy is the **production target for the future Sectors migration**; the
+prototype universe (`config/universe.yaml`) currently covers only 10 of the 11
+(missing Infrastructures) and exposes only the `sector` field, not sub_sector / industry / sub_industry.
 
 Source: `https://www.idx.co.id/en/products/index` (IDX Stock Index Handbook v1.2, 2021-05-04).
-This taxonomy is the **production target for the future Sectors migration**; the
-prototype universe (`config/universe.yaml`) only records `sector` today.
 
-### Foreign flow publication (highest-impact discovery)
 Tavily returned an **authoritative IDX URL** that exposes per-investor-type net-purchase
 data:
 
@@ -105,15 +99,16 @@ distinctions surfaced:
   `foreign_flow_sample.json` is **daily top-list sample**. These cannot be
   compared as if they were the same dataset. (Addressed: existing
   `ForeignFlowAdapted` correctly labels `coverageScope` per observation.)
-- **Taxonomy coverage**: yfinance `config/universe.yaml` has 10 IDX-IC sectors
-  but only the `sector` field; Sectors-native will expose `sector/sub_sector/industry/sub_industry`
-  and the migration should land at `sub_sector` for diffusion stability.
+- **Taxonomy coverage**: yfinance `config/universe.yaml` exposes 10 of the 11
+  IDX-IC sectors (missing `Infrastructures`); only the `sector` field is
+  recorded. Sectors-native will expose `sector / sub_sector / industry /
+  sub_industry` and the migration should land at `sub_sector` for diffusion
+  stability.
 
 ## 5. Changes Made Because of Research
 
 This pass discovered and persisted authoritative source URLs. Concretely
 applied changes:
-
 1. **`docs/RESEARCH_AUDIT.md`** (this file) — the operator-facing audit document.
 2. **`scripts/research/run_research_pass.py`** — reusable research driver that
    constructs per-workstream bounded Tavily + YOU.com clients, classifies
@@ -129,9 +124,18 @@ applied changes:
 5. **`CODEX_HANDOFF.md` §27** — search/research status section appended.
 6. **Foreign-flow methodology note** — the existing
    `scripts/calculate_foreign_flow_sample.py` keeps the
-   `signal_eligible=false` gate (75% mapped < 80% threshold) and now has
-   authoritative monthly-source URL noted in the audit; the bounded sample
-   remains correct as-is.
+   `signal_eligible=false` gate (75% mapped < 80% threshold); the bounded
+   sample remains correct as-is and is now annotated with the
+   authoritative monthly-source URL.
+7. **IDX-IC taxonomy correction (during final audit)** — IDX-IC has
+   **11 canonical sectors** (not 10). Authoritative source: Sectors
+   persisted snapshot `data/snapshots/snap_sectors_2026-08-27/
+   groups.parquet` (11 group_ids). Prototype `config/universe.yaml`
+   covers 10/11 (missing Infrastructures).
+8. **BBCA 2021-10-13 resolution (during final audit)** — resolved as
+   5-for-1 stock split via BBCA official press release. yfinance
+   `Adj Close` auto-handles; no manual pipeline correction needed.
+   Persisted at `data/research/corp_actions/bbca_2021_10_13_resolution.json`.
 
 ## 6. Unresolved Research Gaps
 
