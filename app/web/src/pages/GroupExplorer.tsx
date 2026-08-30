@@ -2,7 +2,14 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 import { useSnapshot } from "../data/SnapshotProvider";
-import type { ConstituentData, FlowState, SectorData } from "../data/adapter";
+import type {
+  AdaptedSnapshot,
+  ConstituentData,
+  FlowState,
+  SectorData,
+  TaxonomyGroupData,
+} from "../data/adapter";
+import type { TaxonomyKind } from "../data/snapshot";
 import { DataStatusChip, LeadershipChip, DiffusionChip } from "../components/StatusChips";
 import { EmptyState } from "../components/EmptyState";
 import {
@@ -275,6 +282,109 @@ function findGroupFromLocation(
   return sectors[0]?.id ?? "";
 }
 
+function normalizeTaxonomyKind(value: string | null): TaxonomyKind | null {
+  const normalized = value?.toUpperCase();
+  return normalized === "SECTOR" || normalized === "KONGLO" || normalized === "THEMES"
+    ? normalized
+    : null;
+}
+
+function TaxonomyGroupDetail({
+  group,
+  data,
+}: {
+  group: TaxonomyGroupData;
+  data: AdaptedSnapshot;
+}) {
+  const backPath = group.taxonomyKind === "KONGLO" ? "/maps/konglo" : "/maps/themes";
+  const members = group.memberships.filter((member) => member.membership_type !== "EXCLUDED");
+  const metric = (value: number | null, suffix = "pp") =>
+    value === null || !Number.isFinite(value)
+      ? "—"
+      : `${value >= 0 ? "+" : ""}${value.toFixed(1)}${suffix}`;
+
+  return (
+    <div className="taxonomy-detail-page" style={{ padding: "36px 40px", maxWidth: 1280, margin: "0 auto" }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 20, marginBottom: 24, flexWrap: "wrap" }}>
+        <div>
+          <Link to={backPath} style={{ color: "#686e73", fontSize: 12, textDecoration: "none" }}>
+            ← Back to {group.taxonomyKind === "KONGLO" ? "Konglo" : "Themes"} map
+          </Link>
+          <div className="eyebrow-muted" style={{ marginTop: 16, marginBottom: 8 }}>
+            {group.taxonomyName} · group detail
+          </div>
+          <h1 style={{ margin: 0, fontSize: 30, fontWeight: 400, letterSpacing: "-1.5px" }}>
+            {group.name}
+          </h1>
+          <p style={{ margin: "8px 0 0", color: "#686e73", fontSize: 13, lineHeight: 1.5 }}>
+            Source-backed aggregate for the current snapshot. This is a research lens, not an official IDX classification.
+          </p>
+        </div>
+        <Link to="/overview" style={{ padding: "9px 13px", border: "1px solid #202325", color: "#202325", textDecoration: "none", fontSize: 12 }}>
+          Overview
+        </Link>
+      </div>
+
+      <div style={{ ...card, padding: "18px 22px", marginBottom: 20 }}>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+          <LeadershipChip state={group.leadership as Parameters<typeof LeadershipChip>[0]["state"]} />
+          <DiffusionChip state={group.diffusion as Parameters<typeof DiffusionChip>[0]["state"]} />
+          <span style={{ fontFamily: "Geist Mono, monospace", fontSize: 11, color: "#666", border: "1px solid #ebebeb", padding: "2px 8px", borderRadius: 4 }}>
+            {group.dataQuality.replace(/_/g, " ")}
+          </span>
+          <span style={{ fontFamily: "Geist Mono, monospace", fontSize: 11, color: "#666" }}>
+            {group.eligible} eligible / {group.constituents} total
+          </span>
+        </div>
+        <div className="explorer-metrics" style={{ display: "flex", gap: 12, marginTop: 16 }}>
+          <MetricCard label="20D excess" value={metric(group.excess20d)} sub="vs IHSG" />
+          <MetricCard label="Breadth" value={metric(group.breadth, "%")} sub={group.breadthDelta === null ? "change unavailable" : `${metric(group.breadthDelta)} vs prior`} />
+          <MetricCard label="Concentration" value={metric(group.concentration, "%")} sub="Top-3 contribution" />
+          <MetricCard label="Members" value={String(group.constituents)} sub={`${members.length} membership records`} />
+        </div>
+      </div>
+
+      <SectionHead label="Membership evidence" />
+      <div style={{ ...card, overflowX: "auto" }}>
+        {members.length > 0 ? (
+          <table style={{ width: "100%", minWidth: 720, borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ borderBottom: "1px solid #ebebeb" }}>
+                {["Ticker", "Membership", "Confidence", "Source", "Source date"].map((label) => (
+                  <th key={label} style={{ padding: "10px 12px", textAlign: label === "Ticker" || label === "Source" ? "left" : "right", fontFamily: "Geist Mono, monospace", fontSize: 10, fontWeight: 400, color: "#666", textTransform: "uppercase", whiteSpace: "nowrap" }}>{label}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {members.map((member, index) => (
+                <tr key={`${member.ticker}-${member.membership_type}`} style={{ borderBottom: index < members.length - 1 ? "1px solid #ebebeb" : "none" }}>
+                  <td style={{ padding: "10px 12px", fontFamily: "Geist Mono, monospace", fontSize: 12, fontWeight: 600 }}>
+                    <Link to={`/ticker/${encodeURIComponent(member.ticker)}`} style={{ color: "#171717" }}>{member.ticker}</Link>
+                  </td>
+                  <td style={{ padding: "10px 12px", textAlign: "right", fontSize: 12 }}>{member.membership_type.toLowerCase()}</td>
+                  <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "Geist Mono, monospace", fontSize: 12 }}>{Math.round(member.confidence * 100)}%</td>
+                  <td style={{ padding: "10px 12px", fontSize: 12, maxWidth: 360 }}>
+                    {member.source ? <a href={member.source} target="_blank" rel="noreferrer">Source</a> : "—"}
+                  </td>
+                  <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "Geist Mono, monospace", fontSize: 11, color: "#666", whiteSpace: "nowrap" }}>{member.source_as_of ?? "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div style={{ padding: 22, color: "#686e73", fontSize: 13 }}>
+            Membership list unavailable in this snapshot. The aggregate is preserved without inventing constituent records.
+          </div>
+        )}
+      </div>
+
+      <div style={{ marginTop: 12, color: "#686e73", fontSize: 11, lineHeight: 1.5 }}>
+        Snapshot: {data.payload.snapshot_id} · As of {data.payload.as_of ?? "—"} · Memberships are retained from the versioned taxonomy definition.
+      </div>
+    </div>
+  );
+}
+
 function ResearchEvidencePanel({
   label,
   category,
@@ -359,6 +469,7 @@ export default function GroupExplorer() {
   const groupPriceHistory = data?.groupPriceHistory ?? {};
   const dataSources = data?.dataSources ?? { breadthHistory: false, constituents: false, fundamentals: false, foreignFlow: false, trajectory: false };
   const queryGroup = new URLSearchParams(location.search).get("group") ?? undefined;
+  const queryTaxonomy = normalizeTaxonomyKind(new URLSearchParams(location.search).get("taxonomy"));
   useEffect(() => {
     if (sectors.length > 0) {
       setSelected(findGroupFromLocation(location.state, queryGroup, sectors));
@@ -366,6 +477,19 @@ export default function GroupExplorer() {
   }, [sectors, location.state, queryGroup]);
 
   if (!data) return null;
+  if (queryTaxonomy && queryTaxonomy !== "SECTOR") {
+    const taxonomyGroup = Object.values(data.taxonomyGroups).find(
+      (group) => group.taxonomyKind === queryTaxonomy && (!queryGroup || group.id === queryGroup),
+    ) ?? Object.values(data.taxonomyGroups).find((group) => group.taxonomyKind === queryTaxonomy);
+    if (!taxonomyGroup) {
+      return (
+        <div style={{ padding: "36px 40px", maxWidth: 1280, margin: "0 auto" }}>
+          <EmptyState label="GROUP NOT FOUND" title="Taxonomy group is unavailable" body="The selected taxonomy group is not present in the current snapshot." height={220} />
+        </div>
+      );
+    }
+    return <TaxonomyGroupDetail group={taxonomyGroup} data={data} />;
+  }
   if (sectors.length === 0) {
     return (
       <div style={{ padding: "36px 40px", maxWidth: 1280, margin: "0 auto" }}>

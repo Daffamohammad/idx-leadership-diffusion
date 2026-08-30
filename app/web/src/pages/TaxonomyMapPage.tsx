@@ -2,7 +2,7 @@
 //
 // The route path encodes the taxonomy: /maps/konglo or /maps/themes.
 
-import { Link, useLocation } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { useSnapshot } from "../data/SnapshotProvider";
 import TaxonomyMap from "../components/TaxonomyMap";
 import ResearchEvents from "../components/ResearchEvents";
@@ -22,6 +22,7 @@ const KIND_LABEL: Record<TaxonomyKind, string> = {
 
 export default function TaxonomyMapPage() {
   const location = useLocation();
+  const navigate = useNavigate();
   const taxonomyKind = TAXONOMY_BY_PATH[location.pathname] ?? "KONGLO";
   const snap = useSnapshot();
   const adapted = snap.data;
@@ -133,6 +134,9 @@ export default function TaxonomyMapPage() {
             ? "Analyst-defined conglomerate archetype. Lower confidence rows are excluded from signal eligibility."
             : "Analyst-defined prototype themes. Multi-theme tickers counted per-theme, never aggregated cross-theme."
         }
+        onSelectGroup={(groupId) => {
+          navigate(`/explorer?taxonomy=${taxonomyKind}&group=${encodeURIComponent(groupId)}`);
+        }}
       />
 
       <ForeignFlowSample sample={adapted.foreignFlow} asOf={asOf} />

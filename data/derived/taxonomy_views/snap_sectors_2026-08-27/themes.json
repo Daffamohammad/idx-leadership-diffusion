@@ -1,5 +1,5 @@
 {
-  "schema_version": "taxonomy-view-v1",
+  "schema_version": "taxonomy-view-v2",
   "taxonomy_id": "themes",
   "taxonomy_name": "Themes (analyst-defined prototype)",
   "taxonomy_version": "themes-prototype-v1",
@@ -17,6 +17,368 @@
     "excluded_count": 0,
     "prototype": true
   },
+  "memberships": [
+    {
+      "ticker": "BBCA.JK",
+      "taxonomy_group_id": "THEME_MAJOR_BANKS",
+      "taxonomy_group_name": "Major banks",
+      "membership_type": "PRIMARY",
+      "confidence": 0.95,
+      "source": "Public listings \u2014 IDX classification",
+      "source_as_of": null
+    },
+    {
+      "ticker": "BBRI.JK",
+      "taxonomy_group_id": "THEME_MAJOR_BANKS",
+      "taxonomy_group_name": "Major banks",
+      "membership_type": "PRIMARY",
+      "confidence": 0.95,
+      "source": "Public listings \u2014 IDX classification",
+      "source_as_of": null
+    },
+    {
+      "ticker": "BMRI.JK",
+      "taxonomy_group_id": "THEME_MAJOR_BANKS",
+      "taxonomy_group_name": "Major banks",
+      "membership_type": "PRIMARY",
+      "confidence": 0.95,
+      "source": "Public listings \u2014 IDX classification",
+      "source_as_of": null
+    },
+    {
+      "ticker": "BBNI.JK",
+      "taxonomy_group_id": "THEME_MAJOR_BANKS",
+      "taxonomy_group_name": "Major banks",
+      "membership_type": "PRIMARY",
+      "confidence": 0.95,
+      "source": "Public listings \u2014 IDX classification",
+      "source_as_of": null
+    },
+    {
+      "ticker": "BRIS.JK",
+      "taxonomy_group_id": "THEME_MAJOR_BANKS",
+      "taxonomy_group_name": "Major banks",
+      "membership_type": "PRIMARY",
+      "confidence": 0.9,
+      "source": "Public listings \u2014 IDX classification",
+      "source_as_of": null
+    },
+    {
+      "ticker": "BNGA.JK",
+      "taxonomy_group_id": "THEME_MAJOR_BANKS",
+      "taxonomy_group_name": "Major banks",
+      "membership_type": "PRIMARY",
+      "confidence": 0.85,
+      "source": "Public listings \u2014 IDX classification",
+      "source_as_of": null
+    },
+    {
+      "ticker": "ARTO.JK",
+      "taxonomy_group_id": "THEME_DIGITAL_FINANCE",
+      "taxonomy_group_name": "Digital finance",
+      "membership_type": "PRIMARY",
+      "confidence": 0.9,
+      "source": "Public listings \u2014 Digital Banks",
+      "source_as_of": null
+    },
+    {
+      "ticker": "PTBA.JK",
+      "taxonomy_group_id": "THEME_COAL_ENERGY",
+      "taxonomy_group_name": "Coal & energy",
+      "membership_type": "PRIMARY",
+      "confidence": 0.9,
+      "source": "Public listings \u2014 Coal",
+      "source_as_of": null
+    },
+    {
+      "ticker": "ADRO.JK",
+      "taxonomy_group_id": "THEME_COAL_ENERGY",
+      "taxonomy_group_name": "Coal & energy",
+      "membership_type": "PRIMARY",
+      "confidence": 0.9,
+      "source": "Public listings \u2014 Coal",
+      "source_as_of": null
+    },
+    {
+      "ticker": "ITMG.JK",
+      "taxonomy_group_id": "THEME_COAL_ENERGY",
+      "taxonomy_group_name": "Coal & energy",
+      "membership_type": "PRIMARY",
+      "confidence": 0.9,
+      "source": "Public listings \u2014 Coal",
+      "source_as_of": null
+    },
+    {
+      "ticker": "HRUM.JK",
+      "taxonomy_group_id": "THEME_COAL_ENERGY",
+      "taxonomy_group_name": "Coal & energy",
+      "membership_type": "PRIMARY",
+      "confidence": 0.9,
+      "source": "Public listings \u2014 Coal",
+      "source_as_of": null
+    },
+    {
+      "ticker": "PGAS.JK",
+      "taxonomy_group_id": "THEME_COAL_ENERGY",
+      "taxonomy_group_name": "Coal & energy",
+      "membership_type": "PRIMARY",
+      "confidence": 0.85,
+      "source": "Public listings \u2014 Gas Distribution",
+      "source_as_of": null
+    },
+    {
+      "ticker": "BREN.JK",
+      "taxonomy_group_id": "THEME_RENEWABLES",
+      "taxonomy_group_name": "Renewables",
+      "membership_type": "PRIMARY",
+      "confidence": 0.85,
+      "source": "Public listings \u2014 green energy",
+      "source_as_of": null
+    },
+    {
+      "ticker": "CUAN.JK",
+      "taxonomy_group_id": "THEME_RENEWABLES",
+      "taxonomy_group_name": "Renewables",
+      "membership_type": "PRIMARY",
+      "confidence": 0.8,
+      "source": "Public listings \u2014 green energy",
+      "source_as_of": null
+    },
+    {
+      "ticker": "TLKM.JK",
+      "taxonomy_group_id": "THEME_DIGITAL_TELECOM",
+      "taxonomy_group_name": "Digital & telecommunications",
+      "membership_type": "PRIMARY",
+      "confidence": 0.95,
+      "source": "Public listings",
+      "source_as_of": null
+    },
+    {
+      "ticker": "ISAT.JK",
+      "taxonomy_group_id": "THEME_DIGITAL_TELECOM",
+      "taxonomy_group_name": "Digital & telecommunications",
+      "membership_type": "PRIMARY",
+      "confidence": 0.95,
+      "source": "Public listings",
+      "source_as_of": null
+    },
+    {
+      "ticker": "EXCL.JK",
+      "taxonomy_group_id": "THEME_DIGITAL_TELECOM",
+      "taxonomy_group_name": "Digital & telecommunications",
+      "membership_type": "PRIMARY",
+      "confidence": 0.95,
+      "source": "Public listings",
+      "source_as_of": null
+    },
+    {
+      "ticker": "EMTK.JK",
+      "taxonomy_group_id": "THEME_DIGITAL_TELECOM",
+      "taxonomy_group_name": "Digital & telecommunications",
+      "membership_type": "PRIMARY",
+      "confidence": 0.7,
+      "source": "Public listings \u2014 Media",
+      "source_as_of": null
+    },
+    {
+      "ticker": "JSMR.JK",
+      "taxonomy_group_id": "THEME_INFRASTRUCTURE",
+      "taxonomy_group_name": "Infrastructure",
+      "membership_type": "PRIMARY",
+      "confidence": 0.9,
+      "source": "Public listings \u2014 Toll Roads",
+      "source_as_of": null
+    },
+    {
+      "ticker": "WIKA.JK",
+      "taxonomy_group_id": "THEME_INFRASTRUCTURE",
+      "taxonomy_group_name": "Infrastructure",
+      "membership_type": "PRIMARY",
+      "confidence": 0.9,
+      "source": "Public listings \u2014 Construction",
+      "source_as_of": null
+    },
+    {
+      "ticker": "PTPP.JK",
+      "taxonomy_group_id": "THEME_INFRASTRUCTURE",
+      "taxonomy_group_name": "Infrastructure",
+      "membership_type": "PRIMARY",
+      "confidence": 0.9,
+      "source": "Public listings \u2014 Construction",
+      "source_as_of": null
+    },
+    {
+      "ticker": "WSKT.JK",
+      "taxonomy_group_id": "THEME_INFRASTRUCTURE",
+      "taxonomy_group_name": "Infrastructure",
+      "membership_type": "PRIMARY",
+      "confidence": 0.85,
+      "source": "Public listings \u2014 Construction",
+      "source_as_of": null
+    },
+    {
+      "ticker": "INTP.JK",
+      "taxonomy_group_id": "THEME_INFRASTRUCTURE",
+      "taxonomy_group_name": "Infrastructure",
+      "membership_type": "PRIMARY",
+      "confidence": 0.85,
+      "source": "Public listings \u2014 Cement",
+      "source_as_of": null
+    },
+    {
+      "ticker": "SMGR.JK",
+      "taxonomy_group_id": "THEME_INFRASTRUCTURE",
+      "taxonomy_group_name": "Infrastructure",
+      "membership_type": "PRIMARY",
+      "confidence": 0.85,
+      "source": "Public listings \u2014 Cement",
+      "source_as_of": null
+    },
+    {
+      "ticker": "ANTM.JK",
+      "taxonomy_group_id": "THEME_EV_MATERIALS",
+      "taxonomy_group_name": "EV & materials",
+      "membership_type": "PRIMARY",
+      "confidence": 0.85,
+      "source": "Public listings \u2014 Mining Diversified",
+      "source_as_of": null
+    },
+    {
+      "ticker": "INCO.JK",
+      "taxonomy_group_id": "THEME_EV_MATERIALS",
+      "taxonomy_group_name": "EV & materials",
+      "membership_type": "PRIMARY",
+      "confidence": 0.9,
+      "source": "Public listings \u2014 Nickel",
+      "source_as_of": null
+    },
+    {
+      "ticker": "MDKA.JK",
+      "taxonomy_group_id": "THEME_EV_MATERIALS",
+      "taxonomy_group_name": "EV & materials",
+      "membership_type": "PRIMARY",
+      "confidence": 0.85,
+      "source": "Public listings",
+      "source_as_of": null
+    },
+    {
+      "ticker": "ESSA.JK",
+      "taxonomy_group_id": "THEME_EV_MATERIALS",
+      "taxonomy_group_name": "EV & materials",
+      "membership_type": "PRIMARY",
+      "confidence": 0.75,
+      "source": "Public listings \u2014 Fertilizers",
+      "source_as_of": null
+    },
+    {
+      "ticker": "BRPT.JK",
+      "taxonomy_group_id": "THEME_EV_MATERIALS",
+      "taxonomy_group_name": "EV & materials",
+      "membership_type": "PRIMARY",
+      "confidence": 0.8,
+      "source": "Public listings \u2014 Petrochemicals",
+      "source_as_of": null
+    },
+    {
+      "ticker": "ICBP.JK",
+      "taxonomy_group_id": "THEME_CONSUMER_DEFENSIVE",
+      "taxonomy_group_name": "Consumer defensive",
+      "membership_type": "PRIMARY",
+      "confidence": 0.9,
+      "source": "Public listings \u2014 Food",
+      "source_as_of": null
+    },
+    {
+      "ticker": "INDF.JK",
+      "taxonomy_group_id": "THEME_CONSUMER_DEFENSIVE",
+      "taxonomy_group_name": "Consumer defensive",
+      "membership_type": "PRIMARY",
+      "confidence": 0.9,
+      "source": "Public listings \u2014 Food",
+      "source_as_of": null
+    },
+    {
+      "ticker": "MYOR.JK",
+      "taxonomy_group_id": "THEME_CONSUMER_DEFENSIVE",
+      "taxonomy_group_name": "Consumer defensive",
+      "membership_type": "PRIMARY",
+      "confidence": 0.9,
+      "source": "Public listings \u2014 Food",
+      "source_as_of": null
+    },
+    {
+      "ticker": "UNVR.JK",
+      "taxonomy_group_id": "THEME_CONSUMER_DEFENSIVE",
+      "taxonomy_group_name": "Consumer defensive",
+      "membership_type": "PRIMARY",
+      "confidence": 0.85,
+      "source": "Public listings \u2014 Household",
+      "source_as_of": null
+    },
+    {
+      "ticker": "SIDO.JK",
+      "taxonomy_group_id": "THEME_CONSUMER_DEFENSIVE",
+      "taxonomy_group_name": "Consumer defensive",
+      "membership_type": "PRIMARY",
+      "confidence": 0.7,
+      "source": "Public listings \u2014 Pharmaceuticals",
+      "source_as_of": null
+    },
+    {
+      "ticker": "MIKA.JK",
+      "taxonomy_group_id": "THEME_HEALTHCARE",
+      "taxonomy_group_name": "Healthcare",
+      "membership_type": "PRIMARY",
+      "confidence": 0.9,
+      "source": "Public listings \u2014 Hospitals",
+      "source_as_of": null
+    },
+    {
+      "ticker": "SILO.JK",
+      "taxonomy_group_id": "THEME_HEALTHCARE",
+      "taxonomy_group_name": "Healthcare",
+      "membership_type": "PRIMARY",
+      "confidence": 0.9,
+      "source": "Public listings \u2014 Hospitals",
+      "source_as_of": null
+    },
+    {
+      "ticker": "HEAL.JK",
+      "taxonomy_group_id": "THEME_HEALTHCARE",
+      "taxonomy_group_name": "Healthcare",
+      "membership_type": "PRIMARY",
+      "confidence": 0.9,
+      "source": "Public listings \u2014 Hospitals",
+      "source_as_of": null
+    },
+    {
+      "ticker": "KLBF.JK",
+      "taxonomy_group_id": "THEME_HEALTHCARE",
+      "taxonomy_group_name": "Healthcare",
+      "membership_type": "PRIMARY",
+      "confidence": 0.85,
+      "source": "Public listings \u2014 Pharmaceuticals",
+      "source_as_of": null
+    },
+    {
+      "ticker": "GOTO.JK",
+      "taxonomy_group_id": "THEME_DIGITAL_FINANCE",
+      "taxonomy_group_name": "Digital finance",
+      "membership_type": "PRIMARY",
+      "confidence": 0.85,
+      "source": "Public listings",
+      "source_as_of": null
+    },
+    {
+      "ticker": "BUKA.JK",
+      "taxonomy_group_id": "THEME_DIGITAL_FINANCE",
+      "taxonomy_group_name": "Digital finance",
+      "membership_type": "PRIMARY",
+      "confidence": 0.8,
+      "source": "Public listings",
+      "source_as_of": null
+    }
+  ],
   "groups": [
     {
       "taxonomy_id": "themes",

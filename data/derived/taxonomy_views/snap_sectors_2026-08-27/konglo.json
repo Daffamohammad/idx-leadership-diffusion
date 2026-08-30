@@ -1,5 +1,5 @@
 {
-  "schema_version": "taxonomy-view-v1",
+  "schema_version": "taxonomy-view-v2",
   "taxonomy_id": "konglo",
   "taxonomy_name": "Konglo (verified corporate ecosystems, prototype)",
   "taxonomy_version": "konglo-verified-prototype-v2",
@@ -17,6 +17,89 @@
     "excluded_count": 0,
     "prototype": true
   },
+  "memberships": [
+    {
+      "ticker": "INDF.JK",
+      "taxonomy_group_id": "KONGLO_SALIM",
+      "taxonomy_group_name": "Salim / Indofood ecosystem",
+      "membership_type": "PRIMARY",
+      "confidence": 0.95,
+      "source": "https://www.indofood.com/leader/anthoni-salim",
+      "source_as_of": "2026-08-27"
+    },
+    {
+      "ticker": "ICBP.JK",
+      "taxonomy_group_id": "KONGLO_SALIM",
+      "taxonomy_group_name": "Salim / Indofood ecosystem",
+      "membership_type": "PRIMARY",
+      "confidence": 0.95,
+      "source": "https://www.indofood.com/leader/anthoni-salim",
+      "source_as_of": "2026-08-27"
+    },
+    {
+      "ticker": "ASII.JK",
+      "taxonomy_group_id": "KONGLO_ASTRA",
+      "taxonomy_group_name": "Astra / Jardine ecosystem",
+      "membership_type": "PRIMARY",
+      "confidence": 1.0,
+      "source": "https://www.astra.co.id/en/investor-relations/shareholding",
+      "source_as_of": "2025-12-31"
+    },
+    {
+      "ticker": "UNTR.JK",
+      "taxonomy_group_id": "KONGLO_ASTRA",
+      "taxonomy_group_name": "Astra / Jardine ecosystem",
+      "membership_type": "PRIMARY",
+      "confidence": 1.0,
+      "source": "https://www.astra.co.id/en/business/heavy-equipment-mining-construction-and-energy/united-tractors",
+      "source_as_of": "2026-08-27"
+    },
+    {
+      "ticker": "BBCA.JK",
+      "taxonomy_group_id": "KONGLO_HARTONO",
+      "taxonomy_group_name": "Hartono / Dwimuria ecosystem",
+      "membership_type": "PRIMARY",
+      "confidence": 1.0,
+      "source": "https://www.bca.co.id/en/tentang-bca/Hubungan-Investor/Informasi-Saham/Komposisi-Pemegang-Saham",
+      "source_as_of": "2025-12-31"
+    },
+    {
+      "ticker": "BSDE.JK",
+      "taxonomy_group_id": "KONGLO_SINARMAS",
+      "taxonomy_group_name": "Sinar Mas Land ecosystem",
+      "membership_type": "PRIMARY",
+      "confidence": 0.95,
+      "source": "https://www.sinarmasland.com/investors/information-disclosure-statement",
+      "source_as_of": "2026-08-27"
+    },
+    {
+      "ticker": "BRPT.JK",
+      "taxonomy_group_id": "KONGLO_BARITO",
+      "taxonomy_group_name": "Barito Pacific / Prajogo ecosystem",
+      "membership_type": "PRIMARY",
+      "confidence": 1.0,
+      "source": "https://www.barito-pacific.com/newsroom/official-statement-from-barito-pacific-group",
+      "source_as_of": "2026-08-27"
+    },
+    {
+      "ticker": "TPIA.JK",
+      "taxonomy_group_id": "KONGLO_BARITO",
+      "taxonomy_group_name": "Barito Pacific / Prajogo ecosystem",
+      "membership_type": "PRIMARY",
+      "confidence": 1.0,
+      "source": "https://www.barito-pacific.com/newsroom/official-statement-from-barito-pacific-group",
+      "source_as_of": "2026-08-27"
+    },
+    {
+      "ticker": "EMTK.JK",
+      "taxonomy_group_id": "KONGLO_EMTEK",
+      "taxonomy_group_name": "EMTEK ecosystem",
+      "membership_type": "PRIMARY",
+      "confidence": 1.0,
+      "source": "https://cms.emtek.co.id/media/annual_report_attachment_en/gcib/AR-EMTEK-2025.pdf",
+      "source_as_of": "2025-12-31"
+    }
+  ],
   "groups": [
     {
       "taxonomy_id": "konglo",

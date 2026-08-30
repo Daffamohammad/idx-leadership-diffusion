@@ -125,8 +125,8 @@ export default function MarketHeatmap({
   onSelectGroup,
 }: MarketHeatmapProps) {
   const [taxonomyId, setTaxonomyId] = useState<string>(() => {
-    const ids = Object.keys(taxonomyKindsById);
-    return ids.length ? ids[0] : "";
+    const ids = Object.entries(taxonomyKindsById);
+    return ids.find(([, kind]) => kind === "SECTOR")?.[0] ?? ids[0]?.[0] ?? "";
   });
   const [metric, setMetric] = useState<HeatmapMetric>("excess20d");
 
@@ -138,6 +138,16 @@ export default function MarketHeatmap({
       .filter((group) => group.taxonomyKind === taxonomyKind)
       .sort((a, b) => b.constituents - a.constituents);
   }, [taxonomyGroups, taxonomyKind]);
+
+  const foreignByGroup = useMemo(() => {
+    const map = new Map<string, ForeignFlowDirection>();
+    if (foreignFlow) {
+      for (const summary of foreignFlow.groupSummaries) {
+        if (summary.netValueIdr !== 0) map.set(summary.groupId, summary.direction);
+      }
+    }
+    return map;
+  }, [foreignFlow]);
 
   if (!taxonomyKind || filteredGroups.length === 0) {
     return (
@@ -165,17 +175,6 @@ export default function MarketHeatmap({
   }
 
   const asOfLabel = asOf ?? "snapshot";
-  const foreignByGroup = useMemo(() => {
-    const map = new Map<string, ForeignFlowDirection>();
-    if (foreignFlow) {
-      for (const summary of foreignFlow.groupSummaries) {
-        if (summary.netValueIdr !== 0) {
-          map.set(summary.groupId, summary.direction);
-        }
-      }
-    }
-    return map;
-  }, [foreignFlow]);
 
   return (
     <section
@@ -220,6 +219,9 @@ export default function MarketHeatmap({
             <span>·</span>
             <span>No recommendation language</span>
           </div>
+          <p style={{ margin: "12px 0 0", fontSize: 12, color: "#202325" }}>
+            Click a tile to open group detail.
+          </p>
         </div>
         <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
           <fieldset
@@ -242,7 +244,9 @@ export default function MarketHeatmap({
             </legend>
             <div role="radiogroup" style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               {TAXONOMY_ORDER.map((kind) => {
-                const id = kind.toLowerCase();
+                const id = Object.entries(taxonomyKindsById).find(
+                  ([, availableKind]) => availableKind === kind,
+                )?.[0] ?? kind.toLowerCase();
                 const available = Object.values(taxonomyGroups).some(
                       (group) => group.taxonomyKind === kind,
                     );
@@ -338,7 +342,7 @@ export default function MarketHeatmap({
           const value = metricValue(group, metric);
           const flow = foreignByGroup.get(group.id);
           const isPrototype = group.prototype;
-          const ariaLabel = `${group.name}: ${metricLabel(metric)} ${formatSigned(value)}, leadership ${group.leadership}, diffusion ${group.diffusion}, ${group.constituents} constituents.`;
+          const ariaLabel = `${group.name}: ${metricLabel(metric)} ${formatSigned(value)}, leadership ${group.leadership}, diffusion ${group.diffusion}, ${group.constituents} ${group.constituents === 1 ? "ticker" : "tickers"}.`;
           return (
             <button
               key={`${group.taxonomyId}::${group.id}`}
@@ -406,7 +410,7 @@ export default function MarketHeatmap({
                     data gap
                   </span>
                 ) : metric === "leadership" ? (
-                  group.leadership.toLowerCase()
+                  group.leadership.toLowerCase().replace(/_/g, " ")
                 ) : metric === "breadth" ? (
                   `${value.toFixed(0)}%`
                 ) : (
@@ -422,8 +426,8 @@ export default function MarketHeatmap({
                   color: "rgba(16,18,21,0.75)",
                 }}
               >
-                <span>{group.constituents} tickers</span>
-                <span>{group.leadership.toLowerCase()}</span>
+                <span>{group.constituents} {group.constituents === 1 ? "ticker" : "tickers"}</span>
+                <span>{group.leadership.toLowerCase().replace(/_/g, " ")}</span>
               </div>
               {flow && (
                 <div
@@ -454,7 +458,7 @@ export default function MarketHeatmap({
       >
         <span>Source: Python-aggregated taxonomy_views (no frontend recompute)</span>
         <span>·</span>
-        <span>Provider mode: PUBLIC_PROTOTYPE</span>
+        <span>Source: snapshot-backed aggregation</span>
         <span>·</span>
         <span>Negative values mean the group is underperforming IHSG; no recommendation language.</span>
       </footer>

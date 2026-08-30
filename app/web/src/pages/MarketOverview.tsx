@@ -5,7 +5,8 @@
 // view; PublicHome keeps the marketing surface and links here for
 // detailed analysis.
 
-import { Link } from "react-router";
+import { useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router";
 import { useSnapshot } from "../data/SnapshotProvider";
 import MarketHeatmap from "../components/MarketHeatmap";
 import ForeignFlowSample from "../components/ForeignFlowSample";
@@ -20,7 +21,19 @@ const KIND_LABELS: Record<TaxonomyKind, string> = {
 
 export default function MarketOverview() {
   const snap = useSnapshot();
+  const navigate = useNavigate();
+  const location = useLocation();
   const adapted = snap.data;
+
+  useEffect(() => {
+    const legacy = location.hash.match(/^#(sector|konglo|themes)=([^&]+)$/i);
+    if (!legacy) return;
+    const taxonomy = legacy[1].toUpperCase();
+    const group = decodeURIComponent(legacy[2]);
+    navigate(`/explorer?taxonomy=${taxonomy}&group=${encodeURIComponent(group)}`, {
+      replace: true,
+    });
+  }, [location.hash, navigate]);
 
   if (snap.loading) {
     return (
@@ -127,18 +140,8 @@ export default function MarketOverview() {
         foreignFlow={adapted.foreignFlow}
         asOf={asOf}
         onSelectGroup={(kind, taxonomyId, groupId) => {
-          if (typeof window !== "undefined") {
-            const params = new URLSearchParams({
-              taxonomy: taxonomyId,
-              group: groupId,
-            });
-            window.history.replaceState(
-              null,
-              "",
-              `${window.location.pathname}#${kind.toLowerCase()}=${groupId}`,
-            );
-            void params;
-          }
+          void taxonomyId;
+          navigate(`/explorer?taxonomy=${kind}&group=${encodeURIComponent(groupId)}`);
         }}
       />
 
