@@ -383,3 +383,93 @@ Codex may now review whether the scanner column set faithfully expresses the
 four-dimension separation (leadership / diffusion / concentration / confirmation)
 and whether the Themes Explorer correctly labels analyst-defined vs
 provider-authoritative taxonomies.
+
+## 27. Search / Research Pass — 2026-08-30
+
+Both search APIs were exercised live (not stubbed) against real
+credentials loaded from `.env` (`TAVILY_API_KEY`, `YOU_API_KEY`).
+
+### Status
+
+| Provider | Live exercised | Endpoint | Status | Calls in pass |
+| --- | --- | --- | --- | --- |
+| Tavily   | YES | `https://api.tavily.com/search` | LIVE VERIFIED | 35 / 35 OK |
+| YOU.com  | YES | `https://ydc-index.io/v1/search` | LIVE VERIFIED | 25 / 25 OK |
+
+Live Sectors API calls: **0** (gated by design).
+
+### Workstreams
+
+1. IDX universe discovery
+2. IDX-IC taxonomy (sector / sub-sector / industry / sub-industry)
+3. Konglo conglomerate ownership (10 candidates)
+4. Themes (EV battery, nickel, renewables, digital, banking, telco)
+5. Foreign flow publication discovery
+6. Corporate-action evidence (BBCA 2021-10-13 case)
+7. Benchmark / IHSG methodology reference
+8. Free-float / market-cap publication discovery
+9. Methodology references (breadth, HHI, relative strength)
+
+### Persisted artifacts
+
+- `data/research/<workstream>/observations.jsonl` — structured
+  observations with `entity_id`, `entity_type`, `claim_type`, `claim`,
+  `source_url`, `publisher`, `search_provider`, `source_tier`,
+  `confidence`, `verification_status`.
+- `data/research/<workstream>/sources.jsonl` — raw search hits.
+- `data/research/_audit.jsonl` — 60 lines, every API call, no secrets.
+- `docs/RESEARCH_AUDIT.md` — operator-facing audit document.
+
+### Material findings
+
+- **IDX-IC taxonomy**: 10 canonical sectors confirmed via IDX Stock Index
+  Handbook v1.2; this is the production target for Sectors migration.
+- **Foreign-flow authoritative source**: IDX publishes per-investor-type
+  net-purchase data at a stable monthly URL; an OJK press release
+  contained a concrete market-level quantitative observation
+  (foreign net sell IDR 23.34 trillion). These are monthly aggregates and
+  must NOT be relabeled as daily or per-ticker observations.
+- **IHSG benchmark**: confirmed via IDX handbook that ^JKSE is the Yahoo
+  Finance proxy; current yfinance usage aligns.
+- **BBCA 2021-10-13 corporate action**: corporate-actions endpoint during
+  Sectors migration will resolve; do not manually patch `adjusted_close`.
+
+### Unresolved gaps for Codex
+
+- Tier-1 issuer-website confirmation for every Konglo candidate
+  (currently PROVISIONAL).
+- IDX-IC per-ticker industry / sub-industry (only sector today).
+- Per-ticker daily foreign-flow series (requires Sectors
+  `/v2/foreign-flow/{symbol}/`).
+- BBCA 2021-10-13 specific corporate-action event.
+
+### Source-quality tier distribution (top 10 domains)
+
+| Domain | Hits |
+| --- | --- |
+| www.idx.co.id | 21 |
+| en.wikipedia.org | 13 |
+| finance.yahoo.com | 11 |
+| www.investing.com | 6 |
+| ojk.go.id | 5 |
+| idx.co.id | 4 |
+| www.idnfinancials.com | 3 |
+| gopublic.idx.co.id | 3 |
+| www.sec.gov | 3 |
+| www.ojk.go.id | 2 |
+
+17 of 63 observations are tier-1/2 (IDX / OJK / issuer sites); the rest
+are tier-3/4 (reputable publications, Wikipedia) used for discovery
+and corroboration only.
+
+### Updated Codex assignment
+
+In addition to the analytical and code-quality review, Codex must
+independently inspect the Tavily / YOU.com research artifacts:
+- Confirm observations match their cited URLs.
+- Detect any unsupported taxonomy / Konglo / Theme / corporate-action
+  assertion that was accepted from a low-quality source.
+- Detect any point-in-time leakage (e.g. current ownership applied
+  backwards to historical snapshots).
+- Fix concrete defects where appropriate.
+- Do NOT use the live Sectors API and do NOT broaden product scope.

@@ -109,6 +109,21 @@ The Sectors persisted snapshot is a prefix sample, not full IDX coverage.
 Funnel counts and `exclusion_reasons` must be surfaced in any UI claiming
 Sectors-backed classification (see Methodology page Evidence Matrix).
 
+### Foreign-flow authoritative source (research-discovered)
+
+The 2026-08-30 search/research pass (`docs/RESEARCH_AUDIT.md`) located a
+stable IDX URL for monthly per-investor-type net-purchase data:
+
+```
+https://idx.co.id/id/data-pasar/laporan-statistik/digital-statistik/monthly/equity-trading-by-investor/total-trading-by-investor-s-type-and-net-purchase-by-foreigners
+```
+
+This is a **monthly** aggregate and **market-level**, not a daily or
+per-ticker observation. The current bounded-sample foreign-flow fixture
+(`data/derived/foreign_flow_sample.json`) remains correct: it is a
+daily top-list sample. Both can coexist; neither substitutes for the
+authoritative IDX series.
+
 ## 8. Return / Benchmark Parity Targets
 
 - Return parity: `delta_pct < 0.5` for ≥ 80% of matched securities at the
