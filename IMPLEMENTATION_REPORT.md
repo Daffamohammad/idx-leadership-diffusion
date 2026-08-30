@@ -82,3 +82,33 @@ app/web/node_modules/.bin/tsc --noEmit --project app/web/tsconfig.json
 npm run build --prefix app/web
 .venv/bin/python -m scripts.export_snapshot_json --snapshot-id yf_harness_2026-08-28_adj
 ```
+
+## P1 Upgrade Pass — added 2026-08-30 19:45
+
+### New deliverables
+
+- **Master Group Table** (`app/web/src/pages/MasterGroupTable.tsx` + route `/groups`):
+  Analytical scanner with 14 sortable columns (Group, Leadership, Prev, Transition, 20D/60D Excess, Breadth, Δ Breadth, Diffusion, Top-3, Confirmation, Elig/Total, Coverage, Data). Headers are clickable; arrow indicator shows active column and direction. Filter input narrows to group name. Each row links to `/explorer?group=<id>`.
+- **Themes Explorer** (`app/web/src/pages/ThemesExplorer.tsx` + route `/themes`):
+  Two-pane theme browser. Left list with filter and 9 themes; right detail panel shows name, ID, 4 metrics (20D/60D excess, breadth, Δ breadth), state chips, top-3, membership breakdown, off-scale note, sample foreign-flow context. Source-kind badge makes analyst-defined status explicit. "Map view ↗" link switches to `/maps/themes`.
+- **AppShell nav** updated to surface the new entries at indices 06 (Themes Explorer), 07 (Groups), 08 (Groups Table), 09 (Methodology).
+- **EmptyState API**: confirmed `label`/`title`/`body` shape used consistently; new pages follow it.
+
+### Files changed
+
+| File | Purpose |
+| --- | --- |
+| `app/web/src/pages/MasterGroupTable.tsx` | New analytical scanner page |
+| `app/web/src/pages/ThemesExplorer.tsx` | New theme browser page |
+| `app/web/src/App.tsx` | Routes `/groups` and `/themes` |
+| `app/web/src/components/AppShell.tsx` | Nav entries 06/07/08/09 |
+| `TEST_REPORT.md`, `IMPLEMENTATION_REPORT.md` | Updated with P1 verification |
+
+### Validation evidence
+
+- pytest: 482 passed in 10.60s (unchanged — no backend touched in this pass).
+- tsc --noEmit: clean.
+- vite build: success, 845.42 kB bundle (was 828.96 kB).
+- All 11 SPA routes loaded with expected headings in browser smoke test.
+- Master Group Table sort interaction verified (clicking 20D Excess header reorders rows, arrow indicator updates).
+- Themes Explorer filter verified (`digital` → 2 themes).

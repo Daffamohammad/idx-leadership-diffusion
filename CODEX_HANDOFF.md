@@ -365,3 +365,21 @@ Do NOT tell Codex to redesign the product. Codex is the independent engineering/
 ---
 
 *End of handoff. Gaps above are explicit and auditable. Precision is preferable to a flattering completion report.*
+
+## 26. P1 Upgrade Delta — 2026-08-30 19:45
+
+Two new SPA routes were added to materially strengthen the group-intelligence UX
+(P1 §18 Master Group Table, P1 §20 Themes Explorer):
+
+- `/groups` (`MasterGroupTable.tsx`) — analytical scanner with 14 sortable columns, name filter, links to `/explorer?group=<id>`.
+- `/themes` (`ThemesExplorer.tsx`) — two-pane theme browser (list + detail), filter, source-kind badge, "Map view ↗" link to `/maps/themes`.
+- `AppShell.tsx` nav: indices 06 (Themes Explorer), 07 (Groups), 08 (Groups Table), 09 (Methodology).
+
+**No backend or methodology changes** in this delta. The new pages consume the
+existing `SectorData` and `TaxonomyView` adapters. TypeScript clean, pytest
+482 passed unchanged, vite build success (bundle grew 16.46 kB to ~845 kB).
+
+Codex may now review whether the scanner column set faithfully expresses the
+four-dimension separation (leadership / diffusion / concentration / confirmation)
+and whether the Themes Explorer correctly labels analyst-defined vs
+provider-authoritative taxonomies.

@@ -11,8 +11,10 @@ const navItems = [
   { path: "/map", label: "Leadership Map", index: "03" },
   { path: "/maps/konglo", label: "Konglo Map", index: "04" },
   { path: "/maps/themes", label: "Themes Map", index: "05" },
-  { path: "/explorer", label: "Groups", index: "06" },
-  { path: "/methodology", label: "Methodology", index: "07" },
+  { path: "/themes", label: "Themes Explorer", index: "06" },
+  { path: "/explorer", label: "Groups", index: "07" },
+  { path: "/groups", label: "Groups Table", index: "08" },
+  { path: "/methodology", label: "Methodology", index: "09" },
 ];
 
 interface Props {

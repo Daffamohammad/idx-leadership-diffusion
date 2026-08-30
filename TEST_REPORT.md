@@ -1,4 +1,4 @@
-# Test Report — 2026-08-30 Implementation Pass
+# Test Report — 2026-08-30 Implementation Pass (P1 upgrade)
 
 ## Commands Executed
 
@@ -135,3 +135,34 @@ print(len(p['groups']), p['comparability']['status'], p['comparability']['select
 ## Remaining Gaps (Not a Suite Failure)
 
 * None failing; suite is offline-safe. Live parity (`scripts/compare_providers.py --live`) intentionally not exercised until operator authorizes `SECTORS_API_KEY` + `--allow-credit-spend`.
+
+## P1 upgrade verification (added 2026-08-30 19:45)
+
+### Python
+```
+.venv/bin/pytest -q
+→ 482 passed in 10.60s
+```
+No backend changes for the P1 surface; existing suite still green.
+
+### TypeScript
+```
+app/web/node_modules/.bin/tsc --noEmit --project app/web/tsconfig.json
+→ (no output)
+```
+Two new pages (`MasterGroupTable`, `ThemesExplorer`) added. EmptyState props corrected to `label`/`title`/`body`. useSnapshot destructuring aligned with `SnapshotContextValue`.
+
+### Vite build
+```
+npm run build --prefix app/web
+✓ 629 modules transformed.
+dist/assets/index-DBxRl8-o.js   845.42 kB │ gzip: 243.39 kB
+✓ built in 505ms
+```
+Bundle grew 16.46 kB (~2%) to accommodate the Master Group Table and Themes Explorer.
+
+### Browser smoke (dev server :5186)
+- `/groups` → "Analytical scanner" heading, 11 rows, sortable headers (clicking 20D Excess header reorders rows; arrow indicator updates).
+- `/themes` → "Theme browser" heading, 9 themes listed; first theme selected by default (Coal & energy) with 4-metric detail panel.
+- Filter `digital` in Themes Explorer narrows list to 2 themes ("Digital & telecommunications", "Digital finance").
+- All 11 routes (`/`, `/what-changed`, `/overview`, `/map`, `/maps/konglo`, `/maps/themes`, `/explorer`, `/groups`, `/themes`, `/methodology`, `/ticker/BBCA.JK`) load with their expected h1 / heading and no error UI (Methodology's single alert-role element is the documented "Partial universe sample" honesty badge).
