@@ -260,7 +260,7 @@ export default function ThemesExplorer() {
                     textTransform: "uppercase",
                   }}
                 >
-                  ID · {selected.taxonomy_group_id}
+                  Group · {formatEnumLabel(selected.taxonomy_group_id)}
                 </div>
                 <Link
                   to={`/explorer?taxonomy=THEMES&group=${encodeURIComponent(selected.taxonomy_group_id)}`}
