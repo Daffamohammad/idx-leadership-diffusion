@@ -21,6 +21,8 @@ research layers. The current section-by-section contract is documented in
 [`docs/HYBRID_PRODUCT_MODEL.md`](docs/HYBRID_PRODUCT_MODEL.md).
 The official IDX source and parser boundary are documented in
 [`docs/IDX_STATISTICS_SOURCE.md`](docs/IDX_STATISTICS_SOURCE.md).
+The taxonomy constituent and YTD rotation contract is documented in
+[`docs/TAXONOMY_ROTATION_RUNBOOK.md`](docs/TAXONOMY_ROTATION_RUNBOOK.md).
 
 **This project is an analytical market-intelligence prototype for
 research and educational purposes. It does not provide investment
@@ -111,7 +113,7 @@ provider connections while rendering.
 | `/` | `PublicHome` | marketing copy (no data dependency) |
 | `/overview` | `MarketOverview` | real Sector heatmap plus official IDX market-level release, bounded sample, and static context sections |
 | `/what-changed` | `WhatChanged` | real current snapshot; prior comparison is shown only when compatible history exists |
-| `/map` | `LeadershipMap` | real `groups` (60D/20D signed excess returns; current breadth, or breadth delta when a comparable prior exists) |
+| `/map` | `LeadershipMap` | YTD excess-return rotation mapping and table; 20D/60D momentum remain diagnostics and null YTD values stay `Data gap` |
 | `/maps/konglo` | `TaxonomyMapPage` | static analyst-defined membership lens with current-snapshot aggregates |
 | `/maps/themes` | `TaxonomyMapPage` | static analyst-defined membership lens with current-snapshot aggregates |
 | `/explorer` | `GroupExplorer` | real `features` joined to `security_master` per `group_id` |
@@ -145,7 +147,7 @@ reason rather than a blank chart.
 # 3. Install + start the SPA.
 cd app/web
 npm install
-npm run dev   # http://127.0.0.1:5173
+npm run dev   # http://127.0.0.1:5174 (when launched with --port 5174)
 ```
 
 The output of step 2 lands in `app/web/public/snapshots/` and is served
