@@ -241,6 +241,13 @@ therefore tested offline and the artifact retains the exact official URL and
 reconciliation metadata. Search agents are used for discovery only and are
 not a numeric extraction path.
 
+The optional LlamaParse PDF lane now reduces official Daily Statistics cards
+to a validated JSON artifact. It is intentionally separate from the HTML
+release parser and from the browser runtime. Install the optional SDK and run
+the bounded command only after reviewing the third-party upload and credit
+acknowledgements; see [`docs/IDX_STATISTICS_SOURCE.md`](docs/IDX_STATISTICS_SOURCE.md)
+for the exact command and the 20,000-credit client-side ceiling.
+
 The repository also contains a bounded foreign-flow methodology harness. The
 discovery record in `data/fixtures/foreign_flow_discovery.json` documents the
 official release and the two dated secondary reports used for a small company
