@@ -5,13 +5,14 @@ import type { SectorData } from "../data/adapter";
 import { LeadershipChip, DiffusionChip, DataStatusChip } from "../components/StatusChips";
 import { EmptyState } from "../components/EmptyState";
 import { EvidenceBadge } from "../components/EvidenceModel";
-import { formatEnumLabel } from "../data/format";
+import { formatEnumLabel, formatPercent } from "../data/format";
 
 type SortKey =
   | "name"
   | "leadership"
   | "prevLeadership"
   | "transition"
+  | "excessYtd"
   | "excess20d"
   | "excess60d"
   | "breadth"
@@ -53,18 +54,6 @@ const bodyCell: React.CSSProperties = {
 };
 
 const MISSING = Number.NEGATIVE_INFINITY;
-
-function fmtPct(v: number | null | undefined): string {
-  return v === null || v === undefined || !Number.isFinite(v)
-    ? "—"
-    : `${v > 0 ? "+" : ""}${v.toFixed(1)}%`;
-}
-
-function fmtPp(v: number | null | undefined): string {
-  return v === null || v === undefined || !Number.isFinite(v)
-    ? "—"
-    : `${v > 0 ? "+" : ""}${v.toFixed(1)}pp`;
-}
 
 function breadthDeltaFor(s: SectorData): number | null {
   if (
@@ -122,6 +111,8 @@ function compare(a: SectorData, b: SectorData, key: SortKey, dir: SortDir): numb
       return mult * (a.prevLeadership ?? "ZZ").localeCompare(b.prevLeadership ?? "ZZ");
     case "transition":
       return mult * transitionLabel(a).localeCompare(transitionLabel(b));
+    case "excessYtd":
+      return mult * ((a.excessYtd ?? MISSING) - (b.excessYtd ?? MISSING));
     case "excess20d":
       return mult * ((a.excess20d ?? MISSING) - (b.excess20d ?? MISSING));
     case "excess60d":
@@ -155,7 +146,7 @@ function compare(a: SectorData, b: SectorData, key: SortKey, dir: SortDir): numb
 export default function MasterGroupTable() {
   const { data } = useSnapshot();
   const sectors: SectorData[] = data?.sectors ?? [];
-  const [sortKey, setSortKey] = useState<SortKey>("excess20d");
+  const [sortKey, setSortKey] = useState<SortKey>("excessYtd");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [filter, setFilter] = useState("");
   const rows = useMemo(() => {
@@ -189,6 +180,13 @@ export default function MasterGroupTable() {
   };
 
   const arrow = (key: SortKey) => (sortKey === key ? (sortDir === "asc" ? " ▲" : " ▼") : "");
+  const sortLabel = (key: SortKey): string => key === "excessYtd"
+    ? "YTD excess"
+    : key === "excess20d"
+      ? "20D excess"
+      : key === "excess60d"
+        ? "60D excess"
+        : formatEnumLabel(key);
 
   return (
     <section className="content-shell" style={{ padding: "0 var(--page-gutter) 80px" }}>
@@ -242,7 +240,7 @@ export default function MasterGroupTable() {
           }}
         />
         <span style={{ color: "#8f8f8f", fontSize: 11 }}>
-          {rows.length} of {sectors.length} groups · sorted by {sortKey}
+          {rows.length} of {sectors.length} groups · sorted by {sortLabel(sortKey)}
           {arrow(sortKey)}
         </span>
       </div>
@@ -279,6 +277,13 @@ export default function MasterGroupTable() {
               </th>
               <th
                 style={{ ...headerCell, textAlign: "right" }}
+                onClick={() => handleSort("excessYtd")}
+                role="button"
+              >
+                YTD Excess{arrow("excessYtd")}
+              </th>
+              <th
+                style={{ ...headerCell, textAlign: "right" }}
                 onClick={() => handleSort("excess20d")}
                 role="button"
               >
@@ -303,7 +308,7 @@ export default function MasterGroupTable() {
                 onClick={() => handleSort("breadthDelta")}
                 role="button"
               >
-                Δ Breadth (pp){arrow("breadthDelta")}
+                Δ Breadth (%){arrow("breadthDelta")}
               </th>
               <th style={headerCell} onClick={() => handleSort("diffusion")} role="button">
                 Diffusion{arrow("diffusion")}
@@ -367,15 +372,18 @@ export default function MasterGroupTable() {
                   <td style={{ ...bodyCell, fontSize: 11, color: "#202325" }}>
                     {transitionLabel(s)}
                   </td>
+                  <td style={{ ...bodyCell, textAlign: "right", color: signColor(s.excessYtd) }}>
+                    {formatPercent(s.excessYtd)}
+                  </td>
                   <td style={{ ...bodyCell, textAlign: "right", color: signColor(s.excess20d) }}>
-                    {fmtPct(s.excess20d)}
+                    {formatPercent(s.excess20d)}
                   </td>
                   <td style={{ ...bodyCell, textAlign: "right", color: signColor(s.excess60d) }}>
-                    {fmtPct(s.excess60d)}
+                    {formatPercent(s.excess60d)}
                   </td>
                   <td style={{ ...bodyCell, textAlign: "right" }}>{breadthText}</td>
                   <td style={{ ...bodyCell, textAlign: "right", color: signColor(breadthDelta) }}>
-                    {fmtPp(breadthDelta)}
+                    {formatPercent(breadthDelta)}
                   </td>
                   <td style={bodyCell}>
                     <DiffusionChip state={s.diffusion} small />

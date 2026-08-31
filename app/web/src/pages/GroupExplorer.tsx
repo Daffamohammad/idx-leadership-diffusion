@@ -30,7 +30,7 @@ import {
 } from "recharts";
 import { leadershipColor } from "../components/StatusChips";
 import PriceChart from "../components/PriceChart";
-import { formatCountLabel, formatDateLabel, formatEnumLabel, formatSnapshotId } from "../data/format";
+import { formatCountLabel, formatDateLabel, formatEnumLabel, formatPercent, formatSnapshotId } from "../data/format";
 import { EvidenceBadge } from "../components/EvidenceModel";
 
 const card: React.CSSProperties = {
@@ -40,6 +40,7 @@ const card: React.CSSProperties = {
 };
 
 function displayMetric(val: number | null | undefined, suffix = "%"): string {
+  if (suffix === "%") return formatPercent(val);
   if (val === null || val === undefined || !Number.isFinite(val)) return "—";
   return `${val > 0 ? "+" : ""}${val.toFixed(1)}${suffix}`;
 }
@@ -661,8 +662,9 @@ export default function GroupExplorer() {
           {sector.interpretation}
         </p>
         <div style={{ marginTop: 10, display: "flex", gap: 16, flexWrap: "wrap", fontSize: 11, color: "#666666", fontFamily: "Geist Mono" }}>
-          <span>20D Excess <b style={{ color: sector.excess20d !== null && sector.excess20d >= 0 ? "#1a6e62" : "#8f2424" }}>{displayMetric(sector.excess20d, "pp")}</b></span>
-          <span>Breadth <b>{displayMetric(sector.breadth)}</b> {delta !== undefined ? <span style={{ color: delta !== null && delta > 0 ? "#1a6e62" : delta !== null && delta < 0 ? "#8f2424" : "#666" }}>({delta === null ? "Δ unavailable" : `${delta > 0 ? "+" : ""}${delta.toFixed(1)}pp vs prior observation`})</span> : ""}</span>
+          <span>YTD Excess <b style={{ color: sector.excessYtd !== null && sector.excessYtd >= 0 ? "#1a6e62" : "#8f2424" }}>{displayMetric(sector.excessYtd)}</b></span>
+          <span>20D Excess <b style={{ color: sector.excess20d !== null && sector.excess20d >= 0 ? "#1a6e62" : "#8f2424" }}>{displayMetric(sector.excess20d)}</b></span>
+          <span>Breadth <b>{displayMetric(sector.breadth)}</b> {delta !== undefined ? <span style={{ color: delta !== null && delta > 0 ? "#1a6e62" : delta !== null && delta < 0 ? "#8f2424" : "#666" }}>({delta === null ? "Δ unavailable" : `${formatPercent(delta)} vs prior observation`})</span> : ""}</span>
           <span>Top-3 <b>{displayMetric(sector.concentration)}</b></span>
           {sector.missingConstituents > 0 && (
             <span style={{ color: "#7a5010" }}>{sector.missingConstituents} constituent{sector.missingConstituents !== 1 ? "s" : ""} missing from the 20D metric</span>
@@ -673,23 +675,33 @@ export default function GroupExplorer() {
         </div>
       </div>
 
-      <div className="explorer-metrics" style={{ display: "flex", gap: 12, marginBottom: 24 }}>
+      <div className="explorer-metrics" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 24 }}>
         <MetricCard
-          label="Relative Leadership"
-          value={displayMetric(sector.excess20d)}
-          sub="20D vs IHSG"
+          label="YTD excess"
+          value={displayMetric(sector.excessYtd)}
+          sub={sector.ytdStartDate ? `from ${formatDateLabel(sector.ytdStartDate)} vs IHSG` : "baseline unavailable"}
           color={
-            sector.excess20d === null
+            sector.excessYtd === null
               ? "#8f8f8f"
-              : sector.excess20d >= 0
+              : sector.excessYtd >= 0
                 ? "#1a6e62"
                 : "#8f2424"
           }
         />
         <MetricCard
+          label="YTD group return"
+          value={displayMetric(sector.returnYtd)}
+          sub={`${sector.ytdEligible}/${sector.constituents} with YTD history`}
+        />
+        <MetricCard
+          label="IHSG YTD"
+          value={displayMetric(sector.benchmarkYtd)}
+          sub="same dates and price basis"
+        />
+        <MetricCard
           label="Breadth"
           value={displayMetric(sector.breadth)}
-          sub={delta != null ? `${delta > 0 ? "+" : ""}${delta.toFixed(1)}pp vs prev` : "change unavailable"}
+          sub={delta != null ? `${formatPercent(delta)} vs prior` : "change unavailable"}
           color={sector.breadth === null ? "#8f8f8f" : "#1a6e62"}
         />
         <MetricCard
@@ -805,7 +817,7 @@ export default function GroupExplorer() {
           </div>
           <ConstituentTable constituents={constituents} />
           <div style={{ marginTop: 8, fontSize: 10, color: "#8f8f8f", lineHeight: 1.4 }}>
-            Methodology: per-constituent |return_20d| sorted descending; top-N shares = sum(|ret_i|)/sum(|ret_all|). Signed attribution (Buy/Sell) is separate and undefined when net is unstable.
+            Methodology: absolute 20D return sorted descending; top-N shares use the sum of absolute constituent returns. Signed attribution (buy/sell) is separate and undefined when net is unstable.
             Equal-weight convention; no market-cap weighting.
           </div>
         </>

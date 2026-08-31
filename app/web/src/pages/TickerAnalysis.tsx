@@ -220,7 +220,7 @@ export default function TickerAnalysis() {
         {foreignContext ? (
           <div style={{ display: "grid", gap: 6, fontSize: 13 }}>
             <div>
-              <strong>{foreignContext.direction}</strong> on {foreignContext.asOf}
+              <strong>{formatEnumLabel(foreignContext.direction)}</strong> on {formatDateLabel(foreignContext.asOf)}
             </div>
             <div>
               Net: {formatIdrCompact(foreignContext.netValueIdr)}

@@ -540,8 +540,14 @@ export default function Methodology() {
 
       {/* Data Status */}
       <SectionHead label="Data Status" />
-      <div className="table-scroll" style={{ ...card }}>
-        <table style={{ width: '100%', minWidth: 760, borderCollapse: 'collapse' }}>
+      <div className="table-scroll methodology-status-table" style={{ ...card }}>
+        <table style={{ width: '100%', minWidth: 900, borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+          <colgroup>
+            <col style={{ width: 170 }} />
+            <col style={{ width: 150 }} />
+            <col style={{ width: 130 }} />
+            <col />
+          </colgroup>
           <thead>
             <tr style={{ borderBottom: '1px solid #ebebeb' }}>
               {['Data Layer', 'Status', 'As of', 'Notes'].map(col => (
@@ -556,7 +562,7 @@ export default function Methodology() {
               <tr key={row.label} style={{ borderBottom: i < dataRows.length - 1 ? '1px solid #ebebeb' : 'none' }}>
                 <td style={{ padding: '10px 16px', fontSize: 13, fontWeight: 500, color: '#171717' }}>{row.label}</td>
                 <td style={{ padding: '10px 16px' }}><DataStatusChip status={row.status} /></td>
-                <td style={{ padding: '10px 16px', fontFamily: 'Geist Mono, monospace', fontSize: 11, color: '#666666' }}>{row.asOf}</td>
+                <td style={{ padding: '10px 16px', fontFamily: 'Geist Mono, monospace', fontSize: 11, color: '#666666', whiteSpace: 'nowrap' }}>{row.asOf}</td>
                 <td style={{ padding: '10px 16px', fontSize: 12, color: '#666666', fontStyle: row.note ? 'italic' : 'normal' }}>{row.note || '—'}</td>
               </tr>
             ))}

@@ -27,6 +27,7 @@ import type {
   TaxonomyKind,
   TaxonomyView,
 } from "./snapshot";
+import { formatEnumLabel, formatPercent } from "./format";
 
 export type { DiffusionState, LeadershipState } from "./snapshot";
 
@@ -1221,16 +1222,16 @@ function buildInterpretation(input: {
   const performance =
     group_excess_return_20d === null || group_excess_return_20d === undefined
       ? "20D performance is unavailable"
-      : `20D excess return was ${group_excess_return_20d >= 0 ? "+" : ""}${group_excess_return_20d.toFixed(1)}pp`;
+      : `20D excess return was ${formatPercent(group_excess_return_20d)}`;
   const breadthMove =
     breadth_delta === null || breadth_delta === undefined
       ? "breadth change is unavailable"
       : breadth_delta > 0
-        ? `breadth expanded by ${breadth_delta.toFixed(1)}pp`
+        ? `breadth expanded by ${formatPercent(breadth_delta)}`
         : breadth_delta < 0
-          ? `breadth narrowed by ${Math.abs(breadth_delta).toFixed(1)}pp`
+          ? `breadth narrowed by ${formatPercent(Math.abs(breadth_delta))}`
           : "breadth held flat";
-  return `${performance}; ${breadthMove}; classified ${leadership_state} / ${diffusion_state}.`;
+  return `${performance}; ${breadthMove}; classified ${formatEnumLabel(leadership_state)} / ${formatEnumLabel(diffusion_state)}.`;
 }
 
 export function adaptSnapshot(

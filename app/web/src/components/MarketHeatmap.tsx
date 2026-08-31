@@ -15,7 +15,7 @@ import type {
   TaxonomyGroupData,
 } from "../data/adapter";
 import type { ForeignFlowDirection, TaxonomyKind } from "../data/snapshot";
-import { formatDateLabel, formatEnumLabel } from "../data/format";
+import { formatCountLabel, formatDateLabel, formatEnumLabel, formatPercent } from "../data/format";
 import { EvidenceBadge } from "./EvidenceModel";
 
 const TAXONOMY_ORDER: TaxonomyKind[] = ["SECTOR", "KONGLO", "THEMES"];
@@ -120,9 +120,9 @@ function legendForMetric(metric: HeatmapMetric): Array<{ label: string; color: s
     case "excess20d":
     case "excess60d":
       return [
-        { label: "−15pp", color: colorFor(-15, metric) },
-        { label: "0", color: colorFor(0, metric) },
-        { label: "+15pp", color: colorFor(15, metric) },
+        { label: "−15%", color: colorFor(-15, metric) },
+        { label: "0%", color: colorFor(0, metric) },
+        { label: "+15%", color: colorFor(15, metric) },
       ];
     case "breadth":
       return [
@@ -159,7 +159,7 @@ function metricDisplay(group: TaxonomyGroupData, metric: HeatmapMetric, value: n
   if (metric === "leadership") return formatEnumLabel(group.leadership);
   if (metric === "diffusion") return formatEnumLabel(group.diffusion);
   if (metric === "breadth") return value === null ? "Data gap" : `${value.toFixed(0)}%`;
-  return value === null ? "Data gap" : `${value >= 0 ? "+" : ""}${value.toFixed(1)}pp`;
+  return value === null ? "Data gap" : formatPercent(value);
 }
 
 function directionBadge(direction: ForeignFlowDirection | null): string {
@@ -430,7 +430,7 @@ export default function MarketHeatmap({
           const isPrototype = group.prototype;
           const isDataGap = group.dataQuality === "DATA_GAP" || value === null;
           const gapReason = dataGapReason(group);
-          const ariaLabel = `${group.name}: ${metricLabel(metric)} ${isDataGap ? `data gap, ${gapReason.toLowerCase()}` : metricDisplay(group, metric, value)}, leadership ${formatEnumLabel(group.leadership)}, diffusion ${formatEnumLabel(group.diffusion)}, ${group.constituents} ${group.constituents === 1 ? "ticker" : "tickers"}.`;
+          const ariaLabel = `${group.name}: ${metricLabel(metric)} ${isDataGap ? `data gap, ${gapReason.toLowerCase()}` : metricDisplay(group, metric, value)}, leadership ${formatEnumLabel(group.leadership)}, diffusion ${formatEnumLabel(group.diffusion)}, ${formatCountLabel(group.constituents, "ticker")}.`;
           return (
             <button
               key={`${group.taxonomyId}::${group.id}`}
@@ -493,18 +493,12 @@ export default function MarketHeatmap({
                   letterSpacing: "-.02em",
                 }}
               >
-                {value === null || value === undefined ? (
+                {isDataGap ? (
                   <span style={{ color: "#686e73", fontSize: 12, fontWeight: 400 }}>
                     Data gap · {gapReason}
                   </span>
-                ) : metric === "leadership" ? (
-                  formatEnumLabel(group.leadership)
-                ) : metric === "diffusion" ? (
-                  formatEnumLabel(group.diffusion)
-                ) : metric === "breadth" ? (
-                  `${value.toFixed(0)}%`
                 ) : (
-                  `${value >= 0 ? "+" : ""}${value.toFixed(1)}pp`
+                  metricDisplay(group, metric, value)
                 )}
               </div>
               <div
@@ -516,7 +510,7 @@ export default function MarketHeatmap({
                   color: "rgba(16,18,21,0.75)",
                 }}
               >
-                <span>{group.constituents} {group.constituents === 1 ? "ticker" : "tickers"}</span>
+                <span>{formatCountLabel(group.constituents, "ticker")}</span>
                 <span>{formatEnumLabel(group.leadership)}</span>
               </div>
               {flow && (

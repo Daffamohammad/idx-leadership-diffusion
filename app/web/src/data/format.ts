@@ -81,3 +81,23 @@ export function formatPercent(value: number | null | undefined, fractionDigits =
   const sign = value > 0 ? "+" : value < 0 ? "−" : "";
   return `${sign}${Math.abs(value).toFixed(fractionDigits)}%`;
 }
+
+export function formatDeltaPercent(value: number | null | undefined, fractionDigits = 1): string {
+  return formatPercent(value, fractionDigits);
+}
+
+export function formatStatusLabel(value: string | null | undefined): string {
+  return formatEnumLabel(value);
+}
+
+export function formatProviderMode(value: string | null | undefined): string {
+  return formatEnumLabel(value);
+}
+
+export function formatSourceKind(value: string | null | undefined): string {
+  return formatEnumLabel(value);
+}
+
+export function formatFlowDirection(value: string | null | undefined): string {
+  return formatEnumLabel(value);
+}

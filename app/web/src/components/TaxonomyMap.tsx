@@ -13,7 +13,7 @@
 import { useMemo, useState } from "react";
 import type { TaxonomyGroupData } from "../data/adapter";
 import type { ForeignFlowDirection, TaxonomyKind } from "../data/snapshot";
-import { formatCountLabel, formatEnumLabel } from "../data/format";
+import { formatCountLabel, formatEnumLabel, formatPercent } from "../data/format";
 import { placeMapLabels } from "../data/mapLabels";
 interface TaxonomyMapProps {
   taxonomyGroups: Record<string, TaxonomyGroupData>;
@@ -217,13 +217,13 @@ export default function TaxonomyMap({
           0%
         </text>
         <text x={PLOT.left} y={PLOT.top + PLOT.height + 16} fontSize={10} fontFamily="Geist Mono, monospace" fill="#7c858c" textAnchor="start">
-          -15pp
+          −15%
         </text>
         <text x={PLOT.left + PLOT.width} y={PLOT.top + PLOT.height + 16} fontSize={10} fontFamily="Geist Mono, monospace" fill="#7c858c" textAnchor="end">
-          +15pp
+          +15%
         </text>
         <text x={scaleX(0)} y={PLOT.top + PLOT.height + 16} fontSize={10} fontFamily="Geist Mono, monospace" fill="#7c858c" textAnchor="middle">
-          0
+          0%
         </text>
 
         {/* Quadrant annotations — centered within each quadrant */}

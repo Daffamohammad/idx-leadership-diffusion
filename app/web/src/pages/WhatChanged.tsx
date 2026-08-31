@@ -22,7 +22,7 @@ import {
 } from "../data/mapGeometry";
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, CartesianGrid } from "recharts";
 import { placeMapLabels } from "../data/mapLabels";
-import { formatDateLabel, formatEnumLabel, formatSnapshotId } from "../data/format";
+import { formatDateLabel, formatEnumLabel, formatPercent, formatSnapshotId } from "../data/format";
 import { EvidenceBadge } from "../components/EvidenceModel";
 
 
@@ -53,7 +53,7 @@ const num = (v: number | null | undefined, suffix = "%") => {
         fontSize: 12,
       }}
     >
-      {unavailable ? "—" : `${v > 0 ? "+" : ""}${v.toFixed(1)}${suffix}`}
+      {unavailable ? "—" : suffix === "%" ? formatPercent(v) : `${v > 0 ? "+" : ""}${v.toFixed(1)}${suffix}`}
     </span>
   );
 };
@@ -177,7 +177,7 @@ function MiniMap({
               key={s.id}
               role="button"
               tabIndex={0}
-              aria-label={`${s.name}: ${s.leadership} leadership, ${s.diffusion} diffusion, 20D excess return ${s.excess20d !== null ? s.excess20d.toFixed(1) : "N/A"}pp${isOffScale ? " (off scale)" : ""}`}
+              aria-label={`${s.name}: ${formatEnumLabel(s.leadership)} leadership, ${formatEnumLabel(s.diffusion)} diffusion, 20D excess return ${formatPercent(s.excess20d)}${isOffScale ? " (off scale)" : ""}`}
               onClick={() => onSelect(s)}
               onKeyDown={(event) => {
                 if (event.key === "Enter" || event.key === " ") {
@@ -188,7 +188,7 @@ function MiniMap({
               className="map-group"
               style={{ cursor: "pointer" }}
             >
-              <title>{`${s.name}: ${s.leadership} / ${s.diffusion}, 20D excess ${s.excess20d !== null ? s.excess20d.toFixed(1) : "N/A"}pp${isOffScale ? " (off scale: value outside domain)" : ""}`}</title>
+              <title>{`${s.name}: ${formatEnumLabel(s.leadership)} / ${formatEnumLabel(s.diffusion)}, 20D excess ${formatPercent(s.excess20d)}${isOffScale ? " (off scale: value outside domain)" : ""}`}</title>
               <circle cx={px} cy={py} r={r} fill="#fff" stroke={c} strokeWidth={1.5} />
               <circle cx={px} cy={py} r={3} fill={c} />
               {isOffScale && (
@@ -305,7 +305,7 @@ function ShiftFeed({ items, onSelect }: { items: SectorData[]; onSelect: (s: Sec
                       : "#b34e4c",
               }}
             >
-              {breadthChange === null ? "—" : `${breadthChange > 0 ? "+" : ""}${breadthChange.toFixed(1)}pp`}
+              {formatPercent(breadthChange)}
             </span>
           </div>
         </button>
@@ -326,7 +326,7 @@ function buildMarketRead(sectors: SectorData[], hasComparable: boolean): string 
   if (broadening.length === 0 && narrowing.length === 0) {
     return `The snapshot has ${leading.length} leading group${leading.length === 1 ? "" : "s"}; diffusion change is not confirmed across the universe.`;
   }
-  return `Leadership is broadening in ${broadening.length} group${broadening.length === 1 ? "" : "s"} and narrowing in ${narrowing.length === 1 ? "" : "s"}; ${leading.length} group${leading.length === 1 ? "" : "s"} are leading.`;
+  return `Leadership is broadening in ${broadening.length} group${broadening.length === 1 ? "" : "s"} and narrowing in ${narrowing.length} group${narrowing.length === 1 ? "" : "s"}; ${leading.length} group${leading.length === 1 ? "" : "s"} are leading.`;
 }
 
 function summaryStats(sectors: SectorData[], hasComparable: boolean): Array<[string, string]> {
@@ -470,7 +470,7 @@ export default function WhatChanged() {
     [sort, sectors],
   );
   if (!data) return null;
-  const select = (s: SectorData) => navigate("/explorer", { state: { sectorId: s.id } });
+  const select = (s: SectorData) => navigate(`/explorer?taxonomy=SECTOR&group=${encodeURIComponent(s.id)}`);
 
   const asOf = formatAsOf(payload?.as_of);
   const hasComparable = dataSources.trajectory;
@@ -489,7 +489,7 @@ export default function WhatChanged() {
             <div className="eyebrow-muted">Indonesian Equities · Market Intelligence</div>
             <EvidenceBadge kind="SNAPSHOT" compact />
           </div>
-          <h1 style={{ fontSize: 30, letterSpacing: "-.045em", margin: "5px 0 0" }}>{hasComparable ? "WHAT CHANGED?" : "CURRENT SNAPSHOT"}</h1>
+          <h1 style={{ fontSize: 30, letterSpacing: "-.045em", margin: "5px 0 0" }}>{hasComparable ? "What changed" : "Current snapshot"}</h1>
         </div>
         <span className="eyebrow-muted">EOD research / {asOf} · {hasComparable ? "comparable prior available" : "change comparison unavailable"}</span>
       </div>
@@ -595,8 +595,8 @@ export default function WhatChanged() {
             </div>
             <div>
               <div style={{ fontWeight: 600, marginBottom: 4 }}>Breadth & concentration movers</div>
-              <div>Fastest breadth expansion: {changes.fastestExpansion.length ? changes.fastestExpansion.map((s) => `${s.name} (${(delta(s) ?? 0).toFixed(1)}pp)`).join(", ") : "—"}</div>
-              <div>Fastest breadth contraction: {changes.fastestContraction.length ? changes.fastestContraction.map((s) => `${s.name} (${(delta(s) ?? 0).toFixed(1)}pp)`).join(", ") : "—"}</div>
+              <div>Fastest breadth expansion: {changes.fastestExpansion.length ? changes.fastestExpansion.map((s) => `${s.name} (${formatPercent(delta(s))})`).join(", ") : "—"}</div>
+              <div>Fastest breadth contraction: {changes.fastestContraction.length ? changes.fastestContraction.map((s) => `${s.name} (${formatPercent(delta(s))})`).join(", ") : "—"}</div>
               <div>Highest concentration: {changes.highConcentration.length ? changes.highConcentration.map((s) => `${s.name} ${s.concentration}%`).join(", ") : "—"}</div>
             </div>
           </div>
@@ -683,7 +683,7 @@ export default function WhatChanged() {
                   <td style={{ padding: "10px 8px", textAlign: "right" }}>{num(s.excess60d)}</td>
                   <td style={{ padding: "10px 8px", textAlign: "right", fontFamily: "Geist Mono", fontSize: 12 }}>{s.breadth === null ? "—" : `${s.breadth}%`}</td>
                   <td style={{ padding: "10px 8px", textAlign: "right" }}>
-                    {delta(s) === null ? "—" : num(delta(s)!, "pp")}
+                    {num(delta(s)!)}
                   </td>
                   <td style={{ padding: "10px 8px", textAlign: "right", fontFamily: "Geist Mono", fontSize: 12 }}>{s.concentration === null ? "—" : `${s.concentration}%`}</td>
                   <td style={{ padding: "10px 8px", textAlign: "right", fontFamily: "Geist Mono", fontSize: 12 }}>{s.persistence} obs.</td>

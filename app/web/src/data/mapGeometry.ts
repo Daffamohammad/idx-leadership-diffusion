@@ -51,14 +51,14 @@ export const CURRENT_BREADTH_DOMAIN: LeadershipDiffusionDomain = {
 };
 
 export const MAP_AXIS_LABELS = {
-  x: "20D excess return vs IHSG (pp)",
-  y: "20D breadth delta (pp)",
+  x: "20D excess return vs IHSG (%)",
+  y: "20D breadth delta (%)",
   title: "Leadership × Diffusion Map",
   subtitle: "Relative leadership / breadth momentum",
 } as const;
 
 export const CURRENT_BREADTH_AXIS_LABELS = {
-  x: "20D excess return vs IHSG (pp)",
+  x: "20D excess return vs IHSG (%)",
   y: "20D breadth (current snapshot)",
   title: "Leadership × Current Breadth Map",
   subtitle: "Relative leadership / current participation",
