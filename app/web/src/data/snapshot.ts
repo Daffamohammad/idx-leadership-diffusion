@@ -641,6 +641,7 @@ export interface SnapshotPayload {
   transitions: TransitionRow[];
   features: FeatureRow[];
   constituents: unknown[];
+  memberships?: TaxonomyMembershipData[];
   // New exports use an array of persisted absolute breadth observations.
   // Legacy payloads may still carry an empty object.
   breadth_history: SnapshotBreadthHistoryPoint[] | Record<string, unknown>;

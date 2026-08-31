@@ -30,7 +30,7 @@ import {
 } from "recharts";
 import { leadershipColor } from "../components/StatusChips";
 import PriceChart from "../components/PriceChart";
-import { formatDateLabel, formatEnumLabel, formatSnapshotId } from "../data/format";
+import { formatCountLabel, formatDateLabel, formatEnumLabel, formatSnapshotId } from "../data/format";
 import { EvidenceBadge } from "../components/EvidenceModel";
 
 const card: React.CSSProperties = {
@@ -120,10 +120,10 @@ const flowCfg: Record<FlowState, { label: string; color: string }> = {
 function ConstituentTable({ constituents }: { constituents: ConstituentData[] }) {
   return (
     <div className="table-scroll" style={{ ...card }}>
-      <table style={{ width: "100%", minWidth: 760, borderCollapse: "collapse" }}>
+      <table style={{ width: "100%", minWidth: 1180, borderCollapse: "collapse" }}>
         <thead>
           <tr style={{ borderBottom: "1px solid #ebebeb" }}>
-            {["Ticker", "Company", "20D Ret", "20D Exc", "60D Exc", "Part.", "Abs. Move", "Foreign Flow"].map(
+            {["Ticker", "Company", "YTD Ret", "YTD Exc", "20D Ret", "20D Exc", "60D Exc", "Part.", "Abs. Move", "Membership", "Foreign Flow"].map(
               (col) => (
                 <th
                   key={col}
@@ -166,6 +166,12 @@ function ConstituentTable({ constituents }: { constituents: ConstituentData[] })
                   {c.name || "—"}
                 </td>
                 <td style={{ padding: "9px 12px", textAlign: "right" }}>
+                  <Num val={c.returnYtd} />
+                </td>
+                <td style={{ padding: "9px 12px", textAlign: "right" }}>
+                  <Num val={c.excessYtd} />
+                </td>
+                <td style={{ padding: "9px 12px", textAlign: "right" }}>
                   <Num val={c.return20d} />
                 </td>
                 <td style={{ padding: "9px 12px", textAlign: "right" }}>
@@ -187,6 +193,9 @@ function ConstituentTable({ constituents }: { constituents: ConstituentData[] })
                 </td>
                 <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "Geist Mono, monospace", fontSize: 12, color: "#171717" }}>
                   {c.contribution === null ? "—" : `${c.contribution}%`}
+                </td>
+                <td style={{ padding: "9px 12px", textAlign: "right", fontSize: 11, color: "#666", whiteSpace: "nowrap" }}>
+                  {formatEnumLabel(c.membershipType)}
                 </td>
                 <td
                   style={{
@@ -302,11 +311,18 @@ function TaxonomyGroupDetail({
   data: AdaptedSnapshot;
 }) {
   const backPath = group.taxonomyKind === "KONGLO" ? "/maps/konglo" : "/maps/themes";
-  const members = group.memberships.filter((member) => member.membership_type !== "EXCLUDED");
-  const metric = (value: number | null, suffix = "pp") =>
-    value === null || !Number.isFinite(value)
-      ? "—"
-      : `${value >= 0 ? "+" : ""}${value.toFixed(1)}${suffix}`;
+  const members = group.memberships;
+  const quantitativeMembers = members.filter((member) => member.membership_type !== "EXCLUDED");
+  const groupKey = `${group.taxonomyId}::${group.id}`;
+  const constituents = data.constituentsByTaxonomyGroup[groupKey] ?? [];
+  const pricePoints = data.taxonomyGroupPriceHistory[groupKey] ?? [];
+  const metric = (value: number | null | undefined, suffix = "%") => {
+    if (value == null || !Number.isFinite(value)) return "—";
+    return `${value >= 0 ? "+" : ""}${value.toFixed(1)}${suffix}`;
+  };
+  const ytdCoverage = group.constituents > 0
+    ? `${group.ytdEligible}/${group.constituents}`
+    : "—";
 
   return (
     <div className="taxonomy-detail-page content-shell" style={{ padding: "36px var(--page-gutter)", maxWidth: "var(--content-max)" }}>
@@ -325,7 +341,7 @@ function TaxonomyGroupDetail({
             {group.name}
           </h1>
           <p style={{ margin: "8px 0 0", color: "#686e73", fontSize: 13, lineHeight: 1.5 }}>
-            Aggregate metrics use the current snapshot, while membership definitions remain a static analyst research lens. This is not an official IDX classification.
+            Aggregate metrics use the current snapshot. Membership is an analyst-defined research lens and is not an official IDX classification.
           </p>
         </div>
         <Link to="/overview" style={{ padding: "9px 13px", border: "1px solid #202325", color: "#202325", textDecoration: "none", fontSize: 12 }}>
@@ -341,15 +357,58 @@ function TaxonomyGroupDetail({
             {formatEnumLabel(group.dataQuality)}
           </span>
           <span style={{ fontFamily: "Geist Mono, monospace", fontSize: 11, color: "#666" }}>
-            {group.eligible} eligible / {group.constituents} total
+            {formatCountLabel(group.constituents, "ticker")} · {group.eligible} with 20D history
           </span>
         </div>
-        <div className="explorer-metrics" style={{ display: "flex", gap: 12, marginTop: 16 }}>
-          <MetricCard label="20D excess" value={metric(group.excess20d)} sub="vs IHSG" />
+        <div className="explorer-metrics" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginTop: 16 }}>
+          <MetricCard label="YTD excess" value={metric(group.excessYtd)} sub={group.ytdStartDate ? `from ${formatDateLabel(group.ytdStartDate)} vs IHSG` : "baseline unavailable"} />
+          <MetricCard label="YTD group return" value={metric(group.returnYtd)} sub={`${ytdCoverage} with YTD history`} />
+          <MetricCard label="IHSG YTD" value={metric(group.benchmarkYtd)} sub="same dates and price basis" />
+          <MetricCard label="20D excess" value={metric(group.excess20d)} sub="diagnostic vs IHSG" />
           <MetricCard label="Breadth" value={metric(group.breadth, "%")} sub={group.breadthDelta === null ? "change unavailable" : `${metric(group.breadthDelta)} vs prior`} />
           <MetricCard label="Concentration" value={metric(group.concentration, "%")} sub="Top-3 contribution" />
-          <MetricCard label="Members" value={String(group.constituents)} sub={`${members.length} membership records`} />
         </div>
+      </div>
+
+      <SectionHead label="Performance and membership" />
+      <div style={{ ...card, padding: "16px 18px", marginBottom: 12 }}>
+        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 8 }}>
+          <div style={{ fontSize: 13, fontWeight: 500, color: "#171717" }}>Constituent performance</div>
+          <span className="eyebrow-muted">YTD is primary · 20D and 60D are diagnostics</span>
+        </div>
+        {constituents.length > 0 ? (
+          <ConstituentTable constituents={constituents} />
+        ) : (
+          <div style={{ color: "#686e73", fontSize: 12, padding: "12px 0" }}>
+            Constituent rows unavailable in this snapshot. Membership definitions are preserved below.
+          </div>
+        )}
+      </div>
+
+      <div style={{ ...card, padding: "16px 18px", marginBottom: 12 }}>
+        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 8 }}>
+          <div style={{ fontSize: 13, fontWeight: 500, color: "#171717" }}>Contribution and price context</div>
+          <span className="eyebrow-muted">Persisted price history only</span>
+        </div>
+        {constituents.length > 0 && <ContribBars constituents={constituents} />}
+        {pricePoints.length > 0 ? (
+          <div style={{ marginTop: 16 }}>
+            <PriceChart
+              groupName={group.name}
+              points={pricePoints.map((point) => ({ date: point.date, value: point.value }))}
+              benchmarkPoints={pricePoints.filter((point) => point.benchmark !== null).map((point) => ({ date: point.date, value: point.benchmark }))}
+              asOf={data.payload.as_of}
+              source="Persisted snapshot prices"
+              metricLabel="Equal-weight group index · rebased to 100"
+              referenceValue={100}
+              height={260}
+            />
+          </div>
+        ) : (
+          <div style={{ marginTop: 12, color: "#686e73", fontSize: 12 }}>
+            No persisted group price history is available. No synthetic history is shown.
+          </div>
+        )}
       </div>
 
       <SectionHead label="Membership evidence" />
@@ -365,14 +424,14 @@ function TaxonomyGroupDetail({
             </thead>
             <tbody>
               {members.map((member, index) => (
-                <tr key={`${member.ticker}-${member.membership_type}`} style={{ borderBottom: index < members.length - 1 ? "1px solid #ebebeb" : "none" }}>
+                <tr key={`${member.ticker}-${member.membership_type}`} style={{ borderBottom: index < members.length - 1 ? "1px solid #ebebeb" : "none", opacity: member.membership_type === "EXCLUDED" ? 0.6 : 1 }}>
                   <td style={{ padding: "10px 12px", fontFamily: "Geist Mono, monospace", fontSize: 12, fontWeight: 600 }}>
                     <Link to={`/ticker/${encodeURIComponent(member.ticker)}`} style={{ color: "#171717" }}>{member.ticker}</Link>
                   </td>
                   <td style={{ padding: "10px 12px", textAlign: "right", fontSize: 12 }}>{formatEnumLabel(member.membership_type)}</td>
                   <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "Geist Mono, monospace", fontSize: 12 }}>{Math.round(member.confidence * 100)}%</td>
                   <td style={{ padding: "10px 12px", fontSize: 12, maxWidth: 360 }}>
-                    {member.source ? <a href={member.source} target="_blank" rel="noreferrer">Source</a> : "—"}
+                    {member.source?.startsWith("http") ? <a href={member.source} target="_blank" rel="noreferrer">Official source</a> : member.source || "—"}
                   </td>
                   <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "Geist Mono, monospace", fontSize: 11, color: "#666", whiteSpace: "nowrap" }}>{formatDateLabel(member.source_as_of)}</td>
                 </tr>
@@ -387,7 +446,7 @@ function TaxonomyGroupDetail({
       </div>
 
       <div style={{ marginTop: 12, color: "#686e73", fontSize: 11, lineHeight: 1.5 }}>
-        Snapshot: {formatSnapshotId(data.payload.snapshot_id, data.payload.as_of)} · As of {formatDateLabel(data.payload.as_of)} · Memberships are retained from the versioned taxonomy definition.
+        Snapshot: {formatSnapshotId(data.payload.snapshot_id, data.payload.as_of)} · As of {formatDateLabel(data.payload.as_of)} · {quantitativeMembers.length} membership records enter quantitative rows; excluded memberships remain visible for audit.
       </div>
     </div>
   );

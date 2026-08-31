@@ -59,11 +59,22 @@ export interface ConstituentData {
   ticker: string;
   name: string;
   return20d: number | null;
+  returnYtd: number | null;
+  benchmarkYtd: number | null;
+  excessYtd: number | null;
+  ytdStartDate: string | null;
+  ytdEndDate: string | null;
   excess20d: number | null;
   excess60d: number | null;
   participating: boolean | null;
   contribution: number | null;
   foreignFlow: FlowState;
+  membershipType?: TaxonomyMembershipType;
+  confidence?: number;
+  source?: string;
+  sourceAsOf?: string | null;
+  dataQuality?: string;
+  priceHistoryAvailable?: boolean;
 }
 
 export type BreadthHistoryPoint = SnapshotBreadthHistoryPoint;
@@ -100,6 +111,11 @@ export interface TaxonomyGroupData {
   diffusion: string;
   excess20d: number | null;
   excess60d: number | null;
+  returnYtd: number | null;
+  excessYtd: number | null;
+  benchmarkYtd: number | null;
+  ytdStartDate: string | null;
+  ytdEligible: number;
   breadth: number | null;
   prevBreadth: number | null;
   breadthDelta: number | null;
@@ -271,6 +287,8 @@ export interface AdaptedSnapshot {
   trajectoryAvailable: boolean;
   coverageHonest: CoverageHonest;
   constituentsByGroup: Record<string, ConstituentData[]>;
+  constituentsByTaxonomyGroup: Record<string, ConstituentData[]>;
+  taxonomyGroupPriceHistory: Record<string, GroupPricePoint[]>;
   featureLookup: Record<string, FeatureRow>;
   securityLookup: Record<string, { name: string; group_id: string; sector: string }>;
   taxonomyViews: Record<string, TaxonomyView>;
@@ -382,10 +400,18 @@ function normalizeTaxonomyGroupAggregate(
       typeof raw.coverage_pct === "number" ? raw.coverage_pct : 0,
     equal_weight_return_20d: number(raw.equal_weight_return_20d),
     equal_weight_return_60d: number(raw.equal_weight_return_60d),
+    equal_weight_return_ytd: number(raw.equal_weight_return_ytd),
     excess_return_20d: number(raw.excess_return_20d),
     excess_return_60d: number(raw.excess_return_60d),
+    excess_return_ytd: number(raw.excess_return_ytd),
     benchmark_return_20d: number(raw.benchmark_return_20d),
     benchmark_return_60d: number(raw.benchmark_return_60d),
+    benchmark_return_ytd: number(raw.benchmark_return_ytd),
+    ytd_start_date: typeof raw.ytd_start_date === "string" ? raw.ytd_start_date : null,
+    ytd_eligible_constituent_count:
+      typeof raw.ytd_eligible_constituent_count === "number"
+        ? raw.ytd_eligible_constituent_count
+        : 0,
     breadth_outperforming: number(raw.breadth_outperforming),
     prev_breadth_outperforming: number(raw.prev_breadth_outperforming),
     breadth_delta: number(raw.breadth_delta),
@@ -546,6 +572,11 @@ function adaptTaxonomyView(view: TaxonomyView): {
       diffusion: group.diffusion_state,
       excess20d: group.excess_return_20d,
       excess60d: group.excess_return_60d,
+      returnYtd: group.equal_weight_return_ytd ?? null,
+      excessYtd: group.excess_return_ytd ?? null,
+      benchmarkYtd: group.benchmark_return_ytd ?? null,
+      ytdStartDate: group.ytd_start_date ?? null,
+      ytdEligible: group.ytd_eligible_constituent_count ?? 0,
       breadth: group.breadth_outperforming,
       prevBreadth: group.prev_breadth_outperforming,
       breadthDelta: group.breadth_delta,
@@ -1050,6 +1081,87 @@ function formatVisibleNote(value: string): string {
   );
 }
 
+type SecurityLookupEntry = { name: string; group_id: string; sector: string };
+
+function buildConstituentRow(
+  ticker: string,
+  feature: FeatureRow | undefined,
+  security: SecurityLookupEntry | undefined,
+  tickerPriceHistory: Record<string, GroupPricePoint[]>,
+  membership?: TaxonomyMembershipData,
+): ConstituentData {
+  const hasPrimaryMetric =
+    feature?.return_20d !== null && feature?.return_20d !== undefined &&
+    feature?.excess_return_20d !== null && feature?.excess_return_20d !== undefined;
+  return {
+    ticker,
+    name: security?.name ?? "—",
+    return20d: feature?.return_20d ?? null,
+    returnYtd: feature?.return_ytd ?? null,
+    benchmarkYtd: feature?.benchmark_return_ytd ?? null,
+    excessYtd: feature?.excess_return_ytd ?? null,
+    ytdStartDate: feature?.return_ytd_start_date ?? null,
+    ytdEndDate: feature?.return_ytd_end_date ?? null,
+    excess20d: feature?.excess_return_20d ?? null,
+    excess60d: feature?.excess_return_60d ?? null,
+    participating:
+      feature?.excess_return_20d === null || feature?.excess_return_20d === undefined
+        ? null
+        : feature.excess_return_20d > 0,
+    contribution: null,
+    foreignFlow: "DATA_GAP",
+    membershipType: membership?.membership_type,
+    confidence: membership?.confidence,
+    source: membership?.source,
+    sourceAsOf: membership?.source_as_of ?? null,
+    dataQuality: !feature || !hasPrimaryMetric ? "DATA_GAP" : feature.excess_return_ytd == null ? "READY_WITH_GAPS" : "READY",
+    priceHistoryAvailable: (tickerPriceHistory[ticker] ?? []).length > 0,
+  };
+}
+
+function assignContributions(rows: ConstituentData[]): void {
+  const totalAbs = rows.reduce(
+    (total, row) => total + (row.return20d === null ? 0 : Math.abs(row.return20d)),
+    0,
+  );
+  for (const row of rows) {
+    row.contribution =
+      row.return20d !== null && totalAbs > 0
+        ? Math.round((Math.abs(row.return20d) / totalAbs) * 100)
+        : null;
+  }
+}
+
+function buildTaxonomyGroupPriceSeries(
+  tickers: string[],
+  tickerPriceHistory: Record<string, GroupPricePoint[]>,
+): GroupPricePoint[] {
+  const byDate = new Map<string, { values: number[]; benchmarks: number[] }>();
+  for (const ticker of tickers) {
+    for (const point of tickerPriceHistory[ticker] ?? []) {
+      if (!Number.isFinite(point.value) || point.value <= 0) continue;
+      const bucket = byDate.get(point.date) ?? { values: [], benchmarks: [] };
+      bucket.values.push(point.value);
+      if (point.benchmark !== null && Number.isFinite(point.benchmark) && point.benchmark > 0) {
+        bucket.benchmarks.push(point.benchmark);
+      }
+      byDate.set(point.date, bucket);
+    }
+  }
+  return [...byDate.entries()]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .flatMap(([date, bucket]) => {
+      if (bucket.values.length === 0) return [];
+      return [{
+        date,
+        value: bucket.values.reduce((sum, value) => sum + value, 0) / bucket.values.length,
+        benchmark: bucket.benchmarks.length > 0
+          ? bucket.benchmarks.reduce((sum, value) => sum + value, 0) / bucket.benchmarks.length
+          : null,
+      }];
+    });
+}
+
 function adaptResearchEvents(
   bundle: ResearchEventBundle | undefined,
 ): ResearchEventView[] {
@@ -1232,45 +1344,39 @@ export function adaptSnapshot(
   for (const f of payload.features) {
     featureLookup[f.ticker] = f;
   }
+  const tickerPriceHistory = normalizeGroupPriceHistory(payload.ticker_price_history);
   const constituentsByGroup: Record<string, ConstituentData[]> = {};
-  for (const f of payload.features) {
-    const sm = securityLookup[f.ticker];
-    if (!sm) continue;
-    const bucket = constituentsByGroup[sm.group_id] ?? [];
-    bucket.push({
-      ticker: f.ticker,
-      name: sm.name,
-      return20d: f.return_20d,
-      excess20d: f.excess_return_20d,
-      excess60d: f.excess_return_60d,
-      participating:
-        f.excess_return_20d === null || f.excess_return_20d === undefined
-          ? null
-          : f.excess_return_20d > 0,
-      contribution: null,
-      foreignFlow: "DATA_GAP",
-    });
-    constituentsByGroup[sm.group_id] = bucket;
+  const sectorTickersByGroup: Record<string, Set<string>> = {};
+  for (const security of securityMaster) {
+    if (!security.group_id) continue;
+    const bucket = sectorTickersByGroup[security.group_id] ?? new Set<string>();
+    bucket.add(security.ticker);
+    sectorTickersByGroup[security.group_id] = bucket;
   }
-  for (const groupId of Object.keys(constituentsByGroup)) {
-    const list = constituentsByGroup[groupId];
-    const totalAbs = list.reduce(
-      (acc, c) => acc + (c.return20d === null ? 0 : Math.abs(c.return20d)),
-      0,
-    );
-    for (const c of list) {
-      c.contribution =
-        c.return20d !== null && totalAbs > 0
-          ? Math.round((Math.abs(c.return20d) / totalAbs) * 100)
-          : null;
-    }
+  for (const feature of payload.features) {
+    const security = securityLookup[feature.ticker];
+    if (!security) continue;
+    const bucket = sectorTickersByGroup[security.group_id] ?? new Set<string>();
+    bucket.add(feature.ticker);
+    sectorTickersByGroup[security.group_id] = bucket;
+  }
+  for (const [groupId, tickers] of Object.entries(sectorTickersByGroup)) {
+    const rows = [...tickers]
+      .sort()
+      .map((ticker) => buildConstituentRow(
+        ticker,
+        featureLookup[ticker],
+        securityLookup[ticker],
+        tickerPriceHistory,
+      ));
+    assignContributions(rows);
+    constituentsByGroup[groupId] = rows;
   }
 
   // A transition delta is not an absolute breadth level. Only consume the
   // exporter-owned history array, which is built from persisted group rows.
   const breadthHistory = normalizeBreadthHistory(payload.breadth_history);
   const groupPriceHistory = normalizeGroupPriceHistory(payload.group_price_history);
-  const tickerPriceHistory = normalizeGroupPriceHistory(payload.ticker_price_history);
 
   // New sections: taxonomy views, foreign flow, research events.
   const taxonomyViews: Record<string, TaxonomyView> = {};
@@ -1285,7 +1391,56 @@ export function adaptSnapshot(
       for (const [gid, group] of Object.entries(groupData)) {
         taxonomyGroups[`${view.taxonomy_id}::${gid}`] = group;
       }
-      if (!activeTaxonomyId) activeTaxonomyId = view.taxonomy_id;
+      if (!activeTaxonomyId || view.taxonomy_kind === "SECTOR") {
+        activeTaxonomyId = view.taxonomy_id;
+      }
+    }
+  }
+  const constituentsByTaxonomyGroup: Record<string, ConstituentData[]> = {};
+  const taxonomyGroupPriceHistory: Record<string, GroupPricePoint[]> = {};
+  for (const view of Object.values(taxonomyViews)) {
+    for (const group of view.groups) {
+      const key = `${view.taxonomy_id}::${group.taxonomy_group_id}`;
+      const memberships = (view.memberships?.length
+        ? view.memberships
+        : payload.memberships ?? []
+      ).filter(
+        (membership) =>
+          membership.taxonomy_group_id === group.taxonomy_group_id &&
+          membership.membership_type !== "EXCLUDED",
+      );
+      const uniqueMemberships = memberships.filter(
+        (membership, index, all) =>
+          all.findIndex(
+            (candidate) =>
+              candidate.ticker === membership.ticker &&
+              candidate.membership_type === membership.membership_type,
+          ) === index,
+      );
+      let rows: ConstituentData[];
+      if (uniqueMemberships.length > 0) {
+        rows = uniqueMemberships
+          .map((membership) => buildConstituentRow(
+            membership.ticker.toUpperCase(),
+            featureLookup[membership.ticker] ?? featureLookup[membership.ticker.toUpperCase()],
+            securityLookup[membership.ticker] ?? securityLookup[membership.ticker.toUpperCase()],
+            tickerPriceHistory,
+            membership,
+          ));
+      } else if (view.taxonomy_kind === "SECTOR") {
+        // taxonomy-view-v1 has no root membership list. Reuse the sector
+        // resolver only for that legacy view; do not invent prototype members.
+        rows = (constituentsByGroup[group.taxonomy_group_id] ?? []).map((row) => ({ ...row }));
+      } else {
+        rows = [];
+      }
+      assignContributions(rows);
+      constituentsByTaxonomyGroup[key] = rows;
+      const priceSeries = buildTaxonomyGroupPriceSeries(
+        rows.map((row) => row.ticker),
+        tickerPriceHistory,
+      );
+      if (priceSeries.length > 0) taxonomyGroupPriceHistory[key] = priceSeries;
     }
   }
   const foreignFlowAdapted = adaptForeignFlow(payload.foreign_flow_sample);
@@ -1347,6 +1502,8 @@ export function adaptSnapshot(
       taxonomy_coverage_pct: payload.coverage?.taxonomy_coverage_pct,
     },
     constituentsByGroup,
+    constituentsByTaxonomyGroup,
+    taxonomyGroupPriceHistory,
     featureLookup,
     securityLookup,
     taxonomyViews,
