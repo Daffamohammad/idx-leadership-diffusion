@@ -7,10 +7,13 @@ and themes so the same map surface can render any taxonomy.
 
 Outputs (per group):
 
-* ``equal_weight_return_20d`` and ``equal_weight_return_60d`` — mean of
+* ``equal_weight_return_ytd`` / ``equal_weight_return_20d`` /
+  ``equal_weight_return_60d`` — mean of
   ticker-level returns in the group, equally weighted.
 * ``excess_return_20d`` / ``excess_return_60d`` — group return minus the
   IHSG benchmark return over the same horizon.
+* ``excess_return_ytd`` — YTD group return minus the date-matched IHSG
+  return, or ``None`` when the prior-year-end baseline is unavailable.
 * ``breadth_outperforming`` — fraction of group members whose 20D excess
   return is positive.
 * ``breadth_delta`` — change in breadth vs a comparable prior snapshot
@@ -40,6 +43,7 @@ import pandas as pd
 from ..features.relative_strength import (
     compute_benchmark_returns,
     compute_excess_returns,
+    compute_ytd_excess_returns,
 )
 from ..signals.diffusion_v2 import classify_diffusion_v2, to_v1_state
 from ..signals.leadership import classify_leadership
@@ -64,6 +68,11 @@ class TaxonomyAggregate:
     excess_return_60d: float | None
     benchmark_return_20d: float | None
     benchmark_return_60d: float | None
+    equal_weight_return_ytd: float | None
+    excess_return_ytd: float | None
+    benchmark_return_ytd: float | None
+    ytd_start_date: date | None
+    ytd_eligible_constituent_count: int
     breadth_outperforming: float | None
     prev_breadth_outperforming: float | None
     breadth_delta: float | None
@@ -240,6 +249,26 @@ def aggregate_taxonomy(
         security_price_col=resolved_price_col,
         benchmark_price_col="close",
     )
+    ytd_features = compute_ytd_excess_returns(
+        prices,
+        benchmark_df,
+        as_of=resolved_as_of,
+        security_price_col=resolved_price_col,
+        benchmark_price_col="close",
+    )
+    if features.empty:
+        features = pd.DataFrame(columns=["ticker"])
+    if not ytd_features.empty:
+        features = features.merge(ytd_features, on="ticker", how="left")
+    else:
+        for column in (
+            "return_ytd",
+            "benchmark_return_ytd",
+            "excess_return_ytd",
+            "return_ytd_start_date",
+            "return_ytd_end_date",
+        ):
+            features[column] = None
     benchmark_returns = compute_benchmark_returns(
         benchmark_df,
         horizons=_HORIZONS,
@@ -273,14 +302,23 @@ def aggregate_taxonomy(
         coverage_pct = (
             100.0 * eligible_count / constituent_count if constituent_count else 0.0
         )
-        if eligible_features.empty:
-            aggregates.append(_empty_aggregate(taxonomy, group_id, members))
-            continue
         group_20d = _finite_mean(eligible_features, "return_20d")
         group_60d = _finite_mean(group_features, "return_60d")
         excess_5d = _finite_mean(group_features, "excess_return_5d")
         excess_20d = _finite_mean(eligible_features, "excess_return_20d")
         excess_60d = _finite_mean(group_features, "excess_return_60d")
+        ytd_features_group = group_features.dropna(
+            subset=["return_ytd", "excess_return_ytd"]
+        )
+        group_ytd = _finite_mean(ytd_features_group, "return_ytd")
+        excess_ytd = _finite_mean(ytd_features_group, "excess_return_ytd")
+        benchmark_ytd = _finite_mean(ytd_features_group, "benchmark_return_ytd")
+        ytd_start_values = (
+            ytd_features_group["return_ytd_start_date"].dropna()
+            if "return_ytd_start_date" in ytd_features_group.columns
+            else pd.Series(dtype=object)
+        )
+        ytd_start_date = ytd_start_values.iloc[0] if not ytd_start_values.empty else None
 
         # Breadth = fraction of members whose 20D excess > 0
         breadth = (
@@ -369,6 +407,17 @@ def aggregate_taxonomy(
             excess_return_60d=_round_or_none(excess_60d, 4),
             benchmark_return_20d=_round_or_none(benchmark_20d, 4),
             benchmark_return_60d=_round_or_none(benchmark_60d, 4),
+            equal_weight_return_ytd=_round_or_none(group_ytd, 4),
+            excess_return_ytd=_round_or_none(excess_ytd, 4),
+            benchmark_return_ytd=_round_or_none(benchmark_ytd, 4),
+            ytd_start_date=(
+                pd.Timestamp(ytd_start_date).date()
+                if ytd_start_date is not None
+                else None
+            ),
+            ytd_eligible_constituent_count=int(
+                ytd_features_group["ticker"].nunique()
+            ),
             breadth_outperforming=_round_or_none(breadth, 2),
             prev_breadth_outperforming=_round_or_none(prev_breadth_value, 2),
             breadth_delta=_round_or_none(breadth_delta, 2),
@@ -410,6 +459,11 @@ def _empty_aggregate(
         excess_return_60d=None,
         benchmark_return_20d=None,
         benchmark_return_60d=None,
+        equal_weight_return_ytd=None,
+        excess_return_ytd=None,
+        benchmark_return_ytd=None,
+        ytd_start_date=None,
+        ytd_eligible_constituent_count=0,
         breadth_outperforming=None,
         prev_breadth_outperforming=None,
         breadth_delta=None,

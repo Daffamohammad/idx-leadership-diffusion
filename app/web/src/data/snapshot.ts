@@ -150,6 +150,11 @@ export interface GroupRow {
   group_excess_return_5d: number | null;
   group_excess_return_20d: number | null;
   group_excess_return_60d: number | null;
+  group_return_ytd?: number | null;
+  group_excess_return_ytd?: number | null;
+  benchmark_return_ytd?: number | null;
+  ytd_start_date?: string | null;
+  ytd_eligible_count?: number;
   breadth_positive: number | null;
   breadth_outperforming: number | null;
   breadth_delta: number | null;
@@ -190,9 +195,14 @@ export interface FeatureRow {
   return_5d: number | null;
   return_20d: number | null;
   return_60d: number | null;
+  return_ytd?: number | null;
+  return_ytd_start_date?: string | null;
+  return_ytd_end_date?: string | null;
   excess_return_5d: number | null;
   excess_return_20d: number | null;
   excess_return_60d: number | null;
+  benchmark_return_ytd?: number | null;
+  excess_return_ytd?: number | null;
   relative_strength_level: number | null;
 }
 
@@ -518,10 +528,15 @@ export interface TaxonomyGroupAggregate {
   coverage_pct: number;
   equal_weight_return_20d: number | null;
   equal_weight_return_60d: number | null;
+  equal_weight_return_ytd?: number | null;
   excess_return_20d: number | null;
   excess_return_60d: number | null;
+  excess_return_ytd?: number | null;
   benchmark_return_20d: number | null;
   benchmark_return_60d: number | null;
+  benchmark_return_ytd?: number | null;
+  ytd_start_date?: string | null;
+  ytd_eligible_constituent_count?: number;
   breadth_outperforming: number | null;
   prev_breadth_outperforming: number | null;
   breadth_delta: number | null;

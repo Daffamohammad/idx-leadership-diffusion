@@ -66,6 +66,11 @@ class GroupSnapshot(BaseModel):
     group_excess_return_5d: Optional[float] = None
     group_excess_return_20d: Optional[float] = None
     group_excess_return_60d: Optional[float] = None
+    group_return_ytd: Optional[float] = None
+    group_excess_return_ytd: Optional[float] = None
+    benchmark_return_ytd: Optional[float] = None
+    ytd_start_date: Optional[date] = None
+    ytd_eligible_count: int = Field(default=0, ge=0)
 
     # Internal helper for transition math. Kept in the model so callers
     # can use snapshots interchangeably; not serialized in the canonical

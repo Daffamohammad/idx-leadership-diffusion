@@ -21,15 +21,20 @@ class SecurityFeatureSnapshot(BaseModel):
     return_5d: Optional[float] = None
     return_20d: Optional[float] = None
     return_60d: Optional[float] = None
+    return_ytd: Optional[float] = None
+    return_ytd_start_date: Optional[date] = None
+    return_ytd_end_date: Optional[date] = None
 
     benchmark_return_5d: Optional[float] = None
     benchmark_return_20d: Optional[float] = None
     benchmark_return_60d: Optional[float] = None
+    benchmark_return_ytd: Optional[float] = None
 
     # Excess returns in percent.
     excess_return_5d: Optional[float] = None
     excess_return_20d: Optional[float] = None
     excess_return_60d: Optional[float] = None
+    excess_return_ytd: Optional[float] = None
 
     relative_strength_level: Optional[float] = None  # 20d excess return
     relative_strength_change: Optional[float] = None  # short - medium excess return (pp)

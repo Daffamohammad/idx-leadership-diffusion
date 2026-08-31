@@ -30,7 +30,7 @@ from .data.manifests import write_manifest
 from .data.comparability import check_snapshot_compatibility
 from .data.quality import assess_quality
 from .data.snapshots import SNAPSHOT_VERSION, SnapshotReader, SnapshotWriter
-from .features.relative_strength import compute_excess_returns
+from .features.relative_strength import compute_excess_returns, compute_ytd_excess_returns
 from .analytics.persistence import compute_persistence
 from .evidence.builder import build_group_evidence
 from .intelligence import build_market_read, build_story_mode
@@ -73,6 +73,20 @@ def _none_if_nan_int(v):
         return v
     try:
         return int(v)
+    except (TypeError, ValueError):
+        return None
+
+
+def _date_or_none(v):
+    if v is None:
+        return None
+    try:
+        if pd.isna(v):
+            return None
+    except (TypeError, ValueError):
+        pass
+    try:
+        return pd.Timestamp(v).date()
     except (TypeError, ValueError):
         return None
 
@@ -157,7 +171,16 @@ def build_snapshot(
     as_of = as_of or today
     lookback_days = max(horizons.values()) + 10
     lookback = pd.Timedelta(days=int(lookback_days * 1.6))
-    start_date = (pd.Timestamp(as_of) - lookback).date() if not isinstance(as_of, pd.Timestamp) else (as_of - lookback).date()
+    regular_start = (
+        (pd.Timestamp(as_of) - lookback).date()
+        if not isinstance(as_of, pd.Timestamp)
+        else (as_of - lookback).date()
+    )
+    # YTD needs the last common trading session of the prior calendar year.
+    # Requesting this bounded extra window is deterministic and avoids
+    # silently treating a short lookback as a complete YTD baseline.
+    ytd_start = date(as_of.year - 1, 12, 20)
+    start_date = min(regular_start, ytd_start)
 
     prices = provider.get_price_history(requested, start=start_date, end=as_of)
     benchmark = provider.get_benchmark_history(benchmark_id, start=start_date, end=as_of)
@@ -184,6 +207,27 @@ def build_snapshot(
         security_price_col=effective_price_basis,
         tolerance_days=int(meth.get("as_of_tolerance_days", 7)),
     )
+    ytd_features = compute_ytd_excess_returns(
+        prices,
+        benchmark,
+        as_of=as_of,
+        security_price_col=effective_price_basis,
+        benchmark_price_col="close",
+        tolerance_days=int(meth.get("as_of_tolerance_days", 7)),
+    )
+    if features.empty:
+        features = pd.DataFrame(columns=["ticker"])
+    if not ytd_features.empty:
+        features = features.merge(ytd_features, on="ticker", how="left")
+    else:
+        for column in (
+            "return_ytd",
+            "benchmark_return_ytd",
+            "excess_return_ytd",
+            "return_ytd_start_date",
+            "return_ytd_end_date",
+        ):
+            features[column] = None
     if features.empty:
         _log.warning("no_features_computed as_of=%s", as_of)
     # The aggregation layer merges taxonomy into features internally; do not pre-merge here.
@@ -705,6 +749,11 @@ def _row_to_group_snapshot(row: pd.Series):
         group_excess_return_5d=_none_if_nan(row.get("group_excess_return_5d")),
         group_excess_return_20d=_none_if_nan(row.get("group_excess_return_20d")),
         group_excess_return_60d=_none_if_nan(row.get("group_excess_return_60d")),
+        group_return_ytd=_none_if_nan(row.get("group_return_ytd")),
+        group_excess_return_ytd=_none_if_nan(row.get("group_excess_return_ytd")),
+        benchmark_return_ytd=_none_if_nan(row.get("benchmark_return_ytd")),
+        ytd_start_date=_date_or_none(row.get("ytd_start_date")),
+        ytd_eligible_count=_none_if_nan_int(row.get("ytd_eligible_count")) or 0,
         relative_strength_level=_none_if_nan(row.get("group_excess_return")),
         breadth_positive=_none_if_nan(row.get("breadth_positive")),
         breadth_outperforming=_none_if_nan(row.get("breadth_outperforming")),
@@ -843,6 +892,11 @@ def _snapshots_to_df(snapshots) -> pd.DataFrame:
                 "group_excess_return_5d": s.group_excess_return_5d,
                 "group_excess_return_20d": s.group_excess_return_20d,
                 "group_excess_return_60d": s.group_excess_return_60d,
+                "group_return_ytd": s.group_return_ytd,
+                "group_excess_return_ytd": s.group_excess_return_ytd,
+                "benchmark_return_ytd": s.benchmark_return_ytd,
+                "ytd_start_date": s.ytd_start_date,
+                "ytd_eligible_count": s.ytd_eligible_count,
                 "breadth_positive": s.breadth_positive,
                 "breadth_outperforming": s.breadth_outperforming,
                 "breadth_delta": s.breadth_delta,

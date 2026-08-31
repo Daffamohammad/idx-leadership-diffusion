@@ -30,6 +30,13 @@ from ..utils import get_logger
 _log = get_logger(__name__)
 
 
+def _finite_mean(frame: pd.DataFrame, column: str) -> float | None:
+    if column not in frame.columns:
+        return None
+    values = pd.to_numeric(frame[column], errors="coerce").dropna()
+    return float(values.mean()) if not values.empty else None
+
+
 def build_group_snapshots(
     *,
     features: pd.DataFrame,
@@ -117,9 +124,13 @@ def build_group_snapshots(
         "return_5d",
         "return_20d",
         "return_60d",
+        "return_ytd",
         "excess_return_5d",
         "excess_return_20d",
         "excess_return_60d",
+        "excess_return_ytd",
+        "benchmark_return_ytd",
+        "return_ytd_start_date",
     ):
         if column not in merged.columns:
             merged[column] = np.nan
@@ -168,6 +179,24 @@ def build_group_snapshots(
         ex60 = gdf["excess_return_60d"].dropna()
         g_ex5 = float(ex5.mean()) if not ex5.empty else None
         g_ex60 = float(ex60.mean()) if not ex60.empty else None
+        ytd_features = gdf.dropna(subset=["return_ytd", "excess_return_ytd"])
+        group_ytd = (
+            float(pd.to_numeric(ytd_features["return_ytd"], errors="coerce").dropna().mean())
+            if not ytd_features.empty
+            else None
+        )
+        group_excess_ytd = (
+            float(pd.to_numeric(ytd_features["excess_return_ytd"], errors="coerce").dropna().mean())
+            if not ytd_features.empty
+            else None
+        )
+        benchmark_ytd = _finite_mean(ytd_features, "benchmark_return_ytd")
+        ytd_start_values = (
+            ytd_features["return_ytd_start_date"].dropna()
+            if "return_ytd_start_date" in ytd_features.columns
+            else pd.Series(dtype=object)
+        )
+        ytd_start_date = ytd_start_values.iloc[0] if not ytd_start_values.empty else None
 
         # Breadth (uses features on the group slice)
         breadth = compute_breadth(
@@ -295,6 +324,11 @@ def build_group_snapshots(
             group_excess_return_5d=g_ex5,
             group_excess_return_20d=group_excess,
             group_excess_return_60d=g_ex60,
+            group_return_ytd=group_ytd,
+            group_excess_return_ytd=group_excess_ytd,
+            benchmark_return_ytd=benchmark_ytd,
+            ytd_start_date=ytd_start_date,
+            ytd_eligible_count=int(ytd_features["ticker"].nunique()),
             breadth_positive=breadth.positive_return_share,
             breadth_outperforming=breadth.benchmark_outperformance_share,
             breadth_delta=breadth_delta,

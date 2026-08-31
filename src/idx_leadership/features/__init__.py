@@ -9,6 +9,7 @@ from .relative_strength import (
     compute_benchmark_returns,
     align_security_to_benchmark,
     compute_excess_returns,
+    compute_ytd_excess_returns,
 )
 from .breadth import compute_breadth
 from .concentration import (
@@ -25,6 +26,7 @@ __all__ = [
     "compute_benchmark_returns",
     "align_security_to_benchmark",
     "compute_excess_returns",
+    "compute_ytd_excess_returns",
     "compute_breadth",
     "compute_concentration",
     "compute_signed_contribution_table",

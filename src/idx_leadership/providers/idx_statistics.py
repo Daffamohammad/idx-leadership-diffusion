@@ -18,6 +18,7 @@ from base64 import urlsafe_b64encode
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from html.parser import HTMLParser
+import hashlib
 import json
 import re
 from pathlib import Path
@@ -35,9 +36,95 @@ IDX_MONTHLY_INVESTOR_URL = (
     "monthly/equity-trading-by-investor/"
     "table-daily-trading-by-type-of-investor"
 )
+IDX_DAILY_INDICES_URL = (
+    "https://www.idx.co.id/id/data-pasar/laporan-statistik/digital-statistic/"
+    "monthly/stock-price-index/daily-idx-indices"
+)
+IDX_INDUSTRY_SUMMARY_URL = (
+    "https://www.idx.co.id/id/data-pasar/laporan-statistik/digital-statistic/"
+    "monthly/equity-trading-by-industry/trading-summary-by-industry-classification"
+)
+IDX_DIGITAL_STATISTICS_URL = (
+    "https://www.idx.co.id/id/data-pasar/laporan-statistik/digital-statistic/"
+)
+IDX_STOCK_SUMMARY_URL = "https://www.idx.co.id/en/market-data/trading-summary/stock-summary"
 IDX_HOST = "www.idx.co.id"
 SCHEMA_VERSION = "idx-investor-trading-v1"
 LISTING_SCHEMA_VERSION = "idx-statistics-listing-v1"
+DIGITAL_TABLE_SCHEMA_VERSION = "idx-digital-table-v1"
+MANUAL_PRICE_SCHEMA_VERSION = "idx-manual-price-v1"
+PARSER_VERSION = "idx-first-party-html-v1"
+
+
+@dataclass(frozen=True)
+class IDXSourceSpec:
+    """One official IDX lane and its bounded parser role."""
+
+    source_id: str
+    name: str
+    url: str
+    role: str
+    parser: str
+    format: str
+    quantitative_use: bool
+
+
+IDX_SOURCE_REGISTRY: dict[str, IDXSourceSpec] = {
+    "statistics": IDXSourceSpec(
+        "statistics",
+        "IDX Statistics",
+        IDX_STATISTICS_INDEX_URL,
+        "Discover dated Daily Statistics PDFs",
+        "parse_idx_statistics_listing_html",
+        "HTML/PDF",
+        False,
+    ),
+    "investor_flow": IDXSourceSpec(
+        "investor_flow",
+        "Daily Trading by Type of Investor",
+        IDX_MONTHLY_INVESTOR_URL,
+        "Parse monthly foreign investor flow",
+        "parse_idx_monthly_investor_html",
+        "HTML/JSON",
+        True,
+    ),
+    "daily_indices": IDXSourceSpec(
+        "daily_indices",
+        "Daily IDX Indices",
+        IDX_DAILY_INDICES_URL,
+        "Parse published benchmark and index series",
+        "parse_idx_daily_indices_html",
+        "HTML/JSON",
+        True,
+    ),
+    "industry_summary": IDXSourceSpec(
+        "industry_summary",
+        "Trading Summary by Industry",
+        IDX_INDUSTRY_SUMMARY_URL,
+        "Parse industry-level trading summary",
+        "parse_idx_industry_summary_html",
+        "HTML/JSON",
+        True,
+    ),
+    "digital_statistics": IDXSourceSpec(
+        "digital_statistics",
+        "Digital Statistics",
+        IDX_DIGITAL_STATISTICS_URL,
+        "Discover official Digital Statistics releases",
+        "parse_idx_digital_statistics_listing_html",
+        "HTML",
+        False,
+    ),
+    "stock_summary": IDXSourceSpec(
+        "stock_summary",
+        "IDX Stock Summary",
+        IDX_STOCK_SUMMARY_URL,
+        "Bounded manual latest-close fallback",
+        "parse_idx_stock_summary_html",
+        "HTML/JSON",
+        False,
+    ),
+}
 
 _MONTHS = {
     "jan": 1,
@@ -310,6 +397,384 @@ def parse_idx_statistics_listing_html(
             "A search result is not treated as numeric evidence when the official publication is unavailable.",
         ],
     }
+
+
+_NUMERIC_HEADER_WORDS = (
+    "close",
+    "price",
+    "value",
+    "volume",
+    "frequency",
+    "freq",
+    "open",
+    "high",
+    "low",
+    "change",
+    "return",
+    "index",
+    "market cap",
+    "shares",
+    "yield",
+    "per",
+    "pbv",
+)
+
+
+def _column_key(value: str, index: int) -> str:
+    key = re.sub(r"[^a-z0-9]+", "_", _clean_text(value).lower()).strip("_")
+    return key or f"column_{index + 1}"
+
+
+def _parse_decimal(value: Any) -> float | None:
+    """Parse common Indonesian and international numeric display formats."""
+    text = _clean_text(str(value or ""))
+    if not text or text in {"-", "—", "–", "n/a", "N/A", "null"}:
+        return None
+    negative = text.startswith(("-", "−", "("))
+    text = text.strip("()")
+    text = text.replace("%", "").replace(" ", "")
+    if "." in text and "," in text:
+        # The final separator is the decimal separator. This covers both
+        # 1.234,56 (IDX-style) and 1,234.56 displays.
+        if text.rfind(",") > text.rfind("."):
+            text = text.replace(".", "").replace(",", ".")
+        else:
+            text = text.replace(",", "")
+    elif "," in text:
+        tail = text.rsplit(",", 1)[-1]
+        text = text.replace(",", ".") if len(tail) in {1, 2} else text.replace(",", "")
+    elif "." in text:
+        tail = text.rsplit(".", 1)[-1]
+        if text.count(".") > 1 or len(tail) == 3:
+            text = text.replace(".", "")
+    try:
+        number = float(text)
+    except ValueError:
+        return None
+    if negative:
+        number = -abs(number)
+    return number if number == number else None
+
+
+def _is_numeric_header(header: str) -> bool:
+    lower = header.lower()
+    return any(word in lower for word in _NUMERIC_HEADER_WORDS)
+
+
+def _table_header(table: _HTMLTable) -> tuple[list[str], int]:
+    """Choose a stable header row and skip a second grouped-header row."""
+    if not table.rows:
+        return [], 0
+    raw_header = list(table.rows[0])
+    keys: list[str] = []
+    used: dict[str, int] = {}
+    for index, label in enumerate(raw_header):
+        key = _column_key(label, index)
+        used[key] = used.get(key, 0) + 1
+        keys.append(key if used[key] == 1 else f"{key}_{used[key]}")
+    start = 1
+    if len(table.rows) > 1:
+        second = table.rows[1]
+        first = _clean_text(second[0]).lower() if second else ""
+        # Digital Statistics commonly has a grouped header followed by a
+        # sub-header. Keep the first header names and skip the sub-header.
+        if first in {"", "date", "tanggal", "volume", "value", "freq.", "frequency"}:
+            start = 2
+    return keys, start
+
+
+def parse_idx_digital_table_html(
+    html: str,
+    *,
+    source_url: str,
+    source_id: str,
+    release_period: Mapping[str, Any] | None = None,
+    as_of: str | None = None,
+    table_marker: str | None = None,
+    retrieved_at: str | None = None,
+) -> dict[str, Any]:
+    """Parse one official IDX Digital Statistics HTML table.
+
+    This parser is deliberately schema-light: IDX changes table titles and
+    grouped headers periodically, while the first-party table cells remain
+    the numeric evidence. Missing or malformed cells are retained as ``None``
+    and downgrade the artifact to ``READY_WITH_GAPS``.
+    """
+    _assert_idx_url(source_url)
+    parser = _IDXHTMLParser()
+    parser.feed(html)
+    tables = tuple(_HTMLTable(tuple(tuple(row) for row in table)) for table in parser.tables)
+    if not tables:
+        raise IDXStatisticsError(f"IDX digital table not found: {source_id}")
+    table = _select_table(tables, table_marker) if table_marker else tables[0]
+    headers, start = _table_header(table)
+    if not headers:
+        raise IDXStatisticsError(f"IDX digital table has no header: {source_id}")
+
+    records: list[dict[str, Any]] = []
+    malformed_numeric = 0
+    missing_numeric = 0
+    skipped_rows = 0
+    for raw_row in table.rows[start:]:
+        if not raw_row or not any(_clean_text(cell) for cell in raw_row):
+            skipped_rows += 1
+            continue
+        values = list(raw_row[: len(headers)])
+        if len(values) < len(headers):
+            values.extend([""] * (len(headers) - len(values)))
+        record: dict[str, Any] = {}
+        row_has_value = False
+        for index, key in enumerate(headers):
+            raw_value = _clean_text(values[index])
+            if raw_value:
+                row_has_value = True
+            if key in {"date", "tanggal", "as_of", "trading_date"}:
+                try:
+                    record[key] = _parse_date(raw_value) if raw_value else None
+                except IDXStatisticsError:
+                    record[key] = raw_value or None
+                continue
+            if _is_numeric_header(key):
+                number = _parse_decimal(raw_value)
+                if not raw_value or raw_value in {"-", "—", "–", "n/a", "N/A"}:
+                    missing_numeric += 1
+                elif number is None:
+                    malformed_numeric += 1
+                record[key] = number
+            else:
+                record[key] = raw_value or None
+        if row_has_value:
+            records.append(record)
+        else:
+            skipped_rows += 1
+
+    status = "READY" if records and malformed_numeric == 0 and missing_numeric == 0 else (
+        "READY_WITH_GAPS" if records else "DATA_GAP"
+    )
+    retrieved = retrieved_at or datetime.now(timezone.utc).isoformat()
+    digest = hashlib.sha256(html.encode("utf-8")).hexdigest()
+    coverage = {
+        "table_count": len(tables),
+        "selected_table_rows": len(table.rows),
+        "header_count": len(headers),
+        "record_count": len(records),
+        "malformed_numeric_count": malformed_numeric,
+        "missing_numeric_count": missing_numeric,
+        "skipped_row_count": skipped_rows,
+    }
+    return {
+        "schema_version": DIGITAL_TABLE_SCHEMA_VERSION,
+        "provider": "IDX",
+        "provider_mode": "IDX_OFFICIAL_TABLE",
+        "status": status,
+        "quantitative_use": status in {"READY", "READY_WITH_GAPS"},
+        "scope": source_id,
+        "release_period": dict(release_period or {}),
+        "as_of": as_of,
+        "columns": headers,
+        "records": records,
+        "quality": {
+            **coverage,
+            "search_agent_role": "DISCOVERY_ONLY",
+            "numeric_evidence": "FIRST_PARTY_TABLE_CELLS",
+        },
+        "source": {
+            "publisher": "Indonesia Stock Exchange",
+            "url": source_url,
+            "retrieved_at": retrieved,
+            "parser": "parse_idx_digital_table_html",
+            "parser_version": PARSER_VERSION,
+        },
+        "artifact": {
+            "source_url": source_url,
+            "release_period": dict(release_period or {}),
+            "as_of": as_of,
+            "retrieved_at": retrieved,
+            "parser_version": PARSER_VERSION,
+            "content_sha256": digest,
+            "status": status,
+            "coverage": coverage,
+        },
+        "limitations": [
+            "Search-agent discovery and crawl text are not numeric evidence.",
+            "Missing or malformed cells remain data gaps and are not imputed.",
+        ],
+    }
+
+
+def parse_idx_daily_indices_html(
+    html: str,
+    *,
+    source_url: str = IDX_DAILY_INDICES_URL,
+    release_period: Mapping[str, Any] | None = None,
+    as_of: str | None = None,
+    retrieved_at: str | None = None,
+) -> dict[str, Any]:
+    return parse_idx_digital_table_html(
+        html,
+        source_url=source_url,
+        source_id="DAILY_IDX_INDICES",
+        release_period=release_period,
+        as_of=as_of,
+        retrieved_at=retrieved_at,
+    )
+
+
+def parse_idx_industry_summary_html(
+    html: str,
+    *,
+    source_url: str = IDX_INDUSTRY_SUMMARY_URL,
+    release_period: Mapping[str, Any] | None = None,
+    as_of: str | None = None,
+    retrieved_at: str | None = None,
+) -> dict[str, Any]:
+    return parse_idx_digital_table_html(
+        html,
+        source_url=source_url,
+        source_id="TRADING_SUMMARY_BY_INDUSTRY",
+        release_period=release_period,
+        as_of=as_of,
+        retrieved_at=retrieved_at,
+    )
+
+
+def parse_idx_digital_statistics_listing_html(
+    html: str,
+    *,
+    source_url: str = IDX_DIGITAL_STATISTICS_URL,
+    retrieved_at: str | None = None,
+) -> dict[str, Any]:
+    """Discover first-party Digital Statistics release links without parsing numbers."""
+    _assert_idx_url(source_url)
+    parser = _IDXHTMLParser()
+    parser.feed(html)
+    releases: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for link in parser.links:
+        href = urljoin(source_url, link["href"])
+        parsed = urlparse(href)
+        if parsed.hostname != IDX_HOST or "/digital-statistic/" not in parsed.path:
+            continue
+        if href in seen or href.rstrip("/") == source_url.rstrip("/"):
+            continue
+        seen.add(href)
+        releases.append({"title": link["text"] or href, "url": href})
+    releases.sort(key=lambda row: (row["title"], row["url"]))
+    retrieved = retrieved_at or datetime.now(timezone.utc).isoformat()
+    digest = hashlib.sha256(html.encode("utf-8")).hexdigest()
+    status = "READY" if releases else "DATA_GAP"
+    return {
+        "schema_version": "idx-digital-statistics-listing-v1",
+        "provider": "IDX",
+        "provider_mode": "IDX_OFFICIAL_DISCOVERY",
+        "status": status,
+        "quantitative_use": False,
+        "releases": releases,
+        "quality": {
+            "release_count": len(releases),
+            "search_agent_role": "DISCOVERY_ONLY",
+        },
+        "source": {
+            "publisher": "Indonesia Stock Exchange",
+            "url": source_url,
+            "retrieved_at": retrieved,
+            "parser": "parse_idx_digital_statistics_listing_html",
+            "parser_version": PARSER_VERSION,
+        },
+        "artifact": {
+            "source_url": source_url,
+            "release_period": None,
+            "as_of": None,
+            "retrieved_at": retrieved,
+            "parser_version": PARSER_VERSION,
+            "content_sha256": digest,
+            "status": status,
+            "coverage": {"release_count": len(releases)},
+        },
+    }
+
+
+def parse_idx_stock_summary_html(
+    html: str,
+    *,
+    source_url: str = IDX_STOCK_SUMMARY_URL,
+    as_of: str | None = None,
+    retrieved_at: str | None = None,
+) -> dict[str, Any]:
+    """Parse latest closes as a display-only manual fallback.
+
+    The output explicitly sets ``quantitative_use`` to false. A latest close
+    from this lane cannot be combined with historical adjusted-close data to
+    manufacture a return.
+    """
+    table_payload = parse_idx_digital_table_html(
+        html,
+        source_url=source_url,
+        source_id="IDX_STOCK_SUMMARY",
+        as_of=as_of,
+        retrieved_at=retrieved_at,
+    )
+    ticker_key = next(
+        (key for key in table_payload["columns"] if key in {"ticker", "symbol", "code", "stock_code"}),
+        None,
+    )
+    close_key = next(
+        (
+            key
+            for key in table_payload["columns"]
+            if key in {"close", "last", "last_price", "price", "closing_price"}
+        ),
+        None,
+    )
+    observations: list[dict[str, Any]] = []
+    if ticker_key and close_key:
+        for record in table_payload["records"]:
+            raw_ticker = record.get(ticker_key)
+            close = record.get(close_key)
+            if not raw_ticker:
+                continue
+            ticker = str(raw_ticker).strip().upper()
+            if not ticker.endswith(".JK"):
+                ticker = f"{ticker}.JK"
+            observations.append(
+                {
+                    "ticker": ticker,
+                    "close": close,
+                    "as_of": as_of,
+                    "price_basis": "close",
+                    "source": "IDX manual",
+                    "quantitative_use": False,
+                }
+            )
+    status = table_payload["status"] if observations else "DATA_GAP"
+    table_payload.update(
+        {
+            "schema_version": MANUAL_PRICE_SCHEMA_VERSION,
+            "provider_mode": "IDX_MANUAL_DISPLAY_ONLY",
+            "quantitative_use": False,
+            "status": status,
+            "mode": "current_display_only",
+            "observations": observations,
+            "price_basis": "close",
+            "analytical_contract": {
+                "allowed": False,
+                "reason": "A manual latest close is not a historical return baseline.",
+            },
+        }
+    )
+    return table_payload
+
+
+def manual_price_fallback_contract_matches(
+    source_contract: Mapping[str, Any], snapshot_contract: Mapping[str, Any]
+) -> bool:
+    """Check that a manual price lane has the same analytical contract."""
+    required = ("provider_mode", "universe_version", "taxonomy_version", "price_basis")
+    return all(
+        source_contract.get(key) is not None
+        and source_contract.get(key) == snapshot_contract.get(key)
+        for key in required
+    )
 
 
 def _select_table(tables: Sequence[_HTMLTable], marker: str) -> _HTMLTable:

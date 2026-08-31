@@ -392,6 +392,10 @@ def _build_sector_view_from_groups(
         breadth_delta = _finite_number(row.get("breadth_delta"))
         excess_20d = _finite_number(row.get("group_excess_return_20d"))
         excess_60d = _finite_number(row.get("group_excess_return_60d"))
+        group_ytd = _finite_number(row.get("group_return_ytd"))
+        excess_ytd = _finite_number(row.get("group_excess_return_ytd"))
+        benchmark_ytd = _finite_number(row.get("benchmark_return_ytd"))
+        ytd_start_date = _iso_date(row.get("ytd_start_date"))
         leadership = str(row.get("leadership_state") or "UNCONFIRMED")
         diffusion = str(row.get("diffusion_state") or "UNCONFIRMED")
         if breadth is None or excess_20d is None:
@@ -416,10 +420,17 @@ def _build_sector_view_from_groups(
                     row.get("group_return_equal_weight")
                 ),
                 "equal_weight_return_60d": None,
+                "equal_weight_return_ytd": group_ytd,
                 "excess_return_20d": excess_20d,
                 "excess_return_60d": excess_60d,
+                "excess_return_ytd": excess_ytd,
                 "benchmark_return_20d": None,
                 "benchmark_return_60d": None,
+                "benchmark_return_ytd": benchmark_ytd,
+                "ytd_start_date": ytd_start_date,
+                "ytd_eligible_constituent_count": int(
+                    row.get("ytd_eligible_count") or 0
+                ),
                 "breadth_outperforming": breadth,
                 "prev_breadth_outperforming": (
                     breadth - breadth_delta

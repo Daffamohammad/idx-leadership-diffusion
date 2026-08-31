@@ -7,10 +7,14 @@ from pathlib import Path
 import pytest
 
 from idx_leadership.providers.idx_statistics import (
+    IDX_SOURCE_REGISTRY,
     IDXStatisticsError,
     build_monthly_investor_url,
+    manual_price_fallback_contract_matches,
+    parse_idx_daily_indices_html,
     parse_idx_monthly_investor_html,
     parse_idx_statistics_listing_html,
+    parse_idx_stock_summary_html,
 )
 from scripts.refresh_idx_statistics import main
 
@@ -117,3 +121,62 @@ def test_cli_does_not_write_when_reconciliation_fails(tmp_path: Path):
 def test_parser_output_is_json_serializable():
     payload = parse_idx_monthly_investor_html(_release_html(), source_url=SOURCE_URL)
     assert json.loads(json.dumps(payload, allow_nan=False))["provider"] == "IDX"
+
+
+def test_source_registry_covers_the_six_official_idx_lanes():
+    assert set(IDX_SOURCE_REGISTRY) == {
+        "statistics",
+        "investor_flow",
+        "daily_indices",
+        "industry_summary",
+        "digital_statistics",
+        "stock_summary",
+    }
+    assert all(spec.url.startswith("https://www.idx.co.id/") for spec in IDX_SOURCE_REGISTRY.values())
+
+
+def test_digital_table_parser_keeps_missing_and_malformed_numeric_as_gaps():
+    payload = parse_idx_daily_indices_html(
+        """
+        <table>
+          <tr><th>Date</th><th>Close</th><th>Change (%)</th></tr>
+          <tr><td>28 Aug 2026</td><td>1.234,50</td><td>bad</td></tr>
+          <tr><td>31 Aug 2026</td><td>—</td><td>1,25</td></tr>
+        </table>
+        """,
+        retrieved_at="2026-08-31T00:00:00+00:00",
+    )
+    assert payload["status"] == "READY_WITH_GAPS"
+    assert payload["records"][0]["close"] == pytest.approx(1234.5)
+    assert payload["records"][0]["change"] is None
+    assert payload["quality"]["malformed_numeric_count"] == 1
+    assert payload["artifact"]["content_sha256"]
+
+
+def test_stock_summary_is_display_only_and_never_analytical():
+    payload = parse_idx_stock_summary_html(
+        """
+        <table>
+          <tr><th>Symbol</th><th>Close</th></tr>
+          <tr><td>BBCA</td><td>9.000</td></tr>
+        </table>
+        """,
+        as_of="2026-08-28",
+    )
+    assert payload["mode"] == "current_display_only"
+    assert payload["quantitative_use"] is False
+    assert payload["observations"][0]["ticker"] == "BBCA.JK"
+    assert payload["observations"][0]["close"] == pytest.approx(9000)
+
+
+def test_manual_price_contract_requires_full_contract_match():
+    contract = {
+        "provider_mode": "IDX_OFFICIAL",
+        "universe_version": "u1",
+        "taxonomy_version": "t1",
+        "price_basis": "close",
+    }
+    assert manual_price_fallback_contract_matches(contract, dict(contract))
+    assert not manual_price_fallback_contract_matches(
+        contract, {**contract, "price_basis": "adjusted_close"}
+    )
