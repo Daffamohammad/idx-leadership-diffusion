@@ -104,6 +104,12 @@ Null strength or momentum remains `Data gap` and is shown in the table/list but
 is not plotted. Without a compatible prior snapshot, the UI shows the current
 phase only and does not invent a transition trail.
 
+If the snapshot has no YTD baseline for any group but does have persisted 20D
+and 60D observations, the map uses a muted diagnostic fallback: X is 20D
+excess return and Y is 20D minus 60D excess return. Those points are not
+rotation signals, no phase is assigned, and the table continues to show YTD as
+`Data gap` until the baseline is available.
+
 ## Canonical navigation
 
 All taxonomy detail links use these routes:
@@ -137,4 +143,3 @@ Open [http://127.0.0.1:5174/](http://127.0.0.1:5174/). Local typecheck,
 production build, Python tests, and browser smoke checks are separate evidence
 boundaries. Passing them does not prove live provider entitlement, credit debit,
 deployment, or a successful full-universe refresh.
-
