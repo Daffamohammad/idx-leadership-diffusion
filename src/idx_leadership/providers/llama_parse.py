@@ -6,7 +6,7 @@ after deterministic checks pass. The optional SDK is imported lazily so the
 offline project and its tests do not need a LlamaCloud installation.
 
 This adapter is intentionally narrower than a general document parser. It
-promotes only the first-page market cards needed by the product:
+promotes only the market cards on the first two parsed pages needed by the product:
 
 * IHSG close, previous close, change, and percentage change;
 * Today/YTD net foreign IDR and USD values; and
@@ -280,10 +280,11 @@ def build_parse_request(
                 "separate. Do not infer or recalculate values."
             )
         },
-        "user_metadata": {
-            "project": "idx-leadership-diffusion",
-            "document": "idx-daily-statistics",
-        },
+        # ``client_name`` is accepted by both the Parse convenience method and
+        # the underlying create endpoint. ``user_metadata`` is create-only in
+        # llama-cloud 2.15.0 and would cause ``parsing.parse`` to fail before
+        # any request is sent.
+        "client_name": "idx-leadership-diffusion",
     }
 
 
@@ -305,8 +306,8 @@ def _validate_inputs(
     tier: str,
     max_estimated_credits: float,
 ) -> tuple[Path | None, str | None, float]:
-    if (pdf_path is None) == (source_url is None):
-        raise LlamaParseError("provide exactly one of pdf_path or source_url")
+    if pdf_path is None and source_url is None:
+        raise LlamaParseError("provide a pdf_path or source_url")
     if pdf_path is not None:
         resolved = Path(pdf_path).expanduser()
         if not resolved.is_file():
@@ -372,8 +373,12 @@ def _find_release_date(markdown: str) -> str:
 
 
 def _section(markdown: str, heading: str) -> str:
+    # LlamaParse may emit a semantic heading with hashes or a plain text line.
+    # A numeric markdown heading such as ``# 6,518.121`` is part of the IHSG
+    # card, so section boundaries only recognize alphabetic heading text.
     pattern = re.compile(
-        rf"(?ims)^##\s+{re.escape(heading)}\s*$.*?(?=^##\s+|\Z)"
+        rf"(?ims)^(?:#{{1,6}}\s*)?{re.escape(heading)}\s*$.*?"
+        r"(?=^(?:#{1,6}\s+)?[A-Za-z][^\n]*\s*$|\Z)"
     )
     match = pattern.search(markdown)
     if not match:
@@ -396,6 +401,17 @@ def _extract_previous_close(ihsg_section: str) -> Decimal:
 def _extract_ihsg(markdown: str) -> tuple[dict[str, Any], list[str], dict[str, bool]]:
     section = _section(markdown, "IDX Composite Index (IHSG)")
     match = _IHSG_LINE_RE.search(section)
+    if not match:
+        # Agentic output may preserve the same values as plain lines rather
+        # than bold markdown. Keep the structure strict: close, change and
+        # percentage must remain adjacent in the IHSG card.
+        match = re.search(
+            r"(?im)^\s*(?:#\s*)?(?P<close>[-+−]?\d[\d,]*(?:\.\d+)?)"
+            r"\s*(?:[▲▼↑↓])?\s*\n\s*"
+            r"(?P<change>[-+−]?\d[\d,]*(?:\.\d+)?)\s*"
+            r"\((?P<pct>[-+−]?\d[\d,]*(?:\.\d+)?)%\)",
+            section,
+        )
     if not match:
         raise LlamaParseError("IHSG close/change line was not found")
     close_token = match.group("close")
@@ -592,7 +608,7 @@ def normalize_daily_statistics_markdown(
         },
         "source": source,
         "limitations": [
-            "This artifact promotes only validated first-page market cards; other PDF tables remain in the raw parse audit output.",
+            "This artifact promotes only validated market cards from the first two parsed pages; other PDF tables remain in the raw parse audit output.",
             "Net foreign is market-level and does not establish per-ticker or per-group ownership flow.",
             "A missing YTD label in the markdown output is handled with the fixed IDX card layout and remains an explicit warning.",
             "LlamaParse credit usage is provider-reported when present; the client estimate is not a billing guarantee.",
@@ -610,6 +626,7 @@ def normalize_llama_result(
     parser_version: str = DEFAULT_LLAMA_VERSION,
     tier: str = DEFAULT_LLAMA_TIER,
     estimated_credit_cost: float | None = None,
+    source_provenance: Mapping[str, Any] | None = None,
 ) -> tuple[dict[str, Any], str]:
     """Normalize a JSONable LlamaParse result and return payload plus markdown."""
     pages = _page_markdown(raw_result)
@@ -626,6 +643,8 @@ def normalize_llama_result(
         job_id=_extract_identifier(raw_result, "id"),
         file_id=_extract_identifier(raw_result, "file_id"),
     )
+    if source_provenance is not None:
+        payload["source"]["discovery"] = _jsonable(source_provenance)
     payload["quality"]["parsed_page_count"] = len(pages)
     payload["quality"]["parsed_page_numbers"] = [page for page, _ in pages]
     return payload, markdown
@@ -650,19 +669,22 @@ def run_llama_parse(
     *,
     pdf_path: Path | None = None,
     source_url: str | None = None,
-    target_pages: str = "1",
+    target_pages: str = "1-2",
     tier: str = DEFAULT_LLAMA_TIER,
     version: str = DEFAULT_LLAMA_VERSION,
     max_estimated_credits: float = DEFAULT_LLAMA_CREDIT_BUDGET,
     allow_cloud_upload: bool = False,
     allow_credit_spend: bool = False,
     retrieved_at: str | None = None,
+    source_provenance: Mapping[str, Any] | None = None,
     client_factory: Callable[[], Any] | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any], str]:
     """Run a bounded LlamaParse job and return normalized payload/raw/markdown.
 
     The two explicit acknowledgements are required even for a public IDX PDF:
     the file is sent to a third party and the request consumes account credits.
+    ``source_url`` may accompany ``pdf_path`` as provenance; a local PDF is
+    still uploaded when both are supplied.
     """
     pdf_path, source_url, estimate = _validate_inputs(
         pdf_path=pdf_path,
@@ -709,10 +731,66 @@ def run_llama_parse(
         parser_version=version,
         tier=tier,
         estimated_credit_cost=estimate,
+        source_provenance=source_provenance,
     )
     payload["llama"]["file_id"] = payload["llama"].get("file_id") or (
         request.get("file_id") if isinstance(request.get("file_id"), str) else None
     )
+    return payload, dict(raw_result), markdown
+
+
+def recover_llama_parse_job(
+    job_id: str,
+    *,
+    source_url: str | None = None,
+    source_file_name: str | None = None,
+    retrieved_at: str | None = None,
+    parser_version: str = DEFAULT_LLAMA_VERSION,
+    tier: str = DEFAULT_LLAMA_TIER,
+    estimated_credit_cost: float | None = None,
+    source_provenance: Mapping[str, Any] | None = None,
+    client_factory: Callable[[], Any] | None = None,
+) -> tuple[dict[str, Any], dict[str, Any], str]:
+    """Normalize an existing completed job without creating another job.
+
+    This recovery path is intentionally read-only at LlamaCloud. It prevents
+    a reducer/layout bug discovered after a successful parse from causing a
+    duplicate paid upload.
+    """
+    clean_job_id = str(job_id or "").strip()
+    if not clean_job_id:
+        raise LlamaParseError("LlamaParse job id cannot be empty")
+    if source_url is not None:
+        _assert_official_pdf_url(source_url)
+    try:
+        client = client_factory() if client_factory is not None else _load_client()
+        result = client.parsing.get(
+            clean_job_id,
+            expand=["markdown", "text", "items", "metadata", "job_metadata", "usage"],
+        )
+    except LlamaParseError:
+        raise
+    except Exception as exc:  # SDK errors vary by installed version.
+        raise LlamaParseError(f"LlamaParse recovery failed: {type(exc).__name__}") from exc
+    raw_result = _jsonable(result)
+    if not isinstance(raw_result, Mapping):
+        raise LlamaParseError("LlamaParse recovery returned an unexpected response shape")
+    job = raw_result.get("job")
+    if isinstance(job, Mapping) and job.get("status") not in {None, "COMPLETED"}:
+        raise LlamaParseError(
+            f"LlamaParse job {clean_job_id} is not completed: {job.get('status')}"
+        )
+    payload, markdown = normalize_llama_result(
+        raw_result,
+        source_url=source_url,
+        source_file_name=source_file_name,
+        retrieved_at=retrieved_at,
+        parser_version=parser_version,
+        tier=tier,
+        estimated_credit_cost=estimated_credit_cost,
+        source_provenance=source_provenance,
+    )
+    payload["llama"]["job_id"] = clean_job_id
     return payload, dict(raw_result), markdown
 
 
@@ -747,6 +825,7 @@ __all__ = [
     "normalize_daily_statistics_markdown",
     "normalize_llama_result",
     "parse_target_pages",
+    "recover_llama_parse_job",
     "run_llama_parse",
     "write_text_atomic",
 ]

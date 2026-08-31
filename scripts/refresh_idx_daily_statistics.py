@@ -9,7 +9,7 @@ Examples::
 
     .venv/bin/python -m scripts.refresh_idx_daily_statistics \
         --pdf-file /path/to/ds_260828.pdf \
-        --target-pages 1 \
+        --target-pages 1-2 \
         --allow-cloud-upload \
         --allow-credit-spend
 
@@ -31,11 +31,17 @@ from pathlib import Path
 import sys
 
 from idx_leadership.providers.idx_statistics import write_json_atomic
+from idx_leadership.providers.idx_discovery import (
+    IDXDiscoveryError,
+    discover_and_retrieve_idx_daily_statistics,
+)
 from idx_leadership.providers.llama_parse import (
     DEFAULT_LLAMA_CREDIT_BUDGET,
     DEFAULT_LLAMA_TIER,
     DEFAULT_LLAMA_VERSION,
     LlamaParseError,
+    estimate_credit_cost,
+    recover_llama_parse_job,
     run_llama_parse,
     write_text_atomic,
 )
@@ -54,10 +60,71 @@ def build_parser() -> argparse.ArgumentParser:
         "--source-url",
         help="HTTPS URL of an official IDX Daily Statistics PDF.",
     )
+    source.add_argument(
+        "--discover-latest",
+        action="store_true",
+        help="Use the bounded search-agent -> crawl/retrieve -> LlamaParse pipeline.",
+    )
+    parser.add_argument(
+        "--as-of",
+        default=None,
+        help="Target publication date for discovery (YYYY-MM-DD); omitted means latest dated result.",
+    )
+    parser.add_argument(
+        "--search-provider",
+        choices=("auto", "tavily", "you"),
+        default="auto",
+        help="Search agent for discovery; auto prefers Tavily when its local key is available.",
+    )
+    parser.add_argument(
+        "--allow-search-live",
+        action="store_true",
+        help="Acknowledge live search-agent/crawl requests.",
+    )
+    parser.add_argument(
+        "--allow-search-credit-spend",
+        action="store_true",
+        help="Acknowledge search-agent credit usage.",
+    )
+    parser.add_argument(
+        "--search-max-results",
+        type=int,
+        default=10,
+        help="Maximum search-agent result rows (default: 10).",
+    )
+    parser.add_argument(
+        "--crawl-limit",
+        type=int,
+        default=5,
+        help="Maximum bounded crawl/retrieve result rows (default: 5).",
+    )
+    parser.add_argument(
+        "--retrieved-pdf-output",
+        type=Path,
+        default=None,
+        help="Optional local PDF path; defaults to ignored data/raw/idx_daily_statistics/.",
+    )
+    parser.add_argument(
+        "--retrieved-pdf-file",
+        type=Path,
+        default=None,
+        help="Existing browser-retrieved PDF to verify and upload when IDX serves a dynamic asset.",
+    )
+    parser.add_argument(
+        "--resolved-pdf-url",
+        default=None,
+        help="Browser-resolved official PDF URL used only when discovery APIs expose no dynamic asset link.",
+    )
+    parser.add_argument(
+        "--discovery-output",
+        type=Path,
+        default=None,
+        help="Optional provenance JSON for search/crawl/retrieve stages.",
+    )
     parser.add_argument(
         "--target-pages",
-        default="1",
-        help="Bounded 1-based page list/ranges (default: 1).",
+        default="1-2",
+        help="Bounded 1-based page list/ranges (default: 1-2; use 1-9 for the current full release).",
     )
     parser.add_argument(
         "--tier",
@@ -92,6 +159,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Optional fixed retrieval timestamp for reproducible artifacts.",
     )
     parser.add_argument(
+        "--reuse-job-id",
+        default=None,
+        help="Read and normalize an existing COMPLETED LlamaParse job; never creates a new job.",
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         default=None,
@@ -121,18 +193,61 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     load_project_env()
+    discovery = None
     try:
-        payload, raw_result, markdown = run_llama_parse(
-            pdf_path=args.pdf_file,
-            source_url=args.source_url,
-            target_pages=args.target_pages,
-            tier=args.tier,
-            version=args.version,
-            max_estimated_credits=args.max_estimated_credits,
-            allow_cloud_upload=args.allow_cloud_upload,
-            allow_credit_spend=args.allow_credit_spend,
-            retrieved_at=args.retrieved_at,
-        )
+        pdf_file = args.pdf_file
+        source_url = args.source_url
+        if args.discover_latest:
+            default_pdf_name = f"idx_daily_statistics_{args.as_of or 'latest'}.pdf"
+            retrieved_pdf_output = args.retrieved_pdf_output or (
+                data_root() / "raw" / "idx_daily_statistics" / default_pdf_name
+            )
+            discovery = discover_and_retrieve_idx_daily_statistics(
+                target_as_of=args.as_of,
+                search_provider=args.search_provider,
+                destination=retrieved_pdf_output,
+                allow_live=args.allow_search_live,
+                allow_credit_spend=args.allow_search_credit_spend,
+                max_search_results=args.search_max_results,
+                max_crawl_results=args.crawl_limit,
+                resolved_pdf_url=args.resolved_pdf_url,
+                local_pdf_path=args.retrieved_pdf_file,
+            )
+            pdf_file = discovery.local_pdf.path
+            source_url = discovery.pdf_url
+        if args.reuse_job_id is not None:
+            if args.pdf_file is not None or source_url is None:
+                raise LlamaParseError(
+                    "--reuse-job-id requires --source-url, or --discover-latest for provenance"
+                )
+            payload, raw_result, markdown = recover_llama_parse_job(
+                args.reuse_job_id,
+                source_url=source_url,
+                source_file_name=pdf_file.name if pdf_file is not None else None,
+                retrieved_at=args.retrieved_at,
+                parser_version=args.version,
+                tier=args.tier,
+                estimated_credit_cost=estimate_credit_cost(args.target_pages, tier=args.tier),
+                source_provenance=discovery.provenance if discovery is not None else None,
+            )
+        else:
+            payload, raw_result, markdown = run_llama_parse(
+                pdf_path=pdf_file,
+                source_url=source_url,
+                target_pages=args.target_pages,
+                tier=args.tier,
+                version=args.version,
+                max_estimated_credits=args.max_estimated_credits,
+                allow_cloud_upload=args.allow_cloud_upload,
+                allow_credit_spend=args.allow_credit_spend,
+                retrieved_at=args.retrieved_at,
+                source_provenance=discovery.provenance if discovery is not None else None,
+            )
+        if discovery is not None and payload["as_of"] != discovery.as_of:
+            raise LlamaParseError(
+                "LlamaParse release date does not match the discovered IDX publication: "
+                f"discovered={discovery.as_of} parsed={payload['as_of']}"
+            )
         output = args.output or (
             data_root() / "derived" / f"idx_daily_statistics_{payload['as_of']}.json"
         )
@@ -143,7 +258,9 @@ def main(argv: list[str] | None = None) -> int:
             write_json_atomic(args.raw_output, raw_result)
         if args.markdown_output is not None:
             write_text_atomic(args.markdown_output, markdown)
-    except (LlamaParseError, OSError, ValueError) as exc:
+        if args.discovery_output is not None and discovery is not None:
+            write_json_atomic(args.discovery_output, discovery.provenance)
+    except (IDXDiscoveryError, LlamaParseError, OSError, ValueError) as exc:
         print(f"ERROR {exc}", file=sys.stderr)
         return 2
 
@@ -157,6 +274,7 @@ def main(argv: list[str] | None = None) -> int:
                 "actual_credit_cost": payload["llama"]["actual_credit_cost"],
                 "actual_credit_cost_known": payload["llama"]["actual_credit_cost_known"],
                 "output": str(output),
+                "discovery": discovery.provenance if discovery is not None else None,
             },
             indent=2,
         )

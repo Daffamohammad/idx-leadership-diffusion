@@ -12,6 +12,7 @@ from idx_leadership.providers.llama_parse import (
     estimate_credit_cost,
     normalize_daily_statistics_markdown,
     parse_target_pages,
+    recover_llama_parse_job,
     run_llama_parse,
 )
 from scripts.refresh_idx_daily_statistics import main
@@ -39,6 +40,40 @@ Friday, 28 August 2026
 <table>
   <tr><th>Market PER (x)</th><th>Market PBV (x)</th></tr>
   <tr><td><b>13.07</b></td><td><b>1.73</b></td></tr>
+</table>
+"""
+
+
+CURRENT_AGENT_MARKDOWN = """# IDX DAILY STATISTICS
+Friday, 28 August 2026
+
+IDX Composite Index (IHSG)
+
+# 6,518.121
+
+-3.629 (-0.06%)
+
+<table>
+  <tr><th>Previous</th><th>Highest</th><th>Lowest</th></tr>
+  <tr><td>6,521.750</td><td>6,566.905</td><td>6,495.737</td></tr>
+</table>
+
+## AVERAGE DAILY TRADING (YTD)
+
+## NET FOREIGN
+<table>
+  <tr><th>Today</th><th>YTD</th></tr>
+  <tr><td>-482.24</td><td>-70,360.99</td></tr>
+  <tr><td>(billion IDR)</td><td>(billion IDR)</td></tr>
+  <tr><td>Net Sell</td><td>Net Sell</td></tr>
+  <tr><td>-27.24</td><td>-3,974.52</td></tr>
+  <tr><td>(million USD~)</td><td>(million USD)</td></tr>
+</table>
+
+## FUNDAMENTAL
+<table>
+  <tr><th>Market PER (x)</th><th>Market PBV (x)</th></tr>
+  <tr><td>13.07</td><td>1.73</td></tr>
 </table>
 """
 
@@ -85,6 +120,13 @@ def test_markdown_reducer_rejects_unreconciled_ihsg_change():
         )
 
 
+def test_markdown_reducer_accepts_current_plain_agentic_layout():
+    payload = normalize_daily_statistics_markdown(CURRENT_AGENT_MARKDOWN)
+    assert payload["status"] == "READY"
+    assert payload["metrics"]["ihsg"]["change"] == -3.629
+    assert payload["quality"]["checks"]["net_foreign_column_labels_preserved"] is True
+
+
 def test_run_uses_official_sdk_shape_and_keeps_raw_response_separate(tmp_path: Path):
     pdf_path = tmp_path / "ds_260828.pdf"
     pdf_path.write_bytes(b"%PDF-1.7 fixture")
@@ -95,10 +137,26 @@ def test_run_uses_official_sdk_shape_and_keeps_raw_response_separate(tmp_path: P
             return {"id": "file-1"}
 
     class FakeParsing:
-        def parse(self, **kwargs):
-            assert kwargs["file_id"] == "file-1"
-            assert kwargs["page_ranges"] == {"target_pages": "1"}
-            assert "usage" in kwargs["expand"]
+        # Match the current SDK's explicit parse signature closely enough to
+        # catch create-only parameters accidentally leaking into parse().
+        def parse(
+            self,
+            *,
+            tier,
+            version,
+            client_name,
+            agentic_options,
+            output_options,
+            page_ranges,
+            file_id,
+            expand,
+        ):
+            assert tier == "agentic"
+            assert version == "latest"
+            assert client_name == "idx-leadership-diffusion"
+            assert file_id == "file-1"
+            assert page_ranges == {"target_pages": "1"}
+            assert "usage" in expand
             return {
                 "id": "job-1",
                 "usage": {"credits": 13},
@@ -132,6 +190,58 @@ def test_run_requires_both_external_side_effect_acknowledgements(tmp_path: Path)
         run_llama_parse(pdf_path=pdf_path, client_factory=lambda: None)
     with pytest.raises(LlamaParseError, match="credit spend is blocked"):
         run_llama_parse(pdf_path=pdf_path, allow_cloud_upload=True, client_factory=lambda: None)
+
+
+def test_recover_completed_job_is_read_only_and_preserves_provenance():
+    calls: list[tuple[str, list[str]]] = []
+
+    class FakeParsing:
+        def get(self, job_id, *, expand):
+            calls.append((job_id, expand))
+            return {
+                "id": "job-1",
+                "job": {"status": "COMPLETED"},
+                "usage": {"credits": 13},
+                "markdown": {"pages": [{"page_number": 1, "markdown": DAILY_MARKDOWN}]},
+            }
+
+    class FakeClient:
+        parsing = FakeParsing()
+
+    payload, raw, markdown = recover_llama_parse_job(
+        "job-1",
+        source_url="https://www.idx.co.id/Media/example/ds_260828.pdf",
+        source_file_name="ds_260828.pdf",
+        retrieved_at="2026-08-31T00:00:00+00:00",
+        estimated_credit_cost=13.0,
+        source_provenance={"stage": "search-crawl-retrieve"},
+        client_factory=lambda: FakeClient(),
+    )
+
+    assert calls == [
+        (
+            "job-1",
+            ["markdown", "text", "items", "metadata", "job_metadata", "usage"],
+        )
+    ]
+    assert payload["status"] == "READY_WITH_GAPS"
+    assert payload["llama"]["job_id"] == "job-1"
+    assert payload["llama"]["actual_credit_cost"] == 13.0
+    assert payload["source"]["discovery"] == {"stage": "search-crawl-retrieve"}
+    assert raw["job"]["status"] == "COMPLETED"
+    assert "NET FOREIGN" in markdown
+
+
+def test_recover_refuses_non_completed_job_without_writing_or_reducing():
+    class FakeParsing:
+        def get(self, job_id, *, expand):
+            return {"id": job_id, "job": {"status": "RUNNING"}}
+
+    class FakeClient:
+        parsing = FakeParsing()
+
+    with pytest.raises(LlamaParseError, match="is not completed"):
+        recover_llama_parse_job("job-running", client_factory=lambda: FakeClient())
 
 
 def test_source_url_must_be_first_party_https_pdf():
