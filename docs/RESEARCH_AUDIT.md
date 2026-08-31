@@ -62,14 +62,20 @@ prototype universe (`config/universe.yaml`) currently covers only 10 of the 11
 
 Source: `https://www.idx.co.id/en/products/index` (IDX Stock Index Handbook v1.2, 2021-05-04).
 
-Tavily returned an **authoritative IDX URL** that exposes per-investor-type net-purchase
-data:
+The review confirmed an **authoritative IDX URL** that exposes the rendered
+daily investor-type tables and a separate statistics index that lists dated
+Daily Statistics PDFs:
 
-> `https://idx.co.id/id/data-pasar/laporan-statistik/digital-statistik/monthly/equity-trading-by-investor/total-trading-by-investor-s-type-and-net-purchase-by-foreigners`
+> `https://www.idx.co.id/id/data-pasar/laporan-statistik/statistik/`
 
-Combined with the **monthly statistical highlight** at
-`https://www.idx.co.id/en/market-data/statistical-reports/digital-statistic/monthly/highlights/statistical-highlight`,
-this is the authoritative source for the bounded-sample foreign-flow expansion.
+> `https://www.idx.co.id/id/data-pasar/laporan-statistik/digital-statistic/monthly/equity-trading-by-investor/table-daily-trading-by-type-of-investor?filter=eyJ5ZWFyIjoiMjAyNiIsIm1vbnRoIjoiNyIsInF1YXJ0ZXIiOjAsInR5cGUiOiJtb250aGx5In0%3D`
+
+The monthly page renders 23 July 2026 trading-day rows in two HTML tables.
+`src/idx_leadership/providers/idx_statistics.py` parses and reconciles those
+tables into a market-level release. The index-page parser extracts Daily
+Statistics PDF links, but the PDF tiles (such as Today/YTD net foreign and
+market PER/PBV) remain a separate parser contract; screenshot values are not
+used as numeric evidence.
 
 A concrete quantitative observation was also located in an OJK press release:
 
@@ -138,10 +144,8 @@ applied changes:
 3. **`data/research/<workstream>/observations.jsonl`** + **`sources.jsonl`**
    for each of the 9 workstreams — structured evidence with provenance,
    source_tier, confidence.
-4. **`docs/SECTORS_MIGRATION_READINESS.md`** — referenced the
-   `total-trading-by-investor-s-type-and-net-purchase-by-foreigners` URL as
-   the authoritative market-level foreign-flow publication for the eventual
-   bounded enrichment pass (this was discovered in the research pass).
+4. **`docs/SECTORS_MIGRATION_READINESS.md`** — references the direct July 2026
+   IDX Digital Statistics release and its market-level boundary.
 5. **`CODEX_HANDOFF.md` §27** — search/research status section appended.
 6. **Foreign-flow methodology note** — the existing
    `scripts/calculate_foreign_flow_sample.py` keeps the
@@ -161,9 +165,12 @@ applied changes:
 ## 8. Unresolved Research Gaps
 
 - Per-ticker foreign-flow daily series at scale — IDX monthly aggregate is the
-  only authoritative public observation; finer-grained per-ticker values would
+  current authoritative public market-level observation; finer-grained per-ticker values would
   require Sectors `/v2/foreign-flow/{symbol}/` (deferred until operator
   authorizes `SECTORS_API_KEY`).
+- Daily Statistics PDF tile extraction — the listing and monthly HTML release
+  are parsed, but Today/YTD net-foreign and fundamental tiles need a dedicated
+  PDF text/table fixture and parser before they can enter the product.
 - Industry / sub-industry classifications for every prototype ticker (BBCA,
   BBRI, …) — IDX-IC public page was located but not crawl-extracted in this
   pass; the field exists in Sectors master when migrated.

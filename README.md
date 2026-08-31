@@ -14,10 +14,13 @@ data.
 
 The hackathon product is intentionally hybrid rather than pretending to be a
 complete production terminal: the market-signal lane is backed by a persisted
-real snapshot, foreign flow is a bounded source-backed sample, and Konglo,
+real snapshot, the official IDX investor release is a real market-level lane,
+foreign flow per company remains a bounded source-backed sample, and Konglo,
 Themes, and research context are clearly presented as static or analyst-defined
 research layers. The current section-by-section contract is documented in
 [`docs/HYBRID_PRODUCT_MODEL.md`](docs/HYBRID_PRODUCT_MODEL.md).
+The official IDX source and parser boundary are documented in
+[`docs/IDX_STATISTICS_SOURCE.md`](docs/IDX_STATISTICS_SOURCE.md).
 
 **This project is an analytical market-intelligence prototype for
 research and educational purposes. It does not provide investment
@@ -59,7 +62,8 @@ current build:
 
 | Product lane | Sections | Contract |
 | --- | --- | --- |
-| Real snapshot | Overview Sector heatmap, Leadership Map, Groups, Ticker Analysis, What Changed | Persisted market observations and explicit coverage metadata; the current snapshot remains partial and has no comparable prior. |
+| Real snapshot | Overview, Sector heatmap, Leadership Map, Groups, Ticker Analysis, What Changed | Persisted market observations and explicit coverage metadata; the current snapshot remains partial and has no comparable prior. |
+| Official release | Overview, Methodology | Official IDX July 2026 daily investor-type table, parsed and reconciled across 23 trading days into market-level net foreign flow. |
 | Source-backed sample | Foreign Flow | Real reported observations from a bounded top-list sample; not a full-universe signal. |
 | Static research lens | Konglo Map, Themes Map, Group Explorer for those taxonomies, Themes Explorer | Analyst-defined membership configuration; aggregate metrics may reuse the current snapshot, but the taxonomy is not official IDX data. |
 | Static context | Research Events and optional web-context panels | Persisted descriptive context; never used to create or change quantitative signals. |
@@ -105,7 +109,7 @@ provider connections while rendering.
 | Route | Page | Data source |
 | --- | --- | --- |
 | `/` | `PublicHome` | marketing copy (no data dependency) |
-| `/overview` | `MarketOverview` | real Sector heatmap plus bounded sample and static context sections |
+| `/overview` | `MarketOverview` | real Sector heatmap plus official IDX market-level release, bounded sample, and static context sections |
 | `/what-changed` | `WhatChanged` | real current snapshot; prior comparison is shown only when compatible history exists |
 | `/map` | `LeadershipMap` | real `groups` (60D/20D signed excess returns; current breadth, or breadth delta when a comparable prior exists) |
 | `/maps/konglo` | `TaxonomyMapPage` | static analyst-defined membership lens with current-snapshot aggregates |
@@ -120,8 +124,10 @@ no comparable prior. Breadth-delta diffusion and trajectory views remain
 unavailable until compatible history is persisted; no prior or delta is
 fabricated. Prototype snapshots may include persisted per-group breadth
 history, while the canonical live snapshot currently does not. Foreign flow
-and fundamentals remain explicit data gaps and never become fabricated neutral
-values; unsupported views render a one-line reason rather than a blank chart.
+Per-ticker/group foreign-flow confirmation and fundamentals remain explicit data
+gaps and never become fabricated neutral values; the official IDX market-level
+release is shown in its own evidence lane. Unsupported views render a one-line
+reason rather than a blank chart.
 
 ### Run it
 
@@ -160,12 +166,16 @@ Real (driven by the snapshot bundle):
   `security_master` on `group_id`
 - sidebar as-of, data-status chip, snapshot id in the header
 - Data Status and Provenance tables on the Methodology page
+- official IDX July 2026 investor-type release: 23 daily market-level rows,
+  reconciled net foreign totals, and source provenance
 
 Static or bounded layers (explicitly labeled, never presented as live signals):
 
 - per-group breadth / performance time series (available when a snapshot
   contains persisted comparable observations)
 - leadership trail lines on the map (same reason)
+- per-ticker/group foreign-flow confirmation (not emitted by the official
+  market-level release)
 - foreign-flow top-list sample with source provenance
 - Konglo and Themes analyst-defined membership lenses
 - qualitative research events and web context
@@ -204,11 +214,38 @@ Methodology page alongside the Tavily panel; both layers carry
 
 ## Foreign-flow discovery and sample calculation
 
+The official IDX Digital Statistics page is the quantitative source for the
+market-level investor release shown on Overview and Methodology:
+
+- [IDX statistics index](https://www.idx.co.id/id/data-pasar/laporan-statistik/statistik/)
+  lists the dated Daily Statistics releases.
+- [July 2026 daily trading by type of investor](https://www.idx.co.id/id/data-pasar/laporan-statistik/digital-statistic/monthly/equity-trading-by-investor/table-daily-trading-by-type-of-investor?filter=eyJ5ZWFyIjoiMjAyNiIsIm1vbnRoIjoiNyIsInF1YXJ0ZXIiOjAsInR5cGUiOiJtb250aGx5In0%3D)
+  renders the 23 trading-day rows used by the product.
+
+`src/idx_leadership/providers/idx_statistics.py` parses the two released HTML
+tables, aligns dates, derives `domestic sells to foreign − foreign sells to
+domestic`, and fails closed when totals do not reconcile. The offline-safe
+refresh command is:
+
+```bash
+.venv/bin/python -m scripts.refresh_idx_statistics \
+  --year 2026 --month 7 \
+  --html-file /path/to/saved/official-idx-table.html \
+  --output /path/to/idx_investor_trading_2026-07.json
+```
+
+The checked-in web artifact is
+`app/web/public/idx/idx_investor_trading_2026-07.json`. Direct CLI retrieval
+may be blocked by IDX anti-bot controls in a local environment; the parser is
+therefore tested offline and the artifact retains the exact official URL and
+reconciliation metadata. Search agents are used for discovery only and are
+not a numeric extraction path.
+
 The repository also contains a bounded foreign-flow methodology harness. The
 discovery record in `data/fixtures/foreign_flow_discovery.json` documents the
-Tavily and You.com queries, the first-party IDX candidate page, and the two
-dated secondary reports used for a small company sample. It does not claim
-that a stable full-universe daily per-ticker feed was found.
+official release and the two dated secondary reports used for a small company
+sample. No stable full-universe daily per-ticker ownership-flow feed has been
+established.
 
 The numeric input is intentionally manual and auditable:
 `data/fixtures/foreign_flow_sample.csv` contains two market-wide observations
@@ -436,9 +473,10 @@ See `docs/METHODOLOGY.md` for the full specification.
 - Live Sectors history is intentionally partial when the provider rate-limits
   a request batch. The current snapshot is labeled `READY_WITH_GAPS`, not
   silently filled or downgraded to demo data.
-- No structured foreign flow, broker activity, fundamental, or news
-  confirmation. Optional Tavily sources are context only and are not a
-  substitute for normalized per-ticker or per-group observations.
+- The official IDX investor-type release is integrated for market-level net
+  foreign flow. Per-ticker/group foreign-flow confirmation, broker activity,
+  fundamentals, and news metrics remain unavailable. Optional Tavily sources
+  are context only and are not a substitute for normalized observations.
 - Sectors close adjustment semantics remain `UNKNOWN / VERIFY`; the live
   path surfaces the raw-close caveat rather than claiming adjusted prices.
 

@@ -117,7 +117,10 @@ No analytical code imports `yfinance` or `requests` directly; only `providers/pu
 * No authoritative taxonomy; prototype `sectors` labels are coarse.
 * Corporate-action semantics may differ (adjusted vs unadjusted); holidays handled via trading-day walk, no IDX holiday calendar.
 * Intermittent missing observations for thin names; `WSKT.JK` insufficient history example.
-* No free-float, no structured foreign-flow, no per-ticker fundamentals.
+* No free-float, no per-ticker or per-group structured foreign-flow, and no
+  per-ticker fundamentals. The separate official IDX market-level investor
+  release is documented in `docs/IDX_STATISTICS_SOURCE.md` and does not close
+  this per-name confirmation gap.
 * Benchmark `^JKSE` quality for IDX not validated at scale.
 
 These are labelled `METHODOLOGY VALIDATED ON PUBLIC DATA`, not `PRODUCTION DATA VALIDATED ON SECTORS`.

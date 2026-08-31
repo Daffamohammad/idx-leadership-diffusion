@@ -103,7 +103,7 @@ def test_generated_output_is_valid_json_with_null_missing_fields(tmp_path: Path)
     assert loaded["quality"]["reported_net_preserved"] is True
 
 
-def test_discovery_manifest_keeps_first_party_candidate_separate():
+def test_discovery_manifest_promotes_validated_market_release_but_keeps_company_gap_explicit():
     manifest_path = REPO_ROOT / "data" / "fixtures" / "foreign_flow_discovery.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
 
@@ -111,10 +111,15 @@ def test_discovery_manifest_keeps_first_party_candidate_separate():
     official = next(
         source
         for source in manifest["sources"]
-        if source["publisher"] == "Indonesia Stock Exchange"
+        if source["role"] == "first_party_structured_release"
     )
-    assert official["quantitative_use"] is False
-    assert manifest["calculation_boundary"].startswith("Only the explicit")
+    assert official["publisher"] == "Indonesia Stock Exchange"
+    assert official["quantitative_use"] is True
+    assert official["period"] == "2026-07"
+    assert official["observed_rows"] == 23
+    assert official["parser"] == "idx_monthly_investor_html"
+    assert "per-ticker" in manifest["not_found"]
+    assert manifest["calculation_boundary"].startswith("The official IDX release is parsed")
 
 
 def test_invalid_company_components_fail_closed(tmp_path: Path):
