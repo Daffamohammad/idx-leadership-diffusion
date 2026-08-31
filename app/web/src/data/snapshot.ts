@@ -366,6 +366,61 @@ export interface ForeignFlowSample {
 }
 
 // ────────────────────────────────────────────────────────────────────────
+// First-party IDX Digital Statistic release
+// ────────────────────────────────────────────────────────────────────────
+
+export type IDXInvestorFlowDirection = "NET_BUY" | "NET_SELL" | "FLAT";
+
+export interface IDXInvestorReleaseDay {
+  as_of: string;
+  foreign_to_domestic_value_idr: number;
+  domestic_to_foreign_value_idr: number;
+  net_foreign_value_idr: number;
+  direction: IDXInvestorFlowDirection;
+}
+
+export interface IDXInvestorRelease {
+  schema_version: string;
+  provider: "IDX" | string;
+  provider_mode: string;
+  status: DataStatus | string;
+  quantitative_use: boolean;
+  scope: string;
+  release: {
+    title: string;
+    period: { year: number; month: number; label: string };
+    trading_day_count: number;
+  };
+  as_of: { min: string; max: string };
+  daily: IDXInvestorReleaseDay[];
+  totals: {
+    foreign_to_foreign_value_idr?: number;
+    foreign_to_domestic_value_idr: number;
+    domestic_to_foreign_value_idr: number;
+    domestic_to_domestic_value_idr?: number;
+    net_foreign_value_idr: number;
+    direction: IDXInvestorFlowDirection;
+  };
+  quality: {
+    source_table_count: number;
+    daily_rows: number;
+    positive_day_count?: number;
+    negative_day_count?: number;
+    reconciliation: Record<string, boolean>;
+    search_agent_role: string;
+    full_month_release: boolean;
+  };
+  source: {
+    publisher: string;
+    url: string;
+    retrieved_at: string;
+    parser: string;
+    table_endpoints?: string[];
+  };
+  limitations: string[];
+}
+
+// ────────────────────────────────────────────────────────────────────────
 // Taxonomy views (sector / Konglo / Themes)
 // ────────────────────────────────────────────────────────────────────────
 
@@ -524,5 +579,6 @@ export interface SnapshotPayload {
   // Added 2026-08-30:
   taxonomy_views?: Record<string, TaxonomyView>;
   foreign_flow_sample?: ForeignFlowSample;
+  idx_investor_release?: IDXInvestorRelease;
   research_events?: ResearchEventBundle;
 }

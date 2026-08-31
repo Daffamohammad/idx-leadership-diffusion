@@ -1,7 +1,12 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router";
 
-export type EvidenceKind = "SNAPSHOT" | "SAMPLE" | "PROTOTYPE" | "CONTEXT";
+export type EvidenceKind =
+  | "SNAPSHOT"
+  | "OFFICIAL_RELEASE"
+  | "SAMPLE"
+  | "PROTOTYPE"
+  | "CONTEXT";
 
 const EVIDENCE_CONFIG: Record<
   EvidenceKind,
@@ -13,6 +18,13 @@ const EVIDENCE_CONFIG: Record<
     background: "#f0f8f6",
     border: "#b9ded6",
     description: "Persisted market observations used for quantitative signals.",
+  },
+  OFFICIAL_RELEASE: {
+    label: "Official IDX release",
+    color: "#1a6e62",
+    background: "#eef8f5",
+    border: "#a9d9ce",
+    description: "First-party IDX publication parsed from its released table.",
   },
   SAMPLE: {
     label: "Source-backed sample",
@@ -110,7 +122,7 @@ export function EvidenceModel({
         className="evidence-model-grid"
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+          gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
           gap: 10,
         }}
       >

@@ -277,7 +277,7 @@ export default function TickerAnalysis() {
                 }}
               >
                 <div style={{ fontFamily: "Geist Mono, monospace", fontSize: 11, color: "#686e73" }}>
-                  {event.eventDate} · {event.category}
+                  {formatDateLabel(event.eventDate)} · {formatEnumLabel(event.category)}
                 </div>
                 <div style={{ fontWeight: 600 }}>{event.title}</div>
                 <div style={{ color: "#202325", marginTop: 2 }}>{event.summary}</div>

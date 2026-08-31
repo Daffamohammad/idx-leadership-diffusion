@@ -10,6 +10,7 @@ import { Link, useLocation, useNavigate } from "react-router";
 import { useSnapshot } from "../data/SnapshotProvider";
 import MarketHeatmap from "../components/MarketHeatmap";
 import ForeignFlowSample from "../components/ForeignFlowSample";
+import IDXStatisticsRelease from "../components/IDXStatisticsRelease";
 import ResearchEvents from "../components/ResearchEvents";
 import type { TaxonomyKind } from "../data/snapshot";
 import { formatDateLabel, formatEnumLabel, formatSnapshotId } from "../data/format";
@@ -153,6 +154,8 @@ export default function MarketOverview() {
           navigate(`/explorer?taxonomy=${kind}&group=${encodeURIComponent(groupId)}`);
         }}
       />
+
+      <IDXStatisticsRelease release={adapted.idxInvestorRelease} />
 
       <ForeignFlowSample sample={adapted.foreignFlow} asOf={asOf} />
 

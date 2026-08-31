@@ -4,6 +4,7 @@
 // into quantitative confirmation.
 
 import type { ResearchEventView } from "../data/adapter";
+import { formatDateLabel, formatEnumLabel } from "../data/format";
 import { EvidenceBadge } from "./EvidenceModel";
 
 interface ResearchEventsProps {
@@ -104,15 +105,15 @@ export default function ResearchEvents({
                 fontFamily: "Geist Mono, monospace",
               }}
             >
-              <span>{event.eventDate}</span>
+              <span>{formatDateLabel(event.eventDate)}</span>
               <span>·</span>
-              <span>{CATEGORY_LABEL[event.category] ?? event.category}</span>
+              <span>{CATEGORY_LABEL[event.category] ?? formatEnumLabel(event.category)}</span>
               <span>·</span>
               <span>{event.ticker}</span>
               {event.provider && (
                 <>
                   <span>·</span>
-                  <span>{event.provider}</span>
+                  <span>{formatEnumLabel(event.provider)}</span>
                 </>
               )}
             </div>

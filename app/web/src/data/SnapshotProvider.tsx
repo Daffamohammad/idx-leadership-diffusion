@@ -46,6 +46,21 @@ async function resolveLatestEntry(): Promise<IndexEntry | null> {
   }
 }
 
+const DEFAULT_IDX_RELEASE_PATH = "/idx/idx_investor_trading_2026-07.json";
+
+async function loadOptionalIDXRelease(): Promise<unknown | null> {
+  const path =
+    (import.meta.env.VITE_IDX_RELEASE_PATH as string | undefined)?.trim() ||
+    DEFAULT_IDX_RELEASE_PATH;
+  try {
+    const response = await fetch(path, { cache: "no-store" });
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
 export function SnapshotProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<SnapshotContextValue>({
     loading: true,
@@ -97,7 +112,8 @@ export function SnapshotProvider({ children }: { children: ReactNode }) {
           );
         }
         if (cancelled) return;
-        const adapted: AdaptedSnapshot = adaptSnapshot(payload);
+        const idxInvestorRelease = await loadOptionalIDXRelease();
+        const adapted: AdaptedSnapshot = adaptSnapshot(payload, idxInvestorRelease);
         setState({
           loading: false,
           error: null,

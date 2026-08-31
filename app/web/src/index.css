@@ -58,6 +58,9 @@ button:focus-visible, a:focus-visible, select:focus-visible { outline: 2px solid
 .table-scroll { overflow-x: auto; max-width: 100%; }
 .table-scroll > table { min-width: max-content; }
 .table-cell { padding: var(--table-cell-y) var(--table-cell-x); }
+@media (max-width: 1100px) and (min-width: 901px) {
+  .evidence-model-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+}
 @media (max-width: 900px) {
   .public-grid, .overview-grid, .surface-grid { grid-template-columns: 1fr !important; }
   .desktop-only { display: none !important; }
@@ -79,6 +82,7 @@ button:focus-visible, a:focus-visible, select:focus-visible { outline: 2px solid
   .summary-strips { grid-template-columns: 1fr !important; }
   .current-levels-grid { grid-template-columns: 1fr !important; }
   .evidence-model-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .idx-release-metrics, .idx-release-detail-grid { grid-template-columns: 1fr !important; }
 }
 
 @media (max-width: 560px) {

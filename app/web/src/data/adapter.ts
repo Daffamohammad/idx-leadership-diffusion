@@ -12,6 +12,8 @@ import type {
   ForeignFlowDirection,
   ForeignFlowObservation,
   ForeignFlowSample,
+  IDXInvestorFlowDirection,
+  IDXInvestorRelease,
   LeadershipState,
   ResearchEventBundle,
   ResearchEventRow,
@@ -182,6 +184,37 @@ export interface ForeignFlowAdapted {
   limitations: string[];
 }
 
+export interface IDXInvestorReleaseAdapted {
+  schemaVersion: string;
+  providerMode: string;
+  status: string;
+  quantitativeUse: boolean;
+  scope: string;
+  title: string;
+  periodLabel: string;
+  asOfMin: string;
+  asOfMax: string;
+  tradingDayCount: number;
+  daily: Array<{
+    asOf: string;
+    foreignToDomesticIdr: number;
+    domesticToForeignIdr: number;
+    netForeignIdr: number;
+    direction: IDXInvestorFlowDirection;
+  }>;
+  totals: {
+    foreignToForeignIdr: number | null;
+    foreignToDomesticIdr: number;
+    domesticToForeignIdr: number;
+    domesticToDomesticIdr: number | null;
+    netForeignIdr: number;
+    direction: IDXInvestorFlowDirection;
+  };
+  quality: IDXInvestorRelease["quality"];
+  source: IDXInvestorRelease["source"];
+  limitations: string[];
+}
+
 export interface ForeignFlowSampleDaily {
   asOf: string;
   sampleNetIdr: number;
@@ -227,6 +260,7 @@ export interface AdaptedSnapshot {
   taxonomyGroups: Record<string, TaxonomyGroupData>;
   activeTaxonomyId: string | null;
   foreignFlow: ForeignFlowAdapted | null;
+  idxInvestorRelease: IDXInvestorReleaseAdapted | null;
   researchEvents: ResearchEventView[];
 }
 
@@ -534,6 +568,171 @@ function normalizeForeignDirection(value: unknown): ForeignFlowDirection {
   return FOREIGN_FLOW_DIRECTIONS.includes(upper) ? upper : "UNCONFIRMED";
 }
 
+const IDX_INVESTOR_DIRECTIONS: IDXInvestorFlowDirection[] = [
+  "NET_BUY",
+  "NET_SELL",
+  "FLAT",
+];
+
+function normalizeIDXInvestorDirection(value: unknown): IDXInvestorFlowDirection {
+  if (typeof value !== "string") return "FLAT";
+  const upper = value.toUpperCase() as IDXInvestorFlowDirection;
+  return IDX_INVESTOR_DIRECTIONS.includes(upper) ? upper : "FLAT";
+}
+
+function normalizeIDXInvestorRelease(
+  value: unknown,
+): IDXInvestorReleaseAdapted | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const raw = value as Record<string, unknown>;
+  const release = raw.release;
+  const period = release && typeof release === "object" && !Array.isArray(release)
+    ? (release as Record<string, unknown>).period
+    : null;
+  const source = raw.source;
+  const totals = raw.totals;
+  const quality = raw.quality;
+  if (
+    typeof raw.schema_version !== "string" ||
+    typeof raw.provider_mode !== "string" ||
+    !release ||
+    typeof release !== "object" ||
+    Array.isArray(release) ||
+    !period ||
+    typeof period !== "object" ||
+    Array.isArray(period) ||
+    !source ||
+    typeof source !== "object" ||
+    Array.isArray(source) ||
+    !totals ||
+    typeof totals !== "object" ||
+    Array.isArray(totals) ||
+    !quality ||
+    typeof quality !== "object" ||
+    Array.isArray(quality)
+  ) {
+    return null;
+  }
+  const releaseRaw = release as Record<string, unknown>;
+  const periodRaw = period as Record<string, unknown>;
+  const sourceRaw = source as Record<string, unknown>;
+  const totalsRaw = totals as Record<string, unknown>;
+  const qualityRaw = quality as Record<string, unknown>;
+  const number = (input: unknown): number | null =>
+    typeof input === "number" && Number.isFinite(input) ? input : null;
+  const requiredNumber = (input: unknown): number | null => number(input);
+  const rawDaily = Array.isArray(raw.daily) ? raw.daily : [];
+  const daily = rawDaily.flatMap((item) => {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return [];
+    const row = item as Record<string, unknown>;
+    const asOf = row.as_of;
+    const foreignToDomestic = requiredNumber(row.foreign_to_domestic_value_idr);
+    const domesticToForeign = requiredNumber(row.domestic_to_foreign_value_idr);
+    const netForeign = requiredNumber(row.net_foreign_value_idr);
+    if (
+      typeof asOf !== "string" ||
+      !asOf ||
+      foreignToDomestic === null ||
+      domesticToForeign === null ||
+      netForeign === null
+    ) {
+      return [];
+    }
+    return [{
+      asOf,
+      foreignToDomesticIdr: foreignToDomestic,
+      domesticToForeignIdr: domesticToForeign,
+      netForeignIdr: netForeign,
+      direction: normalizeIDXInvestorDirection(row.direction),
+    }];
+  });
+  const requiredTotals = {
+    foreignToDomesticIdr: number(totalsRaw.foreign_to_domestic_value_idr),
+    domesticToForeignIdr: number(totalsRaw.domestic_to_foreign_value_idr),
+    netForeignIdr: number(totalsRaw.net_foreign_value_idr),
+  };
+  if (
+    !daily.length ||
+    Object.values(requiredTotals).some((entry) => entry === null) ||
+    typeof releaseRaw.title !== "string" ||
+    typeof periodRaw.year !== "number" ||
+    typeof periodRaw.month !== "number" ||
+    typeof periodRaw.label !== "string" ||
+    typeof releaseRaw.trading_day_count !== "number" ||
+    typeof raw.as_of !== "object" ||
+    !raw.as_of ||
+    Array.isArray(raw.as_of) ||
+    typeof sourceRaw.publisher !== "string" ||
+    typeof sourceRaw.url !== "string"
+  ) {
+    return null;
+  }
+  const asOfRaw = raw.as_of as Record<string, unknown>;
+  const reconciliation =
+    qualityRaw.reconciliation &&
+    typeof qualityRaw.reconciliation === "object" &&
+    !Array.isArray(qualityRaw.reconciliation)
+      ? (qualityRaw.reconciliation as Record<string, boolean>)
+      : {};
+  return {
+    schemaVersion: raw.schema_version,
+    providerMode: raw.provider_mode,
+    status: typeof raw.status === "string" ? raw.status : "READY_WITH_GAPS",
+    quantitativeUse: raw.quantitative_use === true,
+    scope: typeof raw.scope === "string" ? raw.scope : "",
+    title: releaseRaw.title,
+    periodLabel: periodRaw.label,
+    asOfMin: typeof asOfRaw.min === "string" ? asOfRaw.min : daily[0].asOf,
+    asOfMax:
+      typeof asOfRaw.max === "string" ? asOfRaw.max : daily[daily.length - 1].asOf,
+    tradingDayCount: releaseRaw.trading_day_count,
+    daily,
+    totals: {
+      foreignToForeignIdr: number(totalsRaw.foreign_to_foreign_value_idr),
+      foreignToDomesticIdr: requiredTotals.foreignToDomesticIdr as number,
+      domesticToForeignIdr: requiredTotals.domesticToForeignIdr as number,
+      domesticToDomesticIdr: number(totalsRaw.domestic_to_domestic_value_idr),
+      netForeignIdr: requiredTotals.netForeignIdr as number,
+      direction: normalizeIDXInvestorDirection(totalsRaw.direction),
+    },
+    quality: {
+      source_table_count:
+        typeof qualityRaw.source_table_count === "number"
+          ? qualityRaw.source_table_count
+          : 0,
+      daily_rows:
+        typeof qualityRaw.daily_rows === "number" ? qualityRaw.daily_rows : daily.length,
+      positive_day_count:
+        typeof qualityRaw.positive_day_count === "number"
+          ? qualityRaw.positive_day_count
+          : undefined,
+      negative_day_count:
+        typeof qualityRaw.negative_day_count === "number"
+          ? qualityRaw.negative_day_count
+          : undefined,
+      reconciliation,
+      search_agent_role:
+        typeof qualityRaw.search_agent_role === "string"
+          ? qualityRaw.search_agent_role
+          : "DISCOVERY_ONLY",
+      full_month_release: qualityRaw.full_month_release === true,
+    },
+    source: {
+      publisher: sourceRaw.publisher,
+      url: sourceRaw.url,
+      retrieved_at:
+        typeof sourceRaw.retrieved_at === "string" ? sourceRaw.retrieved_at : "",
+      parser: typeof sourceRaw.parser === "string" ? sourceRaw.parser : "",
+      table_endpoints: Array.isArray(sourceRaw.table_endpoints)
+        ? sourceRaw.table_endpoints.filter((entry): entry is string => typeof entry === "string")
+        : undefined,
+    },
+    limitations: Array.isArray(raw.limitations)
+      ? raw.limitations.filter((entry): entry is string => typeof entry === "string")
+      : [],
+  };
+}
+
 function adaptForeignFlow(
   payload: ForeignFlowSample | undefined,
 ): ForeignFlowAdapted | null {
@@ -681,8 +880,14 @@ function adaptForeignFlow(
     })),
     topBuys,
     topSells,
-    limitations: payload.limitations ?? [],
+    limitations: (payload.limitations ?? []).map(formatVisibleNote),
   };
+}
+
+function formatVisibleNote(value: string): string {
+  return value.replace(/\b[A-Za-z0-9]+(?:_[A-Za-z0-9]+)+\b/g, (token) =>
+    token.split("_").join(" "),
+  );
 }
 
 function adaptResearchEvents(
@@ -750,7 +955,10 @@ function buildInterpretation(input: {
   return `${performance}; ${breadthMove}; classified ${leadership_state} / ${diffusion_state}.`;
 }
 
-export function adaptSnapshot(payload: SnapshotPayload): AdaptedSnapshot {
+export function adaptSnapshot(
+  payload: SnapshotPayload,
+  idxInvestorRelease?: unknown,
+): AdaptedSnapshot {
   const comparability = payload.comparability;
   const transitionsByGroup: Record<string, (typeof payload.transitions)[number]> = {};
   for (const t of payload.transitions) {
@@ -984,6 +1192,9 @@ export function adaptSnapshot(payload: SnapshotPayload): AdaptedSnapshot {
     taxonomyGroups,
     activeTaxonomyId,
     foreignFlow: foreignFlowAdapted,
+    idxInvestorRelease: normalizeIDXInvestorRelease(
+      idxInvestorRelease ?? payload.idx_investor_release,
+    ),
     researchEvents,
   };
 }

@@ -546,7 +546,7 @@ export default function MarketHeatmap({
           fontFamily: "Geist Mono, monospace",
         }}
       >
-        <span>Source: Python-aggregated taxonomy_views (no frontend recompute)</span>
+        <span>Source: Python-aggregated taxonomy views (no frontend recompute)</span>
         <span>·</span>
         <span>Source: snapshot-backed aggregation</span>
         <span>·</span>
