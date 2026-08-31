@@ -74,3 +74,10 @@ export function formatSnapshotId(
 export function formatCountLabel(count: number, singular: string, plural = `${singular}s`): string {
   return `${count} ${count === 1 ? singular : plural}`;
 }
+
+/** Display-only percentage formatter shared by maps, cards, and tables. */
+export function formatPercent(value: number | null | undefined, fractionDigits = 1): string {
+  if (value === null || value === undefined || !Number.isFinite(value)) return "—";
+  const sign = value > 0 ? "+" : value < 0 ? "−" : "";
+  return `${sign}${Math.abs(value).toFixed(fractionDigits)}%`;
+}

@@ -41,6 +41,11 @@ export interface SectorData {
   prevDiffusion?: DiffusionState;
   excess20d: number | null;
   excess60d: number | null;
+  returnYtd: number | null;
+  excessYtd: number | null;
+  benchmarkYtd: number | null;
+  ytdStartDate: string | null;
+  ytdEligible: number;
   breadth: number | null;
   prevBreadth?: number;
   concentration: number | null;
@@ -52,6 +57,7 @@ export interface SectorData {
   prevRank?: number;
   fundamentals: "SUPPORTIVE" | "NEUTRAL" | "MIXED" | "WEAK" | "DATA_GAP";
   foreignFlow: FlowState;
+  dataQuality?: string;
   interpretation: string;
 }
 
@@ -1278,6 +1284,11 @@ export function adaptSnapshot(
         : undefined,
       excess20d,
       excess60d,
+      returnYtd: g.group_return_ytd ?? null,
+      excessYtd: g.group_excess_return_ytd ?? null,
+      benchmarkYtd: g.benchmark_return_ytd ?? null,
+      ytdStartDate: g.ytd_start_date ?? null,
+      ytdEligible: g.ytd_eligible_count ?? 0,
       breadth,
       prevBreadth:
         isComparable && transition?.breadth_delta !== null && transition?.breadth_delta !== undefined && breadth !== null
@@ -1298,6 +1309,10 @@ export function adaptSnapshot(
           : undefined,
       fundamentals: "DATA_GAP",
       foreignFlow: "DATA_GAP",
+      dataQuality:
+        g.group_excess_return_ytd === null || g.group_excess_return_ytd === undefined
+          ? "READY_WITH_GAPS"
+          : "READY",
       interpretation: buildInterpretation({
         leadership_state: g.leadership_state,
         diffusion_state: g.diffusion_state,
