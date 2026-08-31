@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useSnapshot } from "../data/SnapshotProvider";
 import type { TaxonomyGroupAggregate, TaxonomyView } from "../data/snapshot";
 import { LeadershipChip, DiffusionChip, DataStatusChip } from "../components/StatusChips";
@@ -37,6 +37,7 @@ function asDataStatus(state: string) {
 
 export default function ThemesExplorer() {
   const { data } = useSnapshot();
+  const navigate = useNavigate();
   const taxonomyView: TaxonomyView | undefined = data?.taxonomyViews?.[THEMES_TAXONOMY_ID];
   const groups = taxonomyView?.groups ?? [];
   const [filter, setFilter] = useState("");
@@ -54,6 +55,10 @@ export default function ThemesExplorer() {
     if (fromList) return fromList;
     return filteredGroups[0] ?? groups.find((g) => g.taxonomy_group_id === selectedId);
   }, [filteredGroups, selectedId, groups]);
+
+  const openThemeDetail = (groupId: string) => {
+    navigate(`/explorer?taxonomy=THEMES&group=${encodeURIComponent(groupId)}`);
+  };
 
   if (!taxonomyView || !groups.length) {
     return (
@@ -188,11 +193,11 @@ export default function ThemesExplorer() {
                   key={g.taxonomy_group_id}
                   role="option"
                   aria-selected={isSelected}
-                  onClick={() => setSelectedId(g.taxonomy_group_id)}
+                  onClick={() => openThemeDetail(g.taxonomy_group_id)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
-                      setSelectedId(g.taxonomy_group_id);
+                      openThemeDetail(g.taxonomy_group_id);
                     }
                   }}
                   tabIndex={0}
@@ -257,6 +262,20 @@ export default function ThemesExplorer() {
                 >
                   ID · {selected.taxonomy_group_id}
                 </div>
+                <Link
+                  to={`/explorer?taxonomy=THEMES&group=${encodeURIComponent(selected.taxonomy_group_id)}`}
+                  style={{
+                    display: "inline-block",
+                    marginTop: 10,
+                    padding: "7px 10px",
+                    border: "1px solid #202325",
+                    color: "#202325",
+                    textDecoration: "none",
+                    fontSize: 11,
+                  }}
+                >
+                  Open constituent detail →
+                </Link>
               </header>
 
               <div
