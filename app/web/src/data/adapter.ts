@@ -12,6 +12,7 @@ import type {
   ForeignFlowDirection,
   ForeignFlowObservation,
   ForeignFlowSample,
+  IDXDailyStatistics,
   IDXInvestorFlowDirection,
   IDXInvestorRelease,
   LeadershipState,
@@ -215,6 +216,22 @@ export interface IDXInvestorReleaseAdapted {
   limitations: string[];
 }
 
+export interface IDXDailyStatisticsAdapted {
+  schemaVersion: string;
+  providerMode: string;
+  status: string;
+  quantitativeUse: boolean;
+  scope: string;
+  asOf: string;
+  ihsg: IDXDailyStatistics["metrics"]["ihsg"];
+  netForeign: IDXDailyStatistics["metrics"]["net_foreign"];
+  fundamental: IDXDailyStatistics["metrics"]["fundamental"];
+  quality: IDXDailyStatistics["quality"];
+  llama: IDXDailyStatistics["llama"];
+  source: IDXDailyStatistics["source"];
+  limitations: string[];
+}
+
 export interface ForeignFlowSampleDaily {
   asOf: string;
   sampleNetIdr: number;
@@ -261,6 +278,7 @@ export interface AdaptedSnapshot {
   activeTaxonomyId: string | null;
   foreignFlow: ForeignFlowAdapted | null;
   idxInvestorRelease: IDXInvestorReleaseAdapted | null;
+  idxDailyStatistics: IDXDailyStatisticsAdapted | null;
   researchEvents: ResearchEventView[];
 }
 
@@ -733,6 +751,148 @@ function normalizeIDXInvestorRelease(
   };
 }
 
+function normalizeIDXDailyStatistics(
+  value: unknown,
+): IDXDailyStatisticsAdapted | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const raw = value as Record<string, unknown>;
+  const metrics = raw.metrics;
+  const ihsg = metrics && typeof metrics === "object" && !Array.isArray(metrics)
+    ? (metrics as Record<string, unknown>).ihsg
+    : null;
+  const netForeign = metrics && typeof metrics === "object" && !Array.isArray(metrics)
+    ? (metrics as Record<string, unknown>).net_foreign
+    : null;
+  const fundamental = metrics && typeof metrics === "object" && !Array.isArray(metrics)
+    ? (metrics as Record<string, unknown>).fundamental
+    : null;
+  const asRecord = (input: unknown): Record<string, unknown> | null =>
+    input && typeof input === "object" && !Array.isArray(input)
+      ? (input as Record<string, unknown>)
+      : null;
+  const ihsgRaw = asRecord(ihsg);
+  const flowRaw = asRecord(netForeign);
+  const todayRaw = asRecord(flowRaw?.today);
+  const ytdRaw = asRecord(flowRaw?.ytd);
+  const fundamentalRaw = asRecord(fundamental);
+  const qualityRaw = asRecord(raw.quality);
+  const llamaRaw = asRecord(raw.llama);
+  const sourceRaw = asRecord(raw.source);
+  const finite = (input: unknown): number | null =>
+    typeof input === "number" && Number.isFinite(input) ? input : null;
+  const requiredFlow = (input: Record<string, unknown> | null) =>
+    input &&
+    finite(input.idr_billion) !== null &&
+    finite(input.usd_million) !== null &&
+    typeof input.usd_approximate === "boolean" &&
+    typeof input.direction === "string"
+      ? {
+          idr_billion: finite(input.idr_billion) as number,
+          usd_million: finite(input.usd_million) as number,
+          usd_approximate: input.usd_approximate,
+          direction: input.direction,
+        }
+      : null;
+  const today = requiredFlow(todayRaw);
+  const ytd = requiredFlow(ytdRaw);
+  const checks = qualityRaw?.checks;
+  const warnings = Array.isArray(qualityRaw?.warnings)
+    ? qualityRaw.warnings.filter((entry): entry is string => typeof entry === "string")
+    : [];
+  if (
+    typeof raw.schema_version !== "string" ||
+    typeof raw.provider_mode !== "string" ||
+    typeof raw.as_of !== "string" ||
+    !ihsgRaw ||
+    finite(ihsgRaw.close) === null ||
+    finite(ihsgRaw.previous) === null ||
+    finite(ihsgRaw.change) === null ||
+    finite(ihsgRaw.change_pct) === null ||
+    !today ||
+    !ytd ||
+    !fundamentalRaw ||
+    finite(fundamentalRaw.market_per) === null ||
+    finite(fundamentalRaw.market_pbv) === null ||
+    !qualityRaw ||
+    !llamaRaw ||
+    !sourceRaw ||
+    typeof sourceRaw.publisher !== "string" ||
+    (sourceRaw.url !== null && typeof sourceRaw.url !== "string")
+  ) {
+    return null;
+  }
+  const normalizedChecks: Record<string, boolean> = {};
+  if (checks && typeof checks === "object" && !Array.isArray(checks)) {
+    for (const [key, entry] of Object.entries(checks)) {
+      if (typeof entry === "boolean") normalizedChecks[key] = entry;
+    }
+  }
+  return {
+    schemaVersion: raw.schema_version,
+    providerMode: raw.provider_mode,
+    status: typeof raw.status === "string" ? raw.status : "READY_WITH_GAPS",
+    quantitativeUse: raw.quantitative_use === true,
+    scope: typeof raw.scope === "string" ? raw.scope : "",
+    asOf: raw.as_of,
+    ihsg: {
+      close: finite(ihsgRaw.close) as number,
+      previous: finite(ihsgRaw.previous) as number,
+      change: finite(ihsgRaw.change) as number,
+      change_pct: finite(ihsgRaw.change_pct) as number,
+      raw_change: typeof ihsgRaw.raw_change === "string" ? ihsgRaw.raw_change : undefined,
+    },
+    netForeign: {
+      today,
+      ytd,
+    },
+    fundamental: {
+      market_per: finite(fundamentalRaw.market_per) as number,
+      market_pbv: finite(fundamentalRaw.market_pbv) as number,
+    },
+    quality: {
+      checks: normalizedChecks,
+      warnings,
+      warning_count:
+        typeof qualityRaw.warning_count === "number"
+          ? qualityRaw.warning_count
+          : warnings.length,
+      markdown_sha256:
+        typeof qualityRaw.markdown_sha256 === "string" ? qualityRaw.markdown_sha256 : "",
+      parsed_page_count:
+        typeof qualityRaw.parsed_page_count === "number"
+          ? qualityRaw.parsed_page_count
+          : undefined,
+      parsed_page_numbers: Array.isArray(qualityRaw.parsed_page_numbers)
+        ? qualityRaw.parsed_page_numbers.filter(
+            (entry): entry is number => typeof entry === "number",
+          )
+        : undefined,
+    },
+    llama: {
+      job_id: typeof llamaRaw.job_id === "string" ? llamaRaw.job_id : null,
+      file_id: typeof llamaRaw.file_id === "string" ? llamaRaw.file_id : null,
+      tier: typeof llamaRaw.tier === "string" ? llamaRaw.tier : "",
+      version: typeof llamaRaw.version === "string" ? llamaRaw.version : "",
+      estimated_credit_cost: finite(llamaRaw.estimated_credit_cost),
+      actual_credit_cost: finite(llamaRaw.actual_credit_cost),
+      actual_credit_cost_known: llamaRaw.actual_credit_cost_known === true,
+    },
+    source: {
+      publisher: sourceRaw.publisher,
+      url: sourceRaw.url === null ? null : (sourceRaw.url as string),
+      retrieved_at: typeof sourceRaw.retrieved_at === "string" ? sourceRaw.retrieved_at : "",
+      parser: typeof sourceRaw.parser === "string" ? sourceRaw.parser : "",
+      parser_version:
+        typeof sourceRaw.parser_version === "string" ? sourceRaw.parser_version : undefined,
+      tier: typeof sourceRaw.tier === "string" ? sourceRaw.tier : undefined,
+      file_name: typeof sourceRaw.file_name === "string" ? sourceRaw.file_name : undefined,
+    },
+    limitations: Array.isArray(raw.limitations)
+      ? raw.limitations.filter((entry): entry is string => typeof entry === "string")
+      : [],
+  };
+}
+
 function adaptForeignFlow(
   payload: ForeignFlowSample | undefined,
 ): ForeignFlowAdapted | null {
@@ -958,6 +1118,7 @@ function buildInterpretation(input: {
 export function adaptSnapshot(
   payload: SnapshotPayload,
   idxInvestorRelease?: unknown,
+  idxDailyStatistics?: unknown,
 ): AdaptedSnapshot {
   const comparability = payload.comparability;
   const transitionsByGroup: Record<string, (typeof payload.transitions)[number]> = {};
@@ -1194,6 +1355,9 @@ export function adaptSnapshot(
     foreignFlow: foreignFlowAdapted,
     idxInvestorRelease: normalizeIDXInvestorRelease(
       idxInvestorRelease ?? payload.idx_investor_release,
+    ),
+    idxDailyStatistics: normalizeIDXDailyStatistics(
+      idxDailyStatistics ?? payload.idx_daily_statistics,
     ),
     researchEvents,
   };

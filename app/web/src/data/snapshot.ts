@@ -420,6 +420,73 @@ export interface IDXInvestorRelease {
   limitations: string[];
 }
 
+// First-party IDX Daily Statistics PDF cards reduced by the optional
+// LlamaParse ingest. This is deliberately a small target-metrics contract;
+// the full parser response remains an offline audit sidecar.
+export interface IDXDailyStatistics {
+  schema_version: string;
+  provider: "IDX" | string;
+  provider_mode: string;
+  status: DataStatus | string;
+  quantitative_use: boolean;
+  scope: string;
+  as_of: string;
+  metrics: {
+    ihsg: {
+      close: number;
+      previous: number;
+      change: number;
+      change_pct: number;
+      raw_change?: string;
+    };
+    net_foreign: {
+      today: {
+        idr_billion: number;
+        usd_million: number;
+        usd_approximate: boolean;
+        direction: string;
+      };
+      ytd: {
+        idr_billion: number;
+        usd_million: number;
+        usd_approximate: boolean;
+        direction: string;
+      };
+    };
+    fundamental: {
+      market_per: number;
+      market_pbv: number;
+    };
+  };
+  quality: {
+    checks: Record<string, boolean>;
+    warnings: string[];
+    warning_count: number;
+    markdown_sha256: string;
+    parsed_page_count?: number;
+    parsed_page_numbers?: number[];
+  };
+  llama: {
+    job_id?: string | null;
+    file_id?: string | null;
+    tier: string;
+    version: string;
+    estimated_credit_cost?: number | null;
+    actual_credit_cost?: number | null;
+    actual_credit_cost_known: boolean;
+  };
+  source: {
+    publisher: string;
+    url: string | null;
+    retrieved_at: string;
+    parser: string;
+    parser_version?: string;
+    tier?: string;
+    file_name?: string;
+  };
+  limitations: string[];
+}
+
 // ────────────────────────────────────────────────────────────────────────
 // Taxonomy views (sector / Konglo / Themes)
 // ────────────────────────────────────────────────────────────────────────
@@ -580,5 +647,6 @@ export interface SnapshotPayload {
   taxonomy_views?: Record<string, TaxonomyView>;
   foreign_flow_sample?: ForeignFlowSample;
   idx_investor_release?: IDXInvestorRelease;
+  idx_daily_statistics?: IDXDailyStatistics;
   research_events?: ResearchEventBundle;
 }

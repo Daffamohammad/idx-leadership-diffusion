@@ -47,11 +47,25 @@ async function resolveLatestEntry(): Promise<IndexEntry | null> {
 }
 
 const DEFAULT_IDX_RELEASE_PATH = "/idx/idx_investor_trading_2026-07.json";
+const DEFAULT_IDX_DAILY_STATISTICS_PATH = "/idx/idx_daily_statistics_latest.json";
 
 async function loadOptionalIDXRelease(): Promise<unknown | null> {
   const path =
     (import.meta.env.VITE_IDX_RELEASE_PATH as string | undefined)?.trim() ||
     DEFAULT_IDX_RELEASE_PATH;
+  try {
+    const response = await fetch(path, { cache: "no-store" });
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
+async function loadOptionalIDXDailyStatistics(): Promise<unknown | null> {
+  const path =
+    (import.meta.env.VITE_IDX_DAILY_STATISTICS_PATH as string | undefined)?.trim() ||
+    DEFAULT_IDX_DAILY_STATISTICS_PATH;
   try {
     const response = await fetch(path, { cache: "no-store" });
     if (!response.ok) return null;
@@ -112,8 +126,15 @@ export function SnapshotProvider({ children }: { children: ReactNode }) {
           );
         }
         if (cancelled) return;
-        const idxInvestorRelease = await loadOptionalIDXRelease();
-        const adapted: AdaptedSnapshot = adaptSnapshot(payload, idxInvestorRelease);
+        const [idxInvestorRelease, idxDailyStatistics] = await Promise.all([
+          loadOptionalIDXRelease(),
+          loadOptionalIDXDailyStatistics(),
+        ]);
+        const adapted: AdaptedSnapshot = adaptSnapshot(
+          payload,
+          idxInvestorRelease,
+          idxDailyStatistics,
+        );
         setState({
           loading: false,
           error: null,

@@ -82,7 +82,7 @@ button:focus-visible, a:focus-visible, select:focus-visible { outline: 2px solid
   .summary-strips { grid-template-columns: 1fr !important; }
   .current-levels-grid { grid-template-columns: 1fr !important; }
   .evidence-model-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
-  .idx-release-metrics, .idx-release-detail-grid { grid-template-columns: 1fr !important; }
+  .idx-release-metrics, .idx-release-detail-grid, .idx-daily-statistics-grid, .idx-daily-flow-grid { grid-template-columns: 1fr !important; }
 }
 
 @media (max-width: 560px) {
