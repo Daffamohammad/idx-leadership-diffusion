@@ -10,6 +10,8 @@ export interface RotationGroupInput {
   taxonomyVersion?: string;
   prototype?: boolean;
   constituents: number;
+  excess20d: number | null;
+  excess60d: number | null;
   relativeStrength: number | null;
   relativeMomentum: number | null;
   ytdExcess: number | null;
@@ -66,4 +68,3 @@ export function relativeMomentum(
 export function withRotationPhase(group: RotationGroupInput): RotationRow {
   return { ...group, phase: classifyRotation(group.relativeStrength, group.relativeMomentum) };
 }
-

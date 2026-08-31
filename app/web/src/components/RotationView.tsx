@@ -44,6 +44,13 @@ const QUADRANTS: Array<{
   { phase: "WEAKENING", x: 27, y: -25, color: "#aa8750", fill: "#f8f0df", anchor: "end" },
 ];
 
+const DIAGNOSTIC_QUADRANTS = [
+  { label: "Negative 20D · rising", x: -27, y: 25, color: "#54718b", anchor: "start" as const },
+  { label: "Positive 20D · rising", x: 27, y: 25, color: "#438b82", anchor: "end" as const },
+  { label: "Negative 20D · fading", x: -27, y: -25, color: "#ad6765", anchor: "start" as const },
+  { label: "Positive 20D · fading", x: 27, y: -25, color: "#aa8750", anchor: "end" as const },
+];
+
 function scaleX(value: number): number {
   return PLOT.left + ((value - DOMAIN.xMin) / (DOMAIN.xMax - DOMAIN.xMin)) * PLOT.width;
 }
@@ -67,6 +74,8 @@ function sectorToRotationGroup(sector: SectorData, taxonomyId: string): Rotation
     taxonomyId,
     taxonomyKind: "SECTOR",
     constituents: sector.constituents,
+    excess20d: sector.excess20d,
+    excess60d: sector.excess60d,
     relativeStrength: sector.excessYtd,
     relativeMomentum: relativeMomentum(sector.excess20d, sector.excess60d),
     ytdExcess: sector.excessYtd,
@@ -85,6 +94,8 @@ function taxonomyToRotationGroup(group: TaxonomyGroupData): RotationGroupInput {
     taxonomyVersion: group.taxonomyVersion,
     prototype: group.prototype,
     constituents: group.constituents,
+    excess20d: group.excess20d,
+    excess60d: group.excess60d,
     relativeStrength: group.excessYtd,
     relativeMomentum: relativeMomentum(group.excess20d, group.excess60d),
     ytdExcess: group.excessYtd,
@@ -131,17 +142,27 @@ export default function RotationView() {
   }, [groups, search]);
 
   const plottable = rows.filter((row) => row.phase !== "DATA_GAP" && row.relativeStrength !== null && row.relativeMomentum !== null);
+  // The current persisted snapshot may not yet contain the prior-year
+  // baseline needed for YTD strength. Keep the rotation contract honest, but
+  // avoid an empty hero: use the available 20D/60D values as a clearly marked
+  // diagnostic view until the YTD baseline is persisted.
+  const diagnosticPlottable = rows.filter((row) => row.excess20d !== null && row.relativeMomentum !== null);
+  const isDiagnostic = plottable.length === 0 && diagnosticPlottable.length > 0;
+  const plottedRows = isDiagnostic ? diagnosticPlottable : plottable;
   const labelPositions = useMemo(() => {
-    const candidates = plottable.map((row) => ({
+    const candidates = plottedRows.map((row) => {
+      const xValue = isDiagnostic ? row.excess20d : row.relativeStrength;
+      return {
       id: row.id,
       text: shortName(row.name),
-      x: clamp(scaleX(row.relativeStrength ?? 0), PLOT_BOUNDS.left, PLOT_BOUNDS.right),
+      x: clamp(scaleX(xValue ?? 0), PLOT_BOUNDS.left, PLOT_BOUNDS.right),
       y: clamp(scaleY(row.relativeMomentum ?? 0), PLOT_BOUNDS.top, PLOT_BOUNDS.bottom),
       radius: 7 + Math.sqrt(Math.max(1, row.constituents)) / 3,
-      priority: Math.abs(row.relativeStrength ?? 0) + Math.abs(row.relativeMomentum ?? 0) + row.constituents / 10,
-    }));
+      priority: Math.abs(xValue ?? 0) + Math.abs(row.relativeMomentum ?? 0) + row.constituents / 10,
+      };
+    });
     return placeMapLabels(candidates, PLOT_BOUNDS, Math.min(candidates.length, 10));
-  }, [plottable]);
+  }, [isDiagnostic, plottedRows]);
 
   if (!data) return null;
   const snapshotAsOf = formatDateLabel(data.payload.as_of);
@@ -155,10 +176,17 @@ export default function RotationView() {
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
             <div className="eyebrow-muted" style={{ color: "#438b82" }}>Rotation mapping</div>
             <EvidenceBadge kind={taxonomyKind === "SECTOR" ? "SNAPSHOT" : "PROTOTYPE"} compact />
+            {isDiagnostic && (
+              <span style={{ border: "1px solid #d5c59d", borderRadius: 20, padding: "4px 9px", color: "#7a5010", fontFamily: "Geist Mono, monospace", fontSize: 10 }}>
+                YTD unavailable · diagnostic view
+              </span>
+            )}
           </div>
           <h1 style={{ margin: "7px 0 8px", fontSize: 31, letterSpacing: "-.045em", fontWeight: 500 }}>Market rotation</h1>
           <p style={{ maxWidth: 760, margin: 0, color: "#686e73", lineHeight: 1.55 }}>
-            Relative strength uses YTD excess return versus IHSG. Relative momentum is 20D excess return minus 60D excess return. Null values remain visible as Data gap and are not plotted.
+            {isDiagnostic
+              ? "The YTD baseline is unavailable in this snapshot. The map below shows available 20D excess return and 20D minus 60D momentum as diagnostics only; no rotation phase is assigned."
+              : "Relative strength uses YTD excess return versus IHSG. Relative momentum is 20D excess return minus 60D excess return. Null values remain visible as Data gap and are not plotted."}
           </p>
         </div>
         <div style={{ color: "#686e73", fontFamily: "Geist Mono, monospace", fontSize: 11, textAlign: "right" }}>
@@ -197,13 +225,15 @@ export default function RotationView() {
       </div>
 
       <div className="rotation-note" style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center", padding: "9px 12px", border: "1px solid #dfe2e1", background: "#faf9f6", color: "#686e73", fontSize: 11, marginBottom: 12 }}>
-        <strong style={{ color: "#202325" }}>Current phase</strong>
-        <span>{comparable ? "Comparable prior exists; this view still shows the current rotation classification." : "No compatible prior snapshot; no historical phase trail is shown."}</span>
+        <strong style={{ color: "#202325" }}>{isDiagnostic ? "YTD signal" : "Current phase"}</strong>
+        <span>{isDiagnostic
+          ? `Baseline unavailable; ${formatCountLabel(diagnosticPlottable.length, "group")} remain visible in the diagnostic map and table.`
+          : comparable ? "Comparable prior exists; this view still shows the current rotation classification." : "No compatible prior snapshot; no historical phase trail is shown."}</span>
         {taxonomyKind !== "SECTOR" && <span style={{ color: "#315d87" }}>Analyst-defined taxonomy</span>}
       </div>
 
       <div className="rotation-map-frame" style={{ border: "1px solid #dfe2e1", background: "#fff", overflow: "hidden" }}>
-        <svg viewBox="0 0 1000 450" role="img" aria-label="Market rotation map" style={{ display: "block", width: "100%", height: "auto" }}>
+        <svg viewBox="0 0 1000 450" role="img" aria-label={isDiagnostic ? "Market rotation diagnostic map" : "Market rotation map"} style={{ display: "block", width: "100%", height: "auto" }}>
           <rect x={PLOT.left} y={PLOT.top} width={PLOT.width / 2} height={PLOT.height / 2} fill="#edf3f7" />
           <rect x={PLOT.left + PLOT.width / 2} y={PLOT.top} width={PLOT.width / 2} height={PLOT.height / 2} fill="#e8f3f0" />
           <rect x={PLOT.left} y={PLOT.top + PLOT.height / 2} width={PLOT.width / 2} height={PLOT.height / 2} fill="#f8eaea" />
@@ -218,9 +248,9 @@ export default function RotationView() {
           })}
           <line x1={scaleX(0)} x2={scaleX(0)} y1={PLOT.top} y2={PLOT.top + PLOT.height} stroke="#9ca9a7" strokeWidth="1.25" />
           <line x1={PLOT.left} x2={PLOT.left + PLOT.width} y1={scaleY(0)} y2={scaleY(0)} stroke="#9ca9a7" strokeWidth="1.25" />
-          {QUADRANTS.map((quadrant) => (
-            <text key={quadrant.phase} x={scaleX(quadrant.x)} y={scaleY(quadrant.y)} textAnchor={quadrant.anchor} fontFamily="Geist Mono, monospace" fontSize="11" fill={quadrant.color} opacity=".8">
-              {formatEnumLabel(quadrant.phase)}
+          {(isDiagnostic ? DIAGNOSTIC_QUADRANTS : QUADRANTS).map((quadrant) => (
+            <text key={"phase" in quadrant ? quadrant.phase : quadrant.label} x={scaleX(quadrant.x)} y={scaleY(quadrant.y)} textAnchor={quadrant.anchor} fontFamily="Geist Mono, monospace" fontSize="11" fill={quadrant.color} opacity=".8">
+              {"phase" in quadrant ? formatEnumLabel(quadrant.phase) : quadrant.label}
             </text>
           ))}
           <text x={PLOT.left} y={PLOT.top + PLOT.height + 18} textAnchor="start" fontFamily="Geist Mono, monospace" fontSize="10" fill="#7c858c">−30%</text>
@@ -229,17 +259,20 @@ export default function RotationView() {
           <text x={PLOT.left - 10} y={PLOT.top + 4} textAnchor="end" fontFamily="Geist Mono, monospace" fontSize="10" fill="#7c858c">+30%</text>
           <text x={PLOT.left - 10} y={scaleY(0) + 4} textAnchor="end" fontFamily="Geist Mono, monospace" fontSize="10" fill="#7c858c">0%</text>
           <text x={PLOT.left - 10} y={PLOT.top + PLOT.height} textAnchor="end" fontFamily="Geist Mono, monospace" fontSize="10" fill="#7c858c">−30%</text>
-          {plottable.map((row) => {
-            const x = clamp(scaleX(row.relativeStrength ?? 0), PLOT.left, PLOT.left + PLOT.width);
+          {plottedRows.map((row) => {
+            const xValue = isDiagnostic ? row.excess20d : row.relativeStrength;
+            const x = clamp(scaleX(xValue ?? 0), PLOT.left, PLOT.left + PLOT.width);
             const y = clamp(scaleY(row.relativeMomentum ?? 0), PLOT.top, PLOT.top + PLOT.height);
             const radius = Math.max(8, Math.min(22, 5 + Math.sqrt(Math.max(1, row.constituents)) * 2));
-            const color = phaseColor(row.phase);
+            const color = isDiagnostic ? "#7c858c" : phaseColor(row.phase);
             return (
               <g
                 key={row.id}
                 role="button"
                 tabIndex={0}
-                aria-label={`${row.name}: ${formatEnumLabel(row.phase)}, ${formatPercent(row.relativeStrength)} relative strength, ${formatPercent(row.relativeMomentum)} relative momentum`}
+                aria-label={isDiagnostic
+                  ? `${row.name}: YTD Data gap, diagnostic 20D excess ${formatPercent(row.excess20d)} and momentum ${formatPercent(row.relativeMomentum)}`
+                  : `${row.name}: ${formatEnumLabel(row.phase)}, ${formatPercent(row.relativeStrength)} relative strength, ${formatPercent(row.relativeMomentum)} relative momentum`}
                 onClick={() => openGroup(navigate, row)}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" || event.key === " ") {
@@ -249,7 +282,7 @@ export default function RotationView() {
                 }}
                 style={{ cursor: "pointer" }}
               >
-                <title>{row.name}: {formatEnumLabel(row.phase)}</title>
+                <title>{isDiagnostic ? `${row.name}: YTD Data gap · diagnostic view` : `${row.name}: ${formatEnumLabel(row.phase)}`}</title>
                 <circle cx={x} cy={y} r={radius} fill={color} opacity=".9" stroke="#fff" strokeWidth="1.5" />
                 <text x={x} y={y} textAnchor="middle" dominantBaseline="middle" fontFamily="Geist Mono, monospace" fontSize="10" fill="#fff" pointerEvents="none">{row.constituents}</text>
               </g>
@@ -263,20 +296,34 @@ export default function RotationView() {
               <text x={label.x} y={label.y} textAnchor={label.textAnchor} fontFamily="Geist Mono, monospace" fontSize="10" fill="#202325">{label.text}</text>
             </g>
           ))}
-          <text x={PLOT.left + PLOT.width / 2} y="438" textAnchor="middle" fontFamily="Geist Mono, monospace" fontSize="10" fill="#686e73">YTD excess return vs IHSG (%)</text>
+          <text x={PLOT.left + PLOT.width / 2} y="438" textAnchor="middle" fontFamily="Geist Mono, monospace" fontSize="10" fill="#686e73">{isDiagnostic ? "20D excess return vs IHSG (%) · diagnostic" : "YTD excess return vs IHSG (%)"}</text>
           <text x="18" y={PLOT.top + PLOT.height / 2} textAnchor="middle" transform={`rotate(-90 18 ${PLOT.top + PLOT.height / 2})`} fontFamily="Geist Mono, monospace" fontSize="10" fill="#686e73">20D excess − 60D excess (%)</text>
         </svg>
       </div>
 
-      <div className="rotation-summary-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 10, marginTop: 12 }}>
-        {QUADRANTS.map((quadrant) => (
-          <div key={quadrant.phase} style={{ padding: "11px 13px", border: `1px solid ${quadrant.color}44`, background: quadrant.fill, minWidth: 0 }}>
-            <div style={{ color: quadrant.color, fontSize: 11, fontWeight: 600 }}>{formatEnumLabel(quadrant.phase)}</div>
-            <strong style={{ display: "block", marginTop: 6, fontSize: 21 }}>{rows.filter((row) => row.phase === quadrant.phase).length}</strong>
-            <div style={{ color: "#686e73", fontSize: 10 }}>{formatCountLabel(rows.filter((row) => row.phase === quadrant.phase).length, "group")}</div>
+      {isDiagnostic ? (
+        <div
+          className="rotation-diagnostic-callout"
+          role="status"
+          style={{ marginTop: 12, padding: "13px 15px", border: "1px solid #d5c59d", background: "#fffaf0", color: "#686e73" }}
+        >
+          <div className="eyebrow-muted" style={{ color: "#7a5010" }}>Diagnostic availability</div>
+          <strong style={{ display: "block", marginTop: 5, color: "#202325", fontSize: 15 }}>YTD rotation is unavailable for this snapshot.</strong>
+          <div style={{ marginTop: 5, fontSize: 12, lineHeight: 1.5 }}>
+            {formatCountLabel(diagnosticPlottable.length, "group")} are shown above using available 20D excess and momentum. The phase cards and rotation signal remain Data gap until the prior-year baseline is persisted.
           </div>
-        ))}
-      </div>
+        </div>
+      ) : (
+        <div className="rotation-summary-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 10, marginTop: 12 }}>
+          {QUADRANTS.map((quadrant) => (
+            <div key={quadrant.phase} style={{ padding: "11px 13px", border: `1px solid ${quadrant.color}44`, background: quadrant.fill, minWidth: 0 }}>
+              <div style={{ color: quadrant.color, fontSize: 11, fontWeight: 600 }}>{formatEnumLabel(quadrant.phase)}</div>
+              <strong style={{ display: "block", marginTop: 6, fontSize: 21 }}>{rows.filter((row) => row.phase === quadrant.phase).length}</strong>
+              <div style={{ color: "#686e73", fontSize: 10 }}>{formatCountLabel(rows.filter((row) => row.phase === quadrant.phase).length, "group")}</div>
+            </div>
+          ))}
+        </div>
+      )}
 
       <section style={{ marginTop: 22 }} aria-labelledby="rotation-table-title">
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "baseline", flexWrap: "wrap", marginBottom: 9 }}>
@@ -332,9 +379,8 @@ export default function RotationView() {
         <span>·</span>
         <span>Data gap groups remain in the table and list</span>
         <span>·</span>
-        <span>YTD baseline: last trading session of prior year</span>
+        <span>{isDiagnostic ? "Diagnostic fallback: persisted 20D/60D values only" : "YTD baseline: last trading session of prior year"}</span>
       </footer>
     </section>
   );
 }
-
