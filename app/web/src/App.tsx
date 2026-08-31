@@ -10,12 +10,17 @@ import { useState } from "react";
 import AppShell from "./components/AppShell";
 import CustomCursor from "./components/CustomCursor";
 import PublicHome from "./pages/PublicHome";
-import WhatChanged from "./pages/WhatChanged";
 import LeadershipMap from "./pages/LeadershipMap";
 import GroupExplorer from "./pages/GroupExplorer";
 import Methodology from "./pages/Methodology";
+import WhatChanged from "./pages/WhatChanged";
+import ChartDemo from "./pages/ChartDemo";
+import TickerAnalysis from "./pages/TickerAnalysis";
+import MarketOverview from "./pages/MarketOverview";
+import TaxonomyMapPage from "./pages/TaxonomyMapPage";
+import MasterGroupTable from "./pages/MasterGroupTable";
+import ThemesExplorer from "./pages/ThemesExplorer";
 import { SnapshotProvider, useSnapshot } from "./data/SnapshotProvider";
-
 function WorkspaceLayout() {
   const [taxonomy, setTaxonomy] = useState<"Sector" | "Industry">("Sector");
   const snap = useSnapshot();
@@ -104,10 +109,17 @@ const router = createBrowserRouter([
     Component: WorkspaceLayout,
     errorElement: <RouteErrorElement />,
     children: [
-      { path: "/overview", Component: WhatChanged },
+      { path: "/what-changed", Component: WhatChanged },
+      { path: "/overview", Component: MarketOverview },
       { path: "/map", Component: LeadershipMap },
+      { path: "/maps/konglo", Component: TaxonomyMapPage },
+      { path: "/maps/themes", Component: TaxonomyMapPage },
+      { path: "/themes", Component: ThemesExplorer },
       { path: "/explorer", Component: GroupExplorer },
+      { path: "/groups", Component: MasterGroupTable },
       { path: "/methodology", Component: Methodology },
+      { path: "/chart-demo", Component: ChartDemo },
+      { path: "/ticker/:ticker", Component: TickerAnalysis },
     ],
   },
 ]);

@@ -1,0 +1,199 @@
+{
+  "as_of": "2026-08-28",
+  "limitations": [
+    "This artifact promotes only validated market cards from the first two parsed pages; other PDF tables remain in the raw parse audit output.",
+    "Net foreign is market-level and does not establish per-ticker or per-group ownership flow.",
+    "A missing YTD label in the markdown output is handled with the fixed IDX card layout and remains an explicit warning.",
+    "LlamaParse credit usage is provider-reported when present; the client estimate is not a billing guarantee."
+  ],
+  "llama": {
+    "actual_credit_cost": 90.0,
+    "actual_credit_cost_known": true,
+    "estimated_credit_cost": 117.0,
+    "file_id": null,
+    "job_id": "pjb-e6h9nmrlsnw3ddxgqoc973uqa1y8",
+    "tier": "agentic",
+    "version": "latest"
+  },
+  "metrics": {
+    "fundamental": {
+      "market_pbv": 1.73,
+      "market_per": 13.07
+    },
+    "ihsg": {
+      "change": -3.629,
+      "change_pct": -0.06,
+      "close": 6518.121,
+      "previous": 6521.75,
+      "raw_change": "-3.629"
+    },
+    "net_foreign": {
+      "today": {
+        "direction": "NET_SELL",
+        "idr_billion": -482.24,
+        "usd_approximate": true,
+        "usd_million": -27.24
+      },
+      "ytd": {
+        "direction": "NET_SELL",
+        "idr_billion": -70360.99,
+        "usd_approximate": false,
+        "usd_million": -3974.52
+      }
+    }
+  },
+  "provider": "IDX",
+  "provider_mode": "IDX_OFFICIAL_DAILY_STATISTICS",
+  "quality": {
+    "checks": {
+      "fundamental_values_found": true,
+      "ihsg_change_reconciles": true,
+      "ihsg_percentage_reconciles": true,
+      "net_foreign_column_labels_preserved": true,
+      "net_foreign_four_values_found": true,
+      "net_foreign_units_found": true
+    },
+    "markdown_sha256": "b901f33c24baadbf22248ea117c4a398993fb560f4e6cca26fd7c197e04613f0",
+    "parsed_page_count": 9,
+    "parsed_page_numbers": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "warning_count": 0,
+    "warnings": []
+  },
+  "quantitative_use": true,
+  "schema_version": "idx-daily-statistics-v1",
+  "scope": "DAILY_STATISTICS_TARGET_METRICS",
+  "source": {
+    "discovery": {
+      "crawl": {
+        "cache_hit": true,
+        "candidates": [
+          {
+            "date_candidate": null,
+            "title": "Statistik",
+            "url": "https://www.idx.co.id/id/data-pasar/laporan-statistik/statistik/"
+          }
+        ],
+        "credits": null,
+        "endpoint": "/v1/contents",
+        "note": "You.com uses /v1/contents for bounded crawl/retrieval; the existing client has no separate crawl endpoint.",
+        "provider": "you",
+        "quantitative_use": false,
+        "query": null,
+        "request_id": null,
+        "result_count": 1,
+        "retrieved_at": "2026-08-31T05:25:50.560985+00:00",
+        "stage": "crawl_retrieve",
+        "url": "https://www.idx.co.id/id/data-pasar/laporan-statistik/statistik/"
+      },
+      "limitations": [
+        "Search-agent and crawl output are discovery evidence only; no numeric metric is read from them.",
+        "The selected first-party PDF bytes are uploaded to LlamaParse for numeric extraction."
+      ],
+      "quantitative_use": false,
+      "query": "IDX Daily Statistics \"28 August 2026\" ds_260828 PDF site:idx.co.id",
+      "retrieve": {
+        "byte_count": 1974999,
+        "content_type": "application/pdf",
+        "file_name": "ds_260828.pdf",
+        "method": "browser_download",
+        "note": "Retrieved bytes are uploaded to LlamaParse; search/crawl text is not used as numeric evidence.",
+        "quantitative_use": false,
+        "retrieved_at": "2026-08-31T05:44:36.463805+00:00",
+        "sha256": "701eceed297f5853f89b6653c43651bc9f0be22bd88092d88038bb8a0cf59f43",
+        "status": "READY",
+        "url": "https://www.idx.co.id/Media/liskz5kp/ds_260828.pdf"
+      },
+      "schema_version": "idx-daily-statistics-discovery-v1",
+      "search": {
+        "cache_hit": true,
+        "candidates": [
+          {
+            "date_candidate": null,
+            "title": "Statistic",
+            "url": "https://www.idx.co.id/en/market-data/statistical-reports/statistics/"
+          },
+          {
+            "date_candidate": null,
+            "title": "Statistik",
+            "url": "https://www.idx.co.id/id/data-pasar/laporan-statistik/statistik"
+          },
+          {
+            "date_candidate": null,
+            "title": "Statistic",
+            "url": "https://www2.idx.co.id/en/market-data/statistical-reports/statistics/"
+          },
+          {
+            "date_candidate": null,
+            "title": "Daily IDX Indices - January 2025",
+            "url": "https://www2.idx.co.id/en/market-data/statistical-reports/digital-statistic/monthly/stock-price-index/daily-idx-indices?filter=eyJ5ZWFyIjoiMjAyNSIsIm1vbnRoIjoiMSIsInF1YXJ0ZXIiOjAsInR5cGUiOiJtb250aGx5In0%3D"
+          },
+          {
+            "date_candidate": null,
+            "title": "Indonesia Stock Exchange Activities -",
+            "url": "https://www.idx.co.id/en/market-data/statistical-reports/digital-statistic/monthly/idx-trading-activities/indonesia-stock-exchange-activities"
+          },
+          {
+            "date_candidate": null,
+            "title": "Statistical Highlight - April 2025",
+            "url": "https://idx.co.id/en/market-data/statistical-reports/digital-statistic/monthly/highlights/statistical-highlight?filter=eyJ5ZWFyIjoiMjAyNSIsIm1vbnRoIjoiNCIsInF1YXJ0ZXIiOjAsInR5cGUiOiJtb250aGx5In0%3D"
+          },
+          {
+            "date_candidate": null,
+            "title": "Digital Statistic",
+            "url": "https://www.idx.co.id/id/data-pasar/laporan-statistik/digital-statistic/"
+          },
+          {
+            "date_candidate": null,
+            "title": "Digital Statistic",
+            "url": "https://www.idx.co.id/en/market-data/statistical-reports/digital-statistic/"
+          },
+          {
+            "date_candidate": null,
+            "title": "IDX Indices Highlight",
+            "url": "https://m.idx.co.id/en/market-data/statistical-reports/digital-statistic/monthly/highlights/idx-indices-highlight?filter=eyJ5ZWFyIjoiMjAyNCIsIm1vbnRoIjoiMiIsInF1YXJ0ZXIiOjAsInR5cGUiOiJtb250aGx5In0%3D"
+          },
+          {
+            "date_candidate": null,
+            "title": "Financial Data and Ratio -",
+            "url": "https://www.idx.co.id/id/data-pasar/laporan-statistik/digital-statistic/monthly/financial-report-and-ratio-of-listed-companies/financial-data-and-ratio"
+          }
+        ],
+        "credits": null,
+        "endpoint": "/v1/search",
+        "provider": "you",
+        "quantitative_use": false,
+        "query": "IDX Daily Statistics \"28 August 2026\" ds_260828 PDF site:idx.co.id",
+        "request_id": null,
+        "result_count": 10,
+        "retrieved_at": "2026-08-31T05:37:50.602320+00:00",
+        "stage": "search",
+        "url": "https://www.idx.co.id/en/market-data/statistical-reports/statistics/"
+      },
+      "search_provider": "you",
+      "selected": {
+        "as_of": "2026-08-28",
+        "pdf_url": "https://www.idx.co.id/Media/liskz5kp/ds_260828.pdf",
+        "source": "browser_resolved_dynamic_asset"
+      },
+      "status": "READY"
+    },
+    "file_name": "ds_260828.pdf",
+    "parser": "llamaparse_v2_daily_statistics",
+    "parser_version": "latest",
+    "publisher": "Indonesia Stock Exchange",
+    "retrieved_at": "2026-08-31T05:44:39.336734+00:00",
+    "tier": "agentic",
+    "url": "https://www.idx.co.id/Media/liskz5kp/ds_260828.pdf"
+  },
+  "status": "READY"
+}

@@ -24,8 +24,11 @@ no network calls. A first live Sectors snapshot was exercised and is labeled
   parity and adjusted-price parity remain unmeasured.
 - **Live state turnover:** churn, reversals, transition matrices, and durations
   have not been measured on Sectors market-wide history.
-- **Enrichment:** free-float historical semantics, structured foreign-flow
-  coverage, and corporate-action completeness remain open. The bounded
+- **Enrichment:** free-float historical semantics, per-ticker/group
+  foreign-flow coverage, and corporate-action completeness remain open. The
+  official IDX Digital Statistics investor-type release is now integrated as a
+  reconciled market-level lane, but it does not provide ownership flow by
+  ticker or group. The bounded
   `scripts.enrich_tavily_context` command can attach first-party qualitative
   sources for foreign flow, fundamentals, and events without calling Sectors.
   Those sources are shown as `READY_WITH_GAPS` / `CONTEXT ONLY`; they do not

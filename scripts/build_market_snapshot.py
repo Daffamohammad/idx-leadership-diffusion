@@ -63,6 +63,15 @@ COMPANIES_PAGE_SIZE = 200
 CLOSE_PAGE_SIZE = 30
 
 
+class FullLiveGateError(ProviderError):
+    """Raised before snapshot persistence when a strict live gate fails."""
+
+    def __init__(self, blockers: list[dict[str, str]]) -> None:
+        self.blockers = blockers
+        reason = blockers[0]["reason"] if blockers else "full-live data gate failed"
+        super().__init__(reason)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="build_market_snapshot")
     parser.add_argument("--as-of", default=None, help="Exact market date YYYY-MM-DD.")
@@ -93,6 +102,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--preflight-only",
         action="store_true",
         help="Print the bounded live-call estimate and exit without any HTTP request.",
+    )
+    parser.add_argument(
+        "--require-complete",
+        action="store_true",
+        help="Block snapshot persistence unless the full-live data gates pass.",
     )
     parser.add_argument(
         "--max-pages",
@@ -211,7 +225,16 @@ def main(argv: list[str] | None = None) -> int:
                 )
             as_of = requested_as_of
         else:
-            current_close = latest_close
+            # The first close request is date discovery only. A full-live
+            # run must then fetch the complete cross-section for that date;
+            # otherwise omitting --as-of silently produces a first-page
+            # sample while presenting it as the latest full universe.
+            current_close = provider.get_full_universe_close(observed_latest)
+            if current_close.empty:
+                raise ProviderError(
+                    "Sectors latest full-universe close returned no rows for "
+                    f"observed date={observed_latest.isoformat()}"
+                )
             as_of = observed_latest
         provider.set_source_as_of(as_of)
 
@@ -443,6 +466,27 @@ def main(argv: list[str] | None = None) -> int:
             suspension_warning=suspension_warning,
         )
 
+        if args.require_complete:
+            blockers = _full_live_data_gate(
+                provider=provider,
+                master=master,
+                history_tickers=history_tickers,
+                history=history,
+                benchmark=ihsg,
+                current_close=current_close,
+                quality=quality,
+                coverage=coverage,
+                expected_price_basis=effective_price_basis,
+                as_of=as_of,
+                min_history_days=args.min_history_days,
+            )
+            if blockers:
+                # This is deliberately before sensitivity, Tavily, and the
+                # SnapshotWriter. A failed full-live gate may leave only the
+                # request ledger/cache evidence; it cannot create a snapshot,
+                # aggregate manifest, browser export, or index update.
+                raise FullLiveGateError(blockers)
+
         sensitivity = _build_sensitivity_report(
             baseline=snapshots,
             master=master,
@@ -583,10 +627,62 @@ def main(argv: list[str] | None = None) -> int:
         print(f"snapshot_dir={target}")
         print(json.dumps({"coverage": coverage, "warnings": warnings}, default=str))
         return 0
+    except FullLiveGateError as exc:
+        if provider is not None:
+            provider.ledger.flush()
+        print(
+            json.dumps(
+                {
+                    "status": "BLOCKED",
+                    "mode": "FULL_LIVE",
+                    "phase": "data_gate",
+                    "blockers": exc.blockers,
+                    "next_action": exc.blockers[0]["next_action"],
+                },
+                indent=2,
+            ),
+            file=sys.stderr,
+        )
+        return 2
     except (ProviderError, ValueError, OSError, KeyError) as exc:
         if provider is not None:
             provider.ledger.flush()
-        print(f"BUILD_BLOCKED {exc}", file=sys.stderr)
+        if args.require_complete:
+            message = str(exc)
+            code = (
+                "CREDIT_BUDGET_EXCEEDED"
+                if "credit budget" in message.lower()
+                else "LIVE_PROVIDER_REQUEST_FAILED"
+            )
+            print(
+                json.dumps(
+                    {
+                        "status": "BLOCKED",
+                        "mode": "FULL_LIVE",
+                        "phase": "request_or_pipeline",
+                        "blockers": [
+                            {
+                                "code": code,
+                                "reason": message,
+                                "next_action": (
+                                    "Review the request ledger and provider response; "
+                                    "resolve the cause, then rerun the network-free preflight "
+                                    "before approving another live request."
+                                ),
+                            }
+                        ],
+                        "next_action": (
+                            "Review the request ledger and provider response; resolve the "
+                            "cause, then rerun the network-free preflight before approving "
+                            "another live request."
+                        ),
+                    },
+                    indent=2,
+                ),
+                file=sys.stderr,
+            )
+        else:
+            print(f"BUILD_BLOCKED {exc}", file=sys.stderr)
         return 2
 
 
@@ -640,13 +736,11 @@ def _live_credit_preflight(
     # complete, so this is deliberately conservative.
     company_requests = company_pages * 2
     latest_close_requests = 1
-    requested_close_pages = 0
-    if requested_as_of is not None:
-        requested_close_pages = _bounded_pages(universe_size, CLOSE_PAGE_SIZE, max_pages)
+    full_universe_close_pages = _bounded_pages(universe_size, CLOSE_PAGE_SIZE, max_pages)
     components = {
         "companies_identity_and_taxonomy": company_requests,
-        "latest_close_page": latest_close_requests,
-        "requested_close_pages": requested_close_pages,
+        "latest_close_probe": latest_close_requests,
+        "full_universe_close_pages": full_universe_close_pages,
         "daily_history_calls": history_symbols,
         "native_ihsg_history_call": 1,
         "suspensions_call": 1,
@@ -739,6 +833,188 @@ def _known_live_universe_size(snapshot_root: Path, config_path: str) -> tuple[in
     except (OSError, TypeError, ValueError):
         fallback = 0
     return max(0, fallback), "config refresh_plan.universe_size"
+
+
+def _full_live_data_gate(
+    *,
+    provider: SectorsProvider,
+    master: list[Any],
+    history_tickers: list[str],
+    history: pd.DataFrame,
+    benchmark: pd.DataFrame,
+    current_close: pd.DataFrame,
+    quality: QualityReport,
+    coverage: dict[str, Any],
+    expected_price_basis: str,
+    as_of: date,
+    min_history_days: int,
+) -> list[dict[str, str]]:
+    """Return strict full-live blockers without touching snapshot outputs."""
+
+    blockers: list[dict[str, str]] = []
+
+    def add(code: str, reason: str, next_action: str) -> None:
+        blockers.append({"code": code, "reason": reason, "next_action": next_action})
+
+    master_pagination = str(
+        provider.security_master_diagnostics.get("pagination_completeness") or "UNKNOWN"
+    )
+    if master_pagination != "COMPLETE":
+        add(
+            "SECURITY_MASTER_PAGINATION_INCOMPLETE",
+            f"security-master pagination is {master_pagination}; the full universe is not certified.",
+            "Resolve pagination metadata or provider paging, then rerun full-live preflight and refresh.",
+        )
+
+    close_pagination = str(
+        provider.close_pagination_diagnostics.get("completeness") or "UNKNOWN"
+    )
+    if close_pagination != "COMPLETE":
+        add(
+            "CLOSE_PAGINATION_INCOMPLETE",
+            f"market-close pagination is {close_pagination}; the as-of cross-section is not complete.",
+            "Fetch every close page for the observed market date, then rerun the full-live gate.",
+        )
+
+    history_diagnostics = provider.history_diagnostics or {}
+    failed = history_diagnostics.get("failed_symbols") or []
+    empty = history_diagnostics.get("empty_symbols") or []
+    counts = (
+        history.groupby("ticker")["date"].nunique()
+        if {"ticker", "date"}.issubset(history.columns)
+        else pd.Series(dtype=int)
+    )
+    insufficient = [
+        ticker
+        for ticker in history_tickers
+        if int(counts.get(ticker, 0)) < min_history_days
+    ]
+    if failed or empty or insufficient:
+        add(
+            "HISTORY_INCOMPLETE",
+            "history is incomplete: "
+            f"failed={len(failed)}, empty={len(empty)}, "
+            f"below_{min_history_days}d={len(insufficient)}.",
+            "Resolve the provider history failures and rerun; do not use an imputed or alternate-provider prior.",
+        )
+    if int(history_diagnostics.get("duplicate_symbol_date_rows") or 0) > 0:
+        add(
+            "HISTORY_DUPLICATES",
+            "history contains duplicate ticker/date observations.",
+            "Deduplicate or correct the provider response and rerun the full-live gate.",
+        )
+
+    if quality.invalid_prices:
+        add(
+            "INVALID_PRICE_DATA",
+            f"{quality.invalid_prices} history rows contain non-positive prices.",
+            "Correct or reject invalid provider rows, then rerun the full-live gate.",
+        )
+
+    def declared_bases(frame: pd.DataFrame) -> set[str]:
+        if "price_basis" not in frame.columns:
+            return set()
+        return {
+            str(value)
+            for value in frame["price_basis"].dropna().tolist()
+            if str(value).strip()
+        }
+
+    basis_frames = {
+        "history": declared_bases(history),
+        "market close": declared_bases(current_close),
+        "benchmark": declared_bases(benchmark),
+    }
+    bad_basis = {
+        label: values
+        for label, values in basis_frames.items()
+        if values != {expected_price_basis}
+    }
+    if bad_basis:
+        detail = "; ".join(
+            f"{label}={sorted(values) if values else ['missing']}"
+            for label, values in bad_basis.items()
+        )
+        add(
+            "PRICE_BASIS_UNCERTAIN",
+            f"declared price basis does not consistently match {expected_price_basis}: {detail}.",
+            "Confirm the provider price-basis contract and rerun; do not relabel a different basis.",
+        )
+
+    benchmark_dates = (
+        pd.to_datetime(benchmark["date"], errors="coerce").dropna().dt.date
+        if "date" in benchmark.columns
+        else pd.Series(dtype=object)
+    )
+    if benchmark.empty or benchmark_dates.empty:
+        add(
+            "BENCHMARK_MISSING",
+            "native IHSG benchmark history is empty or undated.",
+            "Resolve the native benchmark endpoint before requesting a full-live snapshot.",
+        )
+    elif max(benchmark_dates) != as_of:
+        add(
+            "BENCHMARK_DATE_MISMATCH",
+            f"latest IHSG benchmark date is {max(benchmark_dates).isoformat()}, expected {as_of.isoformat()}.",
+            "Use a market date with a matching native IHSG observation; do not forward-fill the benchmark.",
+        )
+    elif str(benchmark.get("source", pd.Series(dtype=object)).iloc[0] if "source" in benchmark.columns and not benchmark.empty else "") != "sectors":
+        add(
+            "BENCHMARK_SOURCE_INVALID",
+            "benchmark is not sourced from the native Sectors endpoint.",
+            "Fetch native IHSG history and rerun; do not substitute a Yahoo or cross-sectional proxy.",
+        )
+
+    close_dates = (
+        pd.to_datetime(current_close["date"], errors="coerce").dropna().dt.date
+        if "date" in current_close.columns
+        else pd.Series(dtype=object)
+    )
+    if current_close.empty or close_dates.empty or set(close_dates) != {as_of}:
+        add(
+            "CLOSE_DATE_MISMATCH",
+            f"market-close rows are not a complete dated cross-section for {as_of.isoformat()}.",
+            "Fetch the requested market date from the native close endpoint and rerun the gate.",
+        )
+
+    missing_taxonomy = int(
+        provider.security_master_diagnostics.get("missing_taxonomy_rows") or 0
+    )
+    if missing_taxonomy:
+        add(
+            "TAXONOMY_ENRICHMENT_INCOMPLETE",
+            f"{missing_taxonomy} security-master rows are missing one or more taxonomy fields.",
+            "Complete taxonomy enrichment before publishing the full-live universe.",
+        )
+
+    if quality.status.value != "READY":
+        add(
+            "QUALITY_STATUS_NOT_READY",
+            f"overall provider quality is {quality.status.value}; issues={'; '.join(quality.issues[:3]) or 'unreported'}.",
+            "Resolve every quality issue, then rerun the network-free preflight before another live request.",
+        )
+
+    cap = provider.client.max_estimated_credits
+    reserved = provider.client.budget_reserved_credits
+    if cap is not None and reserved > float(cap) + 1e-9:
+        add(
+            "CREDIT_CEILING_EXCEEDED",
+            f"reserved request credits {reserved:.2f} exceed the client ceiling {float(cap):.2f}.",
+            "Reduce the bounded request or wait for a fresh preflight; never continue past the credit ceiling.",
+        )
+
+    # Keep the report useful even if a future provider implementation changes
+    # the quality object without updating the detailed checks above.
+    if coverage.get("pagination_incomplete") and not any(
+        item["code"] in {"SECURITY_MASTER_PAGINATION_INCOMPLETE", "CLOSE_PAGINATION_INCOMPLETE"}
+        for item in blockers
+    ):
+        add(
+            "COVERAGE_PAGINATION_INCOMPLETE",
+            "coverage diagnostics report incomplete pagination.",
+            "Resolve pagination completeness and rerun the full-live gate.",
+        )
+    return blockers
 
 
 def _limit_master(master: list[Any], max_symbols: int | None) -> list[Any]:

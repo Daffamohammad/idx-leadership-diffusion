@@ -189,7 +189,7 @@ security per trading day.
   ],
   "contradictions": [],
   "data_gaps": [
-    "foreign flow not integrated",
+    "per-ticker/group foreign flow not integrated",
     "fundamental confirmation not integrated"
   ],
   "method_version": "methodology-v2"

@@ -49,6 +49,8 @@ def test_compute_transition_no_previous():
     cur = _snap("X", date(2026, 8, 20), LeadershipState.LEADING, DiffusionState.BROADENING, br=70.0)
     ev = compute_transition(current=cur, previous=None)
     assert ev.previous_date is None
+    assert ev.breadth_delta is None
+    assert ev.relative_strength_delta is None
     assert ev.materiality_label == MaterialityLabel.STABLE
     assert ev.materiality_reason == "no previous snapshot"
 

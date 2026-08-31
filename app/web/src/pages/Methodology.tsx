@@ -2,7 +2,10 @@ import { useState } from 'react';
 import { useSnapshot } from "../data/SnapshotProvider";
 import { DataStatusChip } from "../components/StatusChips";
 import { normalizeDataStatus, type DataStatus, type SnapshotPayload } from "../data/snapshot";
+import type { AdaptedSnapshot, IDXInvestorReleaseAdapted } from "../data/adapter";
 import { buildDiffusionReadiness } from "../data/readiness";
+import { formatCountLabel, formatDateLabel, formatEnumLabel } from "../data/format";
+import { EvidenceModel } from "../components/EvidenceModel";
 import {
   getTavilyCategory,
   getTavilyCategoryStatus,
@@ -30,9 +33,11 @@ function formatQualityIssues(issues: string[] | undefined): string | undefined {
     if (listIssue) {
       const symbols = listIssue[2].split(/,\s*/).filter(Boolean);
       const label = listIssue[1] === "failed_securities" ? "failed history requests" : "insufficient history";
-      return `${label}: ${symbols.length} security(ies) (full list remains in snapshot diagnostics)`;
+      return `${label}: ${formatCountLabel(symbols.length, "security", "securities")} (full list remains in snapshot diagnostics)`;
     }
-    return issue;
+    return issue.replace(/\b[A-Za-z0-9]+(?:_[A-Za-z0-9]+)+\b/g, (token) =>
+      token.split("_").join(" "),
+    );
   });
   return `Data-quality flags: ${readable.join("; ")}`;
 }
@@ -64,8 +69,8 @@ function researchCategoryNote(
   const total = tavilyCount + youCount;
   if (total > 0) {
     const parts: string[] = [];
-    if (tavilyCount > 0) parts.push(`${tavilyCount} Tavily source(s)`);
-    if (youCount > 0) parts.push(`${youCount} You.com source(s)`);
+    if (tavilyCount > 0) parts.push(formatCountLabel(tavilyCount, "Tavily source"));
+    if (youCount > 0) parts.push(formatCountLabel(youCount, "You.com source"));
     return `${parts.join(" + ")} attached; qualitative context only, not normalized into a confirmation metric.`;
   }
   const tavilyFailed = getTavilyCategoryStatus(payload, category) === "FAILED";
@@ -88,8 +93,11 @@ function combinedCategoryStatus(
   return "DATA_GAP";
 }
 
-function buildDataRows(payload: SnapshotPayload | null): DataRow[] {
-  const asOf = payload?.as_of ?? "—";
+function buildDataRows(
+  payload: SnapshotPayload | null,
+  idxRelease: IDXInvestorReleaseAdapted | null,
+): DataRow[] {
+  const asOf = formatDateLabel(payload?.as_of);
   const q = payload?.quality;
   const status: DataStatus = normalizeDataStatus(q?.status) ?? "PARTIAL";
   const qualityNote = formatCoreDataNote(q);
@@ -122,7 +130,15 @@ function buildDataRows(payload: SnapshotPayload | null): DataRow[] {
         ? `Sectors structured taxonomy; ${taxonomyCoverage ?? "—"}% coverage in the persisted report.`
         : `Prototype taxonomy coverage: ${taxonomyCoverage ?? "—"}%; mapping is provider-specific and not authoritative.`,
     },
-    { label: "Benchmark (IHSG)", status: benchmarkStatus, asOf, note: q?.benchmark_latest_date ? `Latest benchmark: ${q.benchmark_latest_date}` : "Benchmark date not present in the snapshot." },
+    { label: "Benchmark (IHSG)", status: benchmarkStatus, asOf, note: q?.benchmark_latest_date ? `Latest benchmark: ${formatDateLabel(q.benchmark_latest_date)}` : "Benchmark date not present in the snapshot." },
+    {
+      label: "IDX Investor Release",
+      status: normalizeDataStatus(idxRelease?.status) ?? "DATA_GAP",
+      asOf: formatDateLabel(idxRelease?.asOfMax ?? payload?.as_of),
+      note: idxRelease
+        ? `${formatCountLabel(idxRelease.tradingDayCount, "trading day")} of market-level investor trading; not a per-ticker or group confirmation metric.`
+        : "No validated official IDX release is attached to this snapshot.",
+    },
     { label: "Diffusion Comparison", status: diffusionReadiness.status, asOf, note: diffusionReadiness.note },
     ...researchRows,
   ];
@@ -145,7 +161,7 @@ const methodCards = [
     title: "Diffusion",
     def: "Change in participation breadth between observations, with a group-size-aware floor.",
     formula: "Breadth Change = Breadth(t) − Breadth(t−1)",
-    detail: "The configured diffusion classifier applies broadening and narrowing thresholds plus minimum constituent requirements. UNCONFIRMED means either the data does not contain a comparable prior breadth observation, or the group fails the configured evidence floor; it is never silently treated as STABLE.",
+    detail: "The configured diffusion classifier applies broadening and narrowing thresholds plus minimum constituent requirements. Unconfirmed means either the data does not contain a comparable prior breadth observation, or the group fails the configured evidence floor; it is never silently treated as Stable.",
   },
   {
     title: "Concentration",
@@ -157,7 +173,7 @@ const methodCards = [
     title: "Confirmation",
     def: "Independent fundamental and flow evidence aligned with the leadership signal.",
     formula: "— qualitative composite",
-    detail: "Tavily can attach first-party research context, but web sources are not a normalized per-ticker metric. Confirmation remains DATA GAP unless the snapshot emits structured, comparable fundamental and flow observations.",
+    detail: "Tavily can attach first-party research context, but web sources are not a normalized per-ticker metric. Confirmation remains a data gap unless the snapshot emits structured, comparable fundamental and flow observations.",
   },
 ];
 
@@ -169,11 +185,214 @@ function SectionHead({ label }: { label: string }) {
     </div>
   );
 }
+function EvidenceMatrix({
+  adapted,
+  manifestEntries,
+}: {
+  adapted: AdaptedSnapshot | null;
+  manifestEntries: SnapshotPayload["manifest"]["entries"][number] | undefined;
+}) {
+  const asOf = formatDateLabel(manifestEntries?.as_of);
+  const providerMode = manifestEntries?.provider_mode ?? "PUBLIC_PROTOTYPE";
+  const fk = adapted?.foreignFlow;
+  const idxRelease = adapted?.idxInvestorRelease;
+  const coverage = adapted?.coverageHonest;
+  const ev = adapted?.researchEvents ?? [];
+  const taxonomy = adapted?.taxonomyViews ?? {};
+
+  const layerStatus = (kind: string) => {
+    if (kind === "prices") return providerMode;
+    if (kind === "benchmark") return "READY";
+    if (kind === "idx_release") {
+      return idxRelease
+        ? normalizeDataStatus(idxRelease.status) ?? "UNAVAILABLE"
+        : "DATA_GAP";
+    }
+    if (kind === "sectors") return providerMode === "SECTORS_LIVE" ? "READY" : "PROTOTYPE_CONFIG";
+    if (kind === "konglo") {
+      const v = taxonomy.konglo;
+      return v ? "ANALYST_DEFINED" : "DATA_GAP";
+    }
+    if (kind === "themes") {
+      const v = taxonomy.themes;
+      return v ? "ANALYST_DEFINED" : "DATA_GAP";
+    }
+    if (kind === "foreign_flow") {
+      return fk ? (fk.signalEligible ? "READY_WITH_GAPS" : "SAMPLE_ONLY") : "DATA_GAP";
+    }
+    if (kind === "fundamentals") return "DATA_GAP";
+    if (kind === "events") return ev.length > 0 ? "CONTEXT_ONLY" : "UNAVAILABLE";
+    if (kind === "tradingview") return "CONTEXT_ONLY";
+    return "—";
+  };
+
+  const layers: Array<{
+    name: string;
+    status: string;
+    source: string;
+    asOf: string;
+    coverage: string;
+    quant: string;
+    signalEligible: boolean;
+    limitation: string;
+  }> = [
+    {
+      name: "Prices",
+      status: layerStatus("prices"),
+      source: providerMode === "SECTORS_LIVE" ? "Sectors API (read-only)" : "yfinance (cached)",
+      asOf,
+      coverage: coverage?.coverage_pct ? `${coverage.coverage_pct.toFixed(1)}%` : "—",
+      quant: "quantitative",
+      signalEligible: true,
+      limitation: providerMode === "PUBLIC_PROTOTYPE" ? "Adj-close vs close basis explicit" : "—",
+    },
+    {
+      name: "Benchmark",
+      status: layerStatus("benchmark"),
+      source: "^JKSE / IHSG",
+      asOf,
+      coverage: "n/a",
+      quant: "quantitative",
+      signalEligible: true,
+      limitation: "IHSG only — no cross-country index",
+    },
+    {
+      name: "IDX investor release",
+      status: layerStatus("idx_release"),
+      source: idxRelease ? "Indonesia Stock Exchange · Digital Statistics" : "—",
+      asOf: formatDateLabel(idxRelease?.asOfMax),
+      coverage: idxRelease ? formatCountLabel(idxRelease.tradingDayCount, "trading day") : "—",
+      quant: "quantitative (market)",
+      signalEligible: false,
+      limitation: "Market-level investor flow; no per-ticker or group confirmation",
+    },
+    {
+      name: "Sectors",
+      status: layerStatus("sectors"),
+      source: providerMode === "SECTORS_LIVE" ? "Sectors API taxonomy" : "Prototype universe.yaml",
+      asOf,
+      coverage: coverage?.taxonomy_coverage_pct ? `${coverage.taxonomy_coverage_pct}%` : "—",
+      quant: "quantitative",
+      signalEligible: true,
+      limitation: "Coarse prototype labels",
+    },
+    {
+      name: "Konglo",
+      status: layerStatus("konglo"),
+      source: taxonomy.konglo?.taxonomy_id ? `config/konglo.yaml (${taxonomy.konglo.taxonomy_version})` : "—",
+      asOf,
+      coverage: fk?.mappedCompanyObservationPct ? `${fk.mappedCompanyObservationPct.toFixed(1)}% mapped` : "—",
+      quant: "context",
+      signalEligible: false,
+      limitation: "Analyst-defined prototype",
+    },
+    {
+      name: "Themes",
+      status: layerStatus("themes"),
+      source: taxonomy.themes?.taxonomy_id ? `config/themes.yaml (${taxonomy.themes.taxonomy_version})` : "—",
+      asOf,
+      coverage: "—",
+      quant: "context",
+      signalEligible: false,
+      limitation: "Analyst-defined prototype; multi-theme not aggregated cross-theme",
+    },
+    {
+      name: "Foreign flow",
+      status: layerStatus("foreign_flow"),
+      source: "IDNFinancials secondary articles (top-buy / top-sell lists)",
+      asOf: formatDateLabel(fk?.asOfMax),
+      coverage: fk ? `${formatCountLabel(fk.marketDayCount, "market date")} · ${formatCountLabel(fk.companyObservationCount, "observation")}` : "—",
+      quant: "quantitative (sample)",
+      signalEligible: fk?.signalEligible ?? false,
+      limitation: "Top-list sample, not full market. Net-only for company rows.",
+    },
+    {
+      name: "Fundamentals",
+      status: layerStatus("fundamentals"),
+      source: "—",
+      asOf: "—",
+      coverage: "0%",
+      quant: "n/a",
+      signalEligible: false,
+      limitation: "No structured per-ticker parser; data gap",
+    },
+    {
+      name: "Events",
+      status: layerStatus("events"),
+      source: ev.length > 0 ? "Tavily + You.com bounded discovery" : "—",
+      asOf: formatDateLabel(ev[0]?.publishedAt),
+      coverage: `${ev.length} events`,
+      quant: "context",
+      signalEligible: false,
+      limitation: "Context only — never signals",
+    },
+    {
+      name: "TradingView",
+      status: layerStatus("tradingview"),
+      source: "TradingView embed (CDN)",
+      asOf: "live",
+      coverage: "—",
+      quant: "context",
+      signalEligible: false,
+      limitation: "Widget unavailable when CDN blocked",
+    },
+  ];
+
+  return (
+    <div className="table-scroll" style={{ ...card, marginBottom: 40 }}>
+      <div style={{ padding: '14px 18px', borderBottom: '1px solid #ebebeb' }}>
+        <div className="eyebrow-muted">Evidence matrix</div>
+        <h2 style={{ fontSize: 18, margin: '4px 0 0', color: '#171717' }}>
+          Layer · status · source · coverage
+        </h2>
+        <p style={{ margin: '6px 0 0', fontSize: 11, fontFamily: 'Geist Mono, monospace', color: '#666666' }}>
+          One row per evidence layer. Status and source coverage are reported separately.
+        </p>
+      </div>
+      <table style={{ width: '100%', minWidth: 980, borderCollapse: 'collapse', fontSize: 12 }}>
+        <thead>
+          <tr>
+            {["Layer", "Status", "Source", "As of", "Coverage", "Quantitative?", "Signal eligible?", "Limitation"].map((label) => (
+              <th
+                key={label}
+                align="left"
+                style={{
+                  borderBottom: '1px solid #ebebeb',
+                  padding: '10px 14px',
+                  fontSize: 11,
+                  fontFamily: 'Geist Mono, monospace',
+                  color: '#666666',
+                  textTransform: 'uppercase',
+                }}
+              >
+                {label}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {layers.map((row, index) => (
+            <tr key={row.name} style={{ borderBottom: index < layers.length - 1 ? '1px solid #f0f0f0' : 'none' }}>
+              <td style={{ padding: '10px 14px', fontWeight: 600 }}>{row.name}</td>
+              <td style={{ padding: '10px 14px', fontFamily: 'Geist Mono, monospace' }}>{formatEnumLabel(row.status)}</td>
+              <td style={{ padding: '10px 14px', color: '#4d4d4d' }}>{row.source}</td>
+              <td style={{ padding: '10px 14px', fontFamily: 'Geist Mono, monospace', whiteSpace: 'nowrap' }}>{row.asOf}</td>
+              <td style={{ padding: '10px 14px', fontFamily: 'Geist Mono, monospace' }}>{row.coverage}</td>
+              <td style={{ padding: '10px 14px' }}>{row.quant}</td>
+              <td style={{ padding: '10px 14px' }}>{row.signalEligible ? "Yes" : "No"}</td>
+              <td style={{ padding: '10px 14px', color: '#666666' }}>{row.limitation}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
 export default function Methodology() {
   const [expanded, setExpanded] = useState<string | null>(null);
   const { data } = useSnapshot();
-  const dataRows = buildDataRows(data?.payload ?? null);
+  const dataRows = buildDataRows(data?.payload ?? null, data?.idxInvestorRelease ?? null);
   const manifestEntries = data?.payload.manifest?.entries?.[0];
   const quality = data?.payload.quality;
   const coverage = data?.payload.coverage;
@@ -230,8 +449,60 @@ export default function Methodology() {
     { label: "Taxonomy Coverage", value: coverage?.taxonomy_coverage_pct !== undefined ? `${coverage.taxonomy_coverage_pct}%` : "—" },
   ];
   const exclusionRows = Object.entries(coverage?.exclusion_reasons ?? {}).map(([reason, count]) => ({ reason, count }));
+  const taxonomyViews = data?.taxonomyViews ?? {};
+  const snapshotCoverage = isPrefixSample && discoveredCount && usedCount
+    ? `${usedCount} of ${discoveredCount} discovered`
+    : `${formatCountLabel(data?.sectors.length ?? 0, "sector group")}`;
+  const evidenceLanes = [
+    {
+      kind: "SNAPSHOT" as const,
+      title: "Market signal",
+      detail: `Real persisted ${formatEnumLabel(providerMode ?? "market")} observations power returns, breadth, leadership, and constituent metrics.`,
+      meta: `${snapshotCoverage} · ${formatDateLabel(data?.payload.as_of)}`,
+      to: "/overview",
+      actionLabel: "Open real snapshot",
+    },
+    {
+      kind: "OFFICIAL_RELEASE" as const,
+      title: "IDX investor release",
+      detail: data?.idxInvestorRelease
+        ? "The official daily investor-type table is integrated as a real market-level release. It does not establish per-ticker or group ownership flow."
+        : "The official IDX release lane is not attached to this snapshot yet; no market-level investor-flow claim is made.",
+      meta: data?.idxInvestorRelease
+        ? `${formatCountLabel(data.idxInvestorRelease.tradingDayCount, "trading day")} · ${formatDateLabel(data.idxInvestorRelease.asOfMax)}`
+        : "Release unavailable",
+      to: "/overview#idx-release-title",
+      actionLabel: "Open official release",
+    },
+    {
+      kind: "SAMPLE" as const,
+      title: "Foreign flow",
+      detail: "Source-backed top-list observations are useful context, but they are not a full-universe live feed or confirmation signal.",
+      meta: data?.foreignFlow
+        ? `${formatCountLabel(data.foreignFlow.marketDayCount, "market date")} · ${formatCountLabel(data.foreignFlow.companyObservationCount, "company observation")}`
+        : "No sample attached",
+      to: "/overview#foreign-flow-sample",
+      actionLabel: "Open sample",
+    },
+    {
+      kind: "PROTOTYPE" as const,
+      title: "Konglo and Themes",
+      detail: "Membership definitions are static analyst research lenses. Their aggregate metrics reuse the current snapshot but are not official IDX classifications.",
+      meta: `${formatCountLabel(taxonomyViews.konglo?.groups.length ?? 0, "Konglo group")} · ${formatCountLabel(taxonomyViews.themes?.groups.length ?? 0, "theme")}`,
+      to: "/maps/konglo",
+      actionLabel: "Open prototype lens",
+    },
+    {
+      kind: "CONTEXT" as const,
+      title: "Research context",
+      detail: "Events and web research are frozen with the snapshot as descriptive context. They do not create or alter quantitative signals.",
+      meta: `${formatCountLabel(data?.researchEvents.length ?? 0, "dated event")} · descriptive only`,
+      to: "/overview#research-events",
+      actionLabel: "Open context",
+    },
+  ];
   return (
-    <div style={{ padding: '36px 40px', maxWidth: 1200, margin: '0 auto' }}>
+    <div className="content-shell" style={{ padding: '36px var(--page-gutter)', maxWidth: 'var(--content-max)' }}>
       <div style={{ marginBottom: 36 }}>
         <h1 style={{ fontSize: 30, fontWeight: 400, color: '#171717', letterSpacing: '-1.5px', lineHeight: 1.1, marginBottom: 8 }}>
           Methodology &amp; Data Quality
@@ -240,6 +511,11 @@ export default function Methodology() {
           Transparent documentation of analytical definitions, data sources, and coverage gaps.
         </p>
       </div>
+
+      <EvidenceModel
+        lanes={evidenceLanes}
+        intro="This hackathon product is intentionally hybrid: the quantitative market lane is snapshot-backed, while bounded samples and static research lenses remain clearly separated."
+      />
 
       {/* Prefix Sample Warning */}
       {isPrefixSample && discoveredCount && (
@@ -264,8 +540,14 @@ export default function Methodology() {
 
       {/* Data Status */}
       <SectionHead label="Data Status" />
-      <div style={{ ...card, overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <div className="table-scroll methodology-status-table" style={{ ...card }}>
+        <table style={{ width: '100%', minWidth: 900, borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+          <colgroup>
+            <col style={{ width: 170 }} />
+            <col style={{ width: 150 }} />
+            <col style={{ width: 130 }} />
+            <col />
+          </colgroup>
           <thead>
             <tr style={{ borderBottom: '1px solid #ebebeb' }}>
               {['Data Layer', 'Status', 'As of', 'Notes'].map(col => (
@@ -280,7 +562,7 @@ export default function Methodology() {
               <tr key={row.label} style={{ borderBottom: i < dataRows.length - 1 ? '1px solid #ebebeb' : 'none' }}>
                 <td style={{ padding: '10px 16px', fontSize: 13, fontWeight: 500, color: '#171717' }}>{row.label}</td>
                 <td style={{ padding: '10px 16px' }}><DataStatusChip status={row.status} /></td>
-                <td style={{ padding: '10px 16px', fontFamily: 'Geist Mono, monospace', fontSize: 11, color: '#666666' }}>{row.asOf}</td>
+                <td style={{ padding: '10px 16px', fontFamily: 'Geist Mono, monospace', fontSize: 11, color: '#666666', whiteSpace: 'nowrap' }}>{row.asOf}</td>
                 <td style={{ padding: '10px 16px', fontSize: 12, color: '#666666', fontStyle: row.note ? 'italic' : 'normal' }}>{row.note || '—'}</td>
               </tr>
             ))}
@@ -320,19 +602,19 @@ export default function Methodology() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {[
           attachedResearchSources + attachedYouSources > 0
-            ? `Tavily provides ${attachedResearchSources} and You.com provides ${attachedYouSources} qualitative source(s); the numeric confirmation layer remains a DATA GAP because no per-ticker or per-group fundamentals, flow, or event metrics are emitted.`
+            ? `Tavily provides ${formatCountLabel(attachedResearchSources, "source")} and You.com provides ${formatCountLabel(attachedYouSources, "source")} as qualitative context. The official IDX investor release is market-level; per-ticker or per-group quantitative confirmation remains a data gap.`
             : isLiveSectors
-              ? 'Fundamentals, foreign-flow, and event layers are not emitted by the current live snapshot; Confirmation is therefore a DATA GAP.'
-              : 'Fundamentals, foreign-flow, and event layers are not emitted by the current snapshot; Confirmation is therefore a DATA GAP.',
+              ? 'The official IDX investor release is a separate market-level lane. Fundamentals, per-ticker or group foreign-flow, and event metrics are not emitted by the current live snapshot; confirmation is therefore a data gap.'
+              : 'The official IDX investor release is a separate market-level lane. Fundamentals, per-ticker or group foreign-flow, and event metrics are not emitted by the current snapshot; confirmation is therefore a data gap.',
           ...(isLiveSectors
-            ? ['Sectors did not expose an explicit instrument-type field in the sampled company response; unresolved rows remain UNKNOWN / VERIFY.']
+            ? ['Sectors did not expose an explicit instrument-type field in the sampled company response; unresolved rows remain unknown and require verification.']
             : []),
           ...(hasBreadthHistory
             ? []
             : ['Per-group rolling breadth and performance history is not emitted; current breadth describes the latest eligible cross-section only.']),
         ].map((msg, i) => (
           <div key={i} style={{ display: 'flex', gap: 12, padding: '12px 14px', borderRadius: 6, border: '1px solid #ebebeb', background: '#fafafa' }}>
-            <span style={{ fontFamily: 'Geist Mono, monospace', fontSize: 10, fontWeight: 500, letterSpacing: '0.07em', textTransform: 'uppercase', color: '#7a5010', flexShrink: 0, paddingTop: 1 }}>DATA GAP</span>
+            <span style={{ fontFamily: 'Geist Mono, monospace', fontSize: 10, fontWeight: 500, letterSpacing: '0.04em', color: '#7a5010', flexShrink: 0, paddingTop: 1 }}>Data gap</span>
             <span style={{ fontSize: 13, color: '#4d4d4d', lineHeight: 1.55 }}>{msg}</span>
           </div>
         ))}
@@ -398,7 +680,7 @@ export default function Methodology() {
                 </div>
                 <p style={{ margin: '0 0 12px', fontSize: 12, color: '#666666', lineHeight: 1.5 }}>
                   {context.note || (context.records.length > 0
-                    ? `${context.records.length} You.com source(s) attached; qualitative context only, not normalized into a confirmation metric.`
+                    ? `${formatCountLabel(context.records.length, "You.com source")} attached; qualitative context only, not normalized into a confirmation metric.`
                     : 'No source-backed context attached; quantitative confirmation is not evaluated.')}
                 </p>
                 {context.research_answer && (
@@ -436,7 +718,7 @@ export default function Methodology() {
               <span className="eyebrow-muted">Evidence boundary</span>
               <span style={{ fontSize: 12, color: '#4d4d4d' }}>
                 {youContext.status === 'REQUESTED' ? 'You.com requested' : 'You.com not requested'}
-                {attachedYouSources > 0 ? ` · ${attachedYouSources} source(s) attached` : ''}
+                {attachedYouSources > 0 ? ` · ${formatCountLabel(attachedYouSources, "source")} attached` : ''}
                 {' · context only; metrics are unchanged'}
               </span>
             </div>
@@ -469,7 +751,7 @@ export default function Methodology() {
           </div>
         ) : exclusionRows.map((ex, i) => (
           <div key={ex.reason} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '9px 14px', borderBottom: i < exclusionRows.length - 1 ? '1px solid #ebebeb' : 'none' }}>
-            <span style={{ flex: 1, fontSize: 13, color: '#4d4d4d' }}>{ex.reason}</span>
+            <span style={{ flex: 1, fontSize: 13, color: '#4d4d4d' }}>{formatEnumLabel(ex.reason)}</span>
             <span style={{ fontFamily: 'Geist Mono, monospace', fontSize: 12, color: '#171717', fontWeight: 500, width: 28, textAlign: 'right' }}>{ex.count}</span>
             <div style={{ width: 100, height: 3, background: '#ebebeb', borderRadius: 1, overflow: 'hidden' }}>
               <div style={{ height: '100%', width: '100%', background: '#4d4d4d', borderRadius: 1 }} />
@@ -532,12 +814,12 @@ export default function Methodology() {
       <SectionHead label="Provenance" />
       <div style={{ ...card, overflow: 'hidden', marginBottom: 40 }}>
         {[
-          ["Core Data Source", manifestEntries?.provider?.toUpperCase() ?? "—"],
-          ["Execution Mode", manifestEntries?.provider_mode ?? "—"],
+          ["Core Data Source", formatEnumLabel(manifestEntries?.provider)],
+          ["Execution Mode", formatEnumLabel(manifestEntries?.provider_mode)],
           ["Benchmark", "IHSG"],
           ["Method Version", manifestEntries?.method_version ?? "—"],
           ["Diffusion Version", manifestEntries?.diffusion_version ?? "—"],
-          ["Snapshot Date", manifestEntries?.as_of ?? "—"],
+          ["Snapshot Date", formatDateLabel(manifestEntries?.as_of)],
         ].map(([label, val], i, arr) => (
           <div key={String(label)} style={{ display: 'flex', padding: '10px 16px', borderBottom: i < arr.length - 1 ? '1px solid #ebebeb' : 'none' }}>
             <span style={{ width: 200, fontSize: 12, color: '#666666' }}>{label}</span>
@@ -548,6 +830,7 @@ export default function Methodology() {
           <div className="eyebrow-muted">Full method reference: docs/METHODOLOGY.md</div>
         </div>
       </div>
+      <EvidenceMatrix adapted={data ?? null} manifestEntries={manifestEntries} />
     </div>
   );
 }

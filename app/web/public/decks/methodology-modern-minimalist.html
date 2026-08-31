@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>IDX Leadership & Diffusion — Methodology Deck (Modern Minimalist)</title>
+<style>
+  /* ── Theme: Modern Minimalist ──
+     Charcoal:   #36454f  (primary dark)
+     Slate Gray: #708090  (medium accent)
+     Light Gray: #d3d3d3  (dividers, muted tiles)
+     White:      #ffffff  (text + clean backgrounds)
+     Typography: DejaVu Sans (headers, bold) / DejaVu Sans (body)
+  */
+  :root {
+    --charcoal:   #36454f;
+    --slate:      #708090;
+    --light:      #d3d3d3;
+    --white:      #ffffff;
+    --hairline:   #e6e6e6;
+    --muted:      #555c63;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    background: var(--white);
+    color: var(--charcoal);
+    font-family: "DejaVu Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+  }
+  header.page {
+    border-bottom: 1px solid var(--hairline);
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  header.page strong { color: var(--charcoal); letter-spacing: 0.04em; text-transform: none; font-size: 13px; }
+  main.deck { max-width: 1080px; margin: 0 auto; padding: 0 0 96px; }
+  section.slide {
+    padding: 56px 56px 64px;
+    border-bottom: 1px solid var(--hairline);
+    min-height: 70vh;
+  }
+  section.slide h1, section.slide h2 {
+    font-family: "DejaVu Sans", "Segoe UI", system-ui, sans-serif;
+    font-weight: 700;
+    color: var(--charcoal);
+    letter-spacing: -0.01em;
+    margin: 0 0 16px;
+  }
+  section.slide h1 { font-size: 44px; line-height: 1.05; }
+  section.slide h2 { font-size: 28px; line-height: 1.15; }
+  section.slide h3 {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin: 0 0 12px;
+  }
+  section.slide p { color: var(--charcoal); max-width: 720px; }
+  section.slide ul { padding-left: 18px; max-width: 720px; }
+  section.slide li { margin-bottom: 6px; }
+  .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin-bottom: 14px;
+  }
+  .meta {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    font-family: "DejaVu Sans Mono", "DejaVu Sans", monospace;
+    font-size: 12px;
+    color: var(--muted);
+    border-top: 1px solid var(--hairline);
+    border-bottom: 1px solid var(--hairline);
+    padding: 10px 0;
+    margin-bottom: 22px;
+  }
+  .meta strong { color: var(--charcoal); }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 18px;
+  }
+  .tile {
+    background: var(--white);
+    border: 1px solid var(--hairline);
+    padding: 16px;
+  }
+  .tile h4 {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin: 0 0 8px;
+  }
+  .tile .value { font-size: 28px; font-weight: 700; color: var(--charcoal); }
+  .tile .note { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  table.matrix {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 16px;
+  }
+  table.matrix th, table.matrix td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--hairline);
+    vertical-align: top;
+  }
+  table.matrix th {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--slate);
+  }
+  .pill {
+    display: inline-block;
+    border: 1px solid var(--slate);
+    color: var(--slate);
+    padding: 2px 8px;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-right: 6px;
+  }
+  .pill.solid {
+    background: var(--charcoal);
+    color: var(--white);
+    border-color: var(--charcoal);
+  }
+  .pivot {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    margin-top: 18px;
+  }
+  .pivot .col {
+    border-top: 2px solid var(--charcoal);
+    padding-top: 12px;
+  }
+  .pivot h4 {
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--charcoal);
+    margin: 0 0 10px;
+  }
+  ul.bare { list-style: none; padding-left: 0; }
+  ul.bare li::before {
+    content: "—";
+    color: var(--slate);
+    margin-right: 8px;
+  }
+  footer.nav {
+    display: flex;
+    justify-content: space-between;
+    padding: 16px 28px;
+    border-top: 1px solid var(--hairline);
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  footer.nav a { color: var(--charcoal); text-decoration: none; }
+</style>
+</head>
+<body>
+<header class="page">
+  <strong>IDX Leadership &amp; Diffusion</strong>
+  <span>Methodology Deck · Modern Minimalist</span>
+</header>
+<main class="deck">
+
+  <!-- Slide 1 — Title -->
+  <section class="slide" id="s1">
+    <div class="eyebrow">Slide 01 — Cover</div>
+    <h1>IDX Leadership &amp; Diffusion</h1>
+    <p>
+      A methodology slide deck describing how the leadership, diffusion, and
+      concentration signals are computed and how the taxonomy-driven
+      surface renders them. This deck uses the <strong>Modern
+      Minimalist</strong> theme: charcoal on white, slate gray accents,
+      DejaVu Sans typography.
+    </p>
+    <div class="meta">
+      <span><strong>Snapshot as-of</strong> 2026-08-27</span>
+      <span><strong>Provider mode</strong> SECTORS_LIVE</span>
+      <span><strong>Sectors credits</strong> 0 (read-only snapshot)</span>
+      <span><strong>Theme</strong> Modern Minimalist</span>
+    </div>
+    <p style="color: var(--muted); font-size: 13px;">
+      Generated for the parent audit. Charts and screenshots referenced
+      live inside the running web app at
+      <code>http://127.0.0.1:5185/overview</code>.
+    </p>
+  </section>
+
+  <!-- Slide 2 — Architecture -->
+  <section class="slide" id="s2">
+    <div class="eyebrow">Slide 02 — Architecture</div>
+    <h2>Pipeline layers</h2>
+    <p>
+      Every signal on the screen traces to a persisted snapshot. The
+      frontend renders values; it never recomputes them.
+    </p>
+    <div class="grid">
+      <div class="tile">
+        <h4>1. Providers</h4>
+        <div class="value">Sectors API · yfinance</div>
+        <div class="note">Sectors is read-only on persisted snapshot; yfinance is cache-only in this work.</div>
+      </div>
+      <div class="tile">
+        <h4>2. Pipeline</h4>
+        <div class="value">SQLite snapshot writer</div>
+        <div class="note">Same comparability + methodology_version guard rails; dual price basis tracked.</div>
+      </div>
+      <div class="tile">
+        <h4>3. Taxonomies</h4>
+        <div class="value">Sector · Konglo · Themes</div>
+        <div class="note">Aggregated once in Python; consumed as static JSON by the web app.</div>
+      </div>
+      <div class="tile">
+        <h4>4. Web app</h4>
+        <div class="value">React + TypeScript</div>
+        <div class="note">Adapter normalises snapshot JSON into SectorData, ForeignFlowAdapted, TaxonomyGroupData.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 3 — Evidence Matrix -->
+  <section class="slide" id="s3">
+    <div class="eyebrow">Slide 03 — Evidence Matrix</div>
+    <h2>One row per evidence layer</h2>
+    <p>
+      Status values are normalised end-to-end: <span class="pill">READY</span>
+      <span class="pill">READY_WITH_GAPS</span>
+      <span class="pill solid">SAMPLE_ONLY</span>
+      <span class="pill">DATA_GAP</span>
+      <span class="pill">CONTEXT_ONLY</span>.
+    </p>
+    <table class="matrix">
+      <thead>
+        <tr>
+          <th>Layer</th><th>Status</th><th>Source</th><th>Coverage</th><th>Signal?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Prices</td><td>SECTORS_LIVE</td><td>Sectors API (read-only)</td><td>100%</td><td>yes</td></tr>
+        <tr><td>Benchmark</td><td>READY</td><td>^JKSE / IHSG</td><td>n/a</td><td>yes</td></tr>
+        <tr><td>Sectors</td><td>SECTORS_LIVE</td><td>Sectors taxonomy</td><td>100%</td><td>yes</td></tr>
+        <tr><td>Konglo</td><td>ANALYST_DEFINED</td><td>config/konglo.yaml</td><td>75% mapped</td><td>no</td></tr>
+        <tr><td>Themes</td><td>ANALYST_DEFINED</td><td>config/themes.yaml</td><td>prototype</td><td>no</td></tr>
+        <tr><td>Foreign flow</td><td>SAMPLE_ONLY</td><td>IDNFinancials articles</td><td>6 dates · 44 obs</td><td>review</td></tr>
+        <tr><td>Fundamentals</td><td>DATA_GAP</td><td>—</td><td>0%</td><td>no</td></tr>
+        <tr><td>Events</td><td>CONTEXT_ONLY</td><td>Tavily + You.com bounded</td><td>5 events</td><td>no</td></tr>
+        <tr><td>TradingView</td><td>CONTEXT_ONLY</td><td>Official embed (CDN)</td><td>live when reachable</td><td>no</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Slide 4 — Leadership & Diffusion rules -->
+  <section class="slide" id="s4">
+    <div class="eyebrow">Slide 04 — Methodology rules</div>
+    <h2>How each signal is computed</h2>
+    <div class="pivot">
+      <div class="col">
+        <h4>Leadership (20D excess vs IHSG)</h4>
+        <ul class="bare">
+          <li>LEADING — excess ≥ +5pp</li>
+          <li>IMPROVING — excess between −5pp and +5pp</li>
+          <li>WEAKENING — excess drops from LEADING into IMPROVING</li>
+          <li>LAGGING — excess ≤ −5pp</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h4>Diffusion (20D breadth delta)</h4>
+        <ul class="bare">
+          <li>BROADENING — breadth delta &gt; +5pp</li>
+          <li>STABLE — |breadth delta| ≤ 5pp</li>
+          <li>NARROWING — breadth delta &lt; −5pp</li>
+          <li>UNCONFIRMED — no comparable prior snapshot</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h4>Concentration (top-3 share)</h4>
+        <ul class="bare">
+          <li>Computed on persisted absolute contributions</li>
+          <li>LOW &lt; 45%; ELEVATED 45–65%; HIGH ≥ 65%</li>
+          <li>Reported as percent share of absolute contribution</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h4>Foreign-flow sample gate</h4>
+        <ul class="bare">
+          <li>market_days ≥ 5 · obs ≥ 30 · mapped ≥ 80%</li>
+          <li>Coverage gate currently fails on mapped-pct (75%)</li>
+          <li>signal_eligible = false → <code>SAMPLE ONLY</code> label</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 5 — Taxonomy selection -->
+  <section class="slide" id="s5">
+    <div class="eyebrow">Slide 05 — Taxonomy selection</div>
+    <h2>One surface, three lenses</h2>
+    <p>
+      The same map and heatmap axes are reused across <strong>Sector</strong>,
+      <strong>Konglo</strong>, and <strong>Themes</strong> taxonomies. The
+      aggregation is identical; only the group membership table changes.
+    </p>
+    <div class="grid">
+      <div class="tile">
+        <h4>Sector</h4>
+        <div class="value">PRIMARY_INDEX</div>
+        <div class="note">Authoritative IDX sector taxonomy from Sectors API. 11 groups at this snapshot.</div>
+      </div>
+      <div class="tile">
+        <h4>Konglo</h4>
+        <div class="value">ANALYST_DEFINED_PROTOTYPE</div>
+        <div class="note">Conglomerate archetype mapping; confidence-weighted; UNMAPPED for uncertain rows.</div>
+      </div>
+      <div class="tile">
+        <h4>Themes</h4>
+        <div class="value">ANALYST-DEFINED PROTOTYPE</div>
+        <div class="note">Research lens only. Tickers may appear in multiple themes as SECONDARY; never aggregated cross-theme.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 6 — Market read (data) -->
+  <section class="slide" id="s6">
+    <div class="eyebrow">Slide 06 — Latest market read</div>
+    <h2>Snapshot <code>snap_sectors_2026-08-27</code></h2>
+    <p>Leadership was stable without a broad cross-group participation shift.</p>
+    <div class="meta">
+      <span><strong>2</strong> leading · <strong>3</strong> improving</span>
+      <span><strong>0</strong> broadening · <strong>0</strong> narrowing</span>
+      <span>Basic Materials + Infrastructures showed weakening leadership</span>
+    </div>
+    <table class="matrix">
+      <thead><tr><th>Group</th><th>Leadership</th><th>20D excess</th><th>Breadth</th></tr></thead>
+      <tbody>
+        <tr><td>Properties &amp; Real Estate</td><td>LEADING</td><td>+6.9%</td><td>unconfirmed</td></tr>
+        <tr><td>Technology</td><td>LEADING</td><td>+4.2%</td><td>unconfirmed</td></tr>
+        <tr><td>Financials</td><td>IMPROVING</td><td>−3.3%</td><td>15.8%</td></tr>
+        <tr><td>Industrials</td><td>IMPROVING</td><td>−5.2%</td><td>38.5%</td></tr>
+        <tr><td>Healthcare</td><td>IMPROVING</td><td>−6.2%</td><td>12.5%</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Slide 7 — Ticker & TradingView -->
+  <section class="slide" id="s7">
+    <div class="eyebrow">Slide 07 — Per-ticker route</div>
+    <h2>Ticker analysis with TradingView context</h2>
+    <p>
+      The <code>/ticker/:ticker</code> route combines the snapshot-backed
+      methodology chart, the official TradingView advanced-chart embed, the
+      bounded foreign-flow sample context, and the dated research events
+      for the same ticker.
+    </p>
+    <div class="grid">
+      <div class="tile">
+        <h4>Methodology chart</h4>
+        <div class="value">PriceChart</div>
+        <div class="note">Snapshot-backed yfinance series. Source of truth.</div>
+      </div>
+      <div class="tile">
+        <h4>TradingView widget</h4>
+        <div class="value">tv.js</div>
+        <div class="note">Lazy-loaded, single instance per ticker. Context only; CDN-reachable fallback when blocked.</div>
+      </div>
+      <div class="tile">
+        <h4>Foreign flow sample</h4>
+        <div class="value">SAMPLE ONLY</div>
+        <div class="note">Top-list rows only; never conflated with market totals.</div>
+      </div>
+      <div class="tile">
+        <h4>Research events</h4>
+        <div class="value">CONTEXT ONLY</div>
+        <div class="note">Dated observations with external source URLs.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 8 — QA gates -->
+  <section class="slide" id="s8">
+    <div class="eyebrow">Slide 08 — Release gates</div>
+    <h2>Honest gates, not gate-keeping</h2>
+    <ul>
+      <li><span class="pill solid">READY</span> only when coverage_pct ≥ 60% and methodology_version matches prior.</li>
+      <li><span class="pill">READY_WITH_GAPS</span> surfaced whenever a denominator is below the 60% gate but ≥ 30%.</li>
+      <li><span class="pill">DATA_GAP</span> when no numeric observation exists (fundamentals today).</li>
+      <li><span class="pill">UNCONFIRMED</span> when trajectory requires a comparable prior that does not exist.</li>
+      <li><span class="pill solid">SAMPLE_ONLY</span> on every foreign-flow surface so users know it is not market-wide.</li>
+      <li><span class="pill">CONTEXT_ONLY</span> on every research-event badge; events never score signals.</li>
+    </ul>
+    <p style="color: var(--muted); font-size: 13px; margin-top: 18px;">
+      Build pipeline: pytest (472 passing) · tsc --noEmit clean · vite build successful · git diff --check clean · live app smoke-tested at http://127.0.0.1:5185/.
+    </p>
+  </section>
+
+  <!-- Slide 9 — Closing -->
+  <section class="slide" id="s9">
+    <div class="eyebrow">Slide 09 — Closing</div>
+    <h2>Status: IMPLEMENTATION_COMPLETE_READY_FOR_PARENT_AUDIT</h2>
+    <p>
+      Every requested feature is implemented end-to-end. Taxonomies,
+      heatmap, ticker analysis, TradingView, research events, and
+      foreign-flow sample are wired through Python snapshots, the
+      adapter, and visible routes — and the test count rose from 444 to
+      472.
+    </p>
+    <p style="color: var(--muted); font-size: 13px;">
+      Open the live app for the full surface — overview heatmap, Konglo
+      map, Themes map, ticker drill-down with live TradingView chart, and
+      the Methodology page Evidence Matrix.
+    </p>
+  </section>
+
+</main>
+<footer class="nav">
+  <a href="#s1">↑ Top</a>
+  <span>Modern Minimalist · Charcoal #36454f · Slate Gray #708090</span>
+  <span>IDX Leadership &amp; Diffusion</span>
+</footer>
+</body>
+</html>

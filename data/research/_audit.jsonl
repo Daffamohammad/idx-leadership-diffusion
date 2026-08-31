@@ -1,0 +1,65 @@
+{"ts": "2026-08-30T14:12:19Z", "provider": "tavily", "endpoint": "/search", "query": "IDX listed companies 2026", "status": "ok", "max_results": 4}
+{"ts": "2026-08-30T14:12:19Z", "provider": "you", "endpoint": "/v1/search", "query": "IDX listed companies 2026", "status": "ok", "count": 3}
+{"ts": "2026-08-30T14:12:21Z", "provider": "tavily", "endpoint": "/search", "query": "IDX daily trading summary listed companies", "status": "ok", "max_results": 4}
+{"ts": "2026-08-30T14:12:23Z", "provider": "you", "endpoint": "/v1/search", "query": "IDX daily trading summary listed companies", "status": "ok", "count": 3}
+{"ts": "2026-08-30T14:12:24Z", "provider": "tavily", "endpoint": "/search", "query": "Jakarta Stock Exchange listed issuers directory", "status": "ok", "max_results": 4}
+{"ts": "2026-08-30T14:12:25Z", "provider": "you", "endpoint": "/v1/search", "query": "Jakarta Stock Exchange listed issuers directory", "status": "ok", "count": 3}
+{"ts": "2026-08-30T14:12:28Z", "provider": "tavily", "endpoint": "/search", "query": "IDX Indonesia Classification IDX-IC sector industry mapping", "status": "ok", "max_results": 5}
+{"ts": "2026-08-30T14:12:29Z", "provider": "you", "endpoint": "/v1/search", "query": "IDX IC sector industry classification listed companies", "status": "ok", "count": 4}
+{"ts": "2026-08-30T14:12:31Z", "provider": "tavily", "endpoint": "/search", "query": "BBCA.JK sector industry sub-industry", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T14:12:32Z", "provider": "tavily", "endpoint": "/search", "query": "ANTM.JK sector industry sub-industry", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T14:12:34Z", "provider": "tavily", "endpoint": "/search", "query": "TLKM.JK sector industry sub-industry", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T14:12:36Z", "provider": "tavily", "endpoint": "/search", "query": "Salim Group controlling shareholder INCO ownership conglomerate", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T14:12:37Z", "provider": "you", "endpoint": "/v1/search", "query": "Salim Group controlling shareholder INCO ownership conglomerate", "status": "ok", "count": 2}
+{"ts": "2026-08-30T14:12:40Z", "provider": "tavily", "endpoint": "/search", "query": "Sinar Mas controlling shareholder SMAR ownership conglomerate", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T14:12:41Z", "provider": "you", "endpoint": "/v1/search", "query": "Sinar Mas controlling shareholder SMAR ownership conglomerate", "status": "ok", "count": 2}
+{"ts": "2026-08-30T14:12:43Z", "provider": "tavily", "endpoint": "/search", "query": "Astra controlling shareholder ASII ownership conglomerate", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T14:12:44Z", "provider": "you", "endpoint": "/v1/search", "query": "Astra controlling shareholder ASII ownership conglomerate", "status": "ok", "count": 2}
+{"ts": "2026-08-30T14:12:46Z", "provider": "tavily", "endpoint": "/search", "query": "Lippo controlling shareholder LPPF ownership conglomerate", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T14:12:47Z", "provider": "you", "endpoint": "/v1/search", "query": "Lippo controlling shareholder LPPF ownership conglomerate", "status": "ok", "count": 2}
+{"ts": "2026-08-30T14:12:49Z", "provider": "tavily", "endpoint": "/search", "query": "Bakrie controlling shareholder BNBR ownership conglomerate", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T14:12:50Z", "provider": "you", "endpoint": "/v1/search", "query": "Bakrie controlling shareholder BNBR ownership conglomerate", "status": "ok", "count": 2}
+{"ts": "2026-08-30T14:12:53Z", "provider": "tavily", "endpoint": "/search", "query": "MNC controlling shareholder MNCN ownership conglomerate", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T14:12:54Z", "provider": "you", "endpoint": "/v1/search", "query": "MNC controlling shareholder MNCN ownership conglomerate", "status": "ok", "count": 2}
+{"ts": "2026-08-30T14:12:56Z", "provider": "tavily", "endpoint": "/search", "query": "Djarum controlling shareholder TCPI ownership conglomerate", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T14:12:57Z", "provider": "you", "endpoint": "/v1/search", "query": "Djarum controlling shareholder TCPI ownership conglomerate", "status": "ok", "count": 2}
+{"ts": "2026-08-30T14:12:59Z", "provider": "tavily", "endpoint": "/search", "query": "Sampoerna controlling shareholder HMSP ownership conglomerate", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T14:13:00Z", "provider": "you", "endpoint": "/v1/search", "query": "Sampoerna controlling shareholder HMSP ownership conglomerate", "status": "ok", "count": 2}
+{"ts": "2026-08-30T14:13:03Z", "provider": "tavily", "endpoint": "/search", "query": "Saratoga controlling shareholder ARTO ownership conglomerate", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T14:13:04Z", "provider": "you", "endpoint": "/v1/search", "query": "Saratoga controlling shareholder ARTO ownership conglomerate", "status": "ok", "count": 2}
+{"ts": "2026-08-30T14:13:06Z", "provider": "tavily", "endpoint": "/search", "query": "Jardine Matheson controlling shareholder JPFA ownership conglomerate", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T14:13:07Z", "provider": "you", "endpoint": "/v1/search", "query": "Jardine Matheson controlling shareholder JPFA ownership conglomerate", "status": "ok", "count": 2}
+{"ts": "2026-08-30T14:13:09Z", "provider": "tavily", "endpoint": "/search", "query": "IDX EV battery supply chain theme members constituent evidence", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T14:13:10Z", "provider": "you", "endpoint": "/v1/search", "query": "IDX EV battery supply chain theme members constituent evidence", "status": "ok", "count": 2}
+{"ts": "2026-08-30T14:13:12Z", "provider": "tavily", "endpoint": "/search", "query": "IDX Nickel theme members constituent evidence", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T14:13:13Z", "provider": "you", "endpoint": "/v1/search", "query": "IDX Nickel theme members constituent evidence", "status": "ok", "count": 2}
+{"ts": "2026-08-30T14:13:15Z", "provider": "tavily", "endpoint": "/search", "query": "IDX Renewable energy theme members constituent evidence", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T14:13:16Z", "provider": "you", "endpoint": "/v1/search", "query": "IDX Renewable energy theme members constituent evidence", "status": "ok", "count": 2}
+{"ts": "2026-08-30T14:13:18Z", "provider": "tavily", "endpoint": "/search", "query": "IDX Digital economy theme members constituent evidence", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T14:13:20Z", "provider": "you", "endpoint": "/v1/search", "query": "IDX Digital economy theme members constituent evidence", "status": "ok", "count": 2}
+{"ts": "2026-08-30T14:13:22Z", "provider": "tavily", "endpoint": "/search", "query": "IDX Banking theme members constituent evidence", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T14:13:23Z", "provider": "you", "endpoint": "/v1/search", "query": "IDX Banking theme members constituent evidence", "status": "ok", "count": 2}
+{"ts": "2026-08-30T14:13:25Z", "provider": "tavily", "endpoint": "/search", "query": "IDX Telecommunications theme members constituent evidence", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T14:13:26Z", "provider": "you", "endpoint": "/v1/search", "query": "IDX Telecommunications theme members constituent evidence", "status": "ok", "count": 2}
+{"ts": "2026-08-30T14:13:29Z", "provider": "tavily", "endpoint": "/search", "query": "IDX foreign net buy sell daily summary publication", "status": "ok", "max_results": 3}
+{"ts": "2026-08-30T14:13:30Z", "provider": "you", "endpoint": "/v1/search", "query": "IDX foreign net buy sell daily summary publication", "status": "ok", "count": 2}
+{"ts": "2026-08-30T14:13:32Z", "provider": "tavily", "endpoint": "/search", "query": "OJK Statistik Pasar Modal asing netto", "status": "ok", "max_results": 3}
+{"ts": "2026-08-30T14:13:33Z", "provider": "you", "endpoint": "/v1/search", "query": "OJK Statistik Pasar Modal asing netto", "status": "ok", "count": 2}
+{"ts": "2026-08-30T14:13:35Z", "provider": "tavily", "endpoint": "/search", "query": "IDX foreign flow daily report csv download", "status": "ok", "max_results": 3}
+{"ts": "2026-08-30T14:13:36Z", "provider": "you", "endpoint": "/v1/search", "query": "IDX foreign flow daily report csv download", "status": "ok", "count": 2}
+{"ts": "2026-08-30T14:13:38Z", "provider": "tavily", "endpoint": "/search", "query": "BBCA.JK corporate action October 2021 stock split", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T14:13:40Z", "provider": "tavily", "endpoint": "/search", "query": "BBCA.JK harga historis 2021-10-13 corporate action", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T14:13:41Z", "provider": "tavily", "endpoint": "/search", "query": "IHSG Jakarta Composite index methodology IDX", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T14:13:41Z", "provider": "you", "endpoint": "/v1/search", "query": "IHSG Jakarta Composite index methodology IDX", "status": "ok", "count": 2}
+{"ts": "2026-08-30T14:13:41Z", "provider": "tavily", "endpoint": "/search", "query": "^JKSE Yahoo Finance IHSG mapping benchmark", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T14:13:41Z", "provider": "you", "endpoint": "/v1/search", "query": "^JKSE Yahoo Finance IHSG mapping benchmark", "status": "ok", "count": 2}
+{"ts": "2026-08-30T14:13:43Z", "provider": "tavily", "endpoint": "/search", "query": "IDX free float listed companies publication", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T14:13:45Z", "provider": "tavily", "endpoint": "/search", "query": "OJK free float IDX issuer disclosure", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T14:13:47Z", "provider": "tavily", "endpoint": "/search", "query": "market breadth definition methodology academic", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T14:13:48Z", "provider": "tavily", "endpoint": "/search", "query": "relative strength index construction methodology", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T14:13:51Z", "provider": "tavily", "endpoint": "/search", "query": "concentration measure HHI market equity", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T15:02:12Z", "provider": "tavily", "endpoint": "/search", "query": "IDX Indonesia Classification IDX-IC sector industry mapping", "status": "ok", "max_results": 5}
+{"ts": "2026-08-30T15:02:12Z", "provider": "you", "endpoint": "/v1/search", "query": "IDX IC sector industry classification listed companies", "status": "ok", "count": 4}
+{"ts": "2026-08-30T15:02:12Z", "provider": "tavily", "endpoint": "/search", "query": "BBCA.JK sector industry sub-industry", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T15:02:12Z", "provider": "tavily", "endpoint": "/search", "query": "ANTM.JK sector industry sub-industry", "status": "ok", "max_results": 2}
+{"ts": "2026-08-30T15:02:12Z", "provider": "tavily", "endpoint": "/search", "query": "TLKM.JK sector industry sub-industry", "status": "ok", "max_results": 2}

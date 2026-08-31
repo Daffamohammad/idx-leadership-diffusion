@@ -4,12 +4,18 @@ import ThemeToggle from "./ThemeToggle";
 import { BrandLockup } from "./BrandMark";
 import type { SnapshotContextValue } from "../data/SnapshotContext";
 import { normalizeDataStatus } from "../data/snapshot";
+import { formatDateLabel, formatEnumLabel, formatSnapshotId } from "../data/format";
 
 const navItems = [
-  { path: "/overview", label: "Overview", index: "01" },
-  { path: "/map", label: "Leadership Map", index: "02" },
-  { path: "/explorer", label: "Groups", index: "03" },
-  { path: "/methodology", label: "Methodology", index: "04" },
+  { path: "/what-changed", label: "What Changed", index: "01" },
+  { path: "/overview", label: "Overview", index: "02" },
+  { path: "/map", label: "Leadership Map", index: "03" },
+  { path: "/maps/konglo", label: "Konglo Map", index: "04" },
+  { path: "/maps/themes", label: "Themes Map", index: "05" },
+  { path: "/themes", label: "Themes Explorer", index: "06" },
+  { path: "/explorer", label: "Groups", index: "07" },
+  { path: "/groups", label: "Groups Table", index: "08" },
+  { path: "/methodology", label: "Methodology", index: "09" },
 ];
 
 interface Props {
@@ -20,28 +26,19 @@ interface Props {
 }
 
 function formatAsOf(asOf: string | null | undefined): string {
-  if (!asOf) return "—";
-  // 2026-08-20 -> 20 Aug 2026
-  const [y, m, d] = asOf.split("-");
-  if (!y || !m || !d) return asOf;
-  const months = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-  ];
-  const month = months[Number(m) - 1] ?? m;
-  return `${Number(d)} ${month} ${y}`;
+  return formatDateLabel(asOf);
 }
 
 function formatProviderMode(mode: string | undefined): string {
   switch (mode) {
     case "PUBLIC_PROTOTYPE":
-      return "PUBLIC PROTOTYPE";
+      return "Public prototype";
     case "DEMO_FIXTURE":
-      return "DEMO FIXTURE";
+      return "Demo fixture";
     case "SECTORS_FIXTURE":
-      return "SECTORS FIXTURE";
+      return "Sectors fixture";
     case "SECTORS_LIVE":
-      return "LIVE — SECTORS";
+      return "Live Sectors";
     default:
       return "Market data";
   }
@@ -53,7 +50,7 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
   const providerMode = snap.data?.payload.manifest?.entries?.[0]?.provider_mode;
   const providerLabel = formatProviderMode(providerMode);
   const qualityStatus = normalizeDataStatus(snap.data?.payload.quality.status);
-  const statusLabel = qualityStatus?.replace(/_/g, " ") ?? null;
+  const statusLabel = qualityStatus ? formatEnumLabel(qualityStatus) : null;
   const availableTaxonomies = new Set(
     snap.data?.payload.groups.map((group) => group.taxonomy_level.toLowerCase()) ?? [],
   );
@@ -290,7 +287,7 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
               ? "Loading snapshot…"
               : snap.error
                 ? "Snapshot unavailable"
-            : providerLabel + " · " + (statusLabel ?? "Ready") + " · Snapshot " + (snap.snapshotId ?? "—")}
+            : providerLabel + " · " + (statusLabel ?? "Ready") + " · Snapshot " + formatSnapshotId(snap.snapshotId, snap.payload?.as_of)}
           </span>
           <ThemeToggle />
           <button

@@ -12,6 +12,18 @@ coverage, provenance, rate-limit, and data-gap metadata. Tavily is wired as
 an optional qualitative context layer; it never supplies quantitative market
 data.
 
+The hackathon product is intentionally hybrid rather than pretending to be a
+complete production terminal: the market-signal lane is backed by a persisted
+real snapshot, the official IDX investor release is a real market-level lane,
+foreign flow per company remains a bounded source-backed sample, and Konglo,
+Themes, and research context are clearly presented as static or analyst-defined
+research layers. The current section-by-section contract is documented in
+[`docs/HYBRID_PRODUCT_MODEL.md`](docs/HYBRID_PRODUCT_MODEL.md).
+The official IDX source and parser boundary are documented in
+[`docs/IDX_STATISTICS_SOURCE.md`](docs/IDX_STATISTICS_SOURCE.md).
+The taxonomy constituent and YTD rotation contract is documented in
+[`docs/TAXONOMY_ROTATION_RUNBOOK.md`](docs/TAXONOMY_ROTATION_RUNBOOK.md).
+
 **This project is an analytical market-intelligence prototype for
 research and educational purposes. It does not provide investment
 advice or personalized recommendations.**
@@ -19,10 +31,12 @@ advice or personalized recommendations.**
 ## Sections
 
 - [What works now](#what-works-now)
+- [Hybrid product model](#hybrid-product-model)
 - [Prototype mode](#prototype-mode)
 - [Demo mode](#demo-mode)
 - [Sectors integration status](#sectors-integration-status)
 - [Live Sectors + Tavily refresh](#live-sectors--tavily-refresh)
+- [Foreign-flow discovery and sample calculation](#foreign-flow-discovery-and-sample-calculation)
 - [Architecture](#architecture)
 - [Methodology](#method-overview)
 - [Known limitations](#known-limitations)
@@ -41,7 +55,25 @@ A clean Python 3.10+ package that:
 8. exposes a thin Streamlit UI for inspection,
 9. ships a deterministic synthetic-market harness (`tests/synthetic_market.py`,
    scenarios A–G) and a group-size diffusion grid
-   (`scripts/audit_group_size_diffusion.py`) as offline guardrails.
+ (`scripts/audit_group_size_diffusion.py`) as offline guardrails.
+
+## Hybrid product model
+
+The product separates evidence by what a reviewer can reasonably trust in the
+current build:
+
+| Product lane | Sections | Contract |
+| --- | --- | --- |
+| Real snapshot | Overview, Sector heatmap, Leadership Map, Groups, Ticker Analysis, What Changed | Persisted market observations and explicit coverage metadata; the current snapshot remains partial and has no comparable prior. |
+| Official release | Overview, Methodology | Official IDX July 2026 daily investor-type table, parsed and reconciled across 23 trading days into market-level net foreign flow. |
+| Source-backed sample | Foreign Flow | Real reported observations from a bounded top-list sample; not a full-universe signal. |
+| Static research lens | Konglo Map, Themes Map, Group Explorer for those taxonomies, Themes Explorer | Analyst-defined membership configuration; aggregate metrics may reuse the current snapshot, but the taxonomy is not official IDX data. |
+| Static context | Research Events and optional web-context panels | Persisted descriptive context; never used to create or change quantitative signals. |
+
+This is a deliberate hackathon delivery choice. A repository-local rubric does
+not require full IDX coverage or production deployment; the external event
+rules remain the final authority. The UI labels each lane so a static research
+prototype is not mistaken for live data.
 
 ## What works now
 
@@ -79,9 +111,14 @@ provider connections while rendering.
 | Route | Page | Data source |
 | --- | --- | --- |
 | `/` | `PublicHome` | marketing copy (no data dependency) |
-| `/overview` | `WhatChanged` | real `groups` + `transitions` from the snapshot |
-| `/map` | `LeadershipMap` | real `groups` (60D/20D signed excess returns; current breadth, or breadth delta when a comparable prior exists) |
+| `/overview` | `MarketOverview` | real Sector heatmap plus official IDX market-level release, bounded sample, and static context sections |
+| `/what-changed` | `WhatChanged` | real current snapshot; prior comparison is shown only when compatible history exists |
+| `/map` | `LeadershipMap` | YTD excess-return rotation mapping and table; 20D/60D momentum remain diagnostics and null YTD values stay `Data gap` |
+| `/maps/konglo` | `TaxonomyMapPage` | static analyst-defined membership lens with current-snapshot aggregates |
+| `/maps/themes` | `TaxonomyMapPage` | static analyst-defined membership lens with current-snapshot aggregates |
 | `/explorer` | `GroupExplorer` | real `features` joined to `security_master` per `group_id` |
+| `/themes` | `ThemesExplorer` | static analyst-defined theme lens with current-snapshot aggregates |
+| `/groups` | `MasterGroupTable` | real group cross-section from the snapshot |
 | `/methodology` | `Methodology` | real `manifest`, `quality`, coverage, warnings, plus static method cards |
 
 The map uses an explicitly labeled current-breadth view when the snapshot has
@@ -89,8 +126,10 @@ no comparable prior. Breadth-delta diffusion and trajectory views remain
 unavailable until compatible history is persisted; no prior or delta is
 fabricated. Prototype snapshots may include persisted per-group breadth
 history, while the canonical live snapshot currently does not. Foreign flow
-and fundamentals remain explicit data gaps and never become fabricated neutral
-values; unsupported views render a one-line reason rather than a blank chart.
+Per-ticker/group foreign-flow confirmation and fundamentals remain explicit data
+gaps and never become fabricated neutral values; the official IDX market-level
+release is shown in its own evidence lane. Unsupported views render a one-line
+reason rather than a blank chart.
 
 ### Run it
 
@@ -108,7 +147,7 @@ values; unsupported views render a one-line reason rather than a blank chart.
 # 3. Install + start the SPA.
 cd app/web
 npm install
-npm run dev   # http://127.0.0.1:5173
+npm run dev   # http://127.0.0.1:5174 (when launched with --port 5174)
 ```
 
 The output of step 2 lands in `app/web/public/snapshots/` and is served
@@ -118,7 +157,7 @@ filter prevents a newer public prototype from silently replacing a live
 Sectors view. Override with `VITE_SNAPSHOT_ID` when intentionally reviewing
 another payload.
 
-### What is real vs design scaffolding
+### What is real vs static or bounded
 
 Real (driven by the snapshot bundle):
 
@@ -129,14 +168,22 @@ Real (driven by the snapshot bundle):
   `security_master` on `group_id`
 - sidebar as-of, data-status chip, snapshot id in the header
 - Data Status and Provenance tables on the Methodology page
+- official IDX July 2026 investor-type release: 23 daily market-level rows,
+  reconciled net foreign totals, and source provenance
 
-Design scaffolding and optional context (explicit empty-state, never fake values):
+Static or bounded layers (explicitly labeled, never presented as live signals):
 
 - per-group breadth / performance time series (available when a snapshot
   contains persisted comparable observations)
 - leadership trail lines on the map (same reason)
-- quantitative foreign flow, fundamentals, and events (not emitted by the
-  current intelligence contract)
+- per-ticker/group foreign-flow confirmation (not emitted by the official
+  market-level release)
+- foreign-flow top-list sample with source provenance
+- Konglo and Themes analyst-defined membership lenses
+- qualitative research events and web context
+
+Fundamentals remain a data gap. Unsupported quantitative views render a
+one-line reason rather than a fabricated neutral value.
 
 An existing snapshot can receive a bounded, first-party Tavily research
 context pass without rebuilding or calling Sectors:
@@ -166,6 +213,68 @@ The command never calls the Sectors provider and never creates per-ticker
 metrics.  The result is stored in `you_context.json` and rendered on the
 Methodology page alongside the Tavily panel; both layers carry
 `quantitative_use: false` and remain qualitative provenance only.
+
+## Foreign-flow discovery and sample calculation
+
+The official IDX Digital Statistics page is the quantitative source for the
+market-level investor release shown on Overview and Methodology:
+
+- [IDX statistics index](https://www.idx.co.id/id/data-pasar/laporan-statistik/statistik/)
+  lists the dated Daily Statistics releases.
+- [July 2026 daily trading by type of investor](https://www.idx.co.id/id/data-pasar/laporan-statistik/digital-statistic/monthly/equity-trading-by-investor/table-daily-trading-by-type-of-investor?filter=eyJ5ZWFyIjoiMjAyNiIsIm1vbnRoIjoiNyIsInF1YXJ0ZXIiOjAsInR5cGUiOiJtb250aGx5In0%3D)
+  renders the 23 trading-day rows used by the product.
+
+`src/idx_leadership/providers/idx_statistics.py` parses the two released HTML
+tables, aligns dates, derives `domestic sells to foreign − foreign sells to
+domestic`, and fails closed when totals do not reconcile. The offline-safe
+refresh command is:
+
+```bash
+.venv/bin/python -m scripts.refresh_idx_statistics \
+  --year 2026 --month 7 \
+  --html-file /path/to/saved/official-idx-table.html \
+  --output /path/to/idx_investor_trading_2026-07.json
+```
+
+The checked-in web artifact is
+`app/web/public/idx/idx_investor_trading_2026-07.json`. Direct CLI retrieval
+may be blocked by IDX anti-bot controls in a local environment; the parser is
+therefore tested offline and the artifact retains the exact official URL and
+reconciliation metadata. Search agents are used for discovery only and are
+not a numeric extraction path.
+
+The optional LlamaParse PDF lane now follows the complete staged path:
+search-agent discovery, bounded official-index crawl/retrieval, local PDF
+verification, LlamaParse upload, and deterministic reduction to the Daily
+Statistics cards. Search/crawl text remains discovery-only and is never used
+as a quantitative value. Install the optional SDK and run the bounded command
+only after reviewing both provider acknowledgements; see
+[`docs/IDX_STATISTICS_SOURCE.md`](docs/IDX_STATISTICS_SOURCE.md) for the exact
+command and the 20,000-credit client-side ceiling.
+
+The repository also contains a bounded foreign-flow methodology harness. The
+discovery record in `data/fixtures/foreign_flow_discovery.json` documents the
+official release and the two dated secondary reports used for a small company
+sample. No stable full-universe daily per-ticker ownership-flow feed has been
+established.
+
+The numeric input is intentionally manual and auditable:
+`data/fixtures/foreign_flow_sample.csv` contains two market-wide observations
+and published top-buy/top-sell company rows. Company rows remain net-only;
+missing buy/sell components are never inferred. The calculator uses pandas to
+validate the input, preserve reported market net values, flag rounding
+variance in rounded market components, and map only tickers present in the
+persisted security master:
+
+```bash
+.venv/bin/python scripts/calculate_foreign_flow_sample.py
+```
+
+The deterministic result is written to
+`data/derived/foreign_flow_sample.json` with `READY_WITH_GAPS` status. It is
+sample evidence only and is explicitly disabled from leadership, diffusion,
+and confirmation calculations. No network request is made and the Sectors
+API is not called by this command.
 
 ## Prototype mode
 
@@ -375,9 +484,10 @@ See `docs/METHODOLOGY.md` for the full specification.
 - Live Sectors history is intentionally partial when the provider rate-limits
   a request batch. The current snapshot is labeled `READY_WITH_GAPS`, not
   silently filled or downgraded to demo data.
-- No structured foreign flow, broker activity, fundamental, or news
-  confirmation. Optional Tavily sources are context only and are not a
-  substitute for normalized per-ticker or per-group observations.
+- The official IDX investor-type release is integrated for market-level net
+  foreign flow. Per-ticker/group foreign-flow confirmation, broker activity,
+  fundamentals, and news metrics remain unavailable. Optional Tavily sources
+  are context only and are not a substitute for normalized observations.
 - Sectors close adjustment semantics remain `UNKNOWN / VERIFY`; the live
   path surfaces the raw-close caveat rather than claiming adjusted prices.
 

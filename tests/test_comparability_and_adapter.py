@@ -594,11 +594,9 @@ def test_complete_adjusted_breadth_history():
         f"Expected >= 40 breadth_history entries (4 dates x 10 groups), got {len(history)}"
     )
     dates = sorted(set(p.get("as_of") for p in history))
-    assert len(dates) == 4, f"Expected 4 distinct dates in breadth_history, got {dates}"
-    assert "2026-08-12" in dates
-    assert "2026-08-19" in dates
-    assert "2026-08-26" in dates
-    assert "2026-08-28" in dates
+    assert len(dates) >= 4, f"Expected >=4 distinct dates in breadth_history, got {dates}"
+    for required in ("2026-08-12", "2026-08-19", "2026-08-26", "2026-08-28"):
+        assert required in dates, f"Missing required date {required} in {dates}"
     # All entries must have group_id and breadth as numbers
     for p in history:
         assert p.get("group_id") is not None
@@ -606,6 +604,23 @@ def test_complete_adjusted_breadth_history():
         assert isinstance(p.get("group_excess_return_20d"), (int, float, type(None))), (
             f"group_excess_return_20d must be numeric or null, got {type(p.get('group_excess_return_20d'))}"
         )
+
+
+def test_group_price_history_is_snapshot_backed_and_rebased():
+    """The web chart must consume persisted group series, not demo values."""
+    payload = _load_harness_payload()
+    histories = payload.get("group_price_history") or {}
+    assert len(histories) == 10
+    assert all(len(points) > 0 for points in histories.values())
+    for points in histories.values():
+        first = points[0]
+        assert first["value"] == pytest.approx(100.0)
+        assert first["date"] >= "2026-05-08"
+        for point in points:
+            assert isinstance(point.get("date"), str)
+            assert isinstance(point.get("value"), (int, float))
+            assert point["value"] > 0
+            assert point.get("benchmark") is None or point["benchmark"] > 0
 
 
 def test_previous_snapshot_id_matches_harness_compatibility():

@@ -30,6 +30,13 @@ from ..utils import get_logger
 _log = get_logger(__name__)
 
 
+def _finite_mean(frame: pd.DataFrame, column: str) -> float | None:
+    if column not in frame.columns:
+        return None
+    values = pd.to_numeric(frame[column], errors="coerce").dropna()
+    return float(values.mean()) if not values.empty else None
+
+
 def build_group_snapshots(
     *,
     features: pd.DataFrame,
@@ -70,8 +77,17 @@ def build_group_snapshots(
     remain in the denominator and count toward `missing_count` rather
     than being silently dropped.
     """
-    if features.empty or taxonomy.empty:
+    if taxonomy is None or taxonomy.empty:
         return []
+
+    # Keep the taxonomy as the left-hand side of the join.  Feature-only rows
+    # are not policy-eligible constituents and must not create an artificial
+    # UNCLASSIFIED group (or dilute any group's denominator).  A completely
+    # empty feature frame is still a valid data-gap snapshot: the taxonomy
+    # remains the denominator and every metric below resolves to None.
+    feature_frame = features.copy() if features is not None else pd.DataFrame()
+    if "ticker" not in feature_frame.columns:
+        feature_frame = pd.DataFrame(columns=["ticker"])
 
     # The taxonomy frame is the policy-eligible universe: this is the
     # denominator for the 60% coverage gate. The raw candidate count is
@@ -89,13 +105,35 @@ def build_group_snapshots(
     # pandas suffixes them and taxonomy_path silently loses its hierarchy.
     feature_columns = [
         column
-        for column in features.columns
+        for column in feature_frame.columns
         if column == "ticker" or column not in taxonomy_base.columns
     ]
+    feature_frame = (
+        feature_frame[feature_columns]
+        .drop_duplicates(subset=["ticker"], keep="last")
+        .copy()
+    )
     merged = taxonomy_base.merge(
-        features[feature_columns], on="ticker", how="outer"
+        feature_frame, on="ticker", how="left"
     )
     merged["group_id"] = merged["group_id"].fillna("UNCLASSIFIED")
+    # Missing feature columns are intentionally represented as NaN so a
+    # missing acquisition remains visible without turning a data-gap run into
+    # a KeyError in the metric calculations.
+    for column in (
+        "return_5d",
+        "return_20d",
+        "return_60d",
+        "return_ytd",
+        "excess_return_5d",
+        "excess_return_20d",
+        "excess_return_60d",
+        "excess_return_ytd",
+        "benchmark_return_ytd",
+        "return_ytd_start_date",
+    ):
+        if column not in merged.columns:
+            merged[column] = np.nan
 
     prev_by_group: dict[str, GroupSnapshot] = {}
     if previous_groups:
@@ -141,6 +179,24 @@ def build_group_snapshots(
         ex60 = gdf["excess_return_60d"].dropna()
         g_ex5 = float(ex5.mean()) if not ex5.empty else None
         g_ex60 = float(ex60.mean()) if not ex60.empty else None
+        ytd_features = gdf.dropna(subset=["return_ytd", "excess_return_ytd"])
+        group_ytd = (
+            float(pd.to_numeric(ytd_features["return_ytd"], errors="coerce").dropna().mean())
+            if not ytd_features.empty
+            else None
+        )
+        group_excess_ytd = (
+            float(pd.to_numeric(ytd_features["excess_return_ytd"], errors="coerce").dropna().mean())
+            if not ytd_features.empty
+            else None
+        )
+        benchmark_ytd = _finite_mean(ytd_features, "benchmark_return_ytd")
+        ytd_start_values = (
+            ytd_features["return_ytd_start_date"].dropna()
+            if "return_ytd_start_date" in ytd_features.columns
+            else pd.Series(dtype=object)
+        )
+        ytd_start_date = ytd_start_values.iloc[0] if not ytd_start_values.empty else None
 
         # Breadth (uses features on the group slice)
         breadth = compute_breadth(
@@ -268,6 +324,11 @@ def build_group_snapshots(
             group_excess_return_5d=g_ex5,
             group_excess_return_20d=group_excess,
             group_excess_return_60d=g_ex60,
+            group_return_ytd=group_ytd,
+            group_excess_return_ytd=group_excess_ytd,
+            benchmark_return_ytd=benchmark_ytd,
+            ytd_start_date=ytd_start_date,
+            ytd_eligible_count=int(ytd_features["ticker"].nunique()),
             breadth_positive=breadth.positive_return_share,
             breadth_outperforming=breadth.benchmark_outperformance_share,
             breadth_delta=breadth_delta,

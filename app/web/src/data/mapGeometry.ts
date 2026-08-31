@@ -51,14 +51,14 @@ export const CURRENT_BREADTH_DOMAIN: LeadershipDiffusionDomain = {
 };
 
 export const MAP_AXIS_LABELS = {
-  x: "20D excess return vs IHSG (pp)",
-  y: "20D breadth delta (pp)",
+  x: "20D excess return vs IHSG (%)",
+  y: "20D breadth delta (%)",
   title: "Leadership × Diffusion Map",
   subtitle: "Relative leadership / breadth momentum",
 } as const;
 
 export const CURRENT_BREADTH_AXIS_LABELS = {
-  x: "20D excess return vs IHSG (pp)",
+  x: "20D excess return vs IHSG (%)",
   y: "20D breadth (current snapshot)",
   title: "Leadership × Current Breadth Map",
   subtitle: "Relative leadership / current participation",
@@ -172,8 +172,8 @@ export function classifyMapPoint(
   hasPriorBreadth: boolean = false,
   mode: MapViewMode = "trajectory",
 ): MapClassificationResult {
-  if (value.excess20d === null) {
-    return { classification: "missing-metric", reason: "20D excess return is null" };
+  if (value.excess20d === null || !Number.isFinite(value.excess20d)) {
+    return { classification: "missing-metric", reason: "20D excess return is missing or non-finite" };
   }
   if (mode === "current") {
     // Current-snapshot mode uses current breadth on the Y axis (0-100 domain).
@@ -188,7 +188,13 @@ export function classifyMapPoint(
     }
     return { classification: "plottable", reason: "Within domain bounds" };
   }
-  if (value.breadth === null || value.prevBreadth === undefined || !hasPriorBreadth) {
+  if (
+    value.breadth === null ||
+    !Number.isFinite(value.breadth) ||
+    value.prevBreadth === undefined ||
+    !Number.isFinite(value.prevBreadth) ||
+    !hasPriorBreadth
+  ) {
     return { classification: "missing-prior", reason: "No comparable prior breadth observation" };
   }
   const yValue = mapYValue(value, mode);

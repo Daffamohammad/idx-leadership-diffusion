@@ -13,6 +13,8 @@ export interface MapLabelPosition {
   x: number;
   y: number;
   textAnchor: "start" | "middle" | "end";
+  targetX?: number;
+  targetY?: number;
 }
 
 interface LabelBox {
@@ -39,9 +41,11 @@ const OFFSETS: LabelOffset[] = [
   { dx: -19, dy: 0, textAnchor: "end" },
 ];
 
-const CHAR_WIDTH = 5.7;
+// Geist Mono at the map's 11px label size is approximately 6.5 units wide.
+// The conservative estimate keeps visual collision checks ahead of rasterized text.
+const CHAR_WIDTH = 6.5;
 const LABEL_HEIGHT = 12;
-const LABEL_GAP = 4;
+const LABEL_GAP = 6;
 const LABEL_X_MIN_SPACING = 40;
 
 function boxFor(
@@ -135,6 +139,8 @@ export function placeMapLabels(
       x: valid.x,
       y: valid.y,
       textAnchor: valid.textAnchor,
+      targetX: candidate.x,
+      targetY: candidate.y,
     });
     boxes.push(valid.box);
   }

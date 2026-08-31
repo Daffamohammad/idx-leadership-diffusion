@@ -16,6 +16,7 @@ import {
 } from "../data/mapGeometry"
 import { BrandLockup } from "../components/BrandMark"
 import { placeMapLabels } from "../data/mapLabels"
+import { EvidenceBadge } from "../components/EvidenceModel"
 
 // ── Dia text reveal ──────────────────────────────────────────────────────────
 // Gradient band sweeps left-to-right; text settles from muted → brand sweep → final color.
@@ -624,6 +625,16 @@ export default function PublicHome() {
 
             <div className="eyebrow-muted reveal" style={{ marginTop: 26 }}>
               Snapshot-driven research · End-of-day
+            </div>
+            <div
+              className="reveal"
+              style={{ display: "flex", flexWrap: "wrap", gap: 7, marginTop: 12, alignItems: "center" }}
+              aria-label="Hybrid product evidence model"
+            >
+              <EvidenceBadge kind="SNAPSHOT" compact />
+              <EvidenceBadge kind="SAMPLE" compact />
+              <EvidenceBadge kind="PROTOTYPE" compact />
+              <EvidenceBadge kind="CONTEXT" compact />
             </div>
           </div>
 

@@ -238,7 +238,10 @@ missing values.
 - Sectors close adjustment semantics are `UNKNOWN / VERIFY`; the live path
   mirrors raw close into the canonical adjusted-close slot and surfaces the
   caveat rather than claiming adjusted prices.
-- No fundamental, flow, broker, filing, or news confirmation.
+- The official IDX Digital Statistics investor-type release is available as a
+  reconciled market-level net-foreign-flow lane. It is not per-ticker or
+  per-group ownership flow; per-name foreign flow, broker, fundamental, filing,
+  and news confirmation remain unavailable.
 - The local prototype universe is not full IDX; the live Sectors universe is
   provider-derived, subject to its explicit history, liquidity, listing, and
   instrument-classification gaps.

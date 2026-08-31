@@ -30,7 +30,7 @@ from .data.manifests import write_manifest
 from .data.comparability import check_snapshot_compatibility
 from .data.quality import assess_quality
 from .data.snapshots import SNAPSHOT_VERSION, SnapshotReader, SnapshotWriter
-from .features.relative_strength import compute_excess_returns
+from .features.relative_strength import compute_excess_returns, compute_ytd_excess_returns
 from .analytics.persistence import compute_persistence
 from .evidence.builder import build_group_evidence
 from .intelligence import build_market_read, build_story_mode
@@ -73,6 +73,20 @@ def _none_if_nan_int(v):
         return v
     try:
         return int(v)
+    except (TypeError, ValueError):
+        return None
+
+
+def _date_or_none(v):
+    if v is None:
+        return None
+    try:
+        if pd.isna(v):
+            return None
+    except (TypeError, ValueError):
+        pass
+    try:
+        return pd.Timestamp(v).date()
     except (TypeError, ValueError):
         return None
 
@@ -157,7 +171,16 @@ def build_snapshot(
     as_of = as_of or today
     lookback_days = max(horizons.values()) + 10
     lookback = pd.Timedelta(days=int(lookback_days * 1.6))
-    start_date = (pd.Timestamp(as_of) - lookback).date() if not isinstance(as_of, pd.Timestamp) else (as_of - lookback).date()
+    regular_start = (
+        (pd.Timestamp(as_of) - lookback).date()
+        if not isinstance(as_of, pd.Timestamp)
+        else (as_of - lookback).date()
+    )
+    # YTD needs the last common trading session of the prior calendar year.
+    # Requesting this bounded extra window is deterministic and avoids
+    # silently treating a short lookback as a complete YTD baseline.
+    ytd_start = date(as_of.year - 1, 12, 20)
+    start_date = min(regular_start, ytd_start)
 
     prices = provider.get_price_history(requested, start=start_date, end=as_of)
     benchmark = provider.get_benchmark_history(benchmark_id, start=start_date, end=as_of)
@@ -184,6 +207,27 @@ def build_snapshot(
         security_price_col=effective_price_basis,
         tolerance_days=int(meth.get("as_of_tolerance_days", 7)),
     )
+    ytd_features = compute_ytd_excess_returns(
+        prices,
+        benchmark,
+        as_of=as_of,
+        security_price_col=effective_price_basis,
+        benchmark_price_col="close",
+        tolerance_days=int(meth.get("as_of_tolerance_days", 7)),
+    )
+    if features.empty:
+        features = pd.DataFrame(columns=["ticker"])
+    if not ytd_features.empty:
+        features = features.merge(ytd_features, on="ticker", how="left")
+    else:
+        for column in (
+            "return_ytd",
+            "benchmark_return_ytd",
+            "excess_return_ytd",
+            "return_ytd_start_date",
+            "return_ytd_end_date",
+        ):
+            features[column] = None
     if features.empty:
         _log.warning("no_features_computed as_of=%s", as_of)
     # The aggregation layer merges taxonomy into features internally; do not pre-merge here.
@@ -191,15 +235,20 @@ def build_snapshot(
     # Compute eligible ticker set hash from the current universe so the
     # comparability gate can verify membership parity.
     from .providers.market_universe import build_market_universe
+    acquisition_failed_tickers, acquisition_empty_tickers = _provider_acquisition_sets(
+        provider
+    )
     _universe = build_market_universe(
         security_master_provider=provider,
         cross_section_provider=provider,
         event_provider=None,
         as_of=as_of,
         price_history=prices,
+        acquisition_failures=acquisition_failed_tickers,
+        acquisition_empties=acquisition_empty_tickers,
     )
     eligible_tickers = set(
-        _universe.loc[_universe["eligible"], "ticker"].astype(str).tolist()
+        _universe.loc[_universe["eligible"], "ticker"].astype(str).str.upper().tolist()
     )
     eligible_ticker_set_hash = (
         hashlib.sha256(json.dumps(sorted(eligible_tickers)).encode()).hexdigest()[:16]
@@ -246,6 +295,16 @@ def build_snapshot(
         previous_date,
     ) = _load_compatible_history(reader, current_contract)
 
+    # The group denominator is the policy-eligible taxonomy, while the raw
+    # frame remains available for transparent candidate counts.  Filtering at
+    # this boundary keeps policy-excluded members from silently entering a
+    # group metric merely because the provider returned their price history.
+    raw_candidate_taxonomy = taxonomy.copy()
+    if "ticker" in taxonomy.columns:
+        taxonomy = taxonomy[
+            taxonomy["ticker"].astype(str).str.upper().isin(eligible_tickers)
+        ].copy()
+
     # Build current group snapshots
     snapshots = build_group_snapshots(
         features=features,
@@ -290,6 +349,8 @@ def build_snapshot(
         ),
         concentration_price_col=effective_price_basis,
         taxonomy_level=str(meth.get("groups", {}).get("primary_taxonomy_level", "sector")),
+        raw_candidate_taxonomy=raw_candidate_taxonomy,
+        acquisition_failed_tickers=acquisition_failed_tickers,
     )
     snapshots = rank_groups(snapshots)
 
@@ -688,6 +749,11 @@ def _row_to_group_snapshot(row: pd.Series):
         group_excess_return_5d=_none_if_nan(row.get("group_excess_return_5d")),
         group_excess_return_20d=_none_if_nan(row.get("group_excess_return_20d")),
         group_excess_return_60d=_none_if_nan(row.get("group_excess_return_60d")),
+        group_return_ytd=_none_if_nan(row.get("group_return_ytd")),
+        group_excess_return_ytd=_none_if_nan(row.get("group_excess_return_ytd")),
+        benchmark_return_ytd=_none_if_nan(row.get("benchmark_return_ytd")),
+        ytd_start_date=_date_or_none(row.get("ytd_start_date")),
+        ytd_eligible_count=_none_if_nan_int(row.get("ytd_eligible_count")) or 0,
         relative_strength_level=_none_if_nan(row.get("group_excess_return")),
         breadth_positive=_none_if_nan(row.get("breadth_positive")),
         breadth_outperforming=_none_if_nan(row.get("breadth_outperforming")),
@@ -787,6 +853,27 @@ def _safe_provider_name(provider) -> Any:
     return mapping.get(name, ProviderName.YFINANCE)
 
 
+def _provider_acquisition_sets(provider: Any) -> tuple[set[str], set[str]]:
+    """Read optional provider diagnostics without coupling the engine to Sectors.
+
+    Providers that can distinguish a failed request from an empty response
+    expose those rows through ``history_diagnostics``.  Other providers keep
+    the empty sets, preserving the source-neutral pipeline contract.
+    """
+    diagnostics = getattr(provider, "history_diagnostics", {}) or {}
+    failed: set[str] = set()
+    for item in diagnostics.get("failed_symbols", []) or []:
+        ticker = item.get("ticker") if isinstance(item, dict) else item
+        if ticker:
+            failed.add(str(ticker).upper())
+    empty = {
+        str(ticker).upper()
+        for ticker in (diagnostics.get("empty_symbols", []) or [])
+        if ticker
+    }
+    return failed, empty
+
+
 def _snapshots_to_df(snapshots) -> pd.DataFrame:
     rows: list[dict] = []
     for s in snapshots:
@@ -805,6 +892,11 @@ def _snapshots_to_df(snapshots) -> pd.DataFrame:
                 "group_excess_return_5d": s.group_excess_return_5d,
                 "group_excess_return_20d": s.group_excess_return_20d,
                 "group_excess_return_60d": s.group_excess_return_60d,
+                "group_return_ytd": s.group_return_ytd,
+                "group_excess_return_ytd": s.group_excess_return_ytd,
+                "benchmark_return_ytd": s.benchmark_return_ytd,
+                "ytd_start_date": s.ytd_start_date,
+                "ytd_eligible_count": s.ytd_eligible_count,
                 "breadth_positive": s.breadth_positive,
                 "breadth_outperforming": s.breadth_outperforming,
                 "breadth_delta": s.breadth_delta,

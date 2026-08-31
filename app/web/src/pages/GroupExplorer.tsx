@@ -1,8 +1,15 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import { useSnapshot } from "../data/SnapshotProvider";
-import type { ConstituentData, FlowState, SectorData } from "../data/adapter";
+import type {
+  AdaptedSnapshot,
+  ConstituentData,
+  FlowState,
+  SectorData,
+  TaxonomyGroupData,
+} from "../data/adapter";
+import type { TaxonomyKind } from "../data/snapshot";
 import { DataStatusChip, LeadershipChip, DiffusionChip } from "../components/StatusChips";
 import { EmptyState } from "../components/EmptyState";
 import {
@@ -22,6 +29,9 @@ import {
   ReferenceLine,
 } from "recharts";
 import { leadershipColor } from "../components/StatusChips";
+import PriceChart from "../components/PriceChart";
+import { formatCountLabel, formatDateLabel, formatEnumLabel, formatPercent, formatSnapshotId } from "../data/format";
+import { EvidenceBadge } from "../components/EvidenceModel";
 
 const card: React.CSSProperties = {
   background: "#ffffff",
@@ -30,6 +40,7 @@ const card: React.CSSProperties = {
 };
 
 function displayMetric(val: number | null | undefined, suffix = "%"): string {
+  if (suffix === "%") return formatPercent(val);
   if (val === null || val === undefined || !Number.isFinite(val)) return "—";
   return `${val > 0 ? "+" : ""}${val.toFixed(1)}${suffix}`;
 }
@@ -109,15 +120,15 @@ const flowCfg: Record<FlowState, { label: string; color: string }> = {
 
 function ConstituentTable({ constituents }: { constituents: ConstituentData[] }) {
   return (
-    <div style={{ ...card, overflow: "hidden" }}>
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+    <div className="table-scroll" style={{ ...card }}>
+      <table style={{ width: "100%", minWidth: 1180, borderCollapse: "collapse" }}>
         <thead>
           <tr style={{ borderBottom: "1px solid #ebebeb" }}>
-            {["Ticker", "Company", "20D Ret", "20D Exc", "60D Exc", "Part.", "Abs. Move", "Foreign Flow"].map(
+            {["Ticker", "Company", "YTD Ret", "YTD Exc", "20D Ret", "20D Exc", "60D Exc", "Part.", "Abs. Move", "Membership", "Foreign Flow"].map(
               (col) => (
                 <th
                   key={col}
-                  style={{
+                style={{
                     padding: "9px 12px",
                     fontFamily: "Geist Mono, monospace",
                     fontSize: 10,
@@ -145,9 +156,22 @@ function ConstituentTable({ constituents }: { constituents: ConstituentData[] })
                 style={{ borderBottom: i < constituents.length - 1 ? "1px solid #ebebeb" : "none" }}
               >
                 <td style={{ padding: "9px 12px", fontFamily: "Geist Mono, monospace", fontSize: 12, fontWeight: 600, color: "#171717" }}>
-                  {c.ticker}
+                  <Link
+                    to={`/ticker/${c.ticker}`}
+                    style={{ color: "#171717", textDecoration: "underline" }}
+                  >
+                    {c.ticker}
+                  </Link>
                 </td>
-                <td style={{ padding: "9px 12px", fontSize: 12, color: "#4d4d4d" }}>{c.name}</td>
+                <td style={{ padding: "9px 12px", fontSize: 12, color: "#4d4d4d", maxWidth: 220 }}>
+                  {c.name || "—"}
+                </td>
+                <td style={{ padding: "9px 12px", textAlign: "right" }}>
+                  <Num val={c.returnYtd} />
+                </td>
+                <td style={{ padding: "9px 12px", textAlign: "right" }}>
+                  <Num val={c.excessYtd} />
+                </td>
                 <td style={{ padding: "9px 12px", textAlign: "right" }}>
                   <Num val={c.return20d} />
                 </td>
@@ -170,6 +194,9 @@ function ConstituentTable({ constituents }: { constituents: ConstituentData[] })
                 </td>
                 <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "Geist Mono, monospace", fontSize: 12, color: "#171717" }}>
                   {c.contribution === null ? "—" : `${c.contribution}%`}
+                </td>
+                <td style={{ padding: "9px 12px", textAlign: "right", fontSize: 11, color: "#666", whiteSpace: "nowrap" }}>
+                  {formatEnumLabel(c.membershipType)}
                 </td>
                 <td
                   style={{
@@ -270,6 +297,162 @@ function findGroupFromLocation(
   return sectors[0]?.id ?? "";
 }
 
+function normalizeTaxonomyKind(value: string | null): TaxonomyKind | null {
+  const normalized = value?.toUpperCase();
+  return normalized === "SECTOR" || normalized === "KONGLO" || normalized === "THEMES"
+    ? normalized
+    : null;
+}
+
+function TaxonomyGroupDetail({
+  group,
+  data,
+}: {
+  group: TaxonomyGroupData;
+  data: AdaptedSnapshot;
+}) {
+  const backPath = group.taxonomyKind === "KONGLO" ? "/maps/konglo" : "/maps/themes";
+  const members = group.memberships;
+  const quantitativeMembers = members.filter((member) => member.membership_type !== "EXCLUDED");
+  const groupKey = `${group.taxonomyId}::${group.id}`;
+  const constituents = data.constituentsByTaxonomyGroup[groupKey] ?? [];
+  const pricePoints = data.taxonomyGroupPriceHistory[groupKey] ?? [];
+  const metric = (value: number | null | undefined, suffix = "%") => {
+    if (value == null || !Number.isFinite(value)) return "—";
+    return `${value >= 0 ? "+" : ""}${value.toFixed(1)}${suffix}`;
+  };
+  const ytdCoverage = group.constituents > 0
+    ? `${group.ytdEligible}/${group.constituents}`
+    : "—";
+
+  return (
+    <div className="taxonomy-detail-page content-shell" style={{ padding: "36px var(--page-gutter)", maxWidth: "var(--content-max)" }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 20, marginBottom: 24, flexWrap: "wrap" }}>
+        <div>
+          <Link to={backPath} style={{ color: "#686e73", fontSize: 12, textDecoration: "none" }}>
+            ← Back to {group.taxonomyKind === "KONGLO" ? "Konglo" : "Themes"} map
+          </Link>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginTop: 16, marginBottom: 8 }}>
+            <div className="eyebrow-muted">
+              {group.taxonomyName} · group detail
+            </div>
+            <EvidenceBadge kind="PROTOTYPE" compact />
+          </div>
+          <h1 style={{ margin: 0, fontSize: 30, fontWeight: 400, letterSpacing: "-1.5px" }}>
+            {group.name}
+          </h1>
+          <p style={{ margin: "8px 0 0", color: "#686e73", fontSize: 13, lineHeight: 1.5 }}>
+            Aggregate metrics use the current snapshot. Membership is an analyst-defined research lens and is not an official IDX classification.
+          </p>
+        </div>
+        <Link to="/overview" style={{ padding: "9px 13px", border: "1px solid #202325", color: "#202325", textDecoration: "none", fontSize: 12 }}>
+          Overview
+        </Link>
+      </div>
+
+      <div style={{ ...card, padding: "18px 22px", marginBottom: 20 }}>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+          <LeadershipChip state={group.leadership as Parameters<typeof LeadershipChip>[0]["state"]} />
+          <DiffusionChip state={group.diffusion as Parameters<typeof DiffusionChip>[0]["state"]} />
+          <span style={{ fontFamily: "Geist Mono, monospace", fontSize: 11, color: "#666", border: "1px solid #ebebeb", padding: "2px 8px", borderRadius: 4 }}>
+            {formatEnumLabel(group.dataQuality)}
+          </span>
+          <span style={{ fontFamily: "Geist Mono, monospace", fontSize: 11, color: "#666" }}>
+            {formatCountLabel(group.constituents, "ticker")} · {group.eligible} with 20D history
+          </span>
+        </div>
+        <div className="explorer-metrics" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginTop: 16 }}>
+          <MetricCard label="YTD excess" value={metric(group.excessYtd)} sub={group.ytdStartDate ? `from ${formatDateLabel(group.ytdStartDate)} vs IHSG` : "baseline unavailable"} />
+          <MetricCard label="YTD group return" value={metric(group.returnYtd)} sub={`${ytdCoverage} with YTD history`} />
+          <MetricCard label="IHSG YTD" value={metric(group.benchmarkYtd)} sub="same dates and price basis" />
+          <MetricCard label="20D excess" value={metric(group.excess20d)} sub="diagnostic vs IHSG" />
+          <MetricCard label="Breadth" value={metric(group.breadth, "%")} sub={group.breadthDelta === null ? "change unavailable" : `${metric(group.breadthDelta)} vs prior`} />
+          <MetricCard label="Concentration" value={metric(group.concentration, "%")} sub="Top-3 contribution" />
+        </div>
+      </div>
+
+      <SectionHead label="Performance and membership" />
+      <div style={{ ...card, padding: "16px 18px", marginBottom: 12 }}>
+        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 8 }}>
+          <div style={{ fontSize: 13, fontWeight: 500, color: "#171717" }}>Constituent performance</div>
+          <span className="eyebrow-muted">YTD is primary · 20D and 60D are diagnostics</span>
+        </div>
+        {constituents.length > 0 ? (
+          <ConstituentTable constituents={constituents} />
+        ) : (
+          <div style={{ color: "#686e73", fontSize: 12, padding: "12px 0" }}>
+            Constituent rows unavailable in this snapshot. Membership definitions are preserved below.
+          </div>
+        )}
+      </div>
+
+      <div style={{ ...card, padding: "16px 18px", marginBottom: 12 }}>
+        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 8 }}>
+          <div style={{ fontSize: 13, fontWeight: 500, color: "#171717" }}>Contribution and price context</div>
+          <span className="eyebrow-muted">Persisted price history only</span>
+        </div>
+        {constituents.length > 0 && <ContribBars constituents={constituents} />}
+        {pricePoints.length > 0 ? (
+          <div style={{ marginTop: 16 }}>
+            <PriceChart
+              groupName={group.name}
+              points={pricePoints.map((point) => ({ date: point.date, value: point.value }))}
+              benchmarkPoints={pricePoints.filter((point) => point.benchmark !== null).map((point) => ({ date: point.date, value: point.benchmark }))}
+              asOf={data.payload.as_of}
+              source="Persisted snapshot prices"
+              metricLabel="Equal-weight group index · rebased to 100"
+              referenceValue={100}
+              height={260}
+            />
+          </div>
+        ) : (
+          <div style={{ marginTop: 12, color: "#686e73", fontSize: 12 }}>
+            No persisted group price history is available. No synthetic history is shown.
+          </div>
+        )}
+      </div>
+
+      <SectionHead label="Membership evidence" />
+      <div style={{ ...card, overflowX: "auto" }}>
+        {members.length > 0 ? (
+          <table style={{ width: "100%", minWidth: 720, borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ borderBottom: "1px solid #ebebeb" }}>
+                {["Ticker", "Membership", "Confidence", "Source", "Source date"].map((label) => (
+                  <th key={label} style={{ padding: "10px 12px", textAlign: label === "Ticker" || label === "Source" ? "left" : "right", fontFamily: "Geist Mono, monospace", fontSize: 10, fontWeight: 400, color: "#666", textTransform: "uppercase", whiteSpace: "nowrap" }}>{label}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {members.map((member, index) => (
+                <tr key={`${member.ticker}-${member.membership_type}`} style={{ borderBottom: index < members.length - 1 ? "1px solid #ebebeb" : "none", opacity: member.membership_type === "EXCLUDED" ? 0.6 : 1 }}>
+                  <td style={{ padding: "10px 12px", fontFamily: "Geist Mono, monospace", fontSize: 12, fontWeight: 600 }}>
+                    <Link to={`/ticker/${encodeURIComponent(member.ticker)}`} style={{ color: "#171717" }}>{member.ticker}</Link>
+                  </td>
+                  <td style={{ padding: "10px 12px", textAlign: "right", fontSize: 12 }}>{formatEnumLabel(member.membership_type)}</td>
+                  <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "Geist Mono, monospace", fontSize: 12 }}>{Math.round(member.confidence * 100)}%</td>
+                  <td style={{ padding: "10px 12px", fontSize: 12, maxWidth: 360 }}>
+                    {member.source?.startsWith("http") ? <a href={member.source} target="_blank" rel="noreferrer">Official source</a> : member.source || "—"}
+                  </td>
+                  <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "Geist Mono, monospace", fontSize: 11, color: "#666", whiteSpace: "nowrap" }}>{formatDateLabel(member.source_as_of)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div style={{ padding: 22, color: "#686e73", fontSize: 13 }}>
+            Membership list unavailable in this snapshot. The aggregate is preserved without inventing constituent records.
+          </div>
+        )}
+      </div>
+
+      <div style={{ marginTop: 12, color: "#686e73", fontSize: 11, lineHeight: 1.5 }}>
+        Snapshot: {formatSnapshotId(data.payload.snapshot_id, data.payload.as_of)} · As of {formatDateLabel(data.payload.as_of)} · {quantitativeMembers.length} membership records enter quantitative rows; excluded memberships remain visible for audit.
+      </div>
+    </div>
+  );
+}
+
 function ResearchEvidencePanel({
   label,
   category,
@@ -284,7 +467,7 @@ function ResearchEvidencePanel({
   const context = getTavilyCategory(payload, category);
   const status = getTavilyCategoryStatus(payload, category);
   const hasContext = context.records.length > 0;
-  const verdict = hasContext ? "CONTEXT ONLY" : status === "FAILED" ? "FAILED" : "DATA GAP";
+  const verdict = hasContext ? "CONTEXT_ONLY" : status === "FAILED" ? "FAILED" : "DATA_GAP";
   const verdictColor = hasContext ? "#7a5010" : status === "FAILED" ? "#8f2424" : "#7a5010";
   return (
     <div style={{ ...card, padding: "16px 18px", minWidth: 0 }}>
@@ -338,7 +521,7 @@ function ResearchEvidencePanel({
             borderRadius: 4,
           }}
         >
-          {verdict}
+          {formatEnumLabel(verdict)}
         </span>
       </div>
     </div>
@@ -351,14 +534,30 @@ export default function GroupExplorer() {
   const [selected, setSelected] = useState<string>("");
   const sectors = data?.sectors ?? [];
   const constituentsByGroup = data?.constituentsByGroup ?? {};
+  const groupPriceHistory = data?.groupPriceHistory ?? {};
   const dataSources = data?.dataSources ?? { breadthHistory: false, constituents: false, fundamentals: false, foreignFlow: false, trajectory: false };
+  const queryGroup = new URLSearchParams(location.search).get("group") ?? undefined;
+  const queryTaxonomy = normalizeTaxonomyKind(new URLSearchParams(location.search).get("taxonomy"));
   useEffect(() => {
-    if (!selected && sectors.length > 0) {
-      setSelected(findGroupFromLocation(location.state, undefined, sectors));
+    if (sectors.length > 0) {
+      setSelected(findGroupFromLocation(location.state, queryGroup, sectors));
     }
-  }, [sectors, location.state, selected]);
+  }, [sectors, location.state, queryGroup]);
 
   if (!data) return null;
+  if (queryTaxonomy && queryTaxonomy !== "SECTOR") {
+    const taxonomyGroup = Object.values(data.taxonomyGroups).find(
+      (group) => group.taxonomyKind === queryTaxonomy && (!queryGroup || group.id === queryGroup),
+    ) ?? Object.values(data.taxonomyGroups).find((group) => group.taxonomyKind === queryTaxonomy);
+    if (!taxonomyGroup) {
+      return (
+        <div style={{ padding: "36px 40px", maxWidth: 1280, margin: "0 auto" }}>
+          <EmptyState label="GROUP NOT FOUND" title="Taxonomy group is unavailable" body="The selected taxonomy group is not present in the current snapshot." height={220} />
+        </div>
+      );
+    }
+    return <TaxonomyGroupDetail group={taxonomyGroup} data={data} />;
+  }
   if (sectors.length === 0) {
     return (
       <div style={{ padding: "36px 40px", maxWidth: 1280, margin: "0 auto" }}>
@@ -377,13 +576,18 @@ export default function GroupExplorer() {
   const groupBreadthHistory = data.breadthHistory.filter(
     (point) => point.group_id === sector.id,
   );
+  const groupPricePoints = groupPriceHistory[sector.id] ?? [];
+  const manifestEntry = data.payload.manifest.entries[0];
+  const chartSource = manifestEntry?.provider
+    ? `${manifestEntry.provider} snapshot`
+    : "Snapshot data";
   const delta =
     sector.prevBreadth !== undefined && sector.breadth !== null
       ? sector.breadth - sector.prevBreadth
       : undefined;
 
   return (
-    <div style={{ padding: "36px 40px", maxWidth: 1280, margin: "0 auto" }}>
+    <div className="content-shell" style={{ padding: "36px var(--page-gutter)", maxWidth: "var(--content-max)" }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 24 }}>
         <div>
           <div className="eyebrow-muted" style={{ marginBottom: 8 }}>
@@ -427,7 +631,7 @@ export default function GroupExplorer() {
       </div>
 
       <div style={{ ...card, padding: "18px 22px", marginBottom: 20 }}>
-        <div style={{ display: "flex", gap: 6, marginBottom: 10, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 6, marginBottom: 10, flexWrap: "wrap", alignItems: "center" }}>
           <LeadershipChip state={sector.leadership} />
           <DiffusionChip state={sector.diffusion} />
           <span
@@ -443,31 +647,61 @@ export default function GroupExplorer() {
               borderRadius: 4,
             }}
           >
-            {sector.constituents} constituents
+            {sector.eligibleConstituents} eligible / {sector.constituents} total
           </span>
+          <span style={{ fontFamily: "Geist Mono", fontSize: 11, color: "#666666" }}>
+            Leadership state persisted for {sector.persistence} observation{sector.persistence !== 1 ? "s" : ""}
+          </span>
+          {sector.prevLeadership && (
+            <span style={{ fontFamily: "Geist Mono", fontSize: 10, color: "#7a5010", border: "1px solid #ebebeb", padding: "2px 6px", borderRadius: 4 }}>
+              {formatEnumLabel(sector.prevLeadership)} → {formatEnumLabel(sector.leadership)}
+            </span>
+          )}
         </div>
         <p style={{ fontSize: 13, color: "#4d4d4d", lineHeight: 1.6, maxWidth: 720 }}>
           {sector.interpretation}
         </p>
+        <div style={{ marginTop: 10, display: "flex", gap: 16, flexWrap: "wrap", fontSize: 11, color: "#666666", fontFamily: "Geist Mono" }}>
+          <span>YTD Excess <b style={{ color: sector.excessYtd !== null && sector.excessYtd >= 0 ? "#1a6e62" : "#8f2424" }}>{displayMetric(sector.excessYtd)}</b></span>
+          <span>20D Excess <b style={{ color: sector.excess20d !== null && sector.excess20d >= 0 ? "#1a6e62" : "#8f2424" }}>{displayMetric(sector.excess20d)}</b></span>
+          <span>Breadth <b>{displayMetric(sector.breadth)}</b> {delta !== undefined ? <span style={{ color: delta !== null && delta > 0 ? "#1a6e62" : delta !== null && delta < 0 ? "#8f2424" : "#666" }}>({delta === null ? "Δ unavailable" : `${formatPercent(delta)} vs prior observation`})</span> : ""}</span>
+          <span>Top-3 <b>{displayMetric(sector.concentration)}</b></span>
+          {sector.missingConstituents > 0 && (
+            <span style={{ color: "#7a5010" }}>{sector.missingConstituents} constituent{sector.missingConstituents !== 1 ? "s" : ""} missing from the 20D metric</span>
+          )}
+        </div>
+        <div style={{ marginTop: 8, fontSize: 10, color: "#8f8f8f" }}>
+          {sector.diffusion === "UNCONFIRMED" ? "No comparable prior snapshot is available. Current breadth can be shown, but diffusion change cannot yet be classified." : `Diffusion: ${formatEnumLabel(sector.diffusion)}${sector.prevDiffusion ? ` (previous ${formatEnumLabel(sector.prevDiffusion)})` : ""}`}
+        </div>
       </div>
 
-      <div className="explorer-metrics" style={{ display: "flex", gap: 12, marginBottom: 24 }}>
+      <div className="explorer-metrics" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 24 }}>
         <MetricCard
-          label="Relative Leadership"
-          value={displayMetric(sector.excess20d)}
-          sub="20D vs IHSG"
+          label="YTD excess"
+          value={displayMetric(sector.excessYtd)}
+          sub={sector.ytdStartDate ? `from ${formatDateLabel(sector.ytdStartDate)} vs IHSG` : "baseline unavailable"}
           color={
-            sector.excess20d === null
+            sector.excessYtd === null
               ? "#8f8f8f"
-              : sector.excess20d >= 0
+              : sector.excessYtd >= 0
                 ? "#1a6e62"
                 : "#8f2424"
           }
         />
         <MetricCard
+          label="YTD group return"
+          value={displayMetric(sector.returnYtd)}
+          sub={`${sector.ytdEligible}/${sector.constituents} with YTD history`}
+        />
+        <MetricCard
+          label="IHSG YTD"
+          value={displayMetric(sector.benchmarkYtd)}
+          sub="same dates and price basis"
+        />
+        <MetricCard
           label="Breadth"
           value={displayMetric(sector.breadth)}
-          sub={delta != null ? `${delta > 0 ? "+" : ""}${delta.toFixed(1)}pp vs prev` : "change unavailable"}
+          sub={delta != null ? `${formatPercent(delta)} vs prior` : "change unavailable"}
           color={sector.breadth === null ? "#8f8f8f" : "#1a6e62"}
         />
         <MetricCard
@@ -518,17 +752,74 @@ export default function GroupExplorer() {
         </div>
       )}
 
-      <SectionHead label="Constituents" />
+      <SectionHead label="Price context" />
+      {groupPricePoints.length > 0 ? (
+        <div style={{ ...card, padding: "16px 18px", marginBottom: 12 }}>
+          <PriceChart
+            groupName={sector.name}
+            points={groupPricePoints.map((point) => ({
+              date: point.date,
+              value: point.value,
+            }))}
+            benchmarkPoints={groupPricePoints
+              .filter((point) => point.benchmark !== null)
+              .map((point) => ({
+                date: point.date,
+                value: point.benchmark,
+              }))}
+            asOf={data.payload.as_of}
+            source={chartSource}
+            metricLabel="Equal-weight group index · rebased to 100"
+            referenceValue={100}
+            height={300}
+          />
+          <div style={{ marginTop: 10, fontSize: 11, color: "#777777", lineHeight: 1.45 }}>
+            Descriptive equal-weight group performance versus IHSG. This chart is
+            presentation-only and does not change leadership or diffusion signals.
+          </div>
+        </div>
+      ) : (
+        <div style={{ ...card, padding: "16px 18px", marginBottom: 12 }}>
+          <EmptyState
+            label="NO PRICE SERIES"
+            title="Group price history is unavailable"
+            body="The selected snapshot does not emit a safe chart series for this group. No demonstration values are shown."
+            height={140}
+          />
+        </div>
+      )}
+
+      <SectionHead label="Constituents — driver decomposition" />
       {dataSources.constituents && constituents.length > 0 ? (
         <>
           <div style={{ ...card, padding: "16px 18px", marginBottom: 12 }}>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 14 }}>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
               <span style={{ fontSize: 13, fontWeight: 500, color: "#171717" }}>Absolute 20D move contribution</span>
-              <span className="eyebrow-muted">Top-3 absolute move: {displayMetric(sector.concentration)}</span>
+              <span className="eyebrow-muted">Top-3 absolute move: {displayMetric(sector.concentration)} · top-1 capped at 100% · equal-weight convention</span>
             </div>
+            <p style={{ fontSize: 11, color: "#666", lineHeight: 1.5, margin: "0 0 12px" }}>
+              {(() => {
+                const part = constituents.filter((c) => c.participating === true).length;
+                const total = constituents.filter((c) => c.excess20d !== null).length;
+                const conc = sector.concentration ?? 0;
+                if (conc > 60) return `Performance is carried by a few names (${conc}% top-3) — narrow and fragile.`;
+                if (conc > 45) return `Performance is moderately concentrated (${conc}% top-3) — check breadth for confirmation.`;
+                if (part / Math.max(1, total) > 0.6) return `Broad participation: ${part}/${total} outperforming — move is supported by multiple names.`;
+                return `Mixed participation: ${part}/${total} outperforming — internally diverging.`;
+              })()}
+            </p>
             <ContribBars constituents={constituents} />
+            <div style={{ marginTop: 12, display: "flex", gap: 16, fontSize: 11, color: "#666", fontFamily: "Geist Mono", flexWrap: "wrap" }}>
+              <span>Positive contributors: {constituents.filter((c) => c.excess20d !== null && c.excess20d > 0).length}</span>
+              <span>Negative contributors: {constituents.filter((c) => c.excess20d !== null && c.excess20d <= 0).length}</span>
+              <span>Participating: {constituents.filter((c) => c.participating).length}/{constituents.filter((c) => c.excess20d !== null).length}</span>
+            </div>
           </div>
           <ConstituentTable constituents={constituents} />
+          <div style={{ marginTop: 8, fontSize: 10, color: "#8f8f8f", lineHeight: 1.4 }}>
+            Methodology: absolute 20D return sorted descending; top-N shares use the sum of absolute constituent returns. Signed attribution (buy/sell) is separate and undefined when net is unstable.
+            Equal-weight convention; no market-cap weighting.
+          </div>
         </>
       ) : (
         <EmptyState

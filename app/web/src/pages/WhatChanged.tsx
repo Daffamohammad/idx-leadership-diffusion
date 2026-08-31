@@ -22,6 +22,8 @@ import {
 } from "../data/mapGeometry";
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, CartesianGrid } from "recharts";
 import { placeMapLabels } from "../data/mapLabels";
+import { formatDateLabel, formatEnumLabel, formatPercent, formatSnapshotId } from "../data/format";
+import { EvidenceBadge } from "../components/EvidenceModel";
 
 
 function averageBreadthHistory(
@@ -51,7 +53,7 @@ const num = (v: number | null | undefined, suffix = "%") => {
         fontSize: 12,
       }}
     >
-      {unavailable ? "—" : `${v > 0 ? "+" : ""}${v.toFixed(1)}${suffix}`}
+      {unavailable ? "—" : suffix === "%" ? formatPercent(v) : `${v > 0 ? "+" : ""}${v.toFixed(1)}${suffix}`}
     </span>
   );
 };
@@ -62,11 +64,7 @@ const delta = (s: SectorData) =>
     : s.breadth - s.prevBreadth;
 
 function formatAsOf(asOf: string | null | undefined): string {
-  if (!asOf) return "—";
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  const [y, m, d] = asOf.split("-");
-  if (!y || !m || !d) return asOf;
-  return `${Number(d)} ${months[Number(m) - 1] ?? m} ${y}`;
+  return formatDateLabel(asOf);
 }
 
 function MiniMap({
@@ -100,6 +98,24 @@ function MiniMap({
     );
     return cls.classification === "plottable";
   });
+  const classifications = sectors.map((s) =>
+    classifyMapPoint(
+      { ...s, excess20d: s.excess20d, breadth: s.breadth, prevBreadth: s.prevBreadth },
+      plot,
+      domain,
+      hasPriorBreadth,
+      mapMode,
+    ).classification,
+  );
+  const offScaleCount = classifications.filter(
+    (classification) => classification === "off-scale-x" || classification === "off-scale-y",
+  ).length;
+  const missingMetricCount = classifications.filter(
+    (classification) => classification === "missing-metric",
+  ).length;
+  const missingPriorCount = classifications.filter(
+    (classification) => classification === "missing-prior",
+  ).length;
   return (
     <div style={{ background: "#fff", border: "1px solid #dfe2e1", minHeight: 412, position: "relative", overflow: "hidden" }}>
       <div style={{ padding: "17px 20px 0", display: "flex", justifyContent: "space-between" }}>
@@ -134,16 +150,16 @@ function MiniMap({
         <line x1={mapX(0, plot, domain)} x2={mapX(0, plot, domain)} y1={plot.top} y2={plot.top + plot.height} stroke="#b9c0be" />
         <line x1={plot.left} x2={plot.left + plot.width} y1={yAxis} y2={yAxis} stroke="#b9c0be" />
         <text x="60" y="43" fill="#778089" fontSize="10" fontFamily="Geist Mono">
-          {mapMode === "current" ? "WEAK / BROAD" : "IMPROVING"}
+          {mapMode === "current" ? "Weak / broad" : "Improving"}
         </text>
         <text x="570" y="43" fill="#315d87" fontSize="10" fontFamily="Geist Mono">
-          {mapMode === "current" ? "STRONG / BROAD" : "LEADING"}
+          {mapMode === "current" ? "Strong / broad" : "Leading"}
         </text>
         <text x="60" y="278" fill="#778089" fontSize="10" fontFamily="Geist Mono">
-          {mapMode === "current" ? "WEAK / NARROW" : "LAGGING"}
+          {mapMode === "current" ? "Weak / narrow" : "Lagging"}
         </text>
         <text x="560" y="278" fill="#b34e4c" fontSize="10" fontFamily="Geist Mono">
-          {mapMode === "current" ? "STRONG / NARROW" : "WEAKENING"}
+          {mapMode === "current" ? "Strong / narrow" : "Weakening"}
         </text>
         {sectors.map((s) => {
           if (s.excess20d === null) return null;
@@ -161,7 +177,7 @@ function MiniMap({
               key={s.id}
               role="button"
               tabIndex={0}
-              aria-label={`${s.name}: ${s.leadership} leadership, ${s.diffusion} diffusion, 20D excess return ${s.excess20d !== null ? s.excess20d.toFixed(1) : "N/A"}pp${isOffScale ? " (off scale)" : ""}`}
+              aria-label={`${s.name}: ${formatEnumLabel(s.leadership)} leadership, ${formatEnumLabel(s.diffusion)} diffusion, 20D excess return ${formatPercent(s.excess20d)}${isOffScale ? " (off scale)" : ""}`}
               onClick={() => onSelect(s)}
               onKeyDown={(event) => {
                 if (event.key === "Enter" || event.key === " ") {
@@ -172,7 +188,7 @@ function MiniMap({
               className="map-group"
               style={{ cursor: "pointer" }}
             >
-              <title>{`${s.name}: ${s.leadership} / ${s.diffusion}, 20D excess ${s.excess20d !== null ? s.excess20d.toFixed(1) : "N/A"}pp${isOffScale ? " (off scale: value outside domain)" : ""}`}</title>
+              <title>{`${s.name}: ${formatEnumLabel(s.leadership)} / ${formatEnumLabel(s.diffusion)}, 20D excess ${formatPercent(s.excess20d)}${isOffScale ? " (off scale: value outside domain)" : ""}`}</title>
               <circle cx={px} cy={py} r={r} fill="#fff" stroke={c} strokeWidth={1.5} />
               <circle cx={px} cy={py} r={3} fill={c} />
               {isOffScale && (
@@ -209,11 +225,15 @@ function MiniMap({
             </text>
           ));
         })()}
-        {plottable.length < sectors.length && (() => {
-          const offScale = sectors.length - plottable.length;
+        {(offScaleCount > 0 || missingMetricCount > 0 || missingPriorCount > 0) && (() => {
+          const notes = [
+            offScaleCount > 0 ? `${offScaleCount} group(s) off scale — shown at boundary${offScaleCount === 1 ? "" : "s"}` : "",
+            missingMetricCount > 0 ? `${missingMetricCount} group(s) not plotted — missing metric` : "",
+            missingPriorCount > 0 ? `${missingPriorCount} group(s) not plotted — missing comparable prior` : "",
+          ].filter(Boolean).join(" · ");
           return (
             <text x="335" y="318" fill="#8f8f8f" fontSize="9" fontFamily="Geist Mono" textAnchor="middle">
-              {offScale} group(s) off scale — shown at boundary{offScale === 1 ? "" : "s"}
+              {notes}
             </text>
           );
         })()}
@@ -267,9 +287,9 @@ function ShiftFeed({ items, onSelect }: { items: SectorData[]; onSelect: (s: Sec
           <div>
             <div style={{ fontSize: 13, fontWeight: 600 }}>{s.name}</div>
             <div style={{ fontFamily: "Geist Mono", fontSize: 10, color: "#686e73", marginTop: 4 }}>
-              {s.prevLeadership || s.leadership} <span style={{ color: "#f26a3d" }}>→</span> {s.leadership}
+              {formatEnumLabel(s.prevLeadership || s.leadership)} <span style={{ color: "#f26a3d" }}>→</span> {formatEnumLabel(s.leadership)}
               <br />
-              {s.prevDiffusion || s.diffusion} <span style={{ color: "#f26a3d" }}>→</span> {s.diffusion}
+              {formatEnumLabel(s.prevDiffusion || s.diffusion)} <span style={{ color: "#f26a3d" }}>→</span> {formatEnumLabel(s.diffusion)}
             </div>
           </div>
           <div style={{ textAlign: "right", fontFamily: "Geist Mono", fontSize: 10 }}>
@@ -285,7 +305,7 @@ function ShiftFeed({ items, onSelect }: { items: SectorData[]; onSelect: (s: Sec
                       : "#b34e4c",
               }}
             >
-              {breadthChange === null ? "—" : `${breadthChange > 0 ? "+" : ""}${breadthChange.toFixed(1)}pp`}
+              {formatPercent(breadthChange)}
             </span>
           </div>
         </button>
@@ -295,24 +315,28 @@ function ShiftFeed({ items, onSelect }: { items: SectorData[]; onSelect: (s: Sec
   );
 }
 
-function buildMarketRead(sectors: SectorData[]): string {
+function buildMarketRead(sectors: SectorData[], hasComparable: boolean): string {
   if (sectors.length === 0) return "Snapshot contains no groups.";
   const broadening = sectors.filter((s) => s.diffusion === "BROADENING");
   const narrowing = sectors.filter((s) => s.diffusion === "NARROWING");
   const leading = sectors.filter((s) => s.leadership === "LEADING");
-  if (broadening.length === 0 && narrowing.length === 0) {
-    return `Snapshot classifies ${leading.length} group(s) as LEADING; diffusion is STABLE or UNCONFIRMED across the universe.`;
+  if (!hasComparable) {
+    return `Current snapshot has ${leading.length} leading group${leading.length === 1 ? "" : "s"}; diffusion change is unavailable until a compatible prior is available.`;
   }
-  return `Leadership is broadening in ${broadening.length} group(s) and narrowing in ${narrowing.length} group(s); ${leading.length} group(s) are LEADING.`;
+  if (broadening.length === 0 && narrowing.length === 0) {
+    return `The snapshot has ${leading.length} leading group${leading.length === 1 ? "" : "s"}; diffusion change is not confirmed across the universe.`;
+  }
+  return `Leadership is broadening in ${broadening.length} group${broadening.length === 1 ? "" : "s"} and narrowing in ${narrowing.length} group${narrowing.length === 1 ? "" : "s"}; ${leading.length} group${leading.length === 1 ? "" : "s"} are leading.`;
 }
 
-function summaryStats(sectors: SectorData[]): Array<[string, string]> {
+function summaryStats(sectors: SectorData[], hasComparable: boolean): Array<[string, string]> {
+  const unavailableChange = hasComparable ? null : "Unavailable";
   if (sectors.length === 0) {
     return [
       ["IDX leadership", "—"],
       ["Breadth", "—"],
-      ["Broadening groups", "0"],
-      ["Narrowing groups", "0"],
+      ["Broadening groups", unavailableChange ?? "0"],
+      ["Narrowing groups", unavailableChange ?? "0"],
       ["Data coverage", "—"],
     ];
   }
@@ -320,8 +344,8 @@ function summaryStats(sectors: SectorData[]): Array<[string, string]> {
     .map((s) => s.breadth)
     .filter((v): v is number => v !== null && Number.isFinite(v));
   const breadth = breadthValues.length
-    ? Math.round(breadthValues.reduce((a, b) => a + b, 0) / breadthValues.length)
-    : 0;
+    ? `${Math.round(breadthValues.reduce((a, b) => a + b, 0) / breadthValues.length)}%`
+    : "—";
   const broadening = sectors.filter((s) => s.diffusion === "BROADENING").length;
   const narrowing = sectors.filter((s) => s.diffusion === "NARROWING").length;
   const classified = sectors.filter(
@@ -329,11 +353,51 @@ function summaryStats(sectors: SectorData[]): Array<[string, string]> {
   ).length;
   return [
     ["IDX leadership", `${classified}/${sectors.length} classified`],
-    ["Breadth", `${breadth}%`],
-    ["Broadening groups", String(broadening)],
-    ["Narrowing groups", String(narrowing)],
+    ["Breadth", breadth],
+    ["Broadening groups", unavailableChange ?? String(broadening)],
+    ["Narrowing groups", unavailableChange ?? String(narrowing)],
     ["Data coverage", `${sectors.reduce((a, s) => a + s.eligibleConstituents, 0)} eligible`],
   ];
+}
+
+function leadershipCounts(sectors: SectorData[]) {
+  return {
+    LEADING: sectors.filter((s) => s.leadership === "LEADING").length,
+    IMPROVING: sectors.filter((s) => s.leadership === "IMPROVING").length,
+    WEAKENING: sectors.filter((s) => s.leadership === "WEAKENING").length,
+    LAGGING: sectors.filter((s) => s.leadership === "LAGGING").length,
+    UNCONFIRMED: sectors.filter((s) => s.leadership === "UNCONFIRMED").length,
+  };
+}
+
+function diffusionCounts(sectors: SectorData[]) {
+  const broadening = sectors.filter((s) => String(s.diffusion).startsWith("BROADENING")).length;
+  const stable = sectors.filter((s) => s.diffusion === "STABLE").length;
+  const narrowing = sectors.filter((s) => String(s.diffusion).startsWith("NARROWING")).length;
+  const unconfirmed = sectors.filter((s) => s.diffusion === "UNCONFIRMED").length;
+  return { BROADENING: broadening, STABLE: stable, NARROWING: narrowing, UNCONFIRMED: unconfirmed };
+}
+
+function confirmationCounts(sectors: SectorData[]) {
+  // Foreign flow confirmation is DATA_GAP in prototype; surface honest counts
+  const confirming = sectors.filter((s) => s.foreignFlow === "CONFIRMING").length;
+  const against = sectors.filter((s) => s.foreignFlow === "AGAINST").length;
+  const neutral = sectors.filter((s) => s.foreignFlow === "NEUTRAL").length;
+  const gap = sectors.filter((s) => s.foreignFlow === "DATA_GAP").length;
+  return { CONFIRMING: confirming, AGAINST: against, NEUTRAL: neutral, GAP: gap };
+}
+
+function categorizeChanges(sectors: SectorData[]) {
+  const newLeaders = sectors.filter((s) => s.prevLeadership && s.prevLeadership !== "LEADING" && s.leadership === "LEADING");
+  const lostLeaders = sectors.filter((s) => s.prevLeadership === "LEADING" && s.leadership !== "LEADING");
+  const improvingToLeading = sectors.filter((s) => s.prevLeadership === "IMPROVING" && s.leadership === "LEADING");
+  const leadingToWeakening = sectors.filter((s) => s.prevLeadership === "LEADING" && s.leadership === "WEAKENING");
+  const withDelta = sectors.filter((s) => delta(s) !== null) as Array<SectorData & { breadth: number }>;
+  const fastestExpansion = [...withDelta].sort((a,b) => (delta(b) ?? -Infinity) - (delta(a) ?? -Infinity)).slice(0,3);
+  const fastestContraction = [...withDelta].sort((a,b) => (delta(a) ?? Infinity) - (delta(b) ?? Infinity)).slice(0,3);
+  const withConc = sectors.filter((s) => s.concentration !== null).sort((a,b) => (b.concentration ?? 0) - (a.concentration ?? 0));
+  const highConcentration = withConc.slice(0,3);
+  return { newLeaders, lostLeaders, improvingToLeading, leadingToWeakening, fastestExpansion, fastestContraction, highConcentration };
 }
 
 function ConstituentCoverage({
@@ -367,7 +431,7 @@ function ConstituentCoverage({
           >
             <span style={{ fontWeight: 600 }}>{sector.name}</span>
             <span className="eyebrow-muted">
-              {participating}/{available} outperforming
+              {available > 0 ? `${participating}/${available} outperforming` : "—"}
             </span>
           </div>
         );
@@ -406,20 +470,28 @@ export default function WhatChanged() {
     [sort, sectors],
   );
   if (!data) return null;
-  const select = (s: SectorData) => navigate("/explorer", { state: { sectorId: s.id } });
+  const select = (s: SectorData) => navigate(`/explorer?taxonomy=SECTOR&group=${encodeURIComponent(s.id)}`);
 
   const asOf = formatAsOf(payload?.as_of);
-  const marketRead = buildMarketRead(sectors);
-  const stats = summaryStats(sectors);
+  const hasComparable = dataSources.trajectory;
+  const marketRead = buildMarketRead(sectors, hasComparable);
+  const stats = summaryStats(sectors, hasComparable);
+  const leadCounts = leadershipCounts(sectors);
+  const diffCounts = diffusionCounts(sectors);
+  const confCounts = confirmationCounts(sectors);
+  const changes = categorizeChanges(sectors);
 
   return (
-    <div style={{ maxWidth: 1480, margin: "auto", padding: "28px 32px 64px" }}>
+    <div className="content-shell-wide" style={{ maxWidth: "var(--content-wide-max)", padding: "28px var(--page-gutter) 64px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "end", marginBottom: 16 }}>
         <div>
-          <div className="eyebrow-muted">Overview / Indonesian Equity Market Intelligence</div>
-          <h1 style={{ fontSize: 30, letterSpacing: "-.045em", margin: "5px 0 0" }}>Market Intelligence</h1>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <div className="eyebrow-muted">Indonesian Equities · Market Intelligence</div>
+            <EvidenceBadge kind="SNAPSHOT" compact />
+          </div>
+          <h1 style={{ fontSize: 30, letterSpacing: "-.045em", margin: "5px 0 0" }}>{hasComparable ? "What changed" : "Current snapshot"}</h1>
         </div>
-        <span className="eyebrow-muted">EOD research / {asOf}</span>
+        <span className="eyebrow-muted">EOD research / {asOf} · {hasComparable ? "comparable prior available" : "change comparison unavailable"}</span>
       </div>
       <section
         style={{
@@ -442,6 +514,11 @@ export default function WhatChanged() {
         >
           {marketRead}
         </div>
+        {!hasComparable && (
+          <div style={{ margin: "0 0 20px", padding: "10px 12px", border: "1px solid #ffffff33", color: "#f6d4b9", fontSize: 12, lineHeight: 1.5 }}>
+            Change comparison unavailable. This view reports current levels only until a second compatible snapshot is persisted.
+          </div>
+        )}
         <div className="market-read-stats" style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", borderTop: "1px solid #ffffff22" }}>
           {stats.map(([l, v]) => (
             <div key={l} style={{ padding: "12px 0 15px", borderRight: "1px solid #ffffff18" }}>
@@ -450,6 +527,80 @@ export default function WhatChanged() {
             </div>
           ))}
         </div>
+      </section>
+      {/* Compact market-level summary strips — master §8 */}
+      <section className="summary-strips" style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 12, marginBottom: 18 }}>
+        <div style={{ background: "#faf9f6", border: "1px solid #dfe2e1", padding: "12px 14px" }}>
+          <div className="eyebrow-muted" style={{ marginBottom: 8 }}>Leadership states</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 6, fontFamily: "Geist Mono", fontSize: 11 }}>
+            <span>Leading <b>{leadCounts.LEADING}</b></span>
+            <span>Improving <b>{leadCounts.IMPROVING}</b></span>
+            <span>Weakening <b>{leadCounts.WEAKENING}</b></span>
+            <span>Lagging <b>{leadCounts.LAGGING}</b></span>
+            <span style={{ gridColumn: "1 / -1", color: "#686e73" }}>Unconfirmed <b>{leadCounts.UNCONFIRMED}</b></span>
+          </div>
+        </div>
+        <div style={{ background: "#faf9f6", border: "1px solid #dfe2e1", padding: "12px 14px" }}>
+          <div className="eyebrow-muted" style={{ marginBottom: 8 }}>Diffusion</div>
+          {hasComparable ? (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 6, fontFamily: "Geist Mono", fontSize: 11 }}>
+              <span>Broadening <b>{diffCounts.BROADENING}</b></span>
+              <span>Stable <b>{diffCounts.STABLE}</b></span>
+              <span>Narrowing <b>{diffCounts.NARROWING}</b></span>
+              <span>Unconfirmed <b>{diffCounts.UNCONFIRMED}</b></span>
+            </div>
+          ) : (
+            <div style={{ fontSize: 11, lineHeight: 1.45, color: "#686e73" }}>
+              Current diffusion state is unconfirmed for {diffCounts.UNCONFIRMED} groups. A compatible prior is required to measure broadening or narrowing.
+            </div>
+          )}
+          {!hasComparable && <div style={{ marginTop: 6, fontSize: 10, color: "#7a5010" }}>Diffusion change unavailable without comparable prior</div>}
+        </div>
+        <div style={{ background: "#faf9f6", border: "1px solid #dfe2e1", padding: "12px 14px" }}>
+          <div className="eyebrow-muted" style={{ marginBottom: 8 }}>Confirmation</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 6, fontFamily: "Geist Mono", fontSize: 11 }}>
+            <span>Confirming <b>{confCounts.CONFIRMING}</b></span>
+            <span>Against <b>{confCounts.AGAINST}</b></span>
+            <span>Neutral <b>{confCounts.NEUTRAL}</b></span>
+            <span style={{ color: "#7a5010" }}>Data gap <b>{confCounts.GAP}</b></span>
+          </div>
+          <div style={{ marginTop: 6, fontSize: 10, color: "#7a5010" }}>Foreign flow: sample only, not full universe</div>
+        </div>
+      </section>
+      {/* WHAT CHANGED categorical digest */}
+      <section style={{ background: "#fff", border: "1px solid #dfe2e1", padding: "16px 18px", marginBottom: 22 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
+          <div className="eyebrow-muted">{hasComparable ? "What changed since prior snapshot" : "What is available now"}</div>
+          <span className="eyebrow-muted">{hasComparable ? `vs ${formatSnapshotId(payload?.previous_snapshot_id)}` : "Current levels only"}</span>
+        </div>
+        {!hasComparable ? (
+          <div className="current-levels-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 16, fontSize: 12, lineHeight: 1.5 }}>
+            <div>
+              <div style={{ fontWeight: 600, marginBottom: 4 }}>You can use this snapshot for</div>
+              <div>Current leadership, breadth, excess return, and concentration levels.</div>
+            </div>
+            <div>
+              <div style={{ fontWeight: 600, marginBottom: 4 }}>Still unavailable</div>
+              <div>No comparable change set available. Broadening, narrowing, and material change versus a prior snapshot remain unavailable.</div>
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16, fontSize: 12, lineHeight: 1.5 }}>
+            <div>
+              <div style={{ fontWeight: 600, marginBottom: 4 }}>Leadership transitions</div>
+              <div>New leadership: {changes.newLeaders.length ? changes.newLeaders.map((s) => s.name).join(", ") : "—"}</div>
+              <div>Leadership lost: {changes.lostLeaders.length ? changes.lostLeaders.map((s) => s.name).join(", ") : "—"}</div>
+              <div>Improving → Leading: {changes.improvingToLeading.length ? changes.improvingToLeading.map((s) => s.name).join(", ") : "—"}</div>
+              <div>Leading → Weakening: {changes.leadingToWeakening.length ? changes.leadingToWeakening.map((s) => s.name).join(", ") : "—"}</div>
+            </div>
+            <div>
+              <div style={{ fontWeight: 600, marginBottom: 4 }}>Breadth & concentration movers</div>
+              <div>Fastest breadth expansion: {changes.fastestExpansion.length ? changes.fastestExpansion.map((s) => `${s.name} (${formatPercent(delta(s))})`).join(", ") : "—"}</div>
+              <div>Fastest breadth contraction: {changes.fastestContraction.length ? changes.fastestContraction.map((s) => `${s.name} (${formatPercent(delta(s))})`).join(", ") : "—"}</div>
+              <div>Highest concentration: {changes.highConcentration.length ? changes.highConcentration.map((s) => `${s.name} ${s.concentration}%`).join(", ") : "—"}</div>
+            </div>
+          </div>
+        )}
       </section>
       <section
         className="overview-grid"
@@ -532,10 +683,10 @@ export default function WhatChanged() {
                   <td style={{ padding: "10px 8px", textAlign: "right" }}>{num(s.excess60d)}</td>
                   <td style={{ padding: "10px 8px", textAlign: "right", fontFamily: "Geist Mono", fontSize: 12 }}>{s.breadth === null ? "—" : `${s.breadth}%`}</td>
                   <td style={{ padding: "10px 8px", textAlign: "right" }}>
-                    {delta(s) === null ? "—" : num(delta(s)!, "pp")}
+                    {num(delta(s)!)}
                   </td>
                   <td style={{ padding: "10px 8px", textAlign: "right", fontFamily: "Geist Mono", fontSize: 12 }}>{s.concentration === null ? "—" : `${s.concentration}%`}</td>
-                  <td style={{ padding: "10px 8px", textAlign: "right", fontFamily: "Geist Mono", fontSize: 12 }}>{s.persistence}W</td>
+                  <td style={{ padding: "10px 8px", textAlign: "right", fontFamily: "Geist Mono", fontSize: 12 }}>{s.persistence} obs.</td>
                   <td
                     style={{
                       padding: "10px 8px",
@@ -545,7 +696,7 @@ export default function WhatChanged() {
                       color: s.foreignFlow === "CONFIRMING" ? "#178477" : "#686e73",
                     }}
                   >
-                    {s.foreignFlow.replace(/_/g, " ")}
+                    {formatEnumLabel(s.foreignFlow)}
                   </td>
                 </tr>
               ))}
@@ -572,13 +723,7 @@ export default function WhatChanged() {
                 <EmptyState
                   label="NO TIME SERIES"
                   title="Per-group breadth history not emitted by the snapshot writer"
-                  body={
-                    <>
-                      The current snapshot bundle (<code>groups.parquet</code>) records only the latest
-                      breadth value. A per-group weekly history will land once
-                      <code> scripts/build_snapshot.py</code> is extended to retain a rolling window.
-                    </>
-                  }
+                  body="The current snapshot contains only the latest breadth level. A comparable prior snapshot is required before a per-group time series can be shown safely."
                   height={175}
                 />
               )}
@@ -603,7 +748,7 @@ export default function WhatChanged() {
               sectors.slice(0, 5).map((s) => (
                 <div key={s.id} style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid #dfe2e1", padding: "8px 0", fontSize: 12 }}>
                   <span style={{ color: "#686e73" }}>{s.name} leadership</span>
-                  <b style={{ fontFamily: "Geist Mono", fontSize: 10, color: "#315d87" }}>{s.leadership}</b>
+                  <b style={{ fontFamily: "Geist Mono", fontSize: 10, color: "#315d87" }}>{formatEnumLabel(s.leadership)}</b>
                 </div>
               ))
             ) : (

@@ -10,6 +10,7 @@ from idx_leadership.features.relative_strength import (
     align_security_to_benchmark,
     compute_benchmark_returns,
     compute_excess_returns,
+    compute_ytd_excess_returns,
 )
 
 
@@ -72,3 +73,46 @@ def test_compute_excess_returns_end_to_end(prices_df, benchmark_df):
     assert "relative_strength_level" in out.columns
     # Sanity: at least one row should have non-null excess return
     assert out["excess_return_20d"].dropna().shape[0] > 0
+
+
+def test_compute_ytd_uses_last_common_prior_year_session():
+    prices = pd.DataFrame(
+        {
+            "ticker": ["A.JK"] * 3,
+            "date": pd.to_datetime(["2025-12-30", "2026-01-02", "2026-08-28"]),
+            "adjusted_close": [100.0, 105.0, 120.0],
+        }
+    )
+    benchmark = pd.DataFrame(
+        {
+            "date": pd.to_datetime(["2025-12-30", "2026-01-02", "2026-08-28"]),
+            "close": [1000.0, 1010.0, 1100.0],
+        }
+    )
+    result = compute_ytd_excess_returns(
+        prices,
+        benchmark,
+        as_of=date(2026, 8, 28),
+    )
+
+    row = result.iloc[0]
+    assert row["return_ytd"] == pytest.approx(20.0)
+    assert row["benchmark_return_ytd"] == pytest.approx(10.0)
+    assert row["excess_return_ytd"] == pytest.approx(10.0)
+    assert row["return_ytd_start_date"] == date(2025, 12, 30)
+    assert row["return_ytd_end_date"] == date(2026, 8, 28)
+
+
+def test_compute_ytd_returns_empty_when_prior_year_baseline_is_missing():
+    prices = pd.DataFrame(
+        {
+            "ticker": ["A.JK"],
+            "date": pd.to_datetime(["2026-08-28"]),
+            "adjusted_close": [120.0],
+        }
+    )
+    benchmark = pd.DataFrame(
+        {"date": pd.to_datetime(["2026-08-28"]), "close": [1100.0]}
+    )
+    result = compute_ytd_excess_returns(prices, benchmark, as_of=date(2026, 8, 28))
+    assert result.empty

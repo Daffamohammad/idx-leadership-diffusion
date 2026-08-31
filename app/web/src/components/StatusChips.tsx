@@ -1,4 +1,5 @@
 import type { LeadershipState, DiffusionState, DataStatus } from "../data/snapshot";
+import { formatEnumLabel } from "../data/format";
 
 /* Vercel-style chips: hairline ring, mono text, color only on text */
 
@@ -33,8 +34,8 @@ const chipBase: React.CSSProperties = {
   gap: 4,
   fontFamily: 'Geist Mono, ui-monospace, monospace',
   fontWeight: 400,
-  letterSpacing: '0.065em',
-  textTransform: 'uppercase' as const,
+  letterSpacing: '0.02em',
+  textTransform: 'none' as const,
   padding: '2px 7px',
   borderRadius: 4,
   whiteSpace: 'nowrap' as const,
@@ -47,7 +48,7 @@ export function LeadershipChip({ state, small }: { state: LeadershipState; small
   return (
     <span style={{ ...chipBase, fontSize: small ? 10 : 11, color: cfg.color }}>
       <span style={{ width: 5, height: 5, borderRadius: '50%', background: cfg.dot, display: 'inline-block', flexShrink: 0 }} />
-      {state}
+      {formatEnumLabel(state)}
     </span>
   );
 }
@@ -57,7 +58,7 @@ export function DiffusionChip({ state, small }: { state: DiffusionState; small?:
   return (
     <span style={{ ...chipBase, fontSize: small ? 10 : 11, color: cfg.color }}>
       <span style={{ lineHeight: 1, fontSize: small ? 9 : 10 }}>{cfg.symbol}</span>
-      {state}
+      {formatEnumLabel(state)}
     </span>
   );
 }
@@ -67,7 +68,7 @@ export function DataStatusChip({ status }: { status: DataStatus }) {
   return (
     <span style={{ ...chipBase, fontSize: 11, color: cfg.color }}>
       <span style={{ width: 5, height: 5, borderRadius: '50%', background: cfg.dotColor, display: 'inline-block', flexShrink: 0 }} />
-      {status.replace(/_/g, " ")}
+      {formatEnumLabel(status)}
     </span>
   );
 }

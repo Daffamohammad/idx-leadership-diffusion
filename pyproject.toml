@@ -37,6 +37,9 @@ ui = [
     "altair>=5.0",
     "plotly>=5.18",
 ]
+llama = [
+    "llama-cloud>=2.8",
+]
 dev = [
     "pytest>=7.4",
     "pytest-cov>=4.1",

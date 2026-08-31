@@ -1,0 +1,69 @@
+{
+  "schema_version": "foreign-flow-discovery-v2",
+  "status": "READY_WITH_GAPS",
+  "discovery_providers": [
+    "tavily",
+    "you"
+  ],
+  "source_policy": [
+    "Prefer the direct first-party IDX release page for structured market-level data.",
+    "Use a deterministic parser and reconciliation checks before promoting a release into the product.",
+    "Use secondary publications only as explicitly labelled sample evidence.",
+    "Search agents are discovery-only; never convert search context into a numeric metric."
+  ],
+  "queries": [
+    {
+      "provider": "tavily",
+      "query": "IDX Indonesia daily foreign investor net buy net sell stock ticker data API",
+      "purpose": "Find official daily or market-level flow publications."
+    },
+    {
+      "provider": "tavily",
+      "query": "Indonesia daily foreign flow per stock net buy net sell BBCA BBRI IDX",
+      "purpose": "Find a dated per-company sample when a structured first-party endpoint is unavailable."
+    },
+    {
+      "provider": "you",
+      "query": "Indonesia IDX foreign investor net buy net sell official market data",
+      "purpose": "Cross-check first-party IDX/OJK/KSEI discovery candidates."
+    }
+  ],
+  "sources": [
+    {
+      "url": "https://www.idx.co.id/en/market-data/statistical-reports/digital-statistic/monthly/equity-trading-by-investor/total-trading-by-investor-s-type-and-net-purchase-by-foreigners",
+      "publisher": "Indonesia Stock Exchange",
+      "role": "first_party_discovery_candidate",
+      "quantitative_use": false,
+      "note": "Official discovery candidate retained for provenance; the product uses the Indonesian direct release below for the validated July 2026 table."
+    },
+    {
+      "url": "https://www.idx.co.id/id/data-pasar/laporan-statistik/digital-statistic/monthly/equity-trading-by-investor/table-daily-trading-by-type-of-investor?filter=eyJ5ZWFyIjoiMjAyNiIsIm1vbnRoIjoiNyIsInF1YXJ0ZXIiOjAsInR5cGUiOiJtb250aGx5In0%3D",
+      "publisher": "Indonesia Stock Exchange",
+      "role": "first_party_structured_release",
+      "quantitative_use": true,
+      "period": "2026-07",
+      "format": "rendered_html_tables",
+      "parser": "idx_monthly_investor_html",
+      "observed_rows": 23,
+      "note": "Official July 2026 release with 23 trading-day rows and a Total row. Foreign-to-domestic and domestic-to-foreign columns are reconciled into market-level net foreign flow; no per-ticker ownership flow is implied."
+    },
+    {
+      "url": "https://www.idnfinancials.com/news/67352/foreign-trading-records-net-buy-bbca-leads-top-buys",
+      "publisher": "IDNFinancials",
+      "role": "dated_market_and_company_sample",
+      "quantitative_use": true,
+      "as_of": "2026-08-12",
+      "note": "Published market totals and top net-buy/net-sell rows are manually normalized in foreign_flow_sample.csv."
+    },
+    {
+      "url": "https://www.idnfinancials.com/news/67999/foreign-trading-is-a-net-sell-bbri-top-sell-idr-274-billion",
+      "publisher": "IDNFinancials",
+      "role": "dated_market_and_company_sample",
+      "quantitative_use": true,
+      "as_of": "2026-08-27",
+      "note": "Published regular-market totals and top net-buy/net-sell rows are manually normalized in foreign_flow_sample.csv."
+    }
+  ],
+  "not_found": "No first-party per-ticker or per-group ownership-flow feed suitable for full-universe confirmation was established. A first-party market-level monthly release was found and integrated separately.",
+  "calculation_boundary": "The official IDX release is parsed only after table/date/total reconciliation; the bounded company sample remains separate. Search summaries and qualitative sidecars remain non-quantitative."
+}
