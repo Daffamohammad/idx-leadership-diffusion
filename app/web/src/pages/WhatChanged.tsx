@@ -384,7 +384,7 @@ function confirmationCounts(sectors: SectorData[]) {
   const against = sectors.filter((s) => s.foreignFlow === "AGAINST").length;
   const neutral = sectors.filter((s) => s.foreignFlow === "NEUTRAL").length;
   const gap = sectors.filter((s) => s.foreignFlow === "DATA_GAP").length;
-  return { CONFIRMING: confirming, AGAINST: against, NEUTRAL: neutral, GAP: gap };
+  return { CONFIRMING: confirming, AGAINST: against, NEUTRAL: neutral, DATA_GAP: gap };
 }
 
 function categorizeChanges(sectors: SectorData[]) {
@@ -562,7 +562,7 @@ export default function WhatChanged() {
             <span>Confirming <b>{confCounts.CONFIRMING}</b></span>
             <span>Against <b>{confCounts.AGAINST}</b></span>
             <span>Neutral <b>{confCounts.NEUTRAL}</b></span>
-            <span style={{ color: "#7a5010" }}>Data gap <b>{confCounts.GAP}</b></span>
+            <span style={{ color: "#7a5010" }}>Data gap <b>{confCounts.DATA_GAP}</b></span>
           </div>
           <div style={{ marginTop: 6, fontSize: 10, color: "#7a5010" }}>Foreign flow: sample only, not full universe</div>
         </div>

@@ -18,6 +18,15 @@ from ..utils.dates import asof_resolve
 _log = get_logger(__name__)
 
 
+def _is_finite(v: Any) -> bool:
+    import math
+
+    try:
+        return math.isfinite(float(v))
+    except (TypeError, ValueError):
+        return False
+
+
 @dataclass
 class QualityReport:
     status: DataQualityStatus
@@ -88,9 +97,14 @@ def assess_quality(
             issues.append(f"duplicate_rows={dupes}")
 
     # Invalid prices
+    # Coerce to numeric first so non-numeric strings become NaN instead of
+    # raising TypeError, and treat NaN/inf as invalid (NaN <= 0 is False, so
+    # a plain <= 0 check would miss NaN closes).
     invalid = 0
     if {"adjusted_close", "close"}.issubset(prices.columns):
-        invalid = int(((prices["adjusted_close"] <= 0) | (prices["close"] <= 0)).sum())
+        adj = pd.to_numeric(prices["adjusted_close"], errors="coerce")
+        cls = pd.to_numeric(prices["close"], errors="coerce")
+        invalid = int((((adj <= 0) | (~adj.apply(_is_finite))) | ((cls <= 0) | (~cls.apply(_is_finite)))).sum())
         if invalid:
             issues.append(f"invalid_prices={invalid}")
 

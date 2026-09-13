@@ -73,6 +73,9 @@ class YFinanceProvider(
         self._ticker_meta: dict[str, dict[str, Any]] = {
             row["ticker"]: row for row in self._universe_config.get("universe", [])
         }
+        # Mirrors SectorsProvider.history_diagnostics so the pipeline can
+        # distinguish failed vs empty symbols without provider coupling.
+        self.history_diagnostics: dict[str, Any] = {}
 
     # ---- contract methods ----
 
@@ -111,16 +114,33 @@ class YFinanceProvider(
         self, tickers: list[str], *, start: date, end: date
     ) -> pd.DataFrame:
         if not tickers:
+            self.history_diagnostics = {
+                "requested_symbols": 0,
+                "failed_symbols": [],
+                "empty_symbols": [],
+                "window_capped_to_90_calendar_days": False,
+            }
             return _empty_price_frame()
         frames: list[pd.DataFrame] = []
+        failed_symbols: list[str] = []
+        empty_symbols: list[str] = []
         for tkr in tickers:
             try:
                 df = self._fetch_one(tkr, start=start, end=end)
             except Exception as e:  # noqa: BLE001
                 _log.warning("yfinance_fetch_failed ticker=%s err=%s", tkr, e)
+                failed_symbols.append(str(tkr).upper())
                 continue
-            if not df.empty:
-                frames.append(df)
+            if df.empty:
+                empty_symbols.append(str(tkr).upper())
+                continue
+            frames.append(df)
+        self.history_diagnostics = {
+            "requested_symbols": len(tickers),
+            "failed_symbols": failed_symbols,
+            "empty_symbols": empty_symbols,
+            "window_capped_to_90_calendar_days": False,
+        }
         if not frames:
             return _empty_price_frame()
         return pd.concat(frames, ignore_index=True)

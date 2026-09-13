@@ -22,7 +22,7 @@ import pandas as pd
 
 from ..models import ProviderMode, ProviderName, SecurityMasterEntry
 from ..utils import get_logger
-from ..utils.errors import CreditBudgetExceeded, ProviderError
+from ..utils.errors import CreditBudgetExceeded, IDXError, ProviderError
 from .capabilities import (
     BenchmarkProvider,
     EventProvider,
@@ -58,6 +58,40 @@ _NON_COMMON_MARKERS = re.compile(
     r"(?:[-_.](?:W|R|RT|RIGHTS?|WARRANTS?)|(?:RIGHTS?|WARRANTS?|ETF|PREFERRED))$",
     re.IGNORECASE,
 )
+
+# Sectors documents a 90-calendar-day maximum for the daily/index-daily
+# endpoints (inclusive difference of 90 days). Longer ranges must be fetched
+# as consecutive windows, never truncated.
+_MAX_HISTORY_WINDOW_DAYS = 90
+_MAX_WINDOW_PLAN_GUARD = 500
+
+
+def _plan_windows(
+    start: date, end: date, *, max_window_days: int = _MAX_HISTORY_WINDOW_DAYS
+) -> list[tuple[date, date]]:
+    """Plan deterministic consecutive ``<=max_window_days`` windows.
+
+    Pure helper: ascending, non-overlapping, gap-free, covering
+    ``[start, end]`` inclusive. Each window satisfies
+    ``(window_end - window_start).days <= max_window_days`` so every
+    per-window ``client.get`` stays within the documented Sectors limit.
+    """
+
+    if end < start:
+        raise ValueError("history end must be on or after start")
+    if max_window_days < 1:
+        raise ValueError("max_window_days must be at least 1")
+    windows: list[tuple[date, date]] = []
+    current = start
+    guard = 0
+    while current <= end:
+        guard += 1
+        if guard > _MAX_WINDOW_PLAN_GUARD:
+            raise ProviderError("Sectors window planning did not terminate")
+        window_end = min(current + timedelta(days=max_window_days), end)
+        windows.append((current, window_end))
+        current = window_end + timedelta(days=1)
+    return windows
 
 
 def _optional_value(value: Any) -> Any:
@@ -134,6 +168,7 @@ class SectorsProvider(
         history_workers: int = 4,
         min_request_interval_seconds: float = 0.0,
         max_estimated_credits: float | None = SectorsClient.DEFAULT_MAX_ESTIMATED_CREDITS,
+        force_cross_section_history: bool = False,
     ) -> None:
         if mode not in {ProviderMode.SECTORS_LIVE, ProviderMode.SECTORS_FIXTURE}:
             raise ProviderError(f"SectorsProvider cannot run in mode {mode.value}")
@@ -144,6 +179,7 @@ class SectorsProvider(
         self.base_url = base_url.rstrip("/")
         self.ledger = ledger or RequestLedger()
         self.mode = mode
+        self.force_cross_section_history = bool(force_cross_section_history)
         self.name = "sectors" if mode is ProviderMode.SECTORS_LIVE else "sectors_fixture"
         self.max_pages = max_pages
         self.history_workers = max(1, int(history_workers))
@@ -374,8 +410,12 @@ class SectorsProvider(
     ) -> pd.DataFrame:
         """Return canonical daily history for the requested securities.
 
-        Live mode uses one bounded 90-calendar-day call per ticker and keeps
-        failed/empty symbols in ``history_diagnostics``. The compatibility
+        Live mode pages ranges longer than 90 calendar days as consecutive
+        ``<=90d`` windows (``_plan_windows``) with per-window failure
+        isolation, then dedupes keep-last + sorts. Failed/empty symbols stay
+        in ``history_diagnostics``. ``window_capped_to_90_calendar_days`` is
+        True only when the intended range was truncated by partial window
+        failure, False on full multi-window success. The compatibility
         cross-section route remains available to the fixture provider and to
         tests that monkeypatch ``get_full_universe_close``.
         """
@@ -385,24 +425,40 @@ class SectorsProvider(
             if max_symbols < 1:
                 raise ValueError("max_symbols must be at least 1")
             canonical = canonical[:max_symbols]
-        if self.mode is ProviderMode.SECTORS_FIXTURE or "get_full_universe_close" in self.__dict__:
+        if self.mode is ProviderMode.SECTORS_FIXTURE or self.force_cross_section_history:
+            return self._get_cross_section_history(canonical, start=start, end=end)
+        if "get_full_universe_close" in self.__dict__:
+            import warnings
+
+            warnings.warn(
+                "SectorsProvider: instance-level get_full_universe_close override "
+                "on a SECTORS_LIVE provider is deprecated; pass "
+                "force_cross_section_history=True instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
             return self._get_cross_section_history(canonical, start=start, end=end)
         if end < start:
             raise ValueError("history end must be on or after start")
 
-        # Sectors documents a 90-day maximum for the daily endpoint. Use the
-        # latest 90 calendar days rather than silently issuing unsupported
-        # requests for longer windows.
-        # A 90-calendar-day inclusive window is the largest documented daily
-        # request and gives the return engine the extra observation required
-        # for a 60-trading-day return when no market holiday intervenes.
-        effective_start = max(start, end - timedelta(days=90))
+        # Sectors documents a 90-day maximum for the daily endpoint. Page
+        # longer ranges as consecutive windows instead of truncating to the
+        # latest 90 calendar days.
+        windows = _plan_windows(start, end)
         self.history_diagnostics = {
             "requested_symbols": len(canonical),
-            "effective_start": effective_start.isoformat(),
             "requested_start": start.isoformat(),
             "end": end.isoformat(),
-            "window_capped_to_90_calendar_days": effective_start != start,
+            "effective_start": start.isoformat(),
+            "windows_requested": len(windows) * len(canonical),
+            "windows_completed": 0,
+            "windows_failed": 0,
+            "distinct_windows_requested": len(windows),
+            "distinct_windows": [
+                [window_start.isoformat(), window_end.isoformat()]
+                for window_start, window_end in windows
+            ],
+            "window_capped_to_90_calendar_days": False,
             "failed_symbols": [],
             "empty_symbols": [],
             "duplicate_symbol_date_rows": 0,
@@ -410,34 +466,71 @@ class SectorsProvider(
         if not canonical:
             return _empty_price_frame()
 
-        def fetch(symbol: str) -> tuple[str, pd.DataFrame, str | None]:
-            try:
-                response = self.client.get(
-                    f"/v2/daily/{symbol}/",
-                    {
-                        "start": effective_start.isoformat(),
-                        "end": end.isoformat(),
-                    },
-                )
-                frame = normalize_daily_history(response.payload, source=self.name)
-                frame = frame[frame["ticker"] == symbol]
-                if frame.empty:
-                    return symbol, frame, "empty"
-                return symbol, frame, None
-            except CreditBudgetExceeded:
-                # A paid-request ceiling is a run-level stop condition. Do not
-                # turn it into a missing-symbol diagnostic and continue with a
-                # partial snapshot after the budget is exhausted.
-                raise
-            except ProviderError as exc:
-                return symbol, _empty_price_frame(), str(exc)[:300]
+        def fetch(
+            symbol: str,
+        ) -> tuple[str, pd.DataFrame, str | None, int, int, str | None]:
+            """Fetch all windows for one symbol with per-window isolation.
+
+            Returns (symbol, combined_frame, terminal_error, completed, failed,
+            first_window_error). ``terminal_error`` is "empty" when every
+            window returned no rows, an error string when every window failed,
+            else None (full or partial success).
+            """
+
+            per_window_frames: list[pd.DataFrame] = []
+            completed = 0
+            failed = 0
+            first_error: str | None = None
+            empty_windows = 0
+            for window_start, window_end in windows:
+                try:
+                    response = self.client.get(
+                        f"/v2/daily/{symbol}/",
+                        {
+                            "start": window_start.isoformat(),
+                            "end": window_end.isoformat(),
+                        },
+                    )
+                    frame = normalize_daily_history(response.payload, source=self.name)
+                    frame = frame[frame["ticker"] == symbol]
+                    if frame.empty:
+                        empty_windows += 1
+                    else:
+                        per_window_frames.append(frame)
+                    completed += 1
+                except CreditBudgetExceeded:
+                    # A paid-request ceiling is a run-level stop condition.
+                    # Do not turn it into a missing-symbol diagnostic and
+                    # continue with a partial snapshot after the budget is
+                    # exhausted.
+                    raise
+                except IDXError as exc:
+                    # Catch ProviderError *and* NormalizationError (sibling
+                    # under IDXError). One window's contract drift must land
+                    # in the window failure count, not abort the symbol or
+                    # the entire history run via future.result().
+                    failed += 1
+                    message = str(exc)[:300]
+                    if first_error is None:
+                        first_error = message
+            if per_window_frames:
+                combined = pd.concat(per_window_frames, ignore_index=True)
+                combined = combined.drop_duplicates(
+                    ["ticker", "date"], keep="last"
+                ).sort_values(["ticker", "date"]).reset_index(drop=True)
+                return symbol, combined, None, completed, failed, first_error
+            if failed == len(windows):
+                return symbol, _empty_price_frame(), first_error or "failed", completed, failed, first_error
+            return symbol, _empty_price_frame(), "empty", completed, failed, first_error
 
         frames: list[pd.DataFrame] = []
         max_workers = min(self.history_workers, len(canonical))
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = [executor.submit(fetch, symbol) for symbol in canonical]
             for index, future in enumerate(as_completed(futures), start=1):
-                symbol, frame, error = future.result()
+                symbol, frame, error, completed, failed, _first_err = future.result()
+                self.history_diagnostics["windows_completed"] += completed
+                self.history_diagnostics["windows_failed"] += failed
                 if error == "empty":
                     self.history_diagnostics["empty_symbols"].append(symbol)
                 elif error is not None:
@@ -449,6 +542,14 @@ class SectorsProvider(
                 if index % 100 == 0 or index == len(canonical):
                     _log.info("sectors_daily_history progress=%s/%s", index, len(canonical))
 
+        # window_capped is True ONLY when the intended range was truncated by
+        # partial window failure (some window calls failed). Full
+        # multi-window success — however many windows were needed — is not
+        # capped.
+        self.history_diagnostics["window_capped_to_90_calendar_days"] = bool(
+            self.history_diagnostics["windows_failed"]
+        )
+
         # Conservative 429 calibration: calculate 429 failures AFTER worker
         # results populate history_diagnostics. If more than 50% of symbols
         # failed with 429, probe one to check if the rate limit persists.
@@ -458,12 +559,13 @@ class SectorsProvider(
         ]
         if rate_limit_failures and len(rate_limit_failures) > len(canonical) // 2:
             probe_symbol = canonical[0]
+            probe_start, probe_end = windows[0]
             try:
                 probe_response = self.client.get(
                     f"/v2/daily/{probe_symbol}/",
                     {
-                        "start": effective_start.isoformat(),
-                        "end": end.isoformat(),
+                        "start": probe_start.isoformat(),
+                        "end": probe_end.isoformat(),
                     },
                 )
                 # If the probe still returns 429, stop and report BLOCKED
@@ -525,9 +627,8 @@ class SectorsProvider(
         else:
             native_code = benchmark_key.lower().removesuffix(".jk")
 
-        if self.mode is ProviderMode.SECTORS_FIXTURE or "get_full_universe_close" in self.__dict__:
-            # Fixture compatibility: the synthetic route models IHSG as a
-            # cross-section row, while live Sectors has a native index route.
+        if self.mode is ProviderMode.SECTORS_FIXTURE or self.force_cross_section_history:
+            # Fixture compatibility path (see history method for deprecation note).
             dates = pd.bdate_range(start=start, end=end)
             rows: list[dict[str, Any]] = []
             for timestamp in dates:
@@ -556,14 +657,100 @@ class SectorsProvider(
                 ],
             )
 
-        effective_start = max(start, end - timedelta(days=90))
-        response = self.client.get(
-            f"/v2/index-daily/{native_code}/",
-            {"start": effective_start.isoformat(), "end": end.isoformat()},
+        if "get_full_universe_close" in self.__dict__:
+            import warnings
+
+            warnings.warn(
+                "SectorsProvider: instance-level get_full_universe_close override "
+                "for benchmark history is deprecated; pass "
+                "force_cross_section_history=True instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            dates = pd.bdate_range(start=start, end=end)
+            rows: list[dict[str, Any]] = []
+            for timestamp in dates:
+                frame = self.get_full_universe_close(timestamp.date())
+                row = frame[frame["ticker"] == "IHSG.JK"]
+                if not row.empty:
+                    rows.append(
+                        {
+                            "benchmark_id": benchmark_id,
+                            "index_code": "IHSG",
+                            "date": timestamp.date(),
+                            "close": float(row.iloc[0]["close"]),
+                            "price_basis": "close",
+                            "source": self.name,
+                        }
+                    )
+            return pd.DataFrame(
+                rows,
+                columns=[
+                    "benchmark_id",
+                    "index_code",
+                    "date",
+                    "close",
+                    "price_basis",
+                    "source",
+                ],
+            )
+
+        if end < start:
+            raise ValueError("history end must be on or after start")
+        windows = _plan_windows(start, end)
+        self.benchmark_diagnostics = {
+            "benchmark_id": benchmark_id,
+            "requested_start": start.isoformat(),
+            "end": end.isoformat(),
+            "windows_requested": len(windows),
+            "windows_completed": 0,
+            "windows_failed": 0,
+            "distinct_windows": [
+                [window_start.isoformat(), window_end.isoformat()]
+                for window_start, window_end in windows
+            ],
+            "window_capped_to_90_calendar_days": False,
+        }
+        frames: list[pd.DataFrame] = []
+        first_error: str | None = None
+        for window_start, window_end in windows:
+            try:
+                response = self.client.get(
+                    f"/v2/index-daily/{native_code}/",
+                    {
+                        "start": window_start.isoformat(),
+                        "end": window_end.isoformat(),
+                    },
+                )
+                window_frame = normalize_index_daily(
+                    response.payload, benchmark_id=benchmark_id, source=self.name
+                )
+                if not window_frame.empty:
+                    frames.append(window_frame)
+                self.benchmark_diagnostics["windows_completed"] += 1
+            except CreditBudgetExceeded:
+                raise
+            except IDXError as exc:
+                # Per-window failure isolation: keep successful windows and
+                # mark the intended range as truncated instead of aborting.
+                self.benchmark_diagnostics["windows_failed"] += 1
+                if first_error is None:
+                    first_error = str(exc)[:300]
+        self.benchmark_diagnostics["window_capped_to_90_calendar_days"] = bool(
+            self.benchmark_diagnostics["windows_failed"]
         )
-        frame = normalize_index_daily(
-            response.payload, benchmark_id=benchmark_id, source=self.name
-        )
+        if first_error is not None:
+            self.benchmark_diagnostics["first_error"] = first_error
+        if not frames:
+            if self.benchmark_diagnostics["windows_failed"]:
+                raise ProviderError(
+                    f"Sectors benchmark history unavailable for {benchmark_id}: "
+                    f"{first_error or 'all windows failed'}"
+                )
+            return pd.DataFrame(
+                columns=["benchmark_id", "index_code", "date", "close", "price_basis", "source"]
+            )
+        frame = pd.concat(frames, ignore_index=True)
         if frame.empty:
             return frame
         frame = frame.drop_duplicates("date", keep="last").sort_values("date")
@@ -675,4 +862,4 @@ def _empty_price_frame() -> pd.DataFrame:
     )
 
 
-__all__ = ["SectorsProvider"]
+__all__ = ["SectorsProvider", "_plan_windows"]

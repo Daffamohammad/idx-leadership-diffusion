@@ -35,6 +35,8 @@ import sys
 import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
+
+from idx_leadership.utils import project_root
 from typing import Any, Mapping, Sequence
 
 import pandas as pd
@@ -727,11 +729,43 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Optional list of expected as_of dates; missing dates are surfaced.",
     )
+    parser.add_argument(
+        "--allow-outside-root",
+        action="store_true",
+        help="Acknowledge writing outputs outside the project root.",
+    )
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    # Root containment for --out/--output (export pattern): outputs must
+    # stay within the project root — or the system temp dir used by
+    # isolated/pytest harnesses — unless --allow-outside-root is set.
+    _project_root = project_root()
+    _temp_root = Path(tempfile.gettempdir()).resolve()
+    for _label, _value in (("--output", args.output),):
+        if _value:
+            _resolved = Path(_value).resolve()
+            _inside_root = True
+            try:
+                _resolved.relative_to(_project_root.resolve())
+            except ValueError:
+                _inside_root = False
+            _inside_temp = True
+            try:
+                _resolved.relative_to(_temp_root)
+            except ValueError:
+                _inside_temp = False
+            if not (_inside_root or _inside_temp) and not getattr(
+                args, "allow_outside_root", False
+            ):
+                print(
+                    f"refusing {_label} outside {_project_root} without --allow-outside-root",
+                    file=sys.stderr,
+                )
+                return 2
+
     security_master = None if args.no_security_master else args.security_master
     try:
         result = calculate_foreign_flow_sample(

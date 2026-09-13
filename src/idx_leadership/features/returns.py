@@ -107,8 +107,8 @@ def forward_fill(
     """Forward-fill missing values for each ticker.
 
     Only valid for value columns. Does NOT forward-fill across tickers.
-    Uses linear interpolation between observed dates first, then forward-fills
-    the leading edge (controlled by caller).
+    Uses forward-fill then backward-fill within each ticker group; no
+    interpolation is performed. Callers control the leading edge.
     """
     if df.empty:
         return df
@@ -142,7 +142,10 @@ def asof_close(
 
 
 def _pct_change(start: float, end: float) -> float:
-    if start == 0 or pd.isna(start) or pd.isna(end):
+    # Zero prices are not valid return denominators: a zero start produces
+    # division by zero, and a zero end is an economically impossible price
+    # that must not be reported as -100%. Both are NaN.
+    if start == 0 or end == 0 or pd.isna(start) or pd.isna(end):
         return float("nan")
     return (end / start - 1.0) * 100.0
 

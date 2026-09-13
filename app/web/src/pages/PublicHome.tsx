@@ -768,7 +768,7 @@ export default function PublicHome() {
             }}
           >
             <div style={{ background: "#fafaf8", padding: 28 }}>
-              <div className="eyebrow-muted">Broad leadership</div>
+              <div className="eyebrow-muted">Illustrative · sample values — Broad leadership</div>
               <div style={{ fontSize: 28, margin: "10px 0" }}>
                 +6.8%{" "}
                 <span style={{ fontSize: 13, color: "#686e73" }}>20D excess</span>
@@ -789,7 +789,7 @@ export default function PublicHome() {
             </div>
             <div style={{ background: "#121619", color: "white", padding: 28 }}>
               <div className="eyebrow-muted" style={{ color: "#a8afb2" }}>
-                Narrow leadership
+                Illustrative · sample values — Narrow leadership
               </div>
               <div style={{ fontSize: 28, margin: "10px 0" }}>
                 +8.1%{" "}

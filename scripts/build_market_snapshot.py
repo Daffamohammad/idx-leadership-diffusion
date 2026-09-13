@@ -18,6 +18,7 @@ import json
 import math
 import os
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -51,7 +52,7 @@ from idx_leadership.providers.tavily_client import TavilyClient, TavilyError
 from idx_leadership.pipeline import resolve_effective_price_basis
 from idx_leadership.signals.change_digest import build_change_digest
 from idx_leadership.signals.transitions import build_transition_events
-from idx_leadership.utils import data_root, get_logger, load_project_env, load_yaml
+from idx_leadership.utils import data_root, get_logger, load_project_env, load_yaml, project_root
 import hashlib
 from idx_leadership.utils.errors import ProviderError
 from idx_leadership.data.comparability import check_snapshot_compatibility
@@ -160,11 +161,43 @@ def build_parser() -> argparse.ArgumentParser:
         default=1,
         help="Maximum basic Tavily context queries (default 1).",
     )
+    parser.add_argument(
+        "--allow-outside-root",
+        action="store_true",
+        help="Acknowledge writing outputs outside the project root.",
+    )
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    # Root containment for --out/--output (export pattern): outputs must
+    # stay within the project root — or the system temp dir used by
+    # isolated/pytest harnesses — unless --allow-outside-root is set.
+    _project_root = project_root()
+    _temp_root = Path(tempfile.gettempdir()).resolve()
+    for _label, _value in (("--out-dir", args.out_dir),):
+        if _value:
+            _resolved = Path(_value).resolve()
+            _inside_root = True
+            try:
+                _resolved.relative_to(_project_root.resolve())
+            except ValueError:
+                _inside_root = False
+            _inside_temp = True
+            try:
+                _resolved.relative_to(_temp_root)
+            except ValueError:
+                _inside_temp = False
+            if not (_inside_root or _inside_temp) and not getattr(
+                args, "allow_outside_root", False
+            ):
+                print(
+                    f"refusing {_label} outside {_project_root} without --allow-outside-root",
+                    file=sys.stderr,
+                )
+                return 2
+
     load_project_env()
     validation_error = _validate_args(args)
     if validation_error:
@@ -1943,7 +1976,8 @@ def _credit_audit(entries: list[dict[str, Any]], provider: SectorsProvider) -> d
     )
     return {
         "provider_mode": ProviderMode.SECTORS_LIVE.value,
-        "ledger_path": str(provider.ledger.path),
+        # Filename only: absolute machine paths must never ship in artifacts.
+        "ledger_path": Path(provider.ledger.path).name,
         "ledger_entries": len(entries),
         "requests": sum(int(item["requests"]) for item in by_endpoint.values()),
         "cache_hits": sum(int(item["cache_hits"]) for item in by_endpoint.values()),

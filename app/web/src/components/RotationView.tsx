@@ -184,6 +184,9 @@ export default function RotationView() {
           </div>
           <h1 style={{ margin: "7px 0 8px", fontSize: 31, letterSpacing: "-.045em", fontWeight: 500 }}>Market rotation</h1>
           <p style={{ maxWidth: 760, margin: 0, color: "#686e73", lineHeight: 1.55 }}>
+            YTD-strength rotation lens. For the 20D excess × breadth-change lens see What Changed.
+          </p>
+          <p style={{ maxWidth: 760, margin: "6px 0 0", color: "#686e73", lineHeight: 1.55 }}>
             {isDiagnostic
               ? "The YTD baseline is unavailable in this snapshot. The map below shows available 20D excess return and 20D minus 60D momentum as diagnostics only; no rotation phase is assigned."
               : "Relative strength uses YTD excess return versus IHSG. Relative momentum is 20D excess return minus 60D excess return. Null values remain visible as Data gap and are not plotted."}

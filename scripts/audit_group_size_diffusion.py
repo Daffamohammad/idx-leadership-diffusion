@@ -12,6 +12,8 @@ auditor can re-run on every methodology change.
 from __future__ import annotations
 
 import argparse
+import sys
+import tempfile
 import json
 from pathlib import Path
 from typing import Any
@@ -21,6 +23,7 @@ from idx_leadership.signals.diffusion_v2 import (
     classify_diffusion_v2,
     constituent_floor,
 )
+from idx_leadership.utils import project_root
 
 
 GROUP_SIZES = (3, 4, 5, 7, 10, 20, 40)
@@ -89,11 +92,43 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--out", default=None)
     parser.add_argument("--fraction", type=float, default=0.10)
     parser.add_argument("--minimum-constituents", type=int, default=2)
+    parser.add_argument(
+        "--allow-outside-root",
+        action="store_true",
+        help="Acknowledge writing outputs outside the project root.",
+    )
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    # Root containment for --out/--output (export pattern): outputs must
+    # stay within the project root — or the system temp dir used by
+    # isolated/pytest harnesses — unless --allow-outside-root is set.
+    _project_root = project_root()
+    _temp_root = Path(tempfile.gettempdir()).resolve()
+    for _label, _value in (("--out", args.out),):
+        if _value:
+            _resolved = Path(_value).resolve()
+            _inside_root = True
+            try:
+                _resolved.relative_to(_project_root.resolve())
+            except ValueError:
+                _inside_root = False
+            _inside_temp = True
+            try:
+                _resolved.relative_to(_temp_root)
+            except ValueError:
+                _inside_temp = False
+            if not (_inside_root or _inside_temp) and not getattr(
+                args, "allow_outside_root", False
+            ):
+                print(
+                    f"refusing {_label} outside {_project_root} without --allow-outside-root",
+                    file=sys.stderr,
+                )
+                return 2
+
     grid = diffusion_grid(
         fraction=args.fraction,
         minimum_constituents=args.minimum_constituents,

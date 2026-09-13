@@ -53,6 +53,15 @@ def classify_diffusion_v2(
     """
     if not eligible or breadth_current is None or breadth_previous is None:
         return DiffusionStateV2.UNCONFIRMED
+    try:
+        import math
+
+        if not math.isfinite(float(breadth_current)) or not math.isfinite(
+            float(breadth_previous)
+        ):
+            return DiffusionStateV2.UNCONFIRMED
+    except (TypeError, ValueError):
+        return DiffusionStateV2.UNCONFIRMED
     delta_pp = float(breadth_current) - float(breadth_previous)
     floor = constituent_floor(group_size, fraction=fraction, minimum=minimum_constituents)
     # The breadth delta in pp must imply at least `floor` constituents

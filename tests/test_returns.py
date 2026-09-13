@@ -153,3 +153,33 @@ def test_returns_for_universe_with_fixture(prices_df):
     # 60d return should be computable for tickers with >= 61 rows
     r60 = out["return_60d"].dropna()
     assert r60.shape[0] > 0
+
+
+def test_zero_end_price_does_not_produce_fake_minus_100():
+    """P0 regression: a zero close must not be reported as -100% return.
+
+    ``_pct_change`` previously only guarded ``start == 0``; a zero end price
+    produced a division-by-zero result of -100.0, which is an economically
+    impossible return and would corrupt every downstream metric.
+    """
+    import math
+    from idx_leadership.features.returns import _pct_change
+
+    assert math.isnan(_pct_change(100.0, 0.0))
+    assert math.isnan(_pct_change(0.0, 100.0))
+    assert _pct_change(100.0, 100.0) == 0.0
+
+    prices = pd.DataFrame(
+        {
+            "ticker": ["X", "X", "X"],
+            "date": [date(2026, 1, 1), date(2026, 1, 2), date(2026, 1, 3)],
+            "adjusted_close": [100.0, 50.0, 0.0],
+        }
+    )
+    out = compute_returns(prices, horizons={"1d": 1, "2d": 2})
+    assert not out.empty
+    row = out.iloc[0]
+    assert row["latest_close"] == 50.0
+    # The zero price was dropped by _validate_prices; the valid 1d window
+    # is 100 -> 50 = -50%, which is a real move, not a fake -100%.
+    assert row["return_1d"] == -50.0

@@ -120,9 +120,14 @@ export default function ResearchEvents({
             <div style={{ fontWeight: 600 }}>{event.title}</div>
             <div style={{ fontSize: 13, color: "#202325" }}>{event.summary}</div>
             <div style={{ fontSize: 11, color: "#686e73" }}>
-              <a href={event.sourceUrl} target="_blank" rel="noreferrer">
-                {event.sourceName}
-              </a>
+              {event.sourceUrl.startsWith("http://") ||
+              event.sourceUrl.startsWith("https://") ? (
+                <a href={event.sourceUrl} target="_blank" rel="noopener noreferrer">
+                  {event.sourceName}
+                </a>
+              ) : (
+                <span>{event.sourceName}</span>
+              )}
             </div>
           </li>
         ))}

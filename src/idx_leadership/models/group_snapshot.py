@@ -24,8 +24,14 @@ class ConcentrationMetrics(BaseModel):
     )
     top3_contribution_share: Optional[float] = Field(default=None, ge=0.0, le=1.0)
     top5_contribution_share: Optional[float] = Field(default=None, ge=0.0, le=1.0)
-    top1_signed_share: Optional[float] = None
-    top3_signed_share: Optional[float] = None
+    top1_signed_share: Optional[float] = Field(
+        default=None,
+        description="Signed share of net move attributable to the largest absolute contributor (NOT the largest signed contributor; may be negative).",
+    )
+    top3_signed_share: Optional[float] = Field(
+        default=None,
+        description="Signed share of net move attributable to the three largest absolute contributors.",
+    )
     hhi_contribution: Optional[float] = Field(default=None, ge=0.0, le=1.0)
     contributor_count: int = Field(default=0, ge=0)
     convention: str = "absolute_move"

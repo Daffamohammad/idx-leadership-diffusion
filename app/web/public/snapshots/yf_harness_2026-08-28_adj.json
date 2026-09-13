@@ -28236,6 +28236,1718 @@
     "stable_leaders": [],
     "notes": []
   },
+  "evidence": [
+    {
+      "group_id": "Energy",
+      "group": "Energy",
+      "taxonomy_path": [
+        "Energy",
+        "Coal"
+      ],
+      "as_of": "2026-08-28",
+      "provider_mode": "PUBLIC_PROTOTYPE",
+      "leadership_state": "WEAKENING",
+      "diffusion_state": "BROADENING",
+      "diffusion_state_v2": "BROADENING_FRAGILE",
+      "leadership": {
+        "state": "WEAKENING",
+        "previous_state": "WEAKENING",
+        "persistence": 2
+      },
+      "diffusion": {
+        "state": "BROADENING_FRAGILE",
+        "previous_state": "STABLE",
+        "breadth": 77.78,
+        "breadth_delta": 22.22,
+        "numerator": 7,
+        "eligible_denominator": 9,
+        "missing_count": 0,
+        "total_count": 9
+      },
+      "concentration": {
+        "status": "DEFINED",
+        "signed_attribution_status": "DEFINED",
+        "top1": 0.1862,
+        "top3": 0.5092,
+        "hhi": 0.1364
+      },
+      "performance": {
+        "return_20d": 10.134654988485911,
+        "excess_5d": 0.6472011281160077,
+        "excess_20d": 2.6248909846764175,
+        "excess_60d": 3.62904493646599
+      },
+      "confirmation": {
+        "fundamentals": "UNAVAILABLE",
+        "foreign_flow": "UNAVAILABLE"
+      },
+      "evidence": [
+        {
+          "metric": "excess_return_5d",
+          "value": 0.65,
+          "unit": "%",
+          "direction": "positive",
+          "comment": "short-horizon excess return vs benchmark"
+        },
+        {
+          "metric": "excess_return_20d",
+          "value": 2.62,
+          "unit": "%",
+          "direction": "positive",
+          "comment": "primary-horizon excess return vs benchmark"
+        },
+        {
+          "metric": "excess_return_60d",
+          "value": 3.63,
+          "unit": "%",
+          "direction": "positive",
+          "comment": "medium-horizon excess return vs benchmark"
+        },
+        {
+          "metric": "breadth_outperforming",
+          "value": 77.78,
+          "unit": "%",
+          "direction": "positive",
+          "comment": "% constituents with positive excess return at primary horizon"
+        },
+        {
+          "metric": "breadth_delta",
+          "value": 22.22,
+          "unit": "pp",
+          "direction": "positive",
+          "comment": "change in outperformance share vs prior observation"
+        },
+        {
+          "metric": "concentration_top1",
+          "value": 0.1862,
+          "unit": "share",
+          "direction": "neutral",
+          "comment": "top-1 share of group absolute move (convention: absolute_move_v2)"
+        },
+        {
+          "metric": "concentration_hhi",
+          "value": 0.1364,
+          "unit": "hhi",
+          "direction": "neutral",
+          "comment": "Herfindahl of absolute contribution shares"
+        }
+      ],
+      "contradictions": [
+        {
+          "metric": "weakening_despite_strength",
+          "label": "excess_20d +2.6%",
+          "severity": "WARNING",
+          "evidence": "20D excess return still positive but state has weakened."
+        }
+      ],
+      "data_gaps": [
+        {
+          "category": "FUNDAMENTALS",
+          "status": "DATA_GAP",
+          "label": "DATA GAP \u2014 Sectors live not connected",
+          "note": null
+        },
+        {
+          "category": "FOREIGN_FLOW",
+          "status": "DATA_GAP",
+          "label": "DATA GAP \u2014 Sectors live not connected",
+          "note": null
+        },
+        {
+          "category": "BROKER_ACTIVITY",
+          "status": "NOT_INTEGRATED",
+          "label": "NOT INTEGRATED",
+          "note": null
+        },
+        {
+          "category": "FREE_FLOAT",
+          "status": "NOT_APPLIED",
+          "label": "NOT APPLIED \u2014 equal-weight prototype",
+          "note": null
+        },
+        {
+          "category": "TAXONOMY",
+          "status": "PROTOTYPE",
+          "label": "PROTOTYPE \u2014 Sectors taxonomy unavailable",
+          "note": null
+        },
+        {
+          "category": "BENCHMARK",
+          "status": "READY",
+          "label": "Benchmark date and series present",
+          "note": null
+        }
+      ],
+      "invalidation": [
+        {
+          "condition": "20D excess return turns negative",
+          "metric": "weaken_if_20d_excess_turns_negative",
+          "threshold": "excess_20d < 0",
+          "rationale": "State may weaken if 20D excess return turns negative on the next refresh."
+        },
+        {
+          "condition": "breadth falls below the configured threshold",
+          "metric": "weaken_if_breadth_below_threshold",
+          "threshold": "breadth_outperforming < 30% (current 77.8%)",
+          "rationale": "State may weaken if breadth falls below the configured threshold."
+        },
+        {
+          "condition": "diffusion shifts to NARROWING or UNCONFIRMED",
+          "metric": "weaken_if_diffusion_shifts",
+          "threshold": "diffusion != BROADENING_FRAGILE",
+          "rationale": "State may weaken if diffusion shifts away from its current classification."
+        },
+        {
+          "condition": "the consecutive-observation persistence chain is broken",
+          "metric": "weaken_if_persistence_broken",
+          "threshold": "persistence resets to 1",
+          "rationale": "State may weaken if the persistence chain resets to 1 on the next refresh."
+        }
+      ],
+      "method_version": "methodology-v3",
+      "contract_version": "intelligence-v1"
+    },
+    {
+      "group_id": "Consumer",
+      "group": "Consumer",
+      "taxonomy_path": [
+        "Consumer",
+        "Retail"
+      ],
+      "as_of": "2026-08-28",
+      "provider_mode": "PUBLIC_PROTOTYPE",
+      "leadership_state": "LAGGING",
+      "diffusion_state": "NARROWING",
+      "diffusion_state_v2": "NARROWING_FIRM",
+      "leadership": {
+        "state": "LAGGING",
+        "previous_state": "WEAKENING",
+        "persistence": 1
+      },
+      "diffusion": {
+        "state": "NARROWING_FIRM",
+        "previous_state": "BROADENING_FRAGILE",
+        "breadth": 30.0,
+        "breadth_delta": -30.0,
+        "numerator": 3,
+        "eligible_denominator": 10,
+        "missing_count": 0,
+        "total_count": 10
+      },
+      "concentration": {
+        "status": "DEFINED",
+        "signed_attribution_status": "DEFINED",
+        "top1": 0.3178,
+        "top3": 0.6602,
+        "hhi": 0.1809
+      },
+      "performance": {
+        "return_20d": 6.418441195945846,
+        "excess_5d": -1.552122359949203,
+        "excess_20d": -1.0913228078636468,
+        "excess_60d": 4.198135417281918
+      },
+      "confirmation": {
+        "fundamentals": "UNAVAILABLE",
+        "foreign_flow": "UNAVAILABLE"
+      },
+      "evidence": [
+        {
+          "metric": "excess_return_5d",
+          "value": -1.55,
+          "unit": "%",
+          "direction": "negative",
+          "comment": "short-horizon excess return vs benchmark"
+        },
+        {
+          "metric": "excess_return_20d",
+          "value": -1.09,
+          "unit": "%",
+          "direction": "negative",
+          "comment": "primary-horizon excess return vs benchmark"
+        },
+        {
+          "metric": "excess_return_60d",
+          "value": 4.2,
+          "unit": "%",
+          "direction": "positive",
+          "comment": "medium-horizon excess return vs benchmark"
+        },
+        {
+          "metric": "breadth_outperforming",
+          "value": 30.0,
+          "unit": "%",
+          "direction": "positive",
+          "comment": "% constituents with positive excess return at primary horizon"
+        },
+        {
+          "metric": "breadth_delta",
+          "value": -30.0,
+          "unit": "pp",
+          "direction": "negative",
+          "comment": "change in outperformance share vs prior observation"
+        },
+        {
+          "metric": "concentration_top1",
+          "value": 0.3178,
+          "unit": "share",
+          "direction": "neutral",
+          "comment": "top-1 share of group absolute move (convention: absolute_move_v2)"
+        },
+        {
+          "metric": "concentration_hhi",
+          "value": 0.1809,
+          "unit": "hhi",
+          "direction": "neutral",
+          "comment": "Herfindahl of absolute contribution shares"
+        }
+      ],
+      "contradictions": [],
+      "data_gaps": [
+        {
+          "category": "FUNDAMENTALS",
+          "status": "DATA_GAP",
+          "label": "DATA GAP \u2014 Sectors live not connected",
+          "note": null
+        },
+        {
+          "category": "FOREIGN_FLOW",
+          "status": "DATA_GAP",
+          "label": "DATA GAP \u2014 Sectors live not connected",
+          "note": null
+        },
+        {
+          "category": "BROKER_ACTIVITY",
+          "status": "NOT_INTEGRATED",
+          "label": "NOT INTEGRATED",
+          "note": null
+        },
+        {
+          "category": "FREE_FLOAT",
+          "status": "NOT_APPLIED",
+          "label": "NOT APPLIED \u2014 equal-weight prototype",
+          "note": null
+        },
+        {
+          "category": "TAXONOMY",
+          "status": "PROTOTYPE",
+          "label": "PROTOTYPE \u2014 Sectors taxonomy unavailable",
+          "note": null
+        },
+        {
+          "category": "BENCHMARK",
+          "status": "READY",
+          "label": "Benchmark date and series present",
+          "note": null
+        }
+      ],
+      "invalidation": [
+        {
+          "condition": "20D excess return turns positive",
+          "metric": "strengthen_if_20d_excess_turns_positive",
+          "threshold": "excess_20d > 0",
+          "rationale": "State may strengthen if 20D excess return turns positive on the next refresh."
+        },
+        {
+          "condition": "breadth falls below the configured threshold",
+          "metric": "weaken_if_breadth_below_threshold",
+          "threshold": "breadth_outperforming < 30% (current 30.0%)",
+          "rationale": "State may weaken if breadth falls below the configured threshold."
+        },
+        {
+          "condition": "diffusion shifts to NARROWING or UNCONFIRMED",
+          "metric": "weaken_if_diffusion_shifts",
+          "threshold": "diffusion != NARROWING_FIRM",
+          "rationale": "State may weaken if diffusion shifts away from its current classification."
+        },
+        {
+          "condition": "the consecutive-observation persistence chain is broken",
+          "metric": "weaken_if_persistence_broken",
+          "threshold": "persistence resets to 1",
+          "rationale": "State may weaken if the persistence chain resets to 1 on the next refresh."
+        }
+      ],
+      "method_version": "methodology-v3",
+      "contract_version": "intelligence-v1"
+    },
+    {
+      "group_id": "Industrial",
+      "group": "Industrial",
+      "taxonomy_path": [
+        "Industrial",
+        "Automotive"
+      ],
+      "as_of": "2026-08-28",
+      "provider_mode": "PUBLIC_PROTOTYPE",
+      "leadership_state": "IMPROVING",
+      "diffusion_state": "STABLE",
+      "diffusion_state_v2": "STABLE",
+      "leadership": {
+        "state": "IMPROVING",
+        "previous_state": "IMPROVING",
+        "persistence": 3
+      },
+      "diffusion": {
+        "state": "STABLE",
+        "previous_state": "STABLE",
+        "breadth": 14.29,
+        "breadth_delta": 0.0,
+        "numerator": 1,
+        "eligible_denominator": 7,
+        "missing_count": 1,
+        "total_count": 8
+      },
+      "concentration": {
+        "status": "DEFINED",
+        "signed_attribution_status": "DEFINED",
+        "top1": 0.6026,
+        "top3": 0.8212,
+        "hhi": 0.3978
+      },
+      "performance": {
+        "return_20d": 3.0556864798990557,
+        "excess_5d": -1.8852715321989335,
+        "excess_20d": -4.4540775239104375,
+        "excess_60d": -4.842112256248703
+      },
+      "confirmation": {
+        "fundamentals": "UNAVAILABLE",
+        "foreign_flow": "UNAVAILABLE"
+      },
+      "evidence": [
+        {
+          "metric": "excess_return_5d",
+          "value": -1.89,
+          "unit": "%",
+          "direction": "negative",
+          "comment": "short-horizon excess return vs benchmark"
+        },
+        {
+          "metric": "excess_return_20d",
+          "value": -4.45,
+          "unit": "%",
+          "direction": "negative",
+          "comment": "primary-horizon excess return vs benchmark"
+        },
+        {
+          "metric": "excess_return_60d",
+          "value": -4.84,
+          "unit": "%",
+          "direction": "negative",
+          "comment": "medium-horizon excess return vs benchmark"
+        },
+        {
+          "metric": "breadth_outperforming",
+          "value": 14.29,
+          "unit": "%",
+          "direction": "positive",
+          "comment": "% constituents with positive excess return at primary horizon"
+        },
+        {
+          "metric": "breadth_delta",
+          "value": 0.0,
+          "unit": "pp",
+          "direction": "neutral",
+          "comment": "change in outperformance share vs prior observation"
+        },
+        {
+          "metric": "concentration_top1",
+          "value": 0.6026,
+          "unit": "share",
+          "direction": "neutral",
+          "comment": "top-1 share of group absolute move (convention: absolute_move_v2)"
+        },
+        {
+          "metric": "concentration_hhi",
+          "value": 0.3978,
+          "unit": "hhi",
+          "direction": "neutral",
+          "comment": "Herfindahl of absolute contribution shares"
+        }
+      ],
+      "contradictions": [
+        {
+          "metric": "thin_breadth",
+          "label": "breadth 14.3%",
+          "severity": "WARNING",
+          "evidence": "improving or leading but few constituents participate"
+        },
+        {
+          "metric": "improving_into_headwind",
+          "label": "excess_20d -4.5%",
+          "severity": "WARNING",
+          "evidence": "Improving short-term, but medium-term excess return still negative."
+        },
+        {
+          "metric": "concentrated_top1",
+          "label": "top1 60%",
+          "severity": "WARNING",
+          "evidence": "Top-1 contribution > 60% of group absolute move."
+        }
+      ],
+      "data_gaps": [
+        {
+          "category": "FUNDAMENTALS",
+          "status": "DATA_GAP",
+          "label": "DATA GAP \u2014 Sectors live not connected",
+          "note": null
+        },
+        {
+          "category": "FOREIGN_FLOW",
+          "status": "DATA_GAP",
+          "label": "DATA GAP \u2014 Sectors live not connected",
+          "note": null
+        },
+        {
+          "category": "BROKER_ACTIVITY",
+          "status": "NOT_INTEGRATED",
+          "label": "NOT INTEGRATED",
+          "note": null
+        },
+        {
+          "category": "FREE_FLOAT",
+          "status": "NOT_APPLIED",
+          "label": "NOT APPLIED \u2014 equal-weight prototype",
+          "note": null
+        },
+        {
+          "category": "TAXONOMY",
+          "status": "PROTOTYPE",
+          "label": "PROTOTYPE \u2014 Sectors taxonomy unavailable",
+          "note": null
+        },
+        {
+          "category": "BENCHMARK",
+          "status": "READY",
+          "label": "Benchmark date and series present",
+          "note": null
+        }
+      ],
+      "invalidation": [
+        {
+          "condition": "20D excess return turns positive",
+          "metric": "strengthen_if_20d_excess_turns_positive",
+          "threshold": "excess_20d > 0",
+          "rationale": "State may strengthen if 20D excess return turns positive on the next refresh."
+        },
+        {
+          "condition": "breadth falls below the configured threshold",
+          "metric": "weaken_if_breadth_below_threshold",
+          "threshold": "breadth_outperforming < 30% (current 14.3%)",
+          "rationale": "State may weaken if breadth falls below the configured threshold."
+        },
+        {
+          "condition": "diffusion shifts to NARROWING or UNCONFIRMED",
+          "metric": "weaken_if_diffusion_shifts",
+          "threshold": "diffusion != STABLE",
+          "rationale": "State may weaken if diffusion shifts away from its current classification."
+        },
+        {
+          "condition": "the consecutive-observation persistence chain is broken",
+          "metric": "weaken_if_persistence_broken",
+          "threshold": "persistence resets to 1",
+          "rationale": "State may weaken if the persistence chain resets to 1 on the next refresh."
+        }
+      ],
+      "method_version": "methodology-v3",
+      "contract_version": "intelligence-v1"
+    },
+    {
+      "group_id": "Financials",
+      "group": "Financials",
+      "taxonomy_path": [
+        "Financials",
+        "Digital Banks"
+      ],
+      "as_of": "2026-08-28",
+      "provider_mode": "PUBLIC_PROTOTYPE",
+      "leadership_state": "IMPROVING",
+      "diffusion_state": "STABLE",
+      "diffusion_state_v2": "STABLE",
+      "leadership": {
+        "state": "IMPROVING",
+        "previous_state": "IMPROVING",
+        "persistence": 3
+      },
+      "diffusion": {
+        "state": "STABLE",
+        "previous_state": "BROADENING_FRAGILE",
+        "breadth": 20.0,
+        "breadth_delta": 0.0,
+        "numerator": 2,
+        "eligible_denominator": 10,
+        "missing_count": 0,
+        "total_count": 10
+      },
+      "concentration": {
+        "status": "DEFINED",
+        "signed_attribution_status": "DEFINED",
+        "top1": 0.2896,
+        "top3": 0.6787,
+        "hhi": 0.1794
+      },
+      "performance": {
+        "return_20d": 1.83231166011378,
+        "excess_5d": -0.26360885895245545,
+        "excess_20d": -5.677452343695713,
+        "excess_60d": -6.354079927657794
+      },
+      "confirmation": {
+        "fundamentals": "UNAVAILABLE",
+        "foreign_flow": "UNAVAILABLE"
+      },
+      "evidence": [
+        {
+          "metric": "excess_return_5d",
+          "value": -0.26,
+          "unit": "%",
+          "direction": "negative",
+          "comment": "short-horizon excess return vs benchmark"
+        },
+        {
+          "metric": "excess_return_20d",
+          "value": -5.68,
+          "unit": "%",
+          "direction": "negative",
+          "comment": "primary-horizon excess return vs benchmark"
+        },
+        {
+          "metric": "excess_return_60d",
+          "value": -6.35,
+          "unit": "%",
+          "direction": "negative",
+          "comment": "medium-horizon excess return vs benchmark"
+        },
+        {
+          "metric": "breadth_outperforming",
+          "value": 20.0,
+          "unit": "%",
+          "direction": "positive",
+          "comment": "% constituents with positive excess return at primary horizon"
+        },
+        {
+          "metric": "breadth_delta",
+          "value": 0.0,
+          "unit": "pp",
+          "direction": "neutral",
+          "comment": "change in outperformance share vs prior observation"
+        },
+        {
+          "metric": "concentration_top1",
+          "value": 0.2896,
+          "unit": "share",
+          "direction": "neutral",
+          "comment": "top-1 share of group absolute move (convention: absolute_move_v2)"
+        },
+        {
+          "metric": "concentration_hhi",
+          "value": 0.1794,
+          "unit": "hhi",
+          "direction": "neutral",
+          "comment": "Herfindahl of absolute contribution shares"
+        }
+      ],
+      "contradictions": [
+        {
+          "metric": "thin_breadth",
+          "label": "breadth 20.0%",
+          "severity": "WARNING",
+          "evidence": "improving or leading but few constituents participate"
+        },
+        {
+          "metric": "improving_into_headwind",
+          "label": "excess_20d -5.7%",
+          "severity": "WARNING",
+          "evidence": "Improving short-term, but medium-term excess return still negative."
+        }
+      ],
+      "data_gaps": [
+        {
+          "category": "FUNDAMENTALS",
+          "status": "DATA_GAP",
+          "label": "DATA GAP \u2014 Sectors live not connected",
+          "note": null
+        },
+        {
+          "category": "FOREIGN_FLOW",
+          "status": "DATA_GAP",
+          "label": "DATA GAP \u2014 Sectors live not connected",
+          "note": null
+        },
+        {
+          "category": "BROKER_ACTIVITY",
+          "status": "NOT_INTEGRATED",
+          "label": "NOT INTEGRATED",
+          "note": null
+        },
+        {
+          "category": "FREE_FLOAT",
+          "status": "NOT_APPLIED",
+          "label": "NOT APPLIED \u2014 equal-weight prototype",
+          "note": null
+        },
+        {
+          "category": "TAXONOMY",
+          "status": "PROTOTYPE",
+          "label": "PROTOTYPE \u2014 Sectors taxonomy unavailable",
+          "note": null
+        },
+        {
+          "category": "BENCHMARK",
+          "status": "READY",
+          "label": "Benchmark date and series present",
+          "note": null
+        }
+      ],
+      "invalidation": [
+        {
+          "condition": "20D excess return turns positive",
+          "metric": "strengthen_if_20d_excess_turns_positive",
+          "threshold": "excess_20d > 0",
+          "rationale": "State may strengthen if 20D excess return turns positive on the next refresh."
+        },
+        {
+          "condition": "breadth falls below the configured threshold",
+          "metric": "weaken_if_breadth_below_threshold",
+          "threshold": "breadth_outperforming < 30% (current 20.0%)",
+          "rationale": "State may weaken if breadth falls below the configured threshold."
+        },
+        {
+          "condition": "diffusion shifts to NARROWING or UNCONFIRMED",
+          "metric": "weaken_if_diffusion_shifts",
+          "threshold": "diffusion != STABLE",
+          "rationale": "State may weaken if diffusion shifts away from its current classification."
+        },
+        {
+          "condition": "the consecutive-observation persistence chain is broken",
+          "metric": "weaken_if_persistence_broken",
+          "threshold": "persistence resets to 1",
+          "rationale": "State may weaken if the persistence chain resets to 1 on the next refresh."
+        }
+      ],
+      "method_version": "methodology-v3",
+      "contract_version": "intelligence-v1"
+    },
+    {
+      "group_id": "Healthcare",
+      "group": "Healthcare",
+      "taxonomy_path": [
+        "Healthcare",
+        "Hospitals"
+      ],
+      "as_of": "2026-08-28",
+      "provider_mode": "PUBLIC_PROTOTYPE",
+      "leadership_state": "UNCONFIRMED",
+      "diffusion_state": "UNCONFIRMED",
+      "diffusion_state_v2": "UNCONFIRMED",
+      "leadership": {
+        "state": "UNCONFIRMED",
+        "previous_state": "UNCONFIRMED",
+        "persistence": 5
+      },
+      "diffusion": {
+        "state": "UNCONFIRMED",
+        "previous_state": "UNCONFIRMED",
+        "breadth": 33.33,
+        "breadth_delta": -33.34,
+        "numerator": 1,
+        "eligible_denominator": 3,
+        "missing_count": 0,
+        "total_count": 3
+      },
+      "concentration": {
+        "status": "DEFINED",
+        "signed_attribution_status": "UNDEFINED_UNSTABLE_DENOMINATOR",
+        "top1": 0.51,
+        "top3": 1.0,
+        "hhi": 0.3842
+      },
+      "performance": {
+        "return_20d": -0.2511498426531083,
+        "excess_5d": -2.6863253058351724,
+        "excess_20d": -7.760913846462601,
+        "excess_60d": -13.852358986770886
+      },
+      "confirmation": {
+        "fundamentals": "UNAVAILABLE",
+        "foreign_flow": "UNAVAILABLE"
+      },
+      "evidence": [
+        {
+          "metric": "excess_return_5d",
+          "value": -2.69,
+          "unit": "%",
+          "direction": "negative",
+          "comment": "short-horizon excess return vs benchmark"
+        },
+        {
+          "metric": "excess_return_20d",
+          "value": -7.76,
+          "unit": "%",
+          "direction": "negative",
+          "comment": "primary-horizon excess return vs benchmark"
+        },
+        {
+          "metric": "excess_return_60d",
+          "value": -13.85,
+          "unit": "%",
+          "direction": "negative",
+          "comment": "medium-horizon excess return vs benchmark"
+        },
+        {
+          "metric": "breadth_outperforming",
+          "value": 33.33,
+          "unit": "%",
+          "direction": "positive",
+          "comment": "% constituents with positive excess return at primary horizon"
+        },
+        {
+          "metric": "breadth_delta",
+          "value": -33.34,
+          "unit": "pp",
+          "direction": "negative",
+          "comment": "change in outperformance share vs prior observation"
+        },
+        {
+          "metric": "concentration_top1",
+          "value": 0.51,
+          "unit": "share",
+          "direction": "neutral",
+          "comment": "top-1 share of group absolute move (convention: absolute_move_v2)"
+        },
+        {
+          "metric": "concentration_hhi",
+          "value": 0.3842,
+          "unit": "hhi",
+          "direction": "neutral",
+          "comment": "Herfindahl of absolute contribution shares"
+        }
+      ],
+      "contradictions": [],
+      "data_gaps": [
+        {
+          "category": "FUNDAMENTALS",
+          "status": "DATA_GAP",
+          "label": "DATA GAP \u2014 Sectors live not connected",
+          "note": null
+        },
+        {
+          "category": "FOREIGN_FLOW",
+          "status": "DATA_GAP",
+          "label": "DATA GAP \u2014 Sectors live not connected",
+          "note": null
+        },
+        {
+          "category": "BROKER_ACTIVITY",
+          "status": "NOT_INTEGRATED",
+          "label": "NOT INTEGRATED",
+          "note": null
+        },
+        {
+          "category": "FREE_FLOAT",
+          "status": "NOT_APPLIED",
+          "label": "NOT APPLIED \u2014 equal-weight prototype",
+          "note": null
+        },
+        {
+          "category": "TAXONOMY",
+          "status": "PROTOTYPE",
+          "label": "PROTOTYPE \u2014 Sectors taxonomy unavailable",
+          "note": null
+        },
+        {
+          "category": "BENCHMARK",
+          "status": "READY",
+          "label": "Benchmark date and series present",
+          "note": null
+        }
+      ],
+      "invalidation": [
+        {
+          "condition": "20D excess return turns positive",
+          "metric": "strengthen_if_20d_excess_turns_positive",
+          "threshold": "excess_20d > 0",
+          "rationale": "State may strengthen if 20D excess return turns positive on the next refresh."
+        },
+        {
+          "condition": "breadth falls below the configured threshold",
+          "metric": "weaken_if_breadth_below_threshold",
+          "threshold": "breadth_outperforming < 30% (current 33.3%)",
+          "rationale": "State may weaken if breadth falls below the configured threshold."
+        },
+        {
+          "condition": "diffusion shifts to NARROWING or UNCONFIRMED",
+          "metric": "weaken_if_diffusion_shifts",
+          "threshold": "diffusion != UNCONFIRMED",
+          "rationale": "State may weaken if diffusion shifts away from its current classification."
+        },
+        {
+          "condition": "the consecutive-observation persistence chain is broken",
+          "metric": "weaken_if_persistence_broken",
+          "threshold": "persistence resets to 1",
+          "rationale": "State may weaken if the persistence chain resets to 1 on the next refresh."
+        }
+      ],
+      "method_version": "methodology-v3",
+      "contract_version": "intelligence-v1"
+    },
+    {
+      "group_id": "Materials",
+      "group": "Materials",
+      "taxonomy_path": [
+        "Materials",
+        "Petrochemicals"
+      ],
+      "as_of": "2026-08-28",
+      "provider_mode": "PUBLIC_PROTOTYPE",
+      "leadership_state": "UNCONFIRMED",
+      "diffusion_state": "UNCONFIRMED",
+      "diffusion_state_v2": "UNCONFIRMED",
+      "leadership": {
+        "state": "UNCONFIRMED",
+        "previous_state": "UNCONFIRMED",
+        "persistence": 5
+      },
+      "diffusion": {
+        "state": "UNCONFIRMED",
+        "previous_state": "UNCONFIRMED",
+        "breadth": 0.0,
+        "breadth_delta": 0.0,
+        "numerator": 0,
+        "eligible_denominator": 3,
+        "missing_count": 0,
+        "total_count": 3
+      },
+      "concentration": {
+        "status": "DEFINED",
+        "signed_attribution_status": "DEFINED",
+        "top1": 0.676,
+        "top3": 1.0,
+        "hhi": 0.5619
+      },
+      "performance": {
+        "return_20d": -1.4200831847890638,
+        "excess_5d": -1.286882982092678,
+        "excess_20d": -8.929847188598558,
+        "excess_60d": -4.543279991649211
+      },
+      "confirmation": {
+        "fundamentals": "UNAVAILABLE",
+        "foreign_flow": "UNAVAILABLE"
+      },
+      "evidence": [
+        {
+          "metric": "excess_return_5d",
+          "value": -1.29,
+          "unit": "%",
+          "direction": "negative",
+          "comment": "short-horizon excess return vs benchmark"
+        },
+        {
+          "metric": "excess_return_20d",
+          "value": -8.93,
+          "unit": "%",
+          "direction": "negative",
+          "comment": "primary-horizon excess return vs benchmark"
+        },
+        {
+          "metric": "excess_return_60d",
+          "value": -4.54,
+          "unit": "%",
+          "direction": "negative",
+          "comment": "medium-horizon excess return vs benchmark"
+        },
+        {
+          "metric": "breadth_outperforming",
+          "value": 0.0,
+          "unit": "%",
+          "direction": "neutral",
+          "comment": "% constituents with positive excess return at primary horizon"
+        },
+        {
+          "metric": "breadth_delta",
+          "value": 0.0,
+          "unit": "pp",
+          "direction": "neutral",
+          "comment": "change in outperformance share vs prior observation"
+        },
+        {
+          "metric": "concentration_top1",
+          "value": 0.676,
+          "unit": "share",
+          "direction": "neutral",
+          "comment": "top-1 share of group absolute move (convention: absolute_move_v2)"
+        },
+        {
+          "metric": "concentration_hhi",
+          "value": 0.5619,
+          "unit": "hhi",
+          "direction": "neutral",
+          "comment": "Herfindahl of absolute contribution shares"
+        }
+      ],
+      "contradictions": [
+        {
+          "metric": "thin_breadth",
+          "label": "breadth 0.0%",
+          "severity": "WARNING",
+          "evidence": "Fewer than 30% of constituents are outperforming the benchmark."
+        },
+        {
+          "metric": "concentrated_top1",
+          "label": "top1 68%",
+          "severity": "WARNING",
+          "evidence": "Top-1 contribution > 60% of group absolute move."
+        }
+      ],
+      "data_gaps": [
+        {
+          "category": "FUNDAMENTALS",
+          "status": "DATA_GAP",
+          "label": "DATA GAP \u2014 Sectors live not connected",
+          "note": null
+        },
+        {
+          "category": "FOREIGN_FLOW",
+          "status": "DATA_GAP",
+          "label": "DATA GAP \u2014 Sectors live not connected",
+          "note": null
+        },
+        {
+          "category": "BROKER_ACTIVITY",
+          "status": "NOT_INTEGRATED",
+          "label": "NOT INTEGRATED",
+          "note": null
+        },
+        {
+          "category": "FREE_FLOAT",
+          "status": "NOT_APPLIED",
+          "label": "NOT APPLIED \u2014 equal-weight prototype",
+          "note": null
+        },
+        {
+          "category": "TAXONOMY",
+          "status": "PROTOTYPE",
+          "label": "PROTOTYPE \u2014 Sectors taxonomy unavailable",
+          "note": null
+        },
+        {
+          "category": "BENCHMARK",
+          "status": "READY",
+          "label": "Benchmark date and series present",
+          "note": null
+        }
+      ],
+      "invalidation": [
+        {
+          "condition": "20D excess return turns positive",
+          "metric": "strengthen_if_20d_excess_turns_positive",
+          "threshold": "excess_20d > 0",
+          "rationale": "State may strengthen if 20D excess return turns positive on the next refresh."
+        },
+        {
+          "condition": "breadth falls below the configured threshold",
+          "metric": "weaken_if_breadth_below_threshold",
+          "threshold": "breadth_outperforming < 30% (current 0.0%)",
+          "rationale": "State may weaken if breadth falls below the configured threshold."
+        },
+        {
+          "condition": "diffusion shifts to NARROWING or UNCONFIRMED",
+          "metric": "weaken_if_diffusion_shifts",
+          "threshold": "diffusion != UNCONFIRMED",
+          "rationale": "State may weaken if diffusion shifts away from its current classification."
+        },
+        {
+          "condition": "the consecutive-observation persistence chain is broken",
+          "metric": "weaken_if_persistence_broken",
+          "threshold": "persistence resets to 1",
+          "rationale": "State may weaken if the persistence chain resets to 1 on the next refresh."
+        }
+      ],
+      "method_version": "methodology-v3",
+      "contract_version": "intelligence-v1"
+    },
+    {
+      "group_id": "Property",
+      "group": "Property",
+      "taxonomy_path": [
+        "Property",
+        "Real Estate"
+      ],
+      "as_of": "2026-08-28",
+      "provider_mode": "PUBLIC_PROTOTYPE",
+      "leadership_state": "UNCONFIRMED",
+      "diffusion_state": "UNCONFIRMED",
+      "diffusion_state_v2": "UNCONFIRMED",
+      "leadership": {
+        "state": "UNCONFIRMED",
+        "previous_state": "UNCONFIRMED",
+        "persistence": 5
+      },
+      "diffusion": {
+        "state": "UNCONFIRMED",
+        "previous_state": "UNCONFIRMED",
+        "breadth": 50.0,
+        "breadth_delta": 0.0,
+        "numerator": 2,
+        "eligible_denominator": 4,
+        "missing_count": 0,
+        "total_count": 4
+      },
+      "concentration": {
+        "status": "DEFINED",
+        "signed_attribution_status": "DEFINED",
+        "top1": 0.4164,
+        "top3": 0.9269,
+        "hhi": 0.3495
+      },
+      "performance": {
+        "return_20d": 7.258621836344037,
+        "excess_5d": -1.6956003896739014,
+        "excess_20d": -0.2511421674654568,
+        "excess_60d": -0.2651909869374025
+      },
+      "confirmation": {
+        "fundamentals": "UNAVAILABLE",
+        "foreign_flow": "UNAVAILABLE"
+      },
+      "evidence": [
+        {
+          "metric": "excess_return_5d",
+          "value": -1.7,
+          "unit": "%",
+          "direction": "negative",
+          "comment": "short-horizon excess return vs benchmark"
+        },
+        {
+          "metric": "excess_return_20d",
+          "value": -0.25,
+          "unit": "%",
+          "direction": "negative",
+          "comment": "primary-horizon excess return vs benchmark"
+        },
+        {
+          "metric": "excess_return_60d",
+          "value": -0.27,
+          "unit": "%",
+          "direction": "negative",
+          "comment": "medium-horizon excess return vs benchmark"
+        },
+        {
+          "metric": "breadth_outperforming",
+          "value": 50.0,
+          "unit": "%",
+          "direction": "positive",
+          "comment": "% constituents with positive excess return at primary horizon"
+        },
+        {
+          "metric": "breadth_delta",
+          "value": 0.0,
+          "unit": "pp",
+          "direction": "neutral",
+          "comment": "change in outperformance share vs prior observation"
+        },
+        {
+          "metric": "concentration_top1",
+          "value": 0.4164,
+          "unit": "share",
+          "direction": "neutral",
+          "comment": "top-1 share of group absolute move (convention: absolute_move_v2)"
+        },
+        {
+          "metric": "concentration_hhi",
+          "value": 0.3495,
+          "unit": "hhi",
+          "direction": "neutral",
+          "comment": "Herfindahl of absolute contribution shares"
+        }
+      ],
+      "contradictions": [],
+      "data_gaps": [
+        {
+          "category": "FUNDAMENTALS",
+          "status": "DATA_GAP",
+          "label": "DATA GAP \u2014 Sectors live not connected",
+          "note": null
+        },
+        {
+          "category": "FOREIGN_FLOW",
+          "status": "DATA_GAP",
+          "label": "DATA GAP \u2014 Sectors live not connected",
+          "note": null
+        },
+        {
+          "category": "BROKER_ACTIVITY",
+          "status": "NOT_INTEGRATED",
+          "label": "NOT INTEGRATED",
+          "note": null
+        },
+        {
+          "category": "FREE_FLOAT",
+          "status": "NOT_APPLIED",
+          "label": "NOT APPLIED \u2014 equal-weight prototype",
+          "note": null
+        },
+        {
+          "category": "TAXONOMY",
+          "status": "PROTOTYPE",
+          "label": "PROTOTYPE \u2014 Sectors taxonomy unavailable",
+          "note": null
+        },
+        {
+          "category": "BENCHMARK",
+          "status": "READY",
+          "label": "Benchmark date and series present",
+          "note": null
+        }
+      ],
+      "invalidation": [
+        {
+          "condition": "20D excess return turns positive",
+          "metric": "strengthen_if_20d_excess_turns_positive",
+          "threshold": "excess_20d > 0",
+          "rationale": "State may strengthen if 20D excess return turns positive on the next refresh."
+        },
+        {
+          "condition": "breadth falls below the configured threshold",
+          "metric": "weaken_if_breadth_below_threshold",
+          "threshold": "breadth_outperforming < 30% (current 50.0%)",
+          "rationale": "State may weaken if breadth falls below the configured threshold."
+        },
+        {
+          "condition": "diffusion shifts to NARROWING or UNCONFIRMED",
+          "metric": "weaken_if_diffusion_shifts",
+          "threshold": "diffusion != UNCONFIRMED",
+          "rationale": "State may weaken if diffusion shifts away from its current classification."
+        },
+        {
+          "condition": "the consecutive-observation persistence chain is broken",
+          "metric": "weaken_if_persistence_broken",
+          "threshold": "persistence resets to 1",
+          "rationale": "State may weaken if the persistence chain resets to 1 on the next refresh."
+        }
+      ],
+      "method_version": "methodology-v3",
+      "contract_version": "intelligence-v1"
+    },
+    {
+      "group_id": "Technology",
+      "group": "Technology",
+      "taxonomy_path": [
+        "Technology",
+        "Internet Services"
+      ],
+      "as_of": "2026-08-28",
+      "provider_mode": "PUBLIC_PROTOTYPE",
+      "leadership_state": "UNCONFIRMED",
+      "diffusion_state": "UNCONFIRMED",
+      "diffusion_state_v2": "UNCONFIRMED",
+      "leadership": {
+        "state": "UNCONFIRMED",
+        "previous_state": "UNCONFIRMED",
+        "persistence": 5
+      },
+      "diffusion": {
+        "state": "UNCONFIRMED",
+        "previous_state": "UNCONFIRMED",
+        "breadth": 0.0,
+        "breadth_delta": 0.0,
+        "numerator": 0,
+        "eligible_denominator": 3,
+        "missing_count": 0,
+        "total_count": 3
+      },
+      "concentration": {
+        "status": "DEFINED",
+        "signed_attribution_status": "DEFINED",
+        "top1": 0.8613,
+        "top3": 1.0,
+        "hhi": 0.761
+      },
+      "performance": {
+        "return_20d": -1.7021881216254624,
+        "excess_5d": -5.14680856303078,
+        "excess_20d": -9.211952125434957,
+        "excess_60d": -14.943004790130573
+      },
+      "confirmation": {
+        "fundamentals": "UNAVAILABLE",
+        "foreign_flow": "UNAVAILABLE"
+      },
+      "evidence": [
+        {
+          "metric": "excess_return_5d",
+          "value": -5.15,
+          "unit": "%",
+          "direction": "negative",
+          "comment": "short-horizon excess return vs benchmark"
+        },
+        {
+          "metric": "excess_return_20d",
+          "value": -9.21,
+          "unit": "%",
+          "direction": "negative",
+          "comment": "primary-horizon excess return vs benchmark"
+        },
+        {
+          "metric": "excess_return_60d",
+          "value": -14.94,
+          "unit": "%",
+          "direction": "negative",
+          "comment": "medium-horizon excess return vs benchmark"
+        },
+        {
+          "metric": "breadth_outperforming",
+          "value": 0.0,
+          "unit": "%",
+          "direction": "neutral",
+          "comment": "% constituents with positive excess return at primary horizon"
+        },
+        {
+          "metric": "breadth_delta",
+          "value": 0.0,
+          "unit": "pp",
+          "direction": "neutral",
+          "comment": "change in outperformance share vs prior observation"
+        },
+        {
+          "metric": "concentration_top1",
+          "value": 0.8613,
+          "unit": "share",
+          "direction": "neutral",
+          "comment": "top-1 share of group absolute move (convention: absolute_move_v2)"
+        },
+        {
+          "metric": "concentration_hhi",
+          "value": 0.761,
+          "unit": "hhi",
+          "direction": "neutral",
+          "comment": "Herfindahl of absolute contribution shares"
+        }
+      ],
+      "contradictions": [
+        {
+          "metric": "thin_breadth",
+          "label": "breadth 0.0%",
+          "severity": "WARNING",
+          "evidence": "Fewer than 30% of constituents are outperforming the benchmark."
+        },
+        {
+          "metric": "concentrated_top1",
+          "label": "top1 86%",
+          "severity": "WARNING",
+          "evidence": "Top-1 contribution > 60% of group absolute move."
+        }
+      ],
+      "data_gaps": [
+        {
+          "category": "FUNDAMENTALS",
+          "status": "DATA_GAP",
+          "label": "DATA GAP \u2014 Sectors live not connected",
+          "note": null
+        },
+        {
+          "category": "FOREIGN_FLOW",
+          "status": "DATA_GAP",
+          "label": "DATA GAP \u2014 Sectors live not connected",
+          "note": null
+        },
+        {
+          "category": "BROKER_ACTIVITY",
+          "status": "NOT_INTEGRATED",
+          "label": "NOT INTEGRATED",
+          "note": null
+        },
+        {
+          "category": "FREE_FLOAT",
+          "status": "NOT_APPLIED",
+          "label": "NOT APPLIED \u2014 equal-weight prototype",
+          "note": null
+        },
+        {
+          "category": "TAXONOMY",
+          "status": "PROTOTYPE",
+          "label": "PROTOTYPE \u2014 Sectors taxonomy unavailable",
+          "note": null
+        },
+        {
+          "category": "BENCHMARK",
+          "status": "READY",
+          "label": "Benchmark date and series present",
+          "note": null
+        }
+      ],
+      "invalidation": [
+        {
+          "condition": "20D excess return turns positive",
+          "metric": "strengthen_if_20d_excess_turns_positive",
+          "threshold": "excess_20d > 0",
+          "rationale": "State may strengthen if 20D excess return turns positive on the next refresh."
+        },
+        {
+          "condition": "breadth falls below the configured threshold",
+          "metric": "weaken_if_breadth_below_threshold",
+          "threshold": "breadth_outperforming < 30% (current 0.0%)",
+          "rationale": "State may weaken if breadth falls below the configured threshold."
+        },
+        {
+          "condition": "diffusion shifts to NARROWING or UNCONFIRMED",
+          "metric": "weaken_if_diffusion_shifts",
+          "threshold": "diffusion != UNCONFIRMED",
+          "rationale": "State may weaken if diffusion shifts away from its current classification."
+        },
+        {
+          "condition": "the consecutive-observation persistence chain is broken",
+          "metric": "weaken_if_persistence_broken",
+          "threshold": "persistence resets to 1",
+          "rationale": "State may weaken if the persistence chain resets to 1 on the next refresh."
+        }
+      ],
+      "method_version": "methodology-v3",
+      "contract_version": "intelligence-v1"
+    },
+    {
+      "group_id": "Telecom",
+      "group": "Telecom",
+      "taxonomy_path": [
+        "Telecom",
+        "Telecommunication"
+      ],
+      "as_of": "2026-08-28",
+      "provider_mode": "PUBLIC_PROTOTYPE",
+      "leadership_state": "UNCONFIRMED",
+      "diffusion_state": "UNCONFIRMED",
+      "diffusion_state_v2": "UNCONFIRMED",
+      "leadership": {
+        "state": "UNCONFIRMED",
+        "previous_state": "UNCONFIRMED",
+        "persistence": 5
+      },
+      "diffusion": {
+        "state": "UNCONFIRMED",
+        "previous_state": "UNCONFIRMED",
+        "breadth": 66.67,
+        "breadth_delta": 0.0,
+        "numerator": 2,
+        "eligible_denominator": 3,
+        "missing_count": 0,
+        "total_count": 3
+      },
+      "concentration": {
+        "status": "DEFINED",
+        "signed_attribution_status": "DEFINED",
+        "top1": 0.6758,
+        "top3": 1.0,
+        "hhi": 0.5518
+      },
+      "performance": {
+        "return_20d": 16.096287335073214,
+        "excess_5d": -4.262918344426292,
+        "excess_20d": 8.58652333126372,
+        "excess_60d": -2.562107354279663
+      },
+      "confirmation": {
+        "fundamentals": "UNAVAILABLE",
+        "foreign_flow": "UNAVAILABLE"
+      },
+      "evidence": [
+        {
+          "metric": "excess_return_5d",
+          "value": -4.26,
+          "unit": "%",
+          "direction": "negative",
+          "comment": "short-horizon excess return vs benchmark"
+        },
+        {
+          "metric": "excess_return_20d",
+          "value": 8.59,
+          "unit": "%",
+          "direction": "positive",
+          "comment": "primary-horizon excess return vs benchmark"
+        },
+        {
+          "metric": "excess_return_60d",
+          "value": -2.56,
+          "unit": "%",
+          "direction": "negative",
+          "comment": "medium-horizon excess return vs benchmark"
+        },
+        {
+          "metric": "breadth_outperforming",
+          "value": 66.67,
+          "unit": "%",
+          "direction": "positive",
+          "comment": "% constituents with positive excess return at primary horizon"
+        },
+        {
+          "metric": "breadth_delta",
+          "value": 0.0,
+          "unit": "pp",
+          "direction": "neutral",
+          "comment": "change in outperformance share vs prior observation"
+        },
+        {
+          "metric": "concentration_top1",
+          "value": 0.6758,
+          "unit": "share",
+          "direction": "neutral",
+          "comment": "top-1 share of group absolute move (convention: absolute_move_v2)"
+        },
+        {
+          "metric": "concentration_hhi",
+          "value": 0.5518,
+          "unit": "hhi",
+          "direction": "neutral",
+          "comment": "Herfindahl of absolute contribution shares"
+        }
+      ],
+      "contradictions": [
+        {
+          "metric": "concentrated_top1",
+          "label": "top1 68%",
+          "severity": "WARNING",
+          "evidence": "Top-1 contribution > 60% of group absolute move."
+        }
+      ],
+      "data_gaps": [
+        {
+          "category": "FUNDAMENTALS",
+          "status": "DATA_GAP",
+          "label": "DATA GAP \u2014 Sectors live not connected",
+          "note": null
+        },
+        {
+          "category": "FOREIGN_FLOW",
+          "status": "DATA_GAP",
+          "label": "DATA GAP \u2014 Sectors live not connected",
+          "note": null
+        },
+        {
+          "category": "BROKER_ACTIVITY",
+          "status": "NOT_INTEGRATED",
+          "label": "NOT INTEGRATED",
+          "note": null
+        },
+        {
+          "category": "FREE_FLOAT",
+          "status": "NOT_APPLIED",
+          "label": "NOT APPLIED \u2014 equal-weight prototype",
+          "note": null
+        },
+        {
+          "category": "TAXONOMY",
+          "status": "PROTOTYPE",
+          "label": "PROTOTYPE \u2014 Sectors taxonomy unavailable",
+          "note": null
+        },
+        {
+          "category": "BENCHMARK",
+          "status": "READY",
+          "label": "Benchmark date and series present",
+          "note": null
+        }
+      ],
+      "invalidation": [
+        {
+          "condition": "20D excess return turns negative",
+          "metric": "weaken_if_20d_excess_turns_negative",
+          "threshold": "excess_20d < 0",
+          "rationale": "State may weaken if 20D excess return turns negative on the next refresh."
+        },
+        {
+          "condition": "breadth falls below the configured threshold",
+          "metric": "weaken_if_breadth_below_threshold",
+          "threshold": "breadth_outperforming < 30% (current 66.7%)",
+          "rationale": "State may weaken if breadth falls below the configured threshold."
+        },
+        {
+          "condition": "diffusion shifts to NARROWING or UNCONFIRMED",
+          "metric": "weaken_if_diffusion_shifts",
+          "threshold": "diffusion != UNCONFIRMED",
+          "rationale": "State may weaken if diffusion shifts away from its current classification."
+        },
+        {
+          "condition": "the consecutive-observation persistence chain is broken",
+          "metric": "weaken_if_persistence_broken",
+          "threshold": "persistence resets to 1",
+          "rationale": "State may weaken if the persistence chain resets to 1 on the next refresh."
+        }
+      ],
+      "method_version": "methodology-v3",
+      "contract_version": "intelligence-v1"
+    },
+    {
+      "group_id": "Transportation",
+      "group": "Transportation",
+      "taxonomy_path": [
+        "Transportation",
+        "Airlines"
+      ],
+      "as_of": "2026-08-28",
+      "provider_mode": "PUBLIC_PROTOTYPE",
+      "leadership_state": "UNCONFIRMED",
+      "diffusion_state": "UNCONFIRMED",
+      "diffusion_state_v2": "UNCONFIRMED",
+      "leadership": {
+        "state": "UNCONFIRMED",
+        "previous_state": "UNCONFIRMED",
+        "persistence": 5
+      },
+      "diffusion": {
+        "state": "UNCONFIRMED",
+        "previous_state": "UNCONFIRMED",
+        "breadth": 100.0,
+        "breadth_delta": 0.0,
+        "numerator": 1,
+        "eligible_denominator": 1,
+        "missing_count": 0,
+        "total_count": 1
+      },
+      "concentration": {
+        "status": "DEFINED",
+        "signed_attribution_status": "DEFINED",
+        "top1": 1.0,
+        "top3": null,
+        "hhi": 1.0
+      },
+      "performance": {
+        "return_20d": 22.222222222222232,
+        "excess_5d": -11.537556677916825,
+        "excess_20d": 14.712458218412738,
+        "excess_60d": 12.15280291511467
+      },
+      "confirmation": {
+        "fundamentals": "UNAVAILABLE",
+        "foreign_flow": "UNAVAILABLE"
+      },
+      "evidence": [
+        {
+          "metric": "excess_return_5d",
+          "value": -11.54,
+          "unit": "%",
+          "direction": "negative",
+          "comment": "short-horizon excess return vs benchmark"
+        },
+        {
+          "metric": "excess_return_20d",
+          "value": 14.71,
+          "unit": "%",
+          "direction": "positive",
+          "comment": "primary-horizon excess return vs benchmark"
+        },
+        {
+          "metric": "excess_return_60d",
+          "value": 12.15,
+          "unit": "%",
+          "direction": "positive",
+          "comment": "medium-horizon excess return vs benchmark"
+        },
+        {
+          "metric": "breadth_outperforming",
+          "value": 100.0,
+          "unit": "%",
+          "direction": "positive",
+          "comment": "% constituents with positive excess return at primary horizon"
+        },
+        {
+          "metric": "breadth_delta",
+          "value": 0.0,
+          "unit": "pp",
+          "direction": "neutral",
+          "comment": "change in outperformance share vs prior observation"
+        },
+        {
+          "metric": "concentration_top1",
+          "value": 1.0,
+          "unit": "share",
+          "direction": "neutral",
+          "comment": "top-1 share of group absolute move (convention: absolute_move_v2)"
+        },
+        {
+          "metric": "concentration_hhi",
+          "value": 1.0,
+          "unit": "hhi",
+          "direction": "neutral",
+          "comment": "Herfindahl of absolute contribution shares"
+        }
+      ],
+      "contradictions": [
+        {
+          "metric": "concentrated_top1",
+          "label": "top1 100%",
+          "severity": "WARNING",
+          "evidence": "Top-1 contribution > 60% of group absolute move."
+        }
+      ],
+      "data_gaps": [
+        {
+          "category": "FUNDAMENTALS",
+          "status": "DATA_GAP",
+          "label": "DATA GAP \u2014 Sectors live not connected",
+          "note": null
+        },
+        {
+          "category": "FOREIGN_FLOW",
+          "status": "DATA_GAP",
+          "label": "DATA GAP \u2014 Sectors live not connected",
+          "note": null
+        },
+        {
+          "category": "BROKER_ACTIVITY",
+          "status": "NOT_INTEGRATED",
+          "label": "NOT INTEGRATED",
+          "note": null
+        },
+        {
+          "category": "FREE_FLOAT",
+          "status": "NOT_APPLIED",
+          "label": "NOT APPLIED \u2014 equal-weight prototype",
+          "note": null
+        },
+        {
+          "category": "TAXONOMY",
+          "status": "PROTOTYPE",
+          "label": "PROTOTYPE \u2014 Sectors taxonomy unavailable",
+          "note": null
+        },
+        {
+          "category": "BENCHMARK",
+          "status": "READY",
+          "label": "Benchmark date and series present",
+          "note": null
+        }
+      ],
+      "invalidation": [
+        {
+          "condition": "20D excess return turns negative",
+          "metric": "weaken_if_20d_excess_turns_negative",
+          "threshold": "excess_20d < 0",
+          "rationale": "State may weaken if 20D excess return turns negative on the next refresh."
+        },
+        {
+          "condition": "breadth falls below the configured threshold",
+          "metric": "weaken_if_breadth_below_threshold",
+          "threshold": "breadth_outperforming < 30% (current 100.0%)",
+          "rationale": "State may weaken if breadth falls below the configured threshold."
+        },
+        {
+          "condition": "diffusion shifts to NARROWING or UNCONFIRMED",
+          "metric": "weaken_if_diffusion_shifts",
+          "threshold": "diffusion != UNCONFIRMED",
+          "rationale": "State may weaken if diffusion shifts away from its current classification."
+        },
+        {
+          "condition": "the consecutive-observation persistence chain is broken",
+          "metric": "weaken_if_persistence_broken",
+          "threshold": "persistence resets to 1",
+          "rationale": "State may weaken if the persistence chain resets to 1 on the next refresh."
+        }
+      ],
+      "method_version": "methodology-v3",
+      "contract_version": "intelligence-v1"
+    }
+  ],
+  "complete": false,
   "taxonomy_views": {
     "konglo": {
       "schema_version": "taxonomy-view-v1",
@@ -29002,10 +30714,15 @@
           "coverage_pct": 100.0,
           "equal_weight_return_20d": 10.1346549885,
           "equal_weight_return_60d": null,
+          "equal_weight_return_ytd": null,
           "excess_return_20d": 2.6248909847,
           "excess_return_60d": 3.6290449365,
+          "excess_return_ytd": null,
           "benchmark_return_20d": null,
           "benchmark_return_60d": null,
+          "benchmark_return_ytd": null,
+          "ytd_start_date": null,
+          "ytd_eligible_constituent_count": 0,
           "breadth_outperforming": 77.78,
           "prev_breadth_outperforming": 55.56,
           "breadth_delta": 22.22,
@@ -29029,10 +30746,15 @@
           "coverage_pct": 100.0,
           "equal_weight_return_20d": 6.4184411959,
           "equal_weight_return_60d": null,
+          "equal_weight_return_ytd": null,
           "excess_return_20d": -1.0913228079,
           "excess_return_60d": 4.1981354173,
+          "excess_return_ytd": null,
           "benchmark_return_20d": null,
           "benchmark_return_60d": null,
+          "benchmark_return_ytd": null,
+          "ytd_start_date": null,
+          "ytd_eligible_constituent_count": 0,
           "breadth_outperforming": 30.0,
           "prev_breadth_outperforming": 60.0,
           "breadth_delta": -30.0,
@@ -29056,10 +30778,15 @@
           "coverage_pct": 87.5,
           "equal_weight_return_20d": 3.0556864799,
           "equal_weight_return_60d": null,
+          "equal_weight_return_ytd": null,
           "excess_return_20d": -4.4540775239,
           "excess_return_60d": -4.8421122562,
+          "excess_return_ytd": null,
           "benchmark_return_20d": null,
           "benchmark_return_60d": null,
+          "benchmark_return_ytd": null,
+          "ytd_start_date": null,
+          "ytd_eligible_constituent_count": 0,
           "breadth_outperforming": 14.29,
           "prev_breadth_outperforming": 14.29,
           "breadth_delta": 0.0,
@@ -29083,10 +30810,15 @@
           "coverage_pct": 100.0,
           "equal_weight_return_20d": 1.8323116601,
           "equal_weight_return_60d": null,
+          "equal_weight_return_ytd": null,
           "excess_return_20d": -5.6774523437,
           "excess_return_60d": -6.3540799277,
+          "excess_return_ytd": null,
           "benchmark_return_20d": null,
           "benchmark_return_60d": null,
+          "benchmark_return_ytd": null,
+          "ytd_start_date": null,
+          "ytd_eligible_constituent_count": 0,
           "breadth_outperforming": 20.0,
           "prev_breadth_outperforming": 20.0,
           "breadth_delta": 0.0,
@@ -29110,10 +30842,15 @@
           "coverage_pct": 100.0,
           "equal_weight_return_20d": -0.2511498427,
           "equal_weight_return_60d": null,
+          "equal_weight_return_ytd": null,
           "excess_return_20d": -7.7609138465,
           "excess_return_60d": -13.8523589868,
+          "excess_return_ytd": null,
           "benchmark_return_20d": null,
           "benchmark_return_60d": null,
+          "benchmark_return_ytd": null,
+          "ytd_start_date": null,
+          "ytd_eligible_constituent_count": 0,
           "breadth_outperforming": 33.33,
           "prev_breadth_outperforming": 66.67,
           "breadth_delta": -33.34,
@@ -29137,10 +30874,15 @@
           "coverage_pct": 100.0,
           "equal_weight_return_20d": -1.4200831848,
           "equal_weight_return_60d": null,
+          "equal_weight_return_ytd": null,
           "excess_return_20d": -8.9298471886,
           "excess_return_60d": -4.5432799916,
+          "excess_return_ytd": null,
           "benchmark_return_20d": null,
           "benchmark_return_60d": null,
+          "benchmark_return_ytd": null,
+          "ytd_start_date": null,
+          "ytd_eligible_constituent_count": 0,
           "breadth_outperforming": 0.0,
           "prev_breadth_outperforming": 0.0,
           "breadth_delta": 0.0,
@@ -29164,10 +30906,15 @@
           "coverage_pct": 100.0,
           "equal_weight_return_20d": 7.2586218363,
           "equal_weight_return_60d": null,
+          "equal_weight_return_ytd": null,
           "excess_return_20d": -0.2511421675,
           "excess_return_60d": -0.2651909869,
+          "excess_return_ytd": null,
           "benchmark_return_20d": null,
           "benchmark_return_60d": null,
+          "benchmark_return_ytd": null,
+          "ytd_start_date": null,
+          "ytd_eligible_constituent_count": 0,
           "breadth_outperforming": 50.0,
           "prev_breadth_outperforming": 50.0,
           "breadth_delta": 0.0,
@@ -29191,10 +30938,15 @@
           "coverage_pct": 100.0,
           "equal_weight_return_20d": -1.7021881216,
           "equal_weight_return_60d": null,
+          "equal_weight_return_ytd": null,
           "excess_return_20d": -9.2119521254,
           "excess_return_60d": -14.9430047901,
+          "excess_return_ytd": null,
           "benchmark_return_20d": null,
           "benchmark_return_60d": null,
+          "benchmark_return_ytd": null,
+          "ytd_start_date": null,
+          "ytd_eligible_constituent_count": 0,
           "breadth_outperforming": 0.0,
           "prev_breadth_outperforming": 0.0,
           "breadth_delta": 0.0,
@@ -29218,10 +30970,15 @@
           "coverage_pct": 100.0,
           "equal_weight_return_20d": 16.0962873351,
           "equal_weight_return_60d": null,
+          "equal_weight_return_ytd": null,
           "excess_return_20d": 8.5865233313,
           "excess_return_60d": -2.5621073543,
+          "excess_return_ytd": null,
           "benchmark_return_20d": null,
           "benchmark_return_60d": null,
+          "benchmark_return_ytd": null,
+          "ytd_start_date": null,
+          "ytd_eligible_constituent_count": 0,
           "breadth_outperforming": 66.67,
           "prev_breadth_outperforming": 66.67,
           "breadth_delta": 0.0,
@@ -29245,10 +31002,15 @@
           "coverage_pct": 100.0,
           "equal_weight_return_20d": 22.2222222222,
           "equal_weight_return_60d": null,
+          "equal_weight_return_ytd": null,
           "excess_return_20d": 14.7124582184,
           "excess_return_60d": 12.1528029151,
+          "excess_return_ytd": null,
           "benchmark_return_20d": null,
           "benchmark_return_60d": null,
+          "benchmark_return_ytd": null,
+          "ytd_start_date": null,
+          "ytd_eligible_constituent_count": 0,
           "breadth_outperforming": 100.0,
           "prev_breadth_outperforming": 100.0,
           "breadth_delta": 0.0,

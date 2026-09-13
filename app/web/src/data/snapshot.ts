@@ -119,7 +119,35 @@ export interface Coverage {
   discovered_universe_disclosure?: string;
   security_master_pagination_completeness?: "COMPLETE" | "PARTIAL" | "UNKNOWN" | null;
   close_pagination_completeness?: "COMPLETE" | "PARTIAL" | "UNKNOWN" | null;
+  // Pagination / window-cap flags threaded from provider diagnostics
+  // (continuation pass, 2026-09-13). Absent on bundles exported before the
+  // pass; UI must treat absent as unknown, never as complete.
   pagination_incomplete?: boolean;
+  history_window_capped_90d?: boolean;
+  history_window_capped_note?: string | null;
+  // Session/alignment disclosure (production pass, 2026-09-13). Absent on
+  // older bundles; UI must treat absent as unknown, never as clean.
+  suspension_check?: "checked" | "not_supported" | "failed" | string;
+  intraday_build?: boolean;
+  max_observation_lag_days?: number | null;
+  tickers_lagging_gt2d?: number;
+}
+
+// Per-ticker acquisition diagnostics persisted by the pipeline as
+// `history_diagnostics.json` and forwarded verbatim by the exporter.
+// `failed_symbols` entries may be plain tickers or `{ticker, ...}` rows
+// depending on the provider; the adapter normalizes both shapes.
+export interface HistoryDiagnostics {
+  requested_symbols?: number;
+  returned_symbols?: number;
+  returned_rows?: number;
+  failed_symbols?: Array<string | { ticker?: string } | Record<string, unknown>>;
+  empty_symbols?: Array<string | Record<string, unknown>>;
+  duplicate_symbol_date_rows?: number;
+  window_capped_to_90_calendar_days?: boolean;
+  requested_start?: string;
+  effective_start?: string;
+  end?: string;
 }
 
 export interface Comparability {
@@ -164,10 +192,42 @@ export interface GroupRow {
   hhi_contribution: number | null;
   leadership_state: LeadershipState;
   diffusion_state: DiffusionState;
+  // Diffusion v2 detail (FIRM / FRAGILE qualified states such as
+  // BROADENING_FIRM) emitted by signals/diffusion_v2.py. Absent on legacy
+  // exports; UI shows it only where emitted, never synthesized.
+  diffusion_state_v2?: string | null;
   leadership_rank: number | null;
   change_rank: number | null;
   leadership_persistence?: number;
   diffusion_persistence?: number;
+  // Extended breadth denominator + signed concentration diagnostics
+  // persisted by newer pipeline builds. All optional for back-compat.
+  breadth_total_count?: number | null;
+  breadth_eligible_count?: number | null;
+  breadth_missing_count?: number | null;
+  breadth_positive_count?: number | null;
+  breadth_outperforming_count?: number | null;
+  breadth_improving_count?: number | null;
+  top1_signed_share?: number | null;
+  top3_signed_share?: number | null;
+}
+
+export interface EvidenceContradictionRow {
+  metric: string;
+  label: string;
+  severity: string;
+  evidence?: string | null;
+}
+
+export interface EvidenceInvalidationRow {
+  condition: string;
+  threshold?: string | null;
+}
+
+export interface GroupEvidenceRow {
+  group_id: string;
+  contradictions?: EvidenceContradictionRow[];
+  invalidation?: EvidenceInvalidationRow[];
 }
 
 export interface TransitionRow {
@@ -179,6 +239,9 @@ export interface TransitionRow {
   current_leadership_state: LeadershipState;
   previous_diffusion_state: DiffusionState | null;
   current_diffusion_state: DiffusionState;
+  previous_diffusion_state_v2?: string | null;
+  current_diffusion_state_v2?: string | null;
+  diffusion_transition_v2?: string | null;
   leadership_transition: string | null;
   diffusion_transition: string | null;
   breadth_delta: number | null;
@@ -625,6 +688,11 @@ export interface SnapshotPayload {
   schema_version: string;
   snapshot_id: string;
   as_of: string;
+  // Bundle-completeness sentinel forwarded from SnapshotReader.load
+  // (`COMPLETE` file written last by SnapshotWriter.write). Pre-sentinel
+  // bundles report false; legacy exports that predate the forwarding omit
+  // the key entirely (unknown — never render as authoritative either way).
+  complete?: boolean | null;
   previous_snapshot_id: string | null;
   comparability?: Comparability;
   manifest: { entries: ManifestEntry[] };
@@ -636,7 +704,7 @@ export interface SnapshotPayload {
   you_context?: Record<string, unknown>;
   api_credit_audit?: Record<string, unknown>;
   security_master_diagnostics?: Record<string, unknown>;
-  history_diagnostics?: Record<string, unknown>;
+  history_diagnostics?: HistoryDiagnostics;
   groups: GroupRow[];
   transitions: TransitionRow[];
   features: FeatureRow[];
@@ -659,6 +727,9 @@ export interface SnapshotPayload {
     sector?: string;
   }>;
   change_digest?: Record<string, unknown>;
+  // Per-group evidence (contradictions + screen invalidation) from
+  // evidence.json. Absent in legacy payloads; UI falls back to placeholders.
+  evidence?: GroupEvidenceRow[];
   // Added 2026-08-30:
   taxonomy_views?: Record<string, TaxonomyView>;
   foreign_flow_sample?: ForeignFlowSample;

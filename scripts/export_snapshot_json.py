@@ -20,7 +20,7 @@ from typing import Any
 
 import pandas as pd
 
-from idx_leadership.data.snapshots import SnapshotReader
+from idx_leadership.data.snapshots import SnapshotReader, validate_snapshot_id
 from idx_leadership.data.comparability import check_snapshot_compatibility
 from idx_leadership.utils import project_root, get_logger
 
@@ -39,6 +39,25 @@ def _records(df: pd.DataFrame | None) -> list[dict[str, Any]]:
             out[col] = out[col].dt.strftime("%Y-%m-%d")
     encoded = out.to_json(orient="records", date_format="iso")
     return json.loads(encoded) if encoded is not None else []
+
+
+def _sanitize_audit(audit: Any) -> Any:
+    """Strip machine-specific absolute paths from audit sidecars.
+
+    Shipped web assets must never embed the builder's local filesystem
+    layout (e.g. ledger_path). Only the ledger filename is preserved.
+    """
+    if isinstance(audit, dict):
+        cleaned: dict[str, Any] = {}
+        for key, value in audit.items():
+            if key == "ledger_path" and isinstance(value, str):
+                cleaned[key] = value.rsplit("/", 1)[-1].rsplit("\\", 1)[-1]
+            else:
+                cleaned[key] = _sanitize_audit(value)
+        return cleaned
+    if isinstance(audit, list):
+        return [_sanitize_audit(item) for item in audit]
+    return audit
 
 
 def _iso_date(value: Any) -> str | None:
@@ -605,6 +624,7 @@ def export(
     *,
     snapshot_root: Path | None = None,
 ) -> dict[str, Any]:
+    validate_snapshot_id(snapshot_id)
     reader = SnapshotReader(root=snapshot_root)
     snap = reader.load(snapshot_id)
     manifest_entries = (snap.get("manifest") or {}).get("entries") or []
@@ -629,7 +649,7 @@ def export(
         "methodology_sensitivity": snap.get("methodology_sensitivity"),
         "tavily_context": snap.get("tavily_context"),
         "you_context": snap.get("you_context"),
-        "api_credit_audit": snap.get("api_credit_audit"),
+        "api_credit_audit": _sanitize_audit(snap.get("api_credit_audit")),
         "security_master_diagnostics": snap.get("security_master_diagnostics"),
         "history_diagnostics": snap.get("history_diagnostics"),
         "endpoints": snap.get("endpoints"),
@@ -658,6 +678,8 @@ def export(
         "breadth_history": _build_breadth_history(reader, snapshot_id, snap),
         "security_master": snap.get("security_master"),
         "change_digest": snap.get("change_digest"),
+        "evidence": snap.get("evidence"),
+        "complete": snap.get("complete"),
     }
     _enrich_with_taxonomy_views(
         payload,
@@ -686,6 +708,11 @@ def main() -> int:
     parser.add_argument("--latest", action="store_true", help="Use the latest snapshot.")
     parser.add_argument("--out", default=None, help="Override output path.")
     parser.add_argument(
+        "--allow-outside-root",
+        action="store_true",
+        help="Acknowledge writing --out outside app/web/public/snapshots/.",
+    )
+    parser.add_argument(
         "--snapshot-root",
         default=None,
         help="Read snapshots from an alternate root (useful for isolated harnesses).",
@@ -707,6 +734,15 @@ def main() -> int:
     else:
         sid = args.snapshot_id
     out_path = Path(args.out) if args.out else PUBLIC_DIR / f"{sid}.json"
+    if args.out and not args.allow_outside_root:
+        try:
+            out_path.resolve().relative_to(PUBLIC_DIR.resolve())
+        except ValueError:
+            print(
+                f"refusing --out outside {PUBLIC_DIR} without --allow-outside-root",
+                file=__import__("sys").stderr,
+            )
+            return 2
     info = export(
         sid,
         out_path,

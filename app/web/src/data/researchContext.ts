@@ -1,5 +1,39 @@
 import { normalizeDataStatus, type DataStatus, type SnapshotPayload } from "./snapshot";
 
+/**
+ * Canonical research-answer display cap (shared with Agent A backend:
+ * `scripts/enrich_tavily_context.py`, `scripts/enrich_you_context.py`,
+ * `you_client.py` all truncate stored evidence `content` to 1200 chars).
+ * Renderers must truncate through `truncateResearchAnswer` so the cap,
+ * provenance banner, and CONTEXT badge stay consistent everywhere.
+ */
+export const RESEARCH_ANSWER_MAX_CHARS = 1200;
+
+export interface TruncatedResearchAnswer {
+  text: string;
+  truncated: boolean;
+  originalLength: number;
+}
+
+/** Enforce the canonical 1200-char cap at render. Never throws. */
+export function truncateResearchAnswer(
+  value: string | null | undefined,
+  max: number = RESEARCH_ANSWER_MAX_CHARS,
+): TruncatedResearchAnswer {
+  const text = (value ?? "").replace(/\s+/g, " ").trim();
+  if (!text) {
+    return { text: "No research synthesis was returned.", truncated: false, originalLength: 0 };
+  }
+  if (text.length <= max) {
+    return { text, truncated: false, originalLength: text.length };
+  }
+  return {
+    text: `${text.slice(0, max - 1).trimEnd()}…`,
+    truncated: true,
+    originalLength: text.length,
+  };
+}
+
 export type ResearchContextCategory = "foreign_flow" | "fundamentals" | "events";
 
 export interface TavilyEvidenceRecord {
@@ -84,7 +118,7 @@ function normalizeRecords(value: unknown, category?: string): TavilyEvidenceReco
       provider: typeof row.provider === "string" ? row.provider : "tavily",
       url,
       title,
-      content: typeof row.content === "string" ? row.content.trim().slice(0, 1200) : undefined,
+      content: typeof row.content === "string" ? row.content.trim().slice(0, RESEARCH_ANSWER_MAX_CHARS) : undefined,
       relevance_score: typeof score === "number" && Number.isFinite(score) ? score : undefined,
       retrieved_at: typeof row.retrieved_at === "string" ? row.retrieved_at : undefined,
       request_id: typeof row.request_id === "string" ? row.request_id : undefined,
@@ -223,7 +257,7 @@ function normalizeYouRecords(value: unknown, category?: string): YouEvidenceReco
       provider: typeof row.provider === "string" ? row.provider : "you",
       url,
       title,
-      content: typeof row.content === "string" ? row.content.trim().slice(0, 1200) : undefined,
+      content: typeof row.content === "string" ? row.content.trim().slice(0, RESEARCH_ANSWER_MAX_CHARS) : undefined,
       retrieved_at: typeof row.retrieved_at === "string" ? row.retrieved_at : undefined,
       request_id: typeof row.request_id === "string" ? row.request_id : undefined,
       quantitative_use: false as const,

@@ -1,4 +1,11 @@
-"""Date helpers — explicit, no implicit timezones beyond naive UTC dates."""
+"""Date helpers — explicit, naive exchange-date convention.
+
+Market data throughout the engine uses naive ``datetime.date`` values in
+exchange (Asia/Jakarta) terms: providers normalize vendor timestamps to
+the exchange trading date before this layer ever sees them. The only
+timezone-aware operation is :func:`jakarta_session_state`, which maps the
+current UTC instant to the IDX session clock for intraday marking.
+"""
 from __future__ import annotations
 
 from datetime import date, datetime, timedelta, timezone
@@ -75,6 +82,29 @@ def _shift(start: date, n: int) -> date:
 def today_utc() -> date:
     """Return today's date (naive)."""
     return datetime.now(timezone.utc).date()
+
+
+def jakarta_session_state(now: datetime | None = None) -> str:
+    """Classify the current IDX session state in Asia/Jakarta time.
+
+    Returns one of ``OPEN`` (Monday–Friday 09:00–16:00 WIB, when the
+    latest daily bar may still be a partial session), ``WEEKEND``, or
+    ``CLOSED``. Dates throughout the engine are naive exchange dates;
+    this helper exists so pipeline runs started mid-session can mark
+    their output intraday instead of letting a partial bar pose as final.
+    """
+    from zoneinfo import ZoneInfo
+
+    moment = now if now is not None else datetime.now(timezone.utc)
+    if moment.tzinfo is None:
+        moment = moment.replace(tzinfo=timezone.utc)
+    local = moment.astimezone(ZoneInfo("Asia/Jakarta"))
+    if local.weekday() >= 5:
+        return "WEEKEND"
+    minutes = local.hour * 60 + local.minute
+    if 9 * 60 <= minutes < 16 * 60:
+        return "OPEN"
+    return "CLOSED"
 
 
 def date_range(start: date, end: date) -> list[date]:

@@ -5,6 +5,7 @@ import type { SectorData } from "../data/adapter";
 import { LeadershipChip, DiffusionChip, DataStatusChip } from "../components/StatusChips";
 import { EmptyState } from "../components/EmptyState";
 import { EvidenceBadge } from "../components/EvidenceModel";
+import { WindowCapNotice } from "../components/SnapshotNotices";
 import { formatEnumLabel, formatPercent } from "../data/format";
 
 type SortKey =
@@ -187,6 +188,21 @@ export default function MasterGroupTable() {
       : key === "excess60d"
         ? "60D excess"
         : formatEnumLabel(key);
+  const sortableHeader = (key: SortKey) => ({
+    onClick: () => handleSort(key),
+    tabIndex: 0,
+    role: "button" as const,
+    "aria-sort": (sortKey === key
+      ? sortDir === "asc" ? "ascending" : "descending"
+      : "none") as "ascending" | "descending" | "none",
+    "aria-label": `Sort by ${sortLabel(key)}`,
+    onKeyDown: (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        handleSort(key);
+      }
+    },
+  });
 
   return (
     <section className="content-shell" style={{ padding: "0 var(--page-gutter) 80px" }}>
@@ -221,6 +237,10 @@ export default function MasterGroupTable() {
           left-to-right to evaluate leadership, breadth, diffusion, concentration, and confirmation independently.
         </p>
       </header>
+
+      <div style={{ marginBottom: 14 }}>
+        <WindowCapNotice data={data} compact />
+      </div>
 
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
         <input
@@ -263,81 +283,72 @@ export default function MasterGroupTable() {
         >
           <thead>
             <tr>
-              <th style={headerCell} onClick={() => handleSort("name")} role="button">
+              <th style={headerCell} {...sortableHeader("name")}>
                 Group{arrow("name")}
               </th>
-              <th style={headerCell} onClick={() => handleSort("leadership")} role="button">
+              <th style={headerCell} {...sortableHeader("leadership")}>
                 Leadership{arrow("leadership")}
               </th>
-              <th style={headerCell} onClick={() => handleSort("prevLeadership")} role="button">
+              <th style={headerCell} {...sortableHeader("prevLeadership")}>
                 Prev{arrow("prevLeadership")}
               </th>
-              <th style={headerCell} onClick={() => handleSort("transition")} role="button">
+              <th style={headerCell} {...sortableHeader("transition")}>
                 Transition{arrow("transition")}
               </th>
               <th
                 style={{ ...headerCell, textAlign: "right" }}
-                onClick={() => handleSort("excessYtd")}
-                role="button"
+                {...sortableHeader("excessYtd")}
               >
                 YTD Excess{arrow("excessYtd")}
               </th>
               <th
                 style={{ ...headerCell, textAlign: "right" }}
-                onClick={() => handleSort("excess20d")}
-                role="button"
+                {...sortableHeader("excess20d")}
               >
                 20D Excess{arrow("excess20d")}
               </th>
               <th
                 style={{ ...headerCell, textAlign: "right" }}
-                onClick={() => handleSort("excess60d")}
-                role="button"
+                {...sortableHeader("excess60d")}
               >
                 60D Excess{arrow("excess60d")}
               </th>
               <th
                 style={{ ...headerCell, textAlign: "right" }}
-                onClick={() => handleSort("breadth")}
-                role="button"
+                {...sortableHeader("breadth")}
               >
                 Breadth{arrow("breadth")}
               </th>
               <th
                 style={{ ...headerCell, textAlign: "right" }}
-                onClick={() => handleSort("breadthDelta")}
-                role="button"
+                {...sortableHeader("breadthDelta")}
               >
                 Δ Breadth (%){arrow("breadthDelta")}
               </th>
-              <th style={headerCell} onClick={() => handleSort("diffusion")} role="button">
+              <th style={headerCell} {...sortableHeader("diffusion")}>
                 Diffusion{arrow("diffusion")}
               </th>
               <th
                 style={{ ...headerCell, textAlign: "right" }}
-                onClick={() => handleSort("concentration")}
-                role="button"
+                {...sortableHeader("concentration")}
               >
                 Top-3{arrow("concentration")}
               </th>
               <th
                 style={{ ...headerCell, textAlign: "right" }}
-                onClick={() => handleSort("confirmation")}
-                role="button"
+                {...sortableHeader("confirmation")}
               >
                 Confirmation{arrow("confirmation")}
               </th>
               <th
                 style={{ ...headerCell, textAlign: "right" }}
-                onClick={() => handleSort("eligible")}
-                role="button"
+                {...sortableHeader("eligible")}
               >
                 Elig / Total{arrow("eligible")}
               </th>
               <th
                 style={{ ...headerCell, textAlign: "right" }}
-                onClick={() => handleSort("coverage")}
-                role="button"
+                {...sortableHeader("coverage")}
               >
                 Coverage{arrow("coverage")}
               </th>

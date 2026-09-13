@@ -30,7 +30,7 @@ class RawCache:
         h = hashlib.sha256(key.encode("utf-8")).hexdigest()
         return self.root / f"{h[:2]}" / f"{h}.json"
 
-    def get(self, key: str, ttl_seconds: Optional[int] = None) -> Optional[dict]:
+    def get(self, key: str, ttl_seconds: Optional[int] = None) -> Optional[Any]:
         p = self._key_path(key)
         if not p.exists():
             return None

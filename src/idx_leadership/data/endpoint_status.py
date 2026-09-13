@@ -104,7 +104,8 @@ def rollup_status(endpoints: list[EndpointQuality]) -> str:
 
     Rules:
       * any FAILED → FAILED
-      * any PARTIAL → PARTIAL
+      * any PARTIAL → READY_WITH_GAPS (PARTIAL has no global enum member;
+        it always signals a gap, never clean READY)
       * any READY_WITH_GAPS → READY_WITH_GAPS
       * any STALE → STALE
       * otherwise READY
@@ -113,7 +114,7 @@ def rollup_status(endpoints: list[EndpointQuality]) -> str:
     if EndpointStatus.FAILED in statuses:
         return DataQualityStatus.FAILED.value
     if EndpointStatus.PARTIAL in statuses:
-        return "PARTIAL"
+        return DataQualityStatus.READY_WITH_GAPS.value
     if EndpointStatus.STALE in statuses:
         return DataQualityStatus.STALE.value
     if EndpointStatus.READY_WITH_GAPS in statuses:

@@ -758,9 +758,9 @@ def render_market_brief(view: DashboardView, selected_group_id: str | None = Non
                 if part
             ]
             lines.append(
-                f"{shift.rank}. **{shift.group_name}** — "
+                f"{shift.rank}. **{_md_escape(shift.group_name)}** — "
                 f"{' | '.join(transition_parts) or 'material evidence change'}; "
-                f"{shift.primary_evidence}. {shift.materiality_reason}."
+                f"{_md_escape(shift.primary_evidence)}. {_md_escape(shift.materiality_reason)}."
             )
     else:
         lines.append("- No change met the configured materiality rules.")
@@ -788,12 +788,12 @@ def render_market_brief(view: DashboardView, selected_group_id: str | None = Non
     if contradiction_rows:
         for name, cn, breadth_delta, breadth in contradiction_rows:
             qualifier = cn.evidence or cn.label
-            detail_bits = [qualifier]
+            detail_bits = [_md_escape(qualifier)]
             if breadth_delta is not None:
                 detail_bits.append(f"breadth {breadth_delta:+.1f}pp")
             if breadth is not None:
                 detail_bits.append(f"current breadth {breadth:.1f}%")
-            lines.append(f"- **{name}** — {cn.label}; {'; '.join(detail_bits)}.")
+            lines.append(f"- **{_md_escape(name)}** — {_md_escape(cn.label)}; {'; '.join(detail_bits)}.")
     else:
         lines.append("- No contradictions were flagged on the latest observation.")
 
@@ -804,9 +804,9 @@ def render_market_brief(view: DashboardView, selected_group_id: str | None = Non
     else:
         lines.extend(
             [
-                f"### {selected.name}",
+                f"### {_md_escape(selected.name)}",
                 "",
-                selected.interpretation,
+                _md_escape(selected.interpretation),
                 "",
                 f"- Leadership: {selected.leadership} ({selected.leadership_persistence} observations)",
                 f"- Diffusion: {selected.diffusion_detail} ({selected.diffusion_persistence} observations)",
@@ -818,7 +818,7 @@ def render_market_brief(view: DashboardView, selected_group_id: str | None = Non
         if selected.contradictions:
             lines.append("- Contradictions:")
             for cn in selected.contradictions:
-                lines.append(f"  - {cn.label} — {cn.evidence or ''}".rstrip())
+                lines.append(f"  - {_md_escape(cn.label)} — {_md_escape(cn.evidence or '')}".rstrip())
         else:
             lines.append("- Contradictions: none flagged.")
 
@@ -826,13 +826,13 @@ def render_market_brief(view: DashboardView, selected_group_id: str | None = Non
         lines.extend(["", "### Screen Invalidation", ""])
         if selected.invalidation:
             intro = (
-                f"{selected.name} would lose its current {selected.leadership}/"
+                f"{_md_escape(selected.name)} would lose its current {selected.leadership}/"
                 f"{selected.diffusion_detail} interpretation if:"
             )
             lines.append(intro)
             for inv in selected.invalidation:
-                threshold = f" ({inv.threshold})" if inv.threshold else ""
-                lines.append(f"- {inv.condition}{threshold}.")
+                threshold = f" ({_md_escape(inv.threshold)})" if inv.threshold else ""
+                lines.append(f"- {_md_escape(inv.condition)}{threshold}.")
         else:
             lines.append("- No invalidation conditions are available for this group.")
 
@@ -1181,6 +1181,14 @@ def _format_share(value: float | None) -> str:
     return "UNDEFINED" if value is None else f"{value:.0%}"
 
 
+def _md_escape(value: object) -> str:
+    """Escape Markdown metacharacters in snapshot-derived strings for briefs."""
+    text = "" if value is None else str(value)
+    for ch in ("\\", "`", "*", "_", "{", "}", "[", "]", "(", ")", "#", "+", "-", ".", "!"):
+        text = text.replace(ch, "\\" + ch)
+    return text
+
+
 def _group_bullets(
     groups: Sequence[GroupView],
     states: set[str],
@@ -1190,7 +1198,7 @@ def _group_bullets(
     if not selected:
         return ["- No group met the leadership condition."]
     return [
-        f"- **{group.name}** — {getattr(group, dimension)}; "
+        f"- **{_md_escape(group.name)}** — {getattr(group, dimension)}; "
         f"20D excess {_format_signed(group.excess_20d, '%')}; {group.diffusion.lower()}."
         for group in selected
     ]
@@ -1201,7 +1209,7 @@ def _diffusion_bullets(groups: Sequence[GroupView], state: str) -> list[str]:
     if not selected:
         return [f"- No group was classified as {state.lower()}."]
     return [
-        f"- **{group.name}** — breadth {_format_value(group.breadth, '%')}; "
+        f"- **{_md_escape(group.name)}** — breadth {_format_value(group.breadth, '%')}; "
         f"change {_format_signed(group.breadth_delta, 'pp')}."
         for group in selected
     ]

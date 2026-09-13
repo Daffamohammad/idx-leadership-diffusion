@@ -126,6 +126,7 @@ class SectorsClient:
     DEFAULT_TIMEOUT_SECONDS = 30
     DEFAULT_MAX_RETRIES = 2
     DEFAULT_BACKOFF_SECONDS = 1.5
+    DEFAULT_MAX_PAGES = 50
 
     def __init__(
         self,
@@ -229,6 +230,11 @@ class SectorsClient:
 
         if page_limit is not None and page_limit < 1:
             raise ProviderError("Sectors page_limit must be at least 1")
+        if page_limit is None and max_rows is None:
+            # Unbounded walks never terminate if the vendor asserts
+            # has_next=True forever; default cap keeps them auditable via
+            # capped_by_max_pages/PARTIAL diagnostics.
+            page_limit = self.DEFAULT_MAX_PAGES
         collected: list[Any] = []
         base_params = dict(params or {})
         offset = int(base_params.get("offset", 0) or 0)
@@ -470,6 +476,7 @@ class SectorsClient:
                     raise ProviderError(message)
 
                 try:
+                    _assert_payload_size(payload, path)
                     self._validate_payload(path, payload, params)
                 except IDXError as exc:
                     message = _redact_error(str(exc), self.api_key)
@@ -798,6 +805,22 @@ def _row_count(payload: Any) -> int:
                 return len(payload[key])
         return 1
     return 0
+
+
+#: Refuse vendor payloads larger than this (serialized chars) before
+#: validation/caching so a runaway response cannot fill disk or memory.
+MAX_PAYLOAD_CHARS = 1_000_000
+
+
+def _assert_payload_size(payload: Any, endpoint: str) -> None:
+    try:
+        size = len(json.dumps(payload, default=str))
+    except (TypeError, ValueError):
+        size = MAX_PAYLOAD_CHARS + 1
+    if size > MAX_PAYLOAD_CHARS:
+        raise ProviderError(
+            f"response exceeds size cap endpoint={endpoint} chars={size}"
+        )
 
 
 __all__ = [
