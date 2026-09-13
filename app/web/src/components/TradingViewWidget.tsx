@@ -11,17 +11,20 @@
 //   https://www.tradingview.com/widget-docs/widgets/charts/advanced-chart/
 //   https://www.tradingview.com/widget-docs/widgets/symbol-info/
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 interface TradingViewWidgetProps {
   ticker: string;
   exchange?: string;
   containerId?: string;
-  onUnavailable?: () => void;
+  onUnavailable?: (reason: TradingViewUnavailableReason) => void;
 }
+
+export type TradingViewUnavailableReason = "network" | "unsupported" | "error" | "timeout";
 
 const SCRIPT_ID = "tradingview-advanced-chart-script";
 const SCRIPT_SRC = "https://s3.tradingview.com/tv.js";
+const WIDGET_RENDER_TIMEOUT_MS = 8000;
 
 function sanitizeTicker(ticker: string, exchange: string): string | null {
   const cleaned = ticker.toUpperCase().trim();
@@ -83,22 +86,40 @@ export default function TradingViewWidget({
   const [status, setStatus] = useState<"loading" | "ready" | "blocked" | "unsupported">(
     "loading",
   );
+  const [healthCheckFailed, setHealthCheckFailed] = useState(false);
   const widgetRef = useRef<EmbeddedWidget | null>(null);
+  const renderTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const widgetReadyRef = useRef(false);
+  const onUnavailableRef = useRef(onUnavailable);
+
+  useEffect(() => {
+    onUnavailableRef.current = onUnavailable;
+  }, [onUnavailable]);
+
+  const clearRenderTimeout = useCallback(() => {
+    if (renderTimeoutRef.current) {
+      clearTimeout(renderTimeoutRef.current);
+      renderTimeoutRef.current = null;
+    }
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
     setStatus("loading");
+    setHealthCheckFailed(false);
+    widgetReadyRef.current = false;
+    clearRenderTimeout();
     const symbol = sanitizeTicker(ticker, exchange);
     if (!symbol) {
       setStatus("unsupported");
-      onUnavailable?.();
+      onUnavailableRef.current?.("unsupported");
       return () => {};
     }
     loadScript().then((loaded) => {
       if (cancelled) return;
       if (!loaded || typeof window.TradingView === "undefined") {
         setStatus("blocked");
-        onUnavailable?.();
+        onUnavailableRef.current?.("network");
         return;
       }
       if (!containerRef.current) return;
@@ -109,6 +130,12 @@ export default function TradingViewWidget({
       inner.style.width = "100%";
       containerRef.current.appendChild(inner);
       try {
+        const markReady = () => {
+          if (cancelled) return;
+          widgetReadyRef.current = true;
+          clearRenderTimeout();
+          setStatus("ready");
+        };
         widgetRef.current = new window.TradingView.widget({
           symbol,
           interval: "D",
@@ -123,23 +150,36 @@ export default function TradingViewWidget({
           hide_legend: false,
           save_image: false,
           container_id: idRef.current,
+          onChartReady: markReady,
         });
-        setStatus("ready");
+        if (widgetReadyRef.current) {
+          clearRenderTimeout();
+        } else {
+          renderTimeoutRef.current = setTimeout(() => {
+            if (!cancelled && widgetRef.current && !widgetReadyRef.current) {
+              setHealthCheckFailed(true);
+              setStatus("blocked");
+              onUnavailableRef.current?.("timeout");
+            }
+          }, WIDGET_RENDER_TIMEOUT_MS);
+        }
       } catch (err) {
         console.warn("TradingView widget failed", err);
         setStatus("blocked");
-        onUnavailable?.();
+        onUnavailableRef.current?.("error");
       }
     });
     return () => {
       cancelled = true;
+      clearRenderTimeout();
       try {
         widgetRef.current?.remove?.();
       } catch {
         // ignore
       }
+      widgetRef.current = null;
     };
-  }, [ticker, exchange, onUnavailable]);
+  }, [ticker, exchange, clearRenderTimeout]);
 
   return (
     <div
@@ -183,7 +223,9 @@ export default function TradingViewWidget({
           {status === "ready"
             ? "Live widget loaded"
             : status === "blocked"
-              ? "Network blocked / offline"
+              ? healthCheckFailed
+                ? "Widget render timed out"
+                : "Network blocked / offline"
               : status === "unsupported"
                 ? "Ticker not IDX-formatted"
                 : "Loading widget…"}
@@ -191,9 +233,9 @@ export default function TradingViewWidget({
       </header>
       {status === "blocked" && (
         <p style={{ margin: "0 0 12px", fontSize: 12, color: "#686e73" }}>
-          TradingView's CDN is not reachable from this browser. The
-          methodology chart (PriceChart) remains the source of truth; this
-          widget is contextual only.
+          {healthCheckFailed
+            ? "The widget did not become ready within 8 seconds. The methodology chart (PriceChart) remains the source of truth; this widget is contextual only."
+            : "TradingView's CDN is not reachable from this browser. The methodology chart (PriceChart) remains the source of truth; this widget is contextual only."}
         </p>
       )}
       <div

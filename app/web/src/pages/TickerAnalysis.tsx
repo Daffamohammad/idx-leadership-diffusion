@@ -10,7 +10,7 @@ import { Link, useParams } from "react-router";
 import { useSnapshot } from "../data/SnapshotProvider";
 import PriceChart from "../components/PriceChart";
 import { EvidenceBadge } from "../components/EvidenceModel";
-import TradingViewWidget from "../components/TradingViewWidget";
+import TradingViewWidget, { type TradingViewUnavailableReason } from "../components/TradingViewWidget";
 import { formatDateLabel, formatEnumLabel, formatIdrCompact } from "../data/format";
 
 export default function TickerAnalysis() {
@@ -18,12 +18,10 @@ export default function TickerAnalysis() {
   const ticker = (rawTicker ?? "").toUpperCase();
   const snap = useSnapshot();
   const adapted = snap.data;
-  const [tradingViewBlocked, setTradingViewBlocked] = useState(false);
-  const [tradingViewUnavailable, setTradingViewUnavailable] = useState(false);
+  const [tradingViewFailure, setTradingViewFailure] = useState<TradingViewUnavailableReason | null>(null);
 
   useEffect(() => {
-    setTradingViewBlocked(false);
-    setTradingViewUnavailable(false);
+    setTradingViewFailure(null);
   }, [ticker]);
 
   const feature = useMemo(() => {
@@ -157,7 +155,6 @@ export default function TickerAnalysis() {
         aria-label="Methodology price chart"
         style={{ display: "grid", gap: 12 }}
       >
-        <div className="eyebrow-muted">Methodology chart (snapshot-backed)</div>
         <PriceChart
           ticker={ticker}
           points={priceHistory.map((row) => ({ date: row.date, value: row.value }))}
@@ -165,26 +162,35 @@ export default function TickerAnalysis() {
             date: row.date,
             value: row.benchmark,
           }))}
+          groupPoints={priceHistory}
           asOf={asOf}
           source={`Persisted snapshot · ${formatEnumLabel(providerMode)} · ${formatEnumLabel(priceBasis)}`}
           metricLabel="Rebased index (start = 100)"
           referenceValue={100}
+          providerMode={providerMode}
+          priceBasis={priceBasis}
+          dataStatus={adapted.payload.quality?.status ?? undefined}
         />
       </section>
       <section
         aria-label="TradingView context chart"
         style={{ display: "grid", gap: 12 }}
       >
-        {!tradingViewBlocked && !tradingViewUnavailable && (
+        {!tradingViewFailure && (
           <TradingViewWidget
             ticker={ticker}
-            onUnavailable={() => {
-              if (navigator.onLine === false) setTradingViewBlocked(true);
-              else setTradingViewUnavailable(true);
+            onUnavailable={(reason) => {
+              if (reason === "timeout" || reason === "unsupported" || reason === "error") {
+                setTradingViewFailure(reason);
+              } else if (navigator.onLine === false) {
+                setTradingViewFailure("network");
+              } else {
+                setTradingViewFailure(reason);
+              }
             }}
           />
         )}
-        {(tradingViewBlocked || tradingViewUnavailable) && (
+        {tradingViewFailure && (
           <div
             style={{
               border: "1px solid #dfe2e1",
@@ -194,10 +200,12 @@ export default function TickerAnalysis() {
           >
             <div className="eyebrow-muted">TradingView (context only)</div>
             <h3 style={{ margin: "6px 0 8px", fontSize: 16 }}>
-              Live widget unavailable
+              {tradingViewFailure === "timeout" ? "Widget render timed out" : "Live widget unavailable"}
             </h3>
             <p style={{ margin: 0, color: "#686e73", fontSize: 13 }}>
-              {tradingViewBlocked
+              {tradingViewFailure === "timeout"
+                ? "The widget did not become ready within 8 seconds; the methodology chart remains the source of truth."
+                : tradingViewFailure === "network"
                 ? "The TradingView CDN is not reachable from this browser; the methodology chart remains the source of truth."
                 : "The widget failed to initialise. The snapshot-backed chart above is the methodology series."}
             </p>
