@@ -32,6 +32,7 @@ import { leadershipColor } from "../components/StatusChips";
 import PriceChart from "../components/PriceChart";
 import { formatCountLabel, formatDateLabel, formatEnumLabel, formatPercent, formatSnapshotId } from "../data/format";
 import { EvidenceBadge } from "../components/EvidenceModel";
+import { WindowCapNotice } from "../components/SnapshotNotices";
 
 const card: React.CSSProperties = {
   background: "#ffffff",
@@ -362,13 +363,16 @@ function TaxonomyGroupDetail({
           </span>
         </div>
         <div className="explorer-metrics" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginTop: 16 }}>
-          <MetricCard label="YTD excess" value={metric(group.excessYtd)} sub={group.ytdStartDate ? `from ${formatDateLabel(group.ytdStartDate)} vs IHSG` : "baseline unavailable"} />
-          <MetricCard label="YTD group return" value={metric(group.returnYtd)} sub={`${ytdCoverage} with YTD history`} />
+          <MetricCard label="YTD excess" value={metric(group.excessYtd)} sub={group.ytdStartDate ? `from ${formatDateLabel(group.ytdStartDate)} vs IHSG` : "baseline unavailable"} />          <MetricCard label="YTD group return" value={metric(group.returnYtd)} sub={`${ytdCoverage} with YTD history`} />
           <MetricCard label="IHSG YTD" value={metric(group.benchmarkYtd)} sub="same dates and price basis" />
           <MetricCard label="20D excess" value={metric(group.excess20d)} sub="diagnostic vs IHSG" />
           <MetricCard label="Breadth" value={metric(group.breadth, "%")} sub={group.breadthDelta === null ? "change unavailable" : `${metric(group.breadthDelta)} vs prior`} />
           <MetricCard label="Concentration" value={metric(group.concentration, "%")} sub="Top-3 contribution" />
         </div>
+      </div>
+
+      <div style={{ marginBottom: 20 }}>
+        <WindowCapNotice data={data} compact />
       </div>
 
       <SectionHead label="Performance and membership" />
@@ -671,9 +675,11 @@ export default function GroupExplorer() {
           )}
         </div>
         <div style={{ marginTop: 8, fontSize: 10, color: "#8f8f8f" }}>
-          {sector.diffusion === "UNCONFIRMED" ? "No comparable prior snapshot is available. Current breadth can be shown, but diffusion change cannot yet be classified." : `Diffusion: ${formatEnumLabel(sector.diffusion)}${sector.prevDiffusion ? ` (previous ${formatEnumLabel(sector.prevDiffusion)})` : ""}`}
+          {sector.diffusion === "UNCONFIRMED" ? "No comparable prior snapshot is available. Current breadth can be shown, but diffusion change cannot yet be classified." : `Diffusion: ${formatEnumLabel(sector.diffusion)}${sector.prevDiffusion ? ` (previous ${formatEnumLabel(sector.prevDiffusion)})` : ""}${sector.diffusionV2 ? ` · v2 detail ${formatEnumLabel(sector.diffusionV2)}` : ""}`}
         </div>
       </div>
+
+      <WindowCapNotice data={data} />
 
       <div className="explorer-metrics" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 24 }}>
         <MetricCard
@@ -853,12 +859,24 @@ export default function GroupExplorer() {
       </div>
 
       <SectionHead label="What could contradict this signal?" />
-      <EmptyState
-        label="NO CONTRADICTION RECORDS"
-        title="Per-group contradiction evidence is not in the web snapshot"
-        body="The current payload does not emit contradiction records, so no generic warning is shown for this group."
-        height={108}
-      />
+      {sector.contradictions.length ? (
+        <ol style={{ margin: "0 0 12px", paddingLeft: 18, fontSize: 13, lineHeight: 1.6 }}>
+          {sector.contradictions.map((c) => (
+            <li key={c.metric}>
+              <strong>{c.severity === "CRITICAL" ? "CRITICAL" : "Warning"}</strong>
+              {` — ${c.label}`}
+              {c.evidence ? <span style={{ color: "#686e73" }}>{` — ${c.evidence}`}</span> : null}
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <EmptyState
+          label="NO CONTRADICTION RECORDS"
+          title="Per-group contradiction evidence is not in the web snapshot"
+          body="The current payload does not emit contradiction records, so no generic warning is shown for this group."
+          height={108}
+        />
+      )}
 
       <div
         style={{
@@ -870,11 +888,22 @@ export default function GroupExplorer() {
         }}
       >
         <div style={{ fontSize: 13, fontWeight: 500, color: "#171717", marginBottom: 8 }}>Screen invalidation</div>
-        <p style={{ fontSize: 12, color: "#666666", margin: 0 }}>
-          Per-group invalidation conditions are not emitted by the current web snapshot.
-          Review the versioned methodology and the next comparable snapshot before treating
-          a state as changed.
-        </p>
+        {sector.invalidation.length ? (
+          <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: "#333333", lineHeight: 1.6 }}>
+            {sector.invalidation.map((row, i) => (
+              <li key={i}>
+                {row.condition}
+                {row.threshold ? <span style={{ color: "#686e73" }}>{` (${row.threshold})`}</span> : null}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p style={{ fontSize: 12, color: "#666666", margin: 0 }}>
+            Per-group invalidation conditions are not emitted by the current web snapshot.
+            Review the versioned methodology and the next comparable snapshot before treating
+            a state as changed.
+          </p>
+        )}
         <p
           style={{
             fontSize: 10,

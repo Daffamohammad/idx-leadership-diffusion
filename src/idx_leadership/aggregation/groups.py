@@ -251,7 +251,8 @@ def build_group_snapshots(
                 convention=conc.convention,
             )
 
-        # Leadership
+        # Leadership (requires all three horizons; otherwise UNCONFIRMED
+        # by construction in classify_leadership — no silent fallback).
         leadership_state = classify_leadership(
             excess_return_20d=group_excess,
             excess_return_5d=g_ex5,
@@ -261,10 +262,6 @@ def build_group_snapshots(
             excess_return_leading=excess_return_leading,
             eligible=eligible_flag,
         )
-        if leadership_state == LeadershipState.UNCONFIRMED:
-            # Try again with primary horizon if acceleration cannot be computed
-            if g_ex5 is None or g_ex60 is None:
-                leadership_state = LeadershipState.UNCONFIRMED
         # Diffusion. Keep the v1 projection for existing consumers, while
         # retaining the richer v2 state when the configured mode enables it.
         diffusion_state_v2 = None

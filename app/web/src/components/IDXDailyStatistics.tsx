@@ -149,8 +149,10 @@ export default function IDXDailyStatistics({ statistics }: IDXDailyStatisticsPro
       >
         <span>Source: {source.publisher}</span>
         <span>·</span>
-        {source.url ? (
-          <a href={source.url} target="_blank" rel="noreferrer">Open source PDF</a>
+        {source.url &&
+        (source.url.startsWith("https://") ||
+          source.url.startsWith("http://")) ? (
+          <a href={source.url} target="_blank" rel="noopener noreferrer">Open source PDF</a>
         ) : (
           <span>Local source PDF</span>
         )}

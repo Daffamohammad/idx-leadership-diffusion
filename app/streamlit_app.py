@@ -697,7 +697,7 @@ def leadership_map_page(view: DashboardView) -> None:
             '</div>',
             unsafe_allow_html=True,
         )
-        st.write(selected.interpretation)
+        st.text(selected.interpretation)
 
 
 def group_explorer(view: DashboardView) -> None:
@@ -763,7 +763,7 @@ def group_explorer(view: DashboardView) -> None:
         st.caption("Screen-state invalidation")
         for item in group.invalidation:
             threshold = f" ({item.threshold})" if item.threshold else ""
-            st.write(f"- {item.condition}{threshold}")
+            st.text(f"- {item.condition}{threshold}")
 
 
 def method_quality(view: DashboardView) -> None:

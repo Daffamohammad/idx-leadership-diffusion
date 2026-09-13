@@ -25,6 +25,13 @@ def classify_diffusion(
     """Return a diffusion state given the breadth delta (in percentage points)."""
     if not eligible or breadth_delta_pp is None:
         return DiffusionState.UNCONFIRMED
+    try:
+        import math
+
+        if not math.isfinite(float(breadth_delta_pp)):
+            return DiffusionState.UNCONFIRMED
+    except (TypeError, ValueError):
+        return DiffusionState.UNCONFIRMED
     if breadth_delta_pp >= broadening_threshold_pp:
         return DiffusionState.BROADENING
     if breadth_delta_pp <= narrowing_threshold_pp:

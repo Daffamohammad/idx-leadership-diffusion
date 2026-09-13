@@ -1,5 +1,10 @@
 # IDX Leadership Diffusion — Architecture
 
+> This document describes the current implementation baseline. The design-first
+> target, feature contract, research-ingestion boundary, and API budget policy
+> are maintained in [`PRODUCT_ARCHITECTURE_PLAN.md`](PRODUCT_ARCHITECTURE_PLAN.md)
+> and the checked architecture artifact [`architecture_north_star.html`](architecture_north_star.html).
+
 ## High-level flow
 
 ```text

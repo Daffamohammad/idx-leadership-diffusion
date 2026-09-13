@@ -1,0 +1,52 @@
+{
+  "request": {
+    "provider": "yfinance",
+    "ticker": "BBCA.JK",
+    "start": "2026-09-06",
+    "end": "2026-09-12",
+    "timeout_seconds": 20,
+    "max_retries": 0,
+    "is_benchmark": false
+  },
+  "receipt": {
+    "status": "ok",
+    "rows_returned": 5,
+    "cache_hit": false,
+    "live_calls": 1,
+    "credits_spent": 0,
+    "key_required": false,
+    "origin": "bounded live probe 2026-09-13, redacted (no credentials exist for keyless yfinance)"
+  },
+  "rows": [
+    {
+      "date": "2026-09-07",
+      "close": 6625.0,
+      "adjusted_close": 6625.0,
+      "volume": 65118000
+    },
+    {
+      "date": "2026-09-08",
+      "close": 6675.0,
+      "adjusted_close": 6675.0,
+      "volume": 108127600
+    },
+    {
+      "date": "2026-09-09",
+      "close": 6525.0,
+      "adjusted_close": 6525.0,
+      "volume": 193375100
+    },
+    {
+      "date": "2026-09-10",
+      "close": 6425.0,
+      "adjusted_close": 6425.0,
+      "volume": 196819200
+    },
+    {
+      "date": "2026-09-11",
+      "close": 6325.0,
+      "adjusted_close": 6325.0,
+      "volume": 187922700
+    }
+  ]
+}

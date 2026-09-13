@@ -6,6 +6,7 @@ documented column names used by the rest of the engine.
 """
 from __future__ import annotations
 
+import math
 from datetime import date
 from typing import Any, Iterable, Mapping
 
@@ -82,6 +83,8 @@ def normalize_close_cross_section(
             price = float(r.get("close"))
         except (TypeError, ValueError):
             continue
+        if not math.isfinite(price) or price <= 0:
+            continue
         row_date = r.get("date")
         try:
             normalized_date = pd.Timestamp(row_date).date() if row_date is not None else as_of
@@ -140,7 +143,7 @@ def normalize_daily_history(
             close = float(r.get("close"))
         except (TypeError, ValueError):
             continue
-        if close <= 0:
+        if not math.isfinite(close) or close <= 0:
             continue
         out_rows.append(
             {
@@ -171,7 +174,7 @@ def normalize_index_daily(
             price = float(r.get("price"))
         except (TypeError, ValueError):
             continue
-        if price <= 0:
+        if not math.isfinite(price) or price <= 0:
             continue
         out_rows.append(
             {

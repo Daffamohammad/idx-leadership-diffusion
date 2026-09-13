@@ -42,6 +42,11 @@ def compute_benchmark_returns(
         df = df[df["date"] <= chosen]
     if df.empty:
         return pd.Series({f"return_{h}": None for h in horizons})
+    df[price_col] = pd.to_numeric(df[price_col], errors="coerce")
+    df = df.dropna(subset=[price_col])
+    df = df[df[price_col] > 0]
+    if df.empty:
+        return pd.Series({f"return_{h}": None for h in horizons})
     out: dict[str, Optional[float]] = {}
     end_date = df["date"].iloc[-1]
     end_price = float(df[price_col].iloc[-1])
@@ -243,10 +248,25 @@ def compute_ytd_excess_returns(
 
 
 def _safe_diff(a, b):
+    """Element-wise (excess_5d - excess_60d), scalar- or Series-safe.
+
+    Previously this took scalar logic (``pd.isna(a)`` in an ``if``) but was
+    called with whole Series, so the ``if`` raised and the ``except``
+    collapsed every row to ``None``. Handle both shapes explicitly.
+    """
     import numpy as np
+
     if a is None or b is None:
         return None
     try:
+        a_is_series = isinstance(a, pd.Series)
+        b_is_series = isinstance(b, pd.Series)
+        if a_is_series or b_is_series:
+            a_num = pd.to_numeric(a, errors="coerce")
+            b_num = pd.to_numeric(b, errors="coerce")
+            diff = a_num - b_num
+            # Preserve missing as None-equivalent (NaN) for DataFrame storage.
+            return diff.where(diff.notna(), np.nan)
         if pd.isna(a) or pd.isna(b):
             return None
         return float(a) - float(b)

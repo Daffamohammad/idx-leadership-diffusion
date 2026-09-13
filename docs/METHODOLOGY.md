@@ -150,6 +150,9 @@ The default convention is **absolute-move decomposition**:
    - `top5_contribution_share = sum(top 5 abs share)`
    - `hhi_contribution = sum(share_i^2)`
    - `top1_signed_share` and `top3_signed_share` for signed attribution
+     (signed share of net move attributable to the largest absolute
+     contributors in absolute-move order — not the largest signed
+     contributors; may be negative when the top mover opposes the net)
 
 This avoids the **sign-confusion trap** when the group return is
 positive but most constituents are flat or negative (in that case,
@@ -225,6 +228,15 @@ The default absolute thresholds are `±10pp` for breadth delta and
 - Negative or zero prices → rejected; treated as missing.
 - As-of date older than the latest available observation by more
   than `as_of_tolerance_days` (default 7 days) → snapshot status `STALE`.
+- Constituents whose latest observation lags the benchmark end date still
+  contribute (within tolerance); the maximum lag and the count lagging over
+  2 sessions are disclosed in coverage (`max_observation_lag_days`,
+  `tickers_lagging_gt2d`), never silently re-based.
+- Snapshots built with a defaulted as-of during Jakarta trading hours are
+  marked `intraday_build`; the latest bars may be partial sessions.
+- Suspension screening runs only when the provider supplies a suspension
+  feed; otherwise coverage records `suspension_check: not_supported`
+  (or `failed` when the feed errors) and halts stay unscreened.
 
 The codebase never silently fills, replaces with neutral, or imputes
 missing values.
@@ -248,6 +260,13 @@ missing values.
 - 5/20/60 day horizons; the engine cannot answer short-term (1D)
   tactical questions reliably from this prototype.
 - Snapshots are written in serial; concurrent runs are not supported.
+  A threading lock serializes in-process writers and a POSIX file lock
+  (`<snapshots>/.snapshot_write.lock`, released by the kernel on process
+  death so stale locks are impossible) serializes across processes;
+  operators can observe contention via blocked-writer latency in logs.
+  No background scheduler exists — duplicate scheduled runs must be
+  serialized by the operator, and any bundle lacking COMPLETE must be
+  treated as provisional.
 
 ## 15. Live Sectors coverage boundary
 

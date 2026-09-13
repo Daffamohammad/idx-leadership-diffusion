@@ -192,9 +192,21 @@ def build_group_evidence(
             breadth=snap.breadth_outperforming,
             breadth_delta=snap.breadth_delta,
             numerator=snap.breadth_outperforming_count,
-            eligible_denominator=snap.breadth_eligible_count or snap.eligible_count,
-            missing_count=snap.breadth_missing_count or snap.missing_count,
-            total_count=snap.breadth_total_count or snap.constituent_count,
+            eligible_denominator=(
+                snap.breadth_eligible_count
+                if snap.breadth_eligible_count is not None
+                else snap.eligible_count
+            ),
+            missing_count=(
+                snap.breadth_missing_count
+                if snap.breadth_missing_count is not None
+                else snap.missing_count
+            ),
+            total_count=(
+                snap.breadth_total_count
+                if snap.breadth_total_count is not None
+                else snap.constituent_count
+            ),
         ),
         concentration=ConcentrationEvidence(
             status=concentration_status,
@@ -206,7 +218,11 @@ def build_group_evidence(
         performance=PerformanceEvidence(
             return_20d=snap.group_return_equal_weight,
             excess_5d=snap.group_excess_return_5d,
-            excess_20d=snap.group_excess_return_20d or snap.group_excess_return,
+            excess_20d=(
+                snap.group_excess_return_20d
+                if snap.group_excess_return_20d is not None
+                else snap.group_excess_return
+            ),
             excess_60d=snap.group_excess_return_60d,
         ),
         confirmation=ConfirmationEvidence(),

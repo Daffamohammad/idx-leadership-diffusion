@@ -167,8 +167,9 @@ def build_snapshot(
             )
     benchmark_id = universe_cfg.get("benchmark", "^JKSE")
     requested = [row["ticker"] for row in universe_cfg.get("universe", [])]
-    today = today_utc()
-    as_of = as_of or today
+    wall_today = today_utc()
+    as_of_explicit = as_of is not None
+    as_of = as_of or wall_today
     lookback_days = max(horizons.values()) + 10
     lookback = pd.Timedelta(days=int(lookback_days * 1.6))
     regular_start = (
@@ -191,12 +192,29 @@ def build_snapshot(
     benchmark["date"] = pd.to_datetime(benchmark["date"]).dt.date
 
     # Quality report
+    # Staleness is assessed relative to the snapshot's as-of date so that
+    # frozen historical snapshots remain deterministic as wall-clock time
+    # advances. Using wall-clock time here made every pinned as_of go STALE
+    # ~stale_days after its date (time-bomb).
     quality = assess_quality(
         requested_tickers=requested,
         prices=prices,
         benchmark=benchmark,
-        today=today,
+        today=as_of,
     )
+    # A run that defaults as_of to today during Jakarta trading hours may
+    # ingest a still-forming daily bar. Mark it intraday explicitly instead
+    # of letting a partial session pose as a final close.
+    from .utils.dates import jakarta_session_state
+
+    intraday_build = bool(
+        not as_of_explicit and jakarta_session_state() == "OPEN"
+    )
+    if intraday_build:
+        quality.issues.append(
+            "intraday_build: snapshot built during the Jakarta trading "
+            "session; the latest bars may be partial, not final closes"
+        )
 
     # Per-security features
     features = compute_excess_returns(
@@ -235,18 +253,28 @@ def build_snapshot(
     # Compute eligible ticker set hash from the current universe so the
     # comparability gate can verify membership parity.
     from .providers.market_universe import build_market_universe
+    from .providers.capabilities import EventProvider
     acquisition_failed_tickers, acquisition_empty_tickers = _provider_acquisition_sets(
         provider
+    )
+    # Suspension exclusion requires a capable event provider. Without one
+    # the universe is built without suspension filtering and the coverage
+    # record says so explicitly (never silently assumed clean).
+    event_provider = provider if isinstance(provider, EventProvider) else None
+    suspension_check = (
+        "checked" if event_provider is not None else "not_supported"
     )
     _universe = build_market_universe(
         security_master_provider=provider,
         cross_section_provider=provider,
-        event_provider=None,
+        event_provider=event_provider,
         as_of=as_of,
         price_history=prices,
         acquisition_failures=acquisition_failed_tickers,
         acquisition_empties=acquisition_empty_tickers,
     )
+    if isinstance(_universe.attrs.get("suspension_check"), str):
+        suspension_check = str(_universe.attrs["suspension_check"])
     eligible_tickers = set(
         _universe.loc[_universe["eligible"], "ticker"].astype(str).str.upper().tolist()
     )
@@ -256,6 +284,7 @@ def build_snapshot(
         else "EMPTY"
     )
     eligible_ticker_count = len(eligible_tickers)
+    max_obs_lag_days, n_lagging_gt2d = _observation_lag_days(prices, benchmark)
     coverage = _build_pipeline_coverage(
         universe=_universe,
         features=features,
@@ -267,6 +296,18 @@ def build_snapshot(
             meth.get("groups", {}).get("minimum_coverage_pct", 60.0)
         ),
         provider_mode=resolved_provider_mode,
+        security_master_diagnostics=getattr(
+            provider, "security_master_diagnostics", None
+        ),
+        close_pagination_diagnostics=getattr(
+            provider, "close_pagination_diagnostics", None
+        ),
+        history_diagnostics=getattr(provider, "history_diagnostics", None),
+        benchmark_diagnostics=getattr(provider, "benchmark_diagnostics", None),
+        suspension_check=suspension_check,
+        intraday_build=intraday_build,
+        max_observation_lag_days=max_obs_lag_days,
+        tickers_lagging_gt2d=n_lagging_gt2d,
     )
 
     # Read only earlier, contract-compatible snapshots.  Directory order is
@@ -441,6 +482,10 @@ def build_snapshot(
     _atomic_json(target / "market_read.json", market_read.to_dict())
     _atomic_json(target / "story_mode.json", story.to_dict())
     _atomic_json(target / "comparability.json", comparison_audit)
+    # COMPLETE is written last, after every sidecar, so a crash anywhere
+    # above leaves a bundle that loads with complete=false instead of
+    # masquerading as finished.
+    _atomic_text(target / "COMPLETE", "complete\n")
 
     # Aggregate manifest. A caller-provided root is isolated from the
     # checked-in/default artifact tree (important for tests and exports).
@@ -477,6 +522,17 @@ def _resolve_horizons(meth: dict[str, Any]) -> dict[str, int]:
     }
 
 
+def _pagination_completeness(value: Any) -> str | None:
+    """Normalize a provider pagination-completeness flag without coupling.
+
+    Providers that track paging (Sectors) expose COMPLETE/PARTIAL/UNKNOWN;
+    others expose nothing and keep the None default.
+    """
+    if value in ("COMPLETE", "PARTIAL", "UNKNOWN"):
+        return str(value)
+    return None
+
+
 def _build_pipeline_coverage(
     *,
     universe: pd.DataFrame,
@@ -487,6 +543,14 @@ def _build_pipeline_coverage(
     as_of: date,
     coverage_gate_pct: float,
     provider_mode: ProviderMode,
+    security_master_diagnostics: Any | None = None,
+    close_pagination_diagnostics: Any | None = None,
+    history_diagnostics: Any | None = None,
+    benchmark_diagnostics: Any | None = None,
+    suspension_check: str = "not_supported",
+    max_observation_lag_days: int | None = None,
+    tickers_lagging_gt2d: int = 0,
+    intraday_build: bool = False,
 ) -> dict[str, Any]:
     """Persist the same denominator contract for the generic pipeline.
 
@@ -577,6 +641,78 @@ def _build_pipeline_coverage(
         if taxonomy_columns
         else 0
     )
+    sm_diagnostics = security_master_diagnostics or {}
+    close_diagnostics = close_pagination_diagnostics or {}
+    history_diag = history_diagnostics or {}
+    benchmark_diag = benchmark_diagnostics or {}
+    sm_completeness = _pagination_completeness(
+        sm_diagnostics.get("pagination_completeness")
+    )
+    close_completeness = _pagination_completeness(
+        close_diagnostics.get("pagination_completeness")
+    )
+    window_capped = bool(history_diag.get("window_capped_to_90_calendar_days", False))
+    benchmark_window_capped = bool(
+        benchmark_diag.get("window_capped_to_90_calendar_days", False)
+    )
+    window_capped_any = bool(window_capped or benchmark_window_capped)
+    pagination_incomplete = (
+        (sm_completeness is not None and sm_completeness != "COMPLETE")
+        or (close_completeness is not None and close_completeness != "COMPLETE")
+    )
+    # Thread multi-window + per-symbol diagnostics so the five coverage
+    # states stay distinguishable: complete vs pagination-incomplete vs
+    # window-capped vs provider-unavailable vs partial-symbol.
+    history_windows_requested = history_diag.get("windows_requested")
+    history_windows_completed = history_diag.get("windows_completed")
+    history_windows_failed = history_diag.get("windows_failed")
+    history_failed_symbols = history_diag.get("failed_symbols") or []
+    history_empty_symbols = history_diag.get("empty_symbols") or []
+    history_failed_count = len(history_failed_symbols)
+    history_empty_count = len(history_empty_symbols)
+    history_returned_symbols = history_diag.get("returned_symbols")
+    history_blocked = bool(history_diag.get("blocked", False))
+    history_requested_symbols = history_diag.get("requested_symbols")
+    try:
+        requested_int = (
+            int(history_requested_symbols)
+            if history_requested_symbols is not None
+            else None
+        )
+    except (TypeError, ValueError):
+        requested_int = None
+    try:
+        returned_int = (
+            int(history_returned_symbols)
+            if history_returned_symbols is not None
+            else None
+        )
+    except (TypeError, ValueError):
+        returned_int = None
+    provider_unavailable = bool(
+        history_blocked
+        or (
+            requested_int is not None
+            and requested_int > 0
+            and returned_int == 0
+        )
+    )
+    partial_symbols = bool(
+        (history_failed_count > 0 or history_empty_count > 0)
+        or (acquisition_failed > 0 or acquisition_empty > 0)
+    )
+    if provider_unavailable:
+        coverage_state = "PROVIDER_UNAVAILABLE"
+    elif pagination_incomplete and window_capped_any:
+        coverage_state = "PAGINATION_INCOMPLETE_WINDOW_CAPPED"
+    elif pagination_incomplete:
+        coverage_state = "PAGINATION_INCOMPLETE"
+    elif window_capped_any:
+        coverage_state = "WINDOW_CAPPED"
+    elif partial_symbols:
+        coverage_state = "PARTIAL_SYMBOLS"
+    else:
+        coverage_state = "COMPLETE"
     return {
         "as_of": as_of.isoformat(),
         "provider_mode": provider_mode.value,
@@ -586,9 +722,30 @@ def _build_pipeline_coverage(
         "discovered_universe_disclosure": (
             f"Configured prototype universe: {raw_count} candidates; not full IDX coverage."
         ),
-        "security_master_pagination_completeness": None,
-        "close_pagination_completeness": None,
-        "pagination_incomplete": False,
+        "security_master_pagination_completeness": sm_completeness,
+        "close_pagination_completeness": close_completeness,
+        "pagination_incomplete": pagination_incomplete,
+        "history_window_capped_90d": window_capped,
+        "history_window_capped_note": (
+            "Price/benchmark history truncated by partial window failure; "
+            "YTD baselines may be unavailable."
+            if window_capped
+            else None
+        ),
+        "suspension_check": suspension_check,
+        "intraday_build": bool(intraday_build),
+        "max_observation_lag_days": max_observation_lag_days,
+        "tickers_lagging_gt2d": int(tickers_lagging_gt2d),
+        "benchmark_window_capped_90d": benchmark_window_capped,
+        "history_windows_requested": history_windows_requested,
+        "history_windows_completed": history_windows_completed,
+        "history_windows_failed": history_windows_failed,
+        "history_failed_symbols_count": history_failed_count,
+        "history_empty_symbols_count": history_empty_count,
+        "history_returned_symbols": returned_int,
+        "history_provider_unavailable": provider_unavailable,
+        "history_partial_symbols": partial_symbols,
+        "coverage_state": coverage_state,
         "security_master_total": raw_count,
         "history_requested_securities": int(quality.requested_securities),
         "securities_with_any_price_history": int(quality.loaded_securities),
@@ -839,6 +996,12 @@ def _atomic_json(path: Path, payload: Any) -> None:
     tmp.replace(path)
 
 
+def _atomic_text(path: Path, value: str) -> None:
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(value, encoding="utf-8")
+    tmp.replace(path)
+
+
 def _safe_provider_name(provider) -> Any:
     from .models import ProviderName
     name = getattr(provider, "name", "abstract")
@@ -851,6 +1014,45 @@ def _safe_provider_name(provider) -> Any:
         "demo": ProviderName.FIXTURE,
     }
     return mapping.get(name, ProviderName.YFINANCE)
+
+
+def _observation_lag_days(
+    prices: pd.DataFrame, benchmark: pd.DataFrame
+) -> tuple[int | None, int]:
+    """Measure per-ticker end-date dispersion vs the benchmark end date.
+
+    Returns (max_lag_days, n_tickers_lagging_more_than_2d). ``None`` max
+    means the lag is uncomputable (empty frames). This is disclosure only:
+    within-tolerance staleness stays in the metrics, but its magnitude is
+    now visible in coverage instead of silent.
+    """
+    try:
+        if prices is None or prices.empty or benchmark is None or benchmark.empty:
+            return None, 0
+        if "ticker" not in prices.columns or "date" not in prices.columns:
+            return None, 0
+        if "date" not in benchmark.columns:
+            return None, 0
+        price_dates = pd.to_datetime(prices["date"], errors="coerce")
+        bench_dates = pd.to_datetime(benchmark["date"], errors="coerce").dropna()
+        if bench_dates.empty:
+            return None, 0
+        bench_end = bench_dates.max().date()
+        latest_by_ticker = (
+            pd.DataFrame({"ticker": prices["ticker"], "date": price_dates})
+            .dropna(subset=["date"])
+            .groupby("ticker")["date"]
+            .max()
+        )
+        if latest_by_ticker.empty:
+            return None, 0
+        lags = [(pd.Timestamp(bench_end) - ts).days for ts in latest_by_ticker]
+        lags = [lag for lag in lags if lag is not None and lag >= 0]
+        if not lags:
+            return None, 0
+        return int(max(lags)), int(sum(1 for lag in lags if lag > 2))
+    except Exception:  # noqa: BLE001 - disclosure must never break a build
+        return None, 0
 
 
 def _provider_acquisition_sets(provider: Any) -> tuple[set[str], set[str]]:
