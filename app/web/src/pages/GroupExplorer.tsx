@@ -318,6 +318,7 @@ function TaxonomyGroupDetail({
   const groupKey = `${group.taxonomyId}::${group.id}`;
   const constituents = data.constituentsByTaxonomyGroup[groupKey] ?? [];
   const pricePoints = data.taxonomyGroupPriceHistory[groupKey] ?? [];
+  const manifestEntry = data.payload.manifest.entries[0];
   const metric = (value: number | null | undefined, suffix = "%") => {
     if (value == null || !Number.isFinite(value)) return "—";
     return `${value >= 0 ? "+" : ""}${value.toFixed(1)}${suffix}`;
@@ -402,10 +403,14 @@ function TaxonomyGroupDetail({
               groupName={group.name}
               points={pricePoints.map((point) => ({ date: point.date, value: point.value }))}
               benchmarkPoints={pricePoints.filter((point) => point.benchmark !== null).map((point) => ({ date: point.date, value: point.benchmark }))}
+              groupPoints={pricePoints}
               asOf={data.payload.as_of}
               source="Persisted snapshot prices"
               metricLabel="Equal-weight group index · rebased to 100"
               referenceValue={100}
+              providerMode={manifestEntry?.provider_mode}
+              priceBasis={manifestEntry?.price_basis}
+              dataStatus={data.payload.quality?.status}
               height={260}
             />
           </div>
@@ -773,10 +778,14 @@ export default function GroupExplorer() {
                 date: point.date,
                 value: point.benchmark,
               }))}
+            groupPoints={groupPricePoints}
             asOf={data.payload.as_of}
             source={chartSource}
             metricLabel="Equal-weight group index · rebased to 100"
             referenceValue={100}
+            providerMode={manifestEntry?.provider_mode}
+            priceBasis={manifestEntry?.price_basis}
+            dataStatus={data.payload.quality?.status}
             height={300}
           />
           <div style={{ marginTop: 10, fontSize: 11, color: "#777777", lineHeight: 1.45 }}>

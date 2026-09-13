@@ -88,10 +88,14 @@ export default function ChartDemo() {
           benchmarkPoints={points
             .filter((point) => point.benchmark !== null)
             .map((point) => ({ date: point.date, value: point.benchmark }))}
+          groupPoints={points}
           asOf={data.payload.as_of}
           source={source}
           metricLabel="Equal-weight group index · rebased to 100"
           referenceValue={100}
+          providerMode={entry?.provider_mode}
+          priceBasis={entry?.price_basis}
+          dataStatus={data.payload.quality?.status}
           height={380}
         />
       ) : (
