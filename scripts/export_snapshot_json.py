@@ -77,6 +77,29 @@ def _finite_number(value: Any) -> float | None:
     return number if math.isfinite(number) else None
 
 
+_PRICE_AUX_COLUMNS = ("open", "high", "low", "close", "volume")
+
+
+def _select_price_columns(prices: pd.DataFrame, price_column: str) -> pd.DataFrame:
+    """Copy the price columns while tolerating older snapshot schemas."""
+    columns = ["ticker", "date", price_column]
+    columns.extend(
+        column
+        for column in _PRICE_AUX_COLUMNS
+        if column not in columns and column in prices.columns
+    )
+    work = prices[columns].copy()
+    for column in _PRICE_AUX_COLUMNS:
+        if column not in work.columns:
+            work[column] = pd.NA
+    return work
+
+
+def _rounded_optional(value: Any) -> float | None:
+    number = _finite_number(value)
+    return round(number, 6) if number is not None else None
+
+
 def _build_group_price_history(
     prices: pd.DataFrame | None,
     benchmark: pd.DataFrame | None,
@@ -114,11 +137,13 @@ def _build_group_price_history(
     if not ticker_to_group:
         return {}
 
-    work = prices[["ticker", "date", price_column]].copy()
+    work = _select_price_columns(prices, price_column)
     work["ticker"] = work["ticker"].astype(str)
     work["group_id"] = work["ticker"].map(ticker_to_group)
     work["date"] = pd.to_datetime(work["date"], errors="coerce")
     work["value"] = pd.to_numeric(work[price_column], errors="coerce")
+    for column in _PRICE_AUX_COLUMNS:
+        work[column] = pd.to_numeric(work[column], errors="coerce")
     work = work.dropna(subset=["group_id", "date", "value"])
     work = work[work["value"] > 0]
     if work.empty:
@@ -128,11 +153,17 @@ def _build_group_price_history(
     )
     first_values = work.groupby("ticker")["value"].transform("first")
     work["rebased"] = work["value"] / first_values * 100.0
-    grouped = (
-        work.groupby(["group_id", "date"], as_index=False)["rebased"]
-        .mean()
-        .rename(columns={"rebased": "value"})
-    )
+    for column in ("open", "high", "low", "close"):
+        work[f"rebased_{column}"] = work[column] / first_values * 100.0
+    aggregate_spec: dict[str, tuple[str, str | Any]] = {
+        "value": ("rebased", "mean"),
+        "open": ("rebased_open", "mean"),
+        "high": ("rebased_high", "mean"),
+        "low": ("rebased_low", "mean"),
+        "close": ("rebased_close", "mean"),
+        "volume": ("volume", lambda values: values.sum(min_count=1)),
+    }
+    grouped = work.groupby(["group_id", "date"], as_index=False).agg(**aggregate_spec)
 
     benchmark_series: pd.DataFrame | None = None
     if benchmark is not None and not benchmark.empty and "date" in benchmark.columns:
@@ -179,6 +210,11 @@ def _build_group_price_history(
                         and _finite_number(benchmark_lookup[row.date]) is not None
                         else None
                     ),
+                    "open": _rounded_optional(getattr(row, "open", None)),
+                    "high": _rounded_optional(getattr(row, "high", None)),
+                    "low": _rounded_optional(getattr(row, "low", None)),
+                    "close": _rounded_optional(getattr(row, "close", None)),
+                    "volume": _rounded_optional(getattr(row, "volume", None)),
                 }
             )
         if points:
@@ -225,12 +261,14 @@ def _build_ticker_price_history(
     if benchmark_frame.empty:
         return {}
 
-    work = prices[["ticker", "date", price_column]].copy()
+    work = _select_price_columns(prices, price_column)
     work["ticker"] = work["ticker"].astype(str).str.upper()
     if allowed_tickers is not None:
         work = work[work["ticker"].isin(allowed_tickers)]
     work["date"] = pd.to_datetime(work["date"], errors="coerce")
     work["security_close"] = pd.to_numeric(work[price_column], errors="coerce")
+    for column in _PRICE_AUX_COLUMNS:
+        work[column] = pd.to_numeric(work[column], errors="coerce")
     work = work.dropna(subset=["ticker", "date", "security_close"])
     work = work[work["security_close"] > 0]
     work = work.sort_values(["ticker", "date"]).drop_duplicates(
@@ -246,6 +284,8 @@ def _build_ticker_price_history(
         benchmark_base = _finite_number(aligned["benchmark_close"].iloc[0])
         if security_base is None or benchmark_base is None:
             continue
+        for column in ("open", "high", "low", "close"):
+            aligned[f"rebased_{column}"] = aligned[column] / security_base * 100.0
         points = [
             {
                 "date": row.date.date().isoformat(),
@@ -253,6 +293,11 @@ def _build_ticker_price_history(
                 "benchmark": round(
                     float(row.benchmark_close) / benchmark_base * 100.0, 6
                 ),
+                "open": _rounded_optional(getattr(row, "rebased_open", None)),
+                "high": _rounded_optional(getattr(row, "rebased_high", None)),
+                "low": _rounded_optional(getattr(row, "rebased_low", None)),
+                "close": _rounded_optional(getattr(row, "rebased_close", None)),
+                "volume": _rounded_optional(getattr(row, "volume", None)),
             }
             for row in aligned.itertuples(index=False)
         ]

@@ -520,3 +520,79 @@ def test_exporter_returns_no_history_for_a_single_snapshot_with_transitions():
         export("history_single", output, snapshot_root=root)
         payload = json.loads(output.read_text(encoding="utf-8"))
         assert payload["breadth_history"] == []
+
+
+def test_exporter_rebases_optional_ohlc_and_aggregates_group_volume():
+    """OHLC uses the chart index basis while volume stays an observed total."""
+    from scripts.export_snapshot_json import (
+        _build_group_price_history,
+        _build_ticker_price_history,
+    )
+
+    prices = pd.DataFrame(
+        [
+            {
+                "ticker": "A.JK",
+                "date": "2026-08-19",
+                "close": 10.0,
+                "adjusted_close": 10.0,
+                "open": 9.5,
+                "high": 10.5,
+                "low": 9.0,
+                "volume": 1_000,
+            },
+            {
+                "ticker": "A.JK",
+                "date": "2026-08-20",
+                "close": 11.0,
+                "adjusted_close": 11.0,
+                "open": 10.5,
+                "high": 11.5,
+                "low": 10.0,
+                "volume": 1_200,
+            },
+            {
+                "ticker": "B.JK",
+                "date": "2026-08-19",
+                "close": 20.0,
+                "adjusted_close": 20.0,
+                "open": 19.0,
+                "high": 21.0,
+                "low": 18.0,
+                "volume": 2_000,
+            },
+            {
+                "ticker": "B.JK",
+                "date": "2026-08-20",
+                "close": 22.0,
+                "adjusted_close": 22.0,
+                "open": 21.0,
+                "high": 23.0,
+                "low": 20.0,
+                "volume": 2_200,
+            },
+        ]
+    )
+    benchmark = pd.DataFrame(
+        [
+            {"date": "2026-08-19", "close": 100.0},
+            {"date": "2026-08-20", "close": 101.0},
+        ]
+    )
+    master = [
+        {"ticker": "A.JK", "group_id": "TestSector"},
+        {"ticker": "B.JK", "group_id": "TestSector"},
+    ]
+
+    group = _build_group_price_history(
+        prices, benchmark, master, {"price_basis": "close"}
+    )
+    ticker = _build_ticker_price_history(
+        prices, benchmark, {"price_basis": "close"}, {"A.JK"}
+    )
+
+    assert group["TestSector"][0]["open"] == pytest.approx(95.0)
+    assert group["TestSector"][1]["close"] == pytest.approx(110.0)
+    assert group["TestSector"][0]["volume"] == pytest.approx(3_000.0)
+    assert ticker["A.JK"][1]["high"] == pytest.approx(115.0)
+    assert ticker["A.JK"][1]["volume"] == pytest.approx(1_200.0)
