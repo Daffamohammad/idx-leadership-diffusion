@@ -8,15 +8,52 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
+import threading
 import time
 from dataclasses import asdict, dataclass, field
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
 
 from ..utils import data_root, get_logger, log_event
 
 _log = get_logger(__name__)
+
+
+# Defense-in-depth: the ledger stores only a hash of request parameters, but
+# the free-form ``error`` string comes from provider transports. Scrub
+# credential-shaped material and bound its length so a fail-open caller
+# cannot persist a secret to the JSONL audit file.
+_RE_LEDGER_KEY_VALUE = re.compile(
+    r"(?i)(api[_-]?key|token|secret|password|authorization)\s*[:=]\s*['\"]?[^\s'\",;}\]]+"
+)
+_RE_LEDGER_JSON_VALUE = re.compile(
+    r'(?i)("(?:api[_-]?key|token|secret|password|authorization)"\s*:\s*")[^"]+(")'
+)
+_RE_LEDGER_BEARER = re.compile(r"(?i)\bBearer\s+[A-Za-z0-9\-._~+/=]+")
+_MAX_ERROR_CHARS = 500
+
+
+def _scrub_error(value: Any) -> Optional[str]:
+    if value is None:
+        return None
+    text = str(value)
+    text = _RE_LEDGER_BEARER.sub("Bearer ***", text)
+    text = _RE_LEDGER_JSON_VALUE.sub(r"\1***\2", text)
+    text = _RE_LEDGER_KEY_VALUE.sub(lambda m: m.group(1) + "=***", text)
+    return text[:_MAX_ERROR_CHARS]
+
+
+def _validate_ledger_path(path: Path) -> Path:
+    text = str(path)
+    if not text or text == "." or "\x00" in text:
+        raise ValueError(f"Invalid ledger path: {text!r}")
+    if path.name in ("", ".", ".."):
+        raise ValueError(f"Invalid ledger path filename: {text!r}")
+    if path.exists() and not path.is_file():
+        raise ValueError(f"Ledger path is not a file: {text!r}")
+    return path
 
 
 @dataclass
@@ -41,11 +78,13 @@ class LedgerEntry:
 
 
 class RequestLedger:
-    """Append-only ledger; flushed to JSONL on demand."""
+    """Append-only ledger; flushed to JSONL on demand. Thread-safe."""
 
     def __init__(self, path: Optional[Path] = None) -> None:
         self._entries: list[LedgerEntry] = []
-        self.path = path or (data_root() / "raw" / "request_ledger.jsonl")
+        self._lock = threading.Lock()
+        raw = path or (data_root() / "raw" / "request_ledger.jsonl")
+        self.path = _validate_ledger_path(Path(raw))
 
     @staticmethod
     def hash_params(params: Any) -> str:
@@ -84,9 +123,10 @@ class RequestLedger:
             estimated_credit_cost=estimated_credit_cost,
             budget_reserved_credit_cost=budget_reserved_credit_cost,
             actual_credit_cost=actual_credit_cost,
-            error=error,
+            error=_scrub_error(error),
         )
-        self._entries.append(entry)
+        with self._lock:
+            self._entries.append(entry)
         log_event(
             _log,
             "provider_request",
@@ -100,18 +140,32 @@ class RequestLedger:
         )
 
     def entries(self) -> list[LedgerEntry]:
-        return list(self._entries)
+        with self._lock:
+            return list(self._entries)
 
     def flush(self) -> None:
-        if not self._entries:
+        # Drain under the lock so concurrent flushers can never snapshot
+        # overlapping batches (which would duplicate entries on disk).
+        with self._lock:
+            pending = list(self._entries)
+            self._entries.clear()
+            target = _validate_ledger_path(self.path)
+        if not pending:
             return
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        with self.path.open("a", encoding="utf-8") as f:
-            for e in self._entries:
-                d = asdict(e)
-                d["timestamp_iso"] = date.fromtimestamp(e.timestamp).isoformat()
-                f.write(json.dumps(d, default=str) + "\n")
-        self._entries.clear()
+        try:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            with target.open("a", encoding="utf-8") as f:
+                for e in pending:
+                    d = asdict(e)
+                    d["timestamp_iso"] = datetime.fromtimestamp(
+                        e.timestamp, tz=timezone.utc
+                    ).isoformat()
+                    f.write(json.dumps(d, default=str) + "\n")
+        except OSError:
+            with self._lock:
+                self._entries[0:0] = pending
+            raise
 
     def reset(self) -> None:
-        self._entries.clear()
+        with self._lock:
+            self._entries.clear()

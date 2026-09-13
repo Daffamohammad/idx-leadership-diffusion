@@ -75,7 +75,7 @@ def build_market_universe(
         else security_master_provider.get_security_master()
     )
     if not master:
-        return pd.DataFrame(
+        empty = pd.DataFrame(
             columns=[
                 "ticker",
                 "sector",
@@ -89,6 +89,10 @@ def build_market_universe(
                 "exclusion_reason",
             ]
         )
+        empty.attrs["suspension_check"] = (
+            "checked" if event_provider is not None else "not_supported"
+        )
+        return empty
     base = pd.DataFrame([m.model_dump() for m in master])
 
     if price_history is not None:
@@ -151,15 +155,22 @@ def build_market_universe(
     else:
         base["median_daily_value"] = None
 
-    # Suspensions window
+    # Suspensions window. A failing suspension feed must not kill the whole
+    # snapshot, but it must not silently pass either: the failure is logged
+    # and recorded on df.attrs["suspension_check"] for the pipeline coverage.
     suspended: set[str] = set()
+    suspension_check = "checked" if event_provider is not None else "not_supported"
     if cfg.exclude_suspended and event_provider is not None:
-        susp = event_provider.get_suspensions(
-            start=as_of - timedelta(days=cfg.stale_trading_days * 2),
-            end=as_of,
-        )
-        if not susp.empty:
-            suspended = set(susp["ticker"].astype(str).tolist())
+        try:
+            susp = event_provider.get_suspensions(
+                start=as_of - timedelta(days=cfg.stale_trading_days * 2),
+                end=as_of,
+            )
+            if not susp.empty:
+                suspended = set(susp["ticker"].astype(str).tolist())
+        except Exception as exc:  # noqa: BLE001
+            _log.warning("suspension_check_failed err=%s", exc)
+            suspension_check = "failed"
 
     fail_set = {str(t).upper() for t in (acquisition_failures or set())}
     empty_set = {str(t).upper() for t in (acquisition_empties or set())}
@@ -205,6 +216,7 @@ def build_market_universe(
     base["eligible"] = eligible_flags
     base["exclusion_reason"] = reasons
     base["acquisition_status"] = acq_statuses
+    base.attrs["suspension_check"] = suspension_check
     return base
 
 

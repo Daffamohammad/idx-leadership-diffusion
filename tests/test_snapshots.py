@@ -225,3 +225,31 @@ def test_assess_quality_distinguishes_loaded_from_usable_history(benchmark_df):
     assert r.coverage_pct == 50.0
     assert r.latest_common_date == date(2026, 7, 30)
     assert any("insufficient_history" in issue for issue in r.issues)
+
+
+def test_load_reports_complete_sentinel(tmp_snap_root):
+    as_of = date(2026, 8, 20)
+    target = _write_minimal_snapshot(tmp_snap_root, "snap_complete", as_of)
+    reader = SnapshotReader(root=tmp_snap_root)
+    # Writer-level output alone is unfinished until the pipeline writes
+    # COMPLETE after all sidecars.
+    assert reader.load("snap_complete")["complete"] is False
+    (target / "COMPLETE").write_text("complete\n", encoding="utf-8")
+    loaded = reader.load("snap_complete")
+    assert loaded["complete"] is True
+
+
+def test_load_marks_pre_sentinel_bundle_incomplete(tmp_snap_root):
+    as_of = date(2026, 8, 20)
+    target = _write_minimal_snapshot(tmp_snap_root, "snap_legacy", as_of)
+    assert not (target / "COMPLETE").exists()
+    loaded = SnapshotReader(root=tmp_snap_root).load("snap_legacy")
+    assert loaded["complete"] is False
+    assert not loaded["prices"].empty
+
+
+def test_load_rejects_path_escape(tmp_snap_root):
+    reader = SnapshotReader(root=tmp_snap_root)
+    for bad_id in ("../x", "a/b", "/abs", ""):
+        with pytest.raises(ValueError):
+            reader.load(bad_id)

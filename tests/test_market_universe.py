@@ -185,3 +185,41 @@ def test_liquidity_and_staleness_are_explicit_exclusions():
     assert reasons["LIQ.JK"] == "insufficient_liquidity"
     assert reasons["STALE.JK"] == "stale_price"
     assert reasons["ALT.JK"] == "non_common_equity"
+
+
+class _FailingEventProvider(_StubProvider):
+    def get_suspensions(self, *, start, end):
+        raise RuntimeError("suspension feed down")
+
+
+def test_failing_suspension_feed_degrades_explicitly():
+    as_of = date(2026, 8, 20)
+    master = [_entry("A.JK")]
+    history = pd.DataFrame(_build_full_history("A.JK", as_of, 60, 100))
+    p = _FailingEventProvider(master, {})
+    df = build_market_universe(
+        security_master_provider=p,
+        cross_section_provider=p,
+        event_provider=p,
+        as_of=as_of,
+        price_history=history,
+        security_master=master,
+    )
+    assert bool(df.iloc[0]["eligible"]) is True
+    assert df.attrs.get("suspension_check") == "failed"
+
+
+def test_suspension_check_attr_present_without_event_provider():
+    as_of = date(2026, 8, 20)
+    master = [_entry("A.JK")]
+    history = pd.DataFrame(_build_full_history("A.JK", as_of, 60, 100))
+    p = _StubProvider(master, {})
+    df = build_market_universe(
+        security_master_provider=p,
+        cross_section_provider=p,
+        event_provider=None,
+        as_of=as_of,
+        price_history=history,
+        security_master=master,
+    )
+    assert df.attrs.get("suspension_check") == "not_supported"

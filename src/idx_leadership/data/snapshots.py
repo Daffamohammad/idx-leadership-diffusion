@@ -9,18 +9,25 @@ A snapshot bundles:
   - one transitions parquet
   - one manifest.json
 
-Files are written via a temp-dir + rename for atomicity. The on-disk
+Files are written atomically per file (tmp + rename). The COMPLETE
+sentinel is written by the pipeline after all sidecars, so writer-level
+output alone loads with complete=false. SnapshotReader.load reports the
+flag; pre-sentinel bundles remain loadable for back-compat. The on-disk
 layout is stable and versioned.
 """
 from __future__ import annotations
 
+import contextlib
 import json
 import os
+import re
 import shutil
 import tempfile
+import threading
+import time
 from datetime import date, datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Iterator, Optional
 
 import pandas as pd
 
@@ -42,15 +49,159 @@ _log = get_logger(__name__)
 
 SNAPSHOT_VERSION = "snapshot-v2"
 
+_SNAPSHOT_ID_RE = re.compile(r"^[A-Za-z0-9_-]+$")
+
+# Intra-process mutual exclusion for SnapshotWriter.write. Class-level shared
+# lock so concurrent threads in the same process serialize bundle writes even
+# when they use distinct SnapshotWriter instances pointing at the same root.
+_WRITE_LOCK = threading.Lock()
+
+_LOCK_FILENAME = ".snapshot_write.lock"
+
+
+@contextlib.contextmanager
+def _interprocess_lock(root: Path) -> Iterator[None]:
+    """Hold an exclusive inter-process lock for the snapshot root.
+
+    Uses POSIX ``fcntl.flock`` on a root-level lock file. Falls back
+    gracefully (no inter-process exclusion, intra-process threading lock
+    still applies) when ``fcntl`` is unavailable or the lock file cannot be
+    created — e.g. Windows, read-only filesystems. Never leaks credentials;
+    the lock file contains no payload.
+    """
+
+    try:
+        root.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        yield
+        return
+    lock_path = root / _LOCK_FILENAME
+    try:
+        import fcntl  # POSIX only; ImportError on Windows is expected
+    except ImportError:
+        yield
+        return
+    try:
+        handle = open(lock_path, "a+b")
+    except OSError:
+        yield
+        return
+    try:
+        try:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        except OSError:
+            # Graceful fallback: proceed without inter-process exclusion.
+            yield
+            return
+        try:
+            yield
+        finally:
+            try:
+                fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+            except OSError:
+                pass
+    finally:
+        try:
+            handle.close()
+        except OSError:
+            pass
+
+
+def validate_snapshot_id(snapshot_id: str) -> str:
+    """Reject path-escape / absolute snapshot ids before joining to root."""
+    if not snapshot_id or not _SNAPSHOT_ID_RE.match(snapshot_id):
+        raise ValueError(
+            f"Invalid snapshot_id={snapshot_id!r}; must match ^[A-Za-z0-9_-]+$"
+        )
+    return snapshot_id
+
 
 class SnapshotWriter:
-    """Write a complete snapshot bundle to disk atomically."""
+    """Write a complete snapshot bundle to disk atomically.
+
+    Concurrency contract (single-writer boundary):
+
+    * One writer at a time per snapshot root. ``write`` serializes callers
+      in this process via a shared threading lock and across processes via a
+      POSIX ``fcntl`` exclusive lock on ``<root>/.snapshot_write.lock``
+      (graceful no-op fallback where ``fcntl`` is unavailable).
+    * There is deliberately no background scheduler or async worker; all
+      scheduled refreshes must go through this single-writer entry point one
+      run at a time. Concurrent schedulers must acquire the same root lock
+      (i.e. run sequentially) rather than writing concurrently.
+    * Readers never take the lock; they are tolerant of in-progress bundles
+      (missing ``COMPLETE`` sentinel, ``*.tmp`` leftovers ignored, optional
+      JSON sidecars defaulted). Atomic ``tmp + rename`` per file guarantees a
+      reader sees either the old or the new file, never a torn write.
+    """
 
     def __init__(self, root: Optional[Path] = None) -> None:
         self.root = root or (data_root() / "snapshots")
         self.root.mkdir(parents=True, exist_ok=True)
 
     def write(
+        self,
+        *,
+        snapshot_id: str,
+        as_of: date,
+        provider: ProviderName,
+        provider_mode: ProviderMode | None = None,
+        price_basis: PriceBasis | str | None = None,
+        universe_version: str,
+        taxonomy_version: str,
+        eligibility_version: str = "eligibility-v1",
+        method_version: str,
+        feature_version: str,
+        leadership_version: str = "leadership-v1",
+        diffusion_version: str = "diffusion-v1",
+        concentration_version: str = "concentration-v1",
+        schema_version: str = "schemas-v1",
+        coverage_status,
+        coverage_pct: float,
+        prices: pd.DataFrame,
+        benchmark: pd.DataFrame,
+        security_master: list[SecurityMasterEntry],
+        features: pd.DataFrame,
+        groups: pd.DataFrame,
+        transitions: pd.DataFrame,
+        notes: Optional[str] = None,
+        eligible_ticker_set_hash: Optional[str] = None,
+        eligible_ticker_count: int = 0,
+        raw_ticker_count: int = 0,
+    ) -> Path:
+        validate_snapshot_id(snapshot_id)
+        with _WRITE_LOCK:
+            with _interprocess_lock(self.root):
+                return self._write_locked(
+                    snapshot_id=snapshot_id,
+                    as_of=as_of,
+                    provider=provider,
+                    provider_mode=provider_mode,
+                    price_basis=price_basis,
+                    universe_version=universe_version,
+                    taxonomy_version=taxonomy_version,
+                    eligibility_version=eligibility_version,
+                    method_version=method_version,
+                    feature_version=feature_version,
+                    leadership_version=leadership_version,
+                    diffusion_version=diffusion_version,
+                    concentration_version=concentration_version,
+                    schema_version=schema_version,
+                    coverage_status=coverage_status,
+                    coverage_pct=coverage_pct,
+                    prices=prices,
+                    benchmark=benchmark,
+                    security_master=security_master,
+                    features=features,
+                    groups=groups,
+                    transitions=transitions,
+                    notes=notes,
+                    eligible_ticker_set_hash=eligible_ticker_set_hash,
+                    eligible_ticker_count=eligible_ticker_count,
+                    raw_ticker_count=raw_ticker_count,
+                )
+
+    def _write_locked(
         self,
         *,
         snapshot_id: str,
@@ -176,17 +327,27 @@ class SnapshotReader:
         )
 
     def load(self, snapshot_id: str) -> dict[str, Any]:
+        validate_snapshot_id(snapshot_id)
         d = self.root / snapshot_id
         if not d.exists():
             raise FileNotFoundError(d)
+        # COMPLETE is written last by SnapshotWriter.write. Pre-sentinel
+        # bundles remain loadable for back-compat; consumers must check the
+        # flag instead of assuming bundle integrity from manifest presence.
+        # Readers never take the write lock (single-writer boundary); atomic
+        # tmp+rename per file plus tolerant JSON/parquet reads keep concurrent
+        # reads safe: *.tmp leftovers are ignored and a torn manifest/master
+        # read is retried once before surfacing.
+        complete = (d / "COMPLETE").exists()
         prices = _read_any(d / "prices")
         benchmark = _read_any(d / "benchmark")
         features = _read_any(d / "features")
         groups = _read_any(d / "groups")
         transitions = _read_any(d / "transitions")
-        master = json.loads((d / "security_master.json").read_text(encoding="utf-8"))
-        manifest = json.loads((d / "manifest.json").read_text(encoding="utf-8"))
+        master = _read_json_required(d / "security_master.json")
+        manifest = _read_json_required(d / "manifest.json")
         return {
+            "complete": complete,
             "prices": prices,
             "benchmark": benchmark,
             "features": features,
@@ -296,11 +457,14 @@ def _default_provider_mode(provider: ProviderName) -> ProviderMode:
 
 
 def _atomic_to_parquet(df: pd.DataFrame, path: Path) -> None:
-    if df.empty:
-        # Write an empty parquet by using a stub
-        path.write_bytes(b"")
-        return
     tmp = path.with_suffix(path.suffix + ".tmp")
+    if df.empty:
+        # Write a valid (schema-preserving) empty parquet so external
+        # parquet readers never see a 0-byte stub. _read_any prefers
+        # parquet and falls back to CSV only when absent.
+        df.to_parquet(tmp, index=False)
+        tmp.replace(path)
+        return
     df.to_parquet(tmp, index=False)
     tmp.replace(path)
 
@@ -308,11 +472,34 @@ def _atomic_to_parquet(df: pd.DataFrame, path: Path) -> None:
 def _read_any(stem: Path) -> pd.DataFrame:
     par = stem.with_suffix(".parquet")
     if par.exists() and par.stat().st_size > 0:
-        return pd.read_parquet(par)
+        try:
+            return pd.read_parquet(par)
+        except (OSError, ValueError):
+            # Tolerate a concurrent writer mid-rename: fall back to CSV or
+            # empty rather than crashing the read path.
+            pass
     csv = stem.with_suffix(".csv")
     if csv.exists():
-        return pd.read_csv(csv)
+        try:
+            return pd.read_csv(csv)
+        except (OSError, ValueError, pd.errors.ParserError):
+            return pd.DataFrame()
     return pd.DataFrame()
+
+
+def _read_json_required(path: Path) -> Any:
+    """Read a required bundle file tolerantly across a concurrent rename.
+
+    Atomic tmp+rename means a reader normally sees the old or the new file.
+    On filesystems where the rename window is visible, retry once after a
+    short sleep before surfacing the error.
+    """
+
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        time.sleep(0.05)
+        return json.loads(path.read_text(encoding="utf-8"))
 
 
 def _read_json_optional(path: Path, default: Any) -> Any:
@@ -321,4 +508,10 @@ def _read_json_optional(path: Path, default: Any) -> Any:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError):
-        return default
+        # Retry once for a concurrent atomic rename, then fall back to the
+        # default so optional sidecars never break the read path.
+        try:
+            time.sleep(0.02)
+            return json.loads(path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            return default

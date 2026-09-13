@@ -102,7 +102,7 @@ export default function TradingViewWidget({
         return;
       }
       if (!containerRef.current) return;
-      containerRef.current.innerHTML = "";
+      containerRef.current.replaceChildren();
       const inner = document.createElement("div");
       inner.id = idRef.current;
       inner.style.height = "420px";

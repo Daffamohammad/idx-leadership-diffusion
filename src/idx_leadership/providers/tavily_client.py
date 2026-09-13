@@ -9,11 +9,14 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 import hashlib
+import ipaddress
 import json
 import os
+import re as _re
 import threading
 import time
 from typing import Any, Mapping, Sequence
+from urllib.parse import urlparse
 
 from ..data import RawCache
 from ..utils import get_logger, load_project_env, project_root
@@ -22,10 +25,26 @@ from .ledger import RequestLedger
 
 _log = get_logger(__name__)
 
+#: Refuse vendor payloads larger than this (serialized chars) before
+#: validation/caching so a runaway response cannot fill disk or memory.
+MAX_PAYLOAD_CHARS = 1_000_000
+
+
+def _assert_payload_size(payload: Any, endpoint: str) -> None:
+    try:
+        size = len(json.dumps(payload, default=str))
+    except (TypeError, ValueError):
+        size = MAX_PAYLOAD_CHARS + 1
+    if size > MAX_PAYLOAD_CHARS:
+        raise TavilyError(
+            f"response exceeds size cap endpoint={endpoint} chars={size}",
+            endpoint=endpoint,
+            code="RESPONSE_TOO_LARGE",
+        )
+
 
 class TavilyError(ProviderError):
     """Structured error for a Tavily request."""
-
     def __init__(
         self,
         message: str,
@@ -40,6 +59,59 @@ class TavilyError(ProviderError):
         self.code = code
         self.retryable = retryable
         super().__init__(message)
+
+
+def _assert_safe_url(url: str, *, endpoint: str) -> str:
+    """Reject non-http(s), localhost, IP-literal, and metadata URLs."""
+    clean = str(url or "").strip()
+    try:
+        parsed = urlparse(clean)
+    except Exception:
+        raise TavilyError(
+            f"Tavily {endpoint} URL is not parseable",
+            endpoint=endpoint,
+            code="INVALID_URL",
+        )
+    if parsed.scheme not in ("http", "https"):
+        raise TavilyError(
+            "Tavily URL must use http:// or https://",
+            endpoint=endpoint,
+            code="INVALID_URL",
+        )
+    host = (parsed.hostname or "").lower()
+    if not host or host in ("localhost", "metadata.google.internal"):
+        raise TavilyError(
+            "Tavily URL host is not allowed",
+            endpoint=endpoint,
+            code="INVALID_URL",
+        )
+    if _re.fullmatch(r"[0-9xXa-fA-F.]+", host or "") and any(
+        ch.isdigit() for ch in (host or "")
+    ):
+        # Decimal / octal / hex IP forms (e.g. 2130706433, 0x7f.0.0.1,
+        # 0177.0.0.1) resolve to loopback/link-local via inet_aton on many
+        # libc stacks but are not parsed by ipaddress — refuse them.
+        raise TavilyError(
+            "Tavily URL numeric-IP hosts are not allowed",
+            endpoint=endpoint,
+            code="INVALID_URL",
+        )
+    try:
+        ip = ipaddress.ip_address(host)
+        raise TavilyError(
+            "Tavily URL IP-literal hosts are not allowed",
+            endpoint=endpoint,
+            code="INVALID_URL",
+        )
+    except ValueError:
+        pass
+    if host == "169.254.169.254":
+        raise TavilyError(
+            "Tavily URL host is not allowed",
+            endpoint=endpoint,
+            code="INVALID_URL",
+        )
+    return clean
 
 
 @dataclass
@@ -154,6 +226,9 @@ class TavilyClient:
         include_raw_content: bool | str = False,
         use_cache: bool = True,
     ) -> TavilyResponse:
+        """Run a bounded web search. Domain scoping via include_domains is
+        caller-enforced; URL safety is enforced at the extract/crawl boundary
+        by _assert_safe_url."""
         query = str(query or "").strip()
         if not query:
             raise TavilyError(
@@ -213,6 +288,7 @@ class TavilyClient:
                 endpoint="/extract",
                 code="INVALID_URL_BATCH",
             )
+        clean_urls = [_assert_safe_url(u, endpoint="/extract") for u in clean_urls]
         params: dict[str, Any] = {
             "urls": clean_urls,
             "extract_depth": extract_depth,
@@ -259,6 +335,7 @@ class TavilyClient:
                 endpoint="/crawl",
                 code="INVALID_URL",
             )
+        clean_url = _assert_safe_url(clean_url, endpoint="/crawl")
         if not 0 <= int(max_depth) <= 5:
             raise TavilyError(
                 "Tavily crawl max_depth must be between 0 and 5",
@@ -392,6 +469,7 @@ class TavilyClient:
                 result = self._post_json(endpoint, params)
                 status, payload, headers = _unpack_result(result)
                 elapsed = (time.time() - started) * 1000.0
+                _assert_payload_size(payload, endpoint)
                 if status == 429 or 500 <= status < 600:
                     if attempt < self.max_retries:
                         delay = _retry_after(headers) or self.backoff_seconds * (attempt + 1)
@@ -402,6 +480,17 @@ class TavilyClient:
                         "Tavily transient response", endpoint, status, payload, self.api_key, True
                     )
                 if status >= 400:
+                    self.ledger.record(
+                        provider="tavily",
+                        endpoint=endpoint,
+                        request_type="POST",
+                        parameters=params,
+                        cache_hit=False,
+                        status=f"http_{status}",
+                        rows_returned=0,
+                        elapsed_ms=elapsed,
+                        error=f"Tavily response endpoint={endpoint} status={status}",
+                    )
                     raise _response_error(
                         "Tavily response", endpoint, status, payload, self.api_key, False
                     )

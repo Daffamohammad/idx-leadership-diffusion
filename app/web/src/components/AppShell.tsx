@@ -2,6 +2,7 @@ import { Link, NavLink } from "react-router";
 import { useState } from "react";
 import ThemeToggle from "./ThemeToggle";
 import { BrandLockup } from "./BrandMark";
+import { BundleNotices } from "./SnapshotNotices";
 import type { SnapshotContextValue } from "../data/SnapshotContext";
 import { normalizeDataStatus } from "../data/snapshot";
 import { formatDateLabel, formatEnumLabel, formatSnapshotId } from "../data/format";
@@ -305,6 +306,7 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
           </button>
         </header>
         <main className="scroll-thin workspace-main" style={{ flex: 1, overflowY: "auto" }}>
+          {!snap.loading && !snap.error && snap.data && <BundleNotices data={snap.data} />}
           {snap.error ? (
             <div
               style={{

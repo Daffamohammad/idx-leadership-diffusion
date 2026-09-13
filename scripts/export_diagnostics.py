@@ -7,12 +7,13 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import tempfile
 from pathlib import Path
 
 import pandas as pd
 
 from idx_leadership.data.snapshots import SnapshotReader
-from idx_leadership.utils import data_root, get_logger
+from idx_leadership.utils import data_root, get_logger, project_root
 
 _log = get_logger(__name__)
 
@@ -21,7 +22,39 @@ def main() -> int:
     parser = argparse.ArgumentParser(prog="export_diagnostics")
     parser.add_argument("--snapshots-dir", default=None)
     parser.add_argument("--out", default="data/normalized/diagnostics.csv")
+    parser.add_argument(
+        "--allow-outside-root",
+        action="store_true",
+        help="Acknowledge writing outputs outside the project root.",
+    )
     args = parser.parse_args()
+    # Root containment for --out/--output (export pattern): outputs must
+    # stay within the project root — or the system temp dir used by
+    # isolated/pytest harnesses — unless --allow-outside-root is set.
+    _project_root = project_root()
+    _temp_root = Path(tempfile.gettempdir()).resolve()
+    for _label, _value in (("--out", args.out),):
+        if _value:
+            _resolved = Path(_value).resolve()
+            _inside_root = True
+            try:
+                _resolved.relative_to(_project_root.resolve())
+            except ValueError:
+                _inside_root = False
+            _inside_temp = True
+            try:
+                _resolved.relative_to(_temp_root)
+            except ValueError:
+                _inside_temp = False
+            if not (_inside_root or _inside_temp) and not getattr(
+                args, "allow_outside_root", False
+            ):
+                print(
+                    f"refusing {_label} outside {_project_root} without --allow-outside-root",
+                    file=sys.stderr,
+                )
+                return 2
+
     reader = SnapshotReader(root=Path(args.snapshots_dir) if args.snapshots_dir else None)
     rows: list[dict] = []
     for p in reader.list_snapshots():

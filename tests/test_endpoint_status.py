@@ -47,9 +47,9 @@ def test_rollup_failed_wins():
     assert rollup_status(eqs) == "FAILED"
 
 
-def test_rollup_partial_next():
+def test_rollup_partial_maps_to_ready_with_gaps():
     eqs = [EndpointQuality(name="a", status=EndpointStatus.READY), EndpointQuality(name="b", status=EndpointStatus.PARTIAL)]
-    assert rollup_status(eqs) == "PARTIAL"
+    assert rollup_status(eqs) == "READY_WITH_GAPS"
 
 
 def test_rollup_all_ready():

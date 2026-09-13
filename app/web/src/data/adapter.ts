@@ -18,6 +18,10 @@ import type {
   LeadershipState,
   ResearchEventBundle,
   ResearchEventRow,
+  GroupEvidenceRow,
+  EvidenceContradictionRow,
+  EvidenceInvalidationRow,
+  HistoryDiagnostics,
   SnapshotPayload,
   SnapshotBreadthHistoryPoint,
   GroupPriceHistoryPoint,
@@ -32,6 +36,19 @@ import { formatEnumLabel, formatPercent } from "./format";
 export type { DiffusionState, LeadershipState } from "./snapshot";
 
 export type FlowState = "CONFIRMING" | "NEUTRAL" | "AGAINST" | "DATA_GAP";
+
+export interface EvidenceContradiction {
+  metric: string;
+  label: string;
+  severity: string;
+  evidence: string | null;
+}
+
+export interface EvidenceInvalidation {
+  condition: string;
+  threshold: string | null;
+}
+
 export interface SectorData {
   id: string;
   name: string;
@@ -40,6 +57,8 @@ export interface SectorData {
   prevLeadership?: LeadershipState;
   diffusion: DiffusionState;
   prevDiffusion?: DiffusionState;
+  // Diffusion v2 detail (e.g. BROADENING_FIRM) where the backend emitted it.
+  diffusionV2?: string | null;
   excess20d: number | null;
   excess60d: number | null;
   returnYtd: number | null;
@@ -60,6 +79,8 @@ export interface SectorData {
   foreignFlow: FlowState;
   dataQuality?: string;
   interpretation: string;
+  contradictions: EvidenceContradiction[];
+  invalidation: EvidenceInvalidation[];
 }
 
 export interface ConstituentData {
@@ -285,6 +306,22 @@ export interface ResearchEventView {
 export interface AdaptedSnapshot {
   payload: SnapshotPayload;
   sectors: SectorData[];
+  // Bundle-completeness sentinel: true = atomic bundle verified,
+  // false = stale partial bundle (pre-sentinel write), null = the export
+  // predates completeness forwarding (unknown — never authoritative).
+  bundleComplete: boolean | null;
+  // True only when the backend explicitly reports incomplete pagination.
+  paginationIncomplete: boolean;
+  // True only when the backend explicitly reports a 90-day history cap.
+  windowCapped90d: boolean;
+  windowCapNote: string | null;
+  acquisitionDiagnostics: {
+    failed: string[];
+    empty: string[];
+    requestedSymbols: number | null;
+    returnedSymbols: number | null;
+    returnedRows: number | null;
+  };
   materialChanges: SectorData[];
   breadthHistory: BreadthHistoryPoint[];
   groupPriceHistory: Record<string, GroupPricePoint[]>;
@@ -1173,8 +1210,22 @@ function adaptResearchEvents(
   bundle: ResearchEventBundle | undefined,
 ): ResearchEventView[] {
   if (!bundle || !Array.isArray(bundle.events)) return [];
+  const safeHttpUrl = (value: unknown): string | null => {
+    if (typeof value !== "string" || !value.trim()) return null;
+    try {
+      const url = new URL(value);
+      return url.protocol === "http:" || url.protocol === "https:"
+        ? url.toString()
+        : null;
+    } catch {
+      return null;
+    }
+  };
   return bundle.events
-    .map((row: ResearchEventRow) => ({
+    .map((row: ResearchEventRow) => {
+      const url = safeHttpUrl(row.source_url);
+      if (!url) return null;
+      return {
       eventId: row.event_id,
       eventDate: row.event_date,
       publishedAt: row.published_at,
@@ -1182,14 +1233,49 @@ function adaptResearchEvents(
       category: row.category,
       title: row.title,
       summary: row.summary,
-      sourceUrl: row.source_url,
+      sourceUrl: url,
       sourceName: row.source_name,
       provider: row.provider,
       quantitativeUse: row.quantitative_use,
       kongloId: row.konglo_id,
       themeIds: Array.isArray(row.theme_ids) ? row.theme_ids : [],
-    }))
+      };
+    })
+    .filter((row): row is ResearchEventView => row !== null)
     .sort((a, b) => b.eventDate.localeCompare(a.eventDate));
+}
+
+// Fail-closed projection of the new backend acquisition diagnostics.
+// Unknown / absent backend state yields empty sets — never fabricated rows.
+function normalizeHistoryTickers(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  const out: string[] = [];
+  for (const item of value) {
+    if (typeof item === "string" && item.trim()) {
+      out.push(item.trim().toUpperCase());
+    } else if (item && typeof item === "object" && !Array.isArray(item)) {
+      const row = item as Record<string, unknown>;
+      const ticker = row.ticker ?? row.symbol;
+      if (typeof ticker === "string" && ticker.trim()) {
+        out.push(ticker.trim().toUpperCase());
+      }
+    }
+  }
+  return [...new Set(out)].sort();
+}
+
+function adaptAcquisitionDiagnostics(
+  value: HistoryDiagnostics | undefined,
+): AdaptedSnapshot["acquisitionDiagnostics"] {
+  const finite = (input: unknown): number | null =>
+    typeof input === "number" && Number.isFinite(input) ? input : null;
+  return {
+    failed: normalizeHistoryTickers(value?.failed_symbols),
+    empty: normalizeHistoryTickers(value?.empty_symbols),
+    requestedSymbols: finite(value?.requested_symbols),
+    returnedSymbols: finite(value?.returned_symbols),
+    returnedRows: finite(value?.returned_rows),
+  };
 }
 
 // `previousLeader` and `previousDiff` carry domain intent ("return the
@@ -1244,6 +1330,12 @@ export function adaptSnapshot(
   for (const t of payload.transitions) {
     transitionsByGroup[t.group_id] = t;
   }
+  const evidenceByGroup: Record<string, GroupEvidenceRow> = {};
+  if (Array.isArray(payload.evidence)) {
+    for (const row of payload.evidence as GroupEvidenceRow[]) {
+      if (row && typeof row.group_id === "string") evidenceByGroup[row.group_id] = row;
+    }
+  }
 
   const sortedGroups = [...payload.groups].sort((a, b) => {
     const ra = typeof a.leadership_rank === "number" ? a.leadership_rank : Infinity;
@@ -1258,6 +1350,7 @@ export function adaptSnapshot(
   const isComparable = comparability?.status === "COMPATIBLE";
   const sectors: SectorData[] = sortedGroups.map((g) => {
     const transition = transitionsByGroup[g.group_id];
+    const evidenceRow = evidenceByGroup[g.group_id];
     const excess20d = g.group_excess_return_20d;
     const excess60d = g.group_excess_return_60d;
     const breadth = g.breadth_outperforming;
@@ -1277,6 +1370,10 @@ export function adaptSnapshot(
           )
         : undefined,
       diffusion: g.diffusion_state,
+      diffusionV2:
+        typeof g.diffusion_state_v2 === "string" && g.diffusion_state_v2.trim()
+          ? g.diffusion_state_v2.trim().toUpperCase()
+          : null,
       prevDiffusion: isComparable
         ? previousDiff(
             g.diffusion_state,
@@ -1320,6 +1417,20 @@ export function adaptSnapshot(
         breadth_delta: g.breadth_delta,
         group_excess_return_20d: g.group_excess_return_20d,
       }),
+      contradictions: Array.isArray(evidenceRow?.contradictions)
+        ? (evidenceRow.contradictions as EvidenceContradictionRow[]).map((c) => ({
+            metric: String(c.metric),
+            label: String(c.label),
+            severity: String(c.severity),
+            evidence: c.evidence == null ? null : String(c.evidence),
+          }))
+        : [],
+      invalidation: Array.isArray(evidenceRow?.invalidation)
+        ? (evidenceRow.invalidation as EvidenceInvalidationRow[]).map((row) => ({
+            condition: String(row.condition),
+            threshold: row.threshold == null ? null : String(row.threshold),
+          }))
+        : [],
     };
   });
 
@@ -1494,6 +1605,18 @@ export function adaptSnapshot(
     payload,
     sectors,
     materialChanges,
+    bundleComplete:
+      payload.complete === true ? true : payload.complete === false ? false : null,
+    paginationIncomplete: payload.coverage?.pagination_incomplete === true,
+    windowCapped90d:
+      payload.coverage?.history_window_capped_90d === true ||
+      payload.history_diagnostics?.window_capped_to_90_calendar_days === true,
+    windowCapNote:
+      typeof payload.coverage?.history_window_capped_note === "string" &&
+      payload.coverage.history_window_capped_note.trim()
+        ? payload.coverage.history_window_capped_note.trim()
+        : null,
+    acquisitionDiagnostics: adaptAcquisitionDiagnostics(payload.history_diagnostics),
     breadthHistory,
     groupPriceHistory,
     tickerPriceHistory,

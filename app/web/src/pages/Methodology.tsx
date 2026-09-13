@@ -5,7 +5,7 @@ import { normalizeDataStatus, type DataStatus, type SnapshotPayload } from "../d
 import type { AdaptedSnapshot, IDXInvestorReleaseAdapted } from "../data/adapter";
 import { buildDiffusionReadiness } from "../data/readiness";
 import { formatCountLabel, formatDateLabel, formatEnumLabel } from "../data/format";
-import { EvidenceModel } from "../components/EvidenceModel";
+import { EvidenceModel, EvidenceBadge } from "../components/EvidenceModel";
 import {
   getTavilyCategory,
   getTavilyCategoryStatus,
@@ -15,6 +15,8 @@ import {
   getYouCategoryStatus,
   normalizeYouContext,
   shortenEvidence,
+  truncateResearchAnswer,
+  RESEARCH_ANSWER_MAX_CHARS,
   type ResearchContextCategory,
 } from "../data/researchContext";
 
@@ -185,6 +187,167 @@ function SectionHead({ label }: { label: string }) {
     </div>
   );
 }
+
+/**
+ * Acquisition + pagination + window-cap diagnostics, read from persisted
+ * backend metadata only. Empty backend state renders an explicit
+ * "not reported" line — never a fabricated zero presented as measured.
+ */
+function AcquisitionDiagnostics({
+  coverage,
+  diagnostics,
+  paginationIncomplete,
+  windowCapped90d,
+  windowCapNote,
+  bundleComplete,
+}: {
+  coverage: SnapshotPayload["coverage"];
+  diagnostics: AdaptedSnapshot["acquisitionDiagnostics"] | null;
+  paginationIncomplete: boolean;
+  windowCapped90d: boolean;
+  windowCapNote: string | null;
+  bundleComplete: boolean | null;
+}) {
+  const failedCount = coverage?.acquisition_failed_constituents;
+  const emptyCount = coverage?.acquisition_empty_constituents;
+  const failedTickers = diagnostics?.failed ?? [];
+  const emptyTickers = diagnostics?.empty ?? [];
+  const hasHistoryDiag =
+    diagnostics !== null &&
+    (failedTickers.length > 0 ||
+      emptyTickers.length > 0 ||
+      diagnostics.requestedSymbols !== null ||
+      diagnostics.returnedSymbols !== null);
+  const showTickerList = (tickers: string[], label: string) => {
+    if (tickers.length === 0) return null;
+    const preview = tickers.slice(0, 12).join(", ");
+    return (
+      <details style={{ marginTop: 4 }}>
+        <summary
+          style={{
+            cursor: "pointer",
+            fontSize: 11,
+            color: "#245b76",
+            fontFamily: "Geist Mono, monospace",
+          }}
+        >
+          {label}: {tickers.length} ticker{tickers.length === 1 ? "" : "s"} ({preview}
+          {tickers.length > 12 ? ` +${tickers.length - 12} more` : ""})
+        </summary>
+        <div
+          style={{
+            marginTop: 6,
+            fontSize: 11,
+            fontFamily: "Geist Mono, monospace",
+            color: "#4d4d4d",
+            lineHeight: 1.6,
+            wordBreak: "break-word",
+          }}
+        >
+          {tickers.join(", ")}
+        </div>
+      </details>
+    );
+  };
+  return (
+    <div style={{ ...card, padding: "12px 16px", marginBottom: 16 }} aria-label="Acquisition diagnostics">
+      <div className="eyebrow-muted" style={{ marginBottom: 8 }}>Acquisition diagnostics</div>
+      <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: "#4d4d4d", lineHeight: 1.7 }}>
+        <li>
+          Failed acquisitions:{" "}
+          {failedCount !== undefined ? <strong>{failedCount}</strong> : "not reported by this export"}
+          {diagnostics?.requestedSymbols !== null && diagnostics?.requestedSymbols !== undefined
+            ? ` · ${diagnostics.returnedSymbols ?? "—"}/${diagnostics.requestedSymbols} symbols returned`
+            : null}
+          {showTickerList(failedTickers, "Failed")}
+        </li>
+        <li>
+          Empty histories:{" "}
+          {emptyCount !== undefined ? <strong>{emptyCount}</strong> : "not reported by this export"}
+          {showTickerList(emptyTickers, "Empty")}
+        </li>
+        {!hasHistoryDiag && failedCount === undefined && emptyCount === undefined && (
+          <li>Per-ticker failed/empty sets are not present in this snapshot export.</li>
+        )}
+        <li>
+          Pagination:{" "}
+          {paginationIncomplete ? (
+            <strong style={{ color: "#7a5900" }}>
+              incomplete — universe coverage may be understated; denominators reflect observed rows only.
+            </strong>
+          ) : (
+            "no incomplete-pagination flag in this export."
+          )}
+        </li>
+        <li>
+          History window:{" "}
+          {windowCapped90d ? (
+            <strong>
+              capped to the latest 90 calendar days.{" "}
+              {windowCapNote ?? "YTD baselines may be unavailable."}
+            </strong>
+          ) : (
+            "no 90-day cap flag in this export."
+          )}
+        </li>
+        <li>
+          Bundle completeness:{" "}
+          {bundleComplete === false ? (
+            <strong style={{ color: "#8f2424" }}>
+              partial — written before the atomic-completeness sentinel; treat levels as provisional.
+            </strong>
+          ) : bundleComplete === true ? (
+            "complete — atomic bundle verified."
+          ) : (
+            "not reported by this export (predates completeness forwarding)."
+          )}
+        </li>
+        <li>
+          Suspension screening:{" "}
+          {coverage?.suspension_check === "checked" ? (
+            "ran against the provider suspension feed."
+          ) : coverage?.suspension_check === "failed" ? (
+            <strong style={{ color: "#7a5900" }}>
+              feed failed — suspended names may remain eligible; treat halts as unfiltered.
+            </strong>
+          ) : coverage?.suspension_check === "not_supported" ? (
+            "provider has no suspension feed; halts are not screened."
+          ) : (
+            "not reported by this export."
+          )}
+        </li>
+        <li>
+          Session timing:{" "}
+          {coverage?.intraday_build === true ? (
+            <strong style={{ color: "#7a5900" }}>
+              built mid-session — latest bars may be partial, not final closes.
+            </strong>
+          ) : coverage?.intraday_build === false ? (
+            "built outside trading hours or from an explicit as-of date."
+          ) : (
+            "not reported by this export."
+          )}
+        </li>
+        <li>
+          Observation alignment:{" "}
+          {coverage?.max_observation_lag_days === undefined ||
+          coverage?.max_observation_lag_days === null ? (
+            "per-ticker end-date dispersion not reported by this export."
+          ) : (
+            <>
+              max end-date lag vs benchmark:{" "}
+              <strong>{coverage.max_observation_lag_days}d</strong>
+              {coverage?.tickers_lagging_gt2d
+                ? ` · ${coverage.tickers_lagging_gt2d} ticker(s) lagging over 2 sessions (mixed windows)`
+                : " · all constituents within 2 sessions"}
+            </>
+          )}
+        </li>
+      </ul>
+    </div>
+  );
+}
+
 function EvidenceMatrix({
   adapted,
   manifestEntries,
@@ -683,12 +846,23 @@ export default function Methodology() {
                     ? `${formatCountLabel(context.records.length, "You.com source")} attached; qualitative context only, not normalized into a confirmation metric.`
                     : 'No source-backed context attached; quantitative confirmation is not evaluated.')}
                 </p>
-                {context.research_answer && (
-                  <div style={{ margin: '0 0 12px', padding: '10px 12px', background: '#fafafa', borderLeft: '2px solid #7a5010', fontSize: 11, color: '#4d4d4d', lineHeight: 1.5 }}>
-                    <div className="eyebrow-muted" style={{ marginBottom: 4 }}>Research synthesis (unsourced)</div>
-                    {shortenEvidence(context.research_answer, 360)}
-                  </div>
-                )}
+                {context.research_answer && (() => {
+                  const capped = truncateResearchAnswer(context.research_answer);
+                  return (
+                    <div style={{ margin: '0 0 12px', padding: '10px 12px', background: '#fafafa', borderLeft: '2px solid #7a5010', fontSize: 11, color: '#4d4d4d', lineHeight: 1.5 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 4 }}>
+                        <div className="eyebrow-muted">Research synthesis (unsourced)</div>
+                        <EvidenceBadge kind="CONTEXT" compact />
+                      </div>
+                      {capped.text}
+                      <div style={{ marginTop: 6, fontSize: 10, color: "#8f8f8f", fontFamily: "Geist Mono, monospace" }}>
+                        {capped.truncated
+                          ? `Truncated to the ${RESEARCH_ANSWER_MAX_CHARS}-char display cap (${capped.originalLength} chars persisted); full text remains in the snapshot sidecar. Context only — never a signal.`
+                          : `Shown within the ${RESEARCH_ANSWER_MAX_CHARS}-char display cap. Context only — never a signal.`}
+                      </div>
+                    </div>
+                  );
+                })()}
                 {context.records.length === 0 ? (
                   <div style={{ fontSize: 12, color: '#8f8f8f' }}>No eligible first-party source was attached.</div>
                 ) : (
@@ -736,6 +910,15 @@ export default function Methodology() {
           </div>
         ))}
       </div>
+
+      <AcquisitionDiagnostics
+        coverage={coverage}
+        diagnostics={data?.acquisitionDiagnostics ?? null}
+        paginationIncomplete={data?.paginationIncomplete ?? false}
+        windowCapped90d={data?.windowCapped90d ?? false}
+        windowCapNote={data?.windowCapNote ?? null}
+        bundleComplete={data?.bundleComplete ?? null}
+      />
 
       <div style={{ ...card, overflow: 'hidden', marginBottom: 6 }}>
         <div style={{ padding: '10px 14px', borderBottom: '1px solid #ebebeb', fontFamily: 'Geist Mono, monospace', fontSize: 10, letterSpacing: '0.07em', textTransform: 'uppercase', color: '#666666', background: '#fafafa' }}>
@@ -820,6 +1003,8 @@ export default function Methodology() {
           ["Method Version", manifestEntries?.method_version ?? "—"],
           ["Diffusion Version", manifestEntries?.diffusion_version ?? "—"],
           ["Snapshot Date", formatDateLabel(manifestEntries?.as_of)],
+          ["Benchmark Latest Date", formatDateLabel(quality?.benchmark_latest_date)],
+          ["Latest Common Date", formatDateLabel(quality?.latest_common_date)],
         ].map(([label, val], i, arr) => (
           <div key={String(label)} style={{ display: 'flex', padding: '10px 16px', borderBottom: i < arr.length - 1 ? '1px solid #ebebeb' : 'none' }}>
             <span style={{ width: 200, fontSize: 12, color: '#666666' }}>{label}</span>
@@ -828,6 +1013,9 @@ export default function Methodology() {
         ))}
         <div style={{ padding: '12px 16px', borderTop: '1px solid #ebebeb' }}>
           <div className="eyebrow-muted">Full method reference: docs/METHODOLOGY.md</div>
+          <p style={{ margin: '8px 0 0', fontSize: 12, color: '#686e73' }}>
+            STALE means the snapshot as-of date lags the latest available benchmark or common trading date shown above; coverage and transitions remain as persisted and are not refreshed in the browser.
+          </p>
         </div>
       </div>
       <EvidenceMatrix adapted={data ?? null} manifestEntries={manifestEntries} />

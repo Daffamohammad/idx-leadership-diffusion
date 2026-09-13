@@ -21,7 +21,7 @@ def render_quality(quality: dict[str, Any]) -> None:
     if issues:
         st.caption("Issues:")
         for i in issues:
-            st.write(f"- {i}")
+            st.text(f"- {i}")
 
 
 def render_change_digest(change: dict[str, Any]) -> None:

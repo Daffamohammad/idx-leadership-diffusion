@@ -29,6 +29,7 @@ import argparse
 import json
 from pathlib import Path
 import sys
+import tempfile
 
 from idx_leadership.providers.idx_statistics import write_json_atomic
 from idx_leadership.providers.idx_discovery import (
@@ -45,7 +46,7 @@ from idx_leadership.providers.llama_parse import (
     run_llama_parse,
     write_text_atomic,
 )
-from idx_leadership.utils import data_root, load_project_env
+from idx_leadership.utils import data_root, load_project_env, project_root
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -187,11 +188,43 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Optional ignored text sidecar containing the parsed markdown.",
     )
+    parser.add_argument(
+        "--allow-outside-root",
+        action="store_true",
+        help="Acknowledge writing outputs outside the project root.",
+    )
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    # Root containment for --out/--output (export pattern): outputs must
+    # stay within the project root — or the system temp dir used by
+    # isolated/pytest harnesses — unless --allow-outside-root is set.
+    _project_root = project_root()
+    _temp_root = Path(tempfile.gettempdir()).resolve()
+    for _label, _value in (("--retrieved-pdf-output", args.retrieved_pdf_output), ("--discovery-output", args.discovery_output), ("--output", args.output), ("--public-output", args.public_output), ("--raw-output", args.raw_output), ("--markdown-output", args.markdown_output),):
+        if _value:
+            _resolved = Path(_value).resolve()
+            _inside_root = True
+            try:
+                _resolved.relative_to(_project_root.resolve())
+            except ValueError:
+                _inside_root = False
+            _inside_temp = True
+            try:
+                _resolved.relative_to(_temp_root)
+            except ValueError:
+                _inside_temp = False
+            if not (_inside_root or _inside_temp) and not getattr(
+                args, "allow_outside_root", False
+            ):
+                print(
+                    f"refusing {_label} outside {_project_root} without --allow-outside-root",
+                    file=sys.stderr,
+                )
+                return 2
+
     load_project_env()
     discovery = None
     try:

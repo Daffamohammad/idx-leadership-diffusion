@@ -19,6 +19,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import tempfile
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -27,7 +28,7 @@ import pandas as pd
 
 from idx_leadership.providers.factory import build_provider_from_config
 from idx_leadership.providers.ledger import RequestLedger
-from idx_leadership.utils import data_root, get_logger, load_yaml
+from idx_leadership.utils import data_root, get_logger, load_yaml, project_root
 from idx_leadership.utils.errors import ProviderError
 
 _log = get_logger(__name__)
@@ -48,7 +49,39 @@ def main() -> int:
         action="store_true",
         help="Permit live Sectors HTTP calls. Required for any real data.",
     )
+    parser.add_argument(
+        "--allow-outside-root",
+        action="store_true",
+        help="Acknowledge writing outputs outside the project root.",
+    )
     args = parser.parse_args()
+    # Root containment for --out/--output (export pattern): outputs must
+    # stay within the project root — or the system temp dir used by
+    # isolated/pytest harnesses — unless --allow-outside-root is set.
+    _project_root = project_root()
+    _temp_root = Path(tempfile.gettempdir()).resolve()
+    for _label, _value in (("--out", args.out),):
+        if _value:
+            _resolved = Path(_value).resolve()
+            _inside_root = True
+            try:
+                _resolved.relative_to(_project_root.resolve())
+            except ValueError:
+                _inside_root = False
+            _inside_temp = True
+            try:
+                _resolved.relative_to(_temp_root)
+            except ValueError:
+                _inside_temp = False
+            if not (_inside_root or _inside_temp) and not getattr(
+                args, "allow_outside_root", False
+            ):
+                print(
+                    f"refusing {_label} outside {_project_root} without --allow-outside-root",
+                    file=sys.stderr,
+                )
+                return 2
+
 
     as_of = date.fromisoformat(args.as_of) if args.as_of else date.today()
     out_dir = Path(args.out) if args.out else (data_root() / "normalized" / "sectors" / as_of.isoformat())

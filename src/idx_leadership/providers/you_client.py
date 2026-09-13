@@ -19,11 +19,14 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 import hashlib
+import ipaddress
 import json
 import os
+import re as _re
 import threading
 import time
 from typing import Any, Mapping, Sequence
+from urllib.parse import urlparse
 
 from ..data import RawCache
 from ..utils import get_logger, load_project_env, project_root
@@ -31,6 +34,51 @@ from ..utils.errors import ProviderError
 from .ledger import RequestLedger
 
 _log = get_logger(__name__)
+
+# Canonical backend cap for persisted research synthesis text. Frontend
+# display capping is owned separately; this constant is the shared contract
+# value recorded in the closure REPORT.
+RESEARCH_ANSWER_MAX_CHARS = 1200
+
+# Provenance banner marking persisted synthesis as unsourced context. The
+# persisted value (banner + body) never exceeds RESEARCH_ANSWER_MAX_CHARS.
+RESEARCH_ANSWER_PREFIX = "UNSOLICITED WEB SYNTHESIS — CONTEXT ONLY, NOT A METRIC. "
+
+#: Refuse vendor payloads larger than this (serialized chars) before
+#: validation/caching so a runaway response cannot fill disk or memory.
+MAX_PAYLOAD_CHARS = 1_000_000
+
+
+def _assert_payload_size(payload: Any, endpoint: str) -> None:
+    try:
+        size = len(json.dumps(payload, default=str))
+    except (TypeError, ValueError):
+        size = MAX_PAYLOAD_CHARS + 1
+    if size > MAX_PAYLOAD_CHARS:
+        raise YouError(
+            f"response exceeds size cap endpoint={endpoint} chars={size}",
+            endpoint=endpoint,
+            code="RESPONSE_TOO_LARGE",
+        )
+
+
+def truncate_research_answer(
+    answer: str | None, *, request_id: str | None = None
+) -> str | None:
+    """Cap research synthesis with a provenance banner.
+
+    The returned value is prefixed with ``RESEARCH_ANSWER_PREFIX`` and the
+    body is truncated so the total never exceeds
+    ``RESEARCH_ANSWER_MAX_CHARS``. ``None`` passes through (no answer).
+    ``request_id`` is accepted for call-site compatibility and recorded in
+    the envelope's own ``request_id`` field, not in the persisted text.
+    """
+
+    if answer is None:
+        return None
+    body = str(answer)
+    room = max(0, RESEARCH_ANSWER_MAX_CHARS - len(RESEARCH_ANSWER_PREFIX))
+    return RESEARCH_ANSWER_PREFIX + body[:room]
 
 
 class YouError(ProviderError):
@@ -50,6 +98,57 @@ class YouError(ProviderError):
         self.code = code
         self.retryable = retryable
         super().__init__(message)
+
+
+def _assert_safe_url(url: str, *, endpoint: str) -> str:
+    clean = str(url or "").strip()
+    try:
+        parsed = urlparse(clean)
+    except Exception:
+        raise YouError(
+            f"You.com {endpoint} URL is not parseable",
+            endpoint=endpoint,
+            code="INVALID_URL",
+        )
+    if parsed.scheme not in ("http", "https"):
+        raise YouError(
+            "You.com URL must use http:// or https://",
+            endpoint=endpoint,
+            code="INVALID_URL",
+        )
+    host = (parsed.hostname or "").lower()
+    if not host or host in ("localhost", "metadata.google.internal"):
+        raise YouError(
+            "You.com URL host is not allowed",
+            endpoint=endpoint,
+            code="INVALID_URL",
+        )
+    if _re.fullmatch(r"[0-9xXa-fA-F.]+", host or "") and any(
+        ch.isdigit() for ch in (host or "")
+    ):
+        # Decimal / octal / hex IP forms resolve to loopback/link-local via
+        # inet_aton on many libc stacks but are not parsed by ipaddress.
+        raise YouError(
+            "You.com URL numeric-IP hosts are not allowed",
+            endpoint=endpoint,
+            code="INVALID_URL",
+        )
+    try:
+        ipaddress.ip_address(host)
+        raise YouError(
+            "You.com URL IP-literal hosts are not allowed",
+            endpoint=endpoint,
+            code="INVALID_URL",
+        )
+    except ValueError:
+        pass
+    if host == "169.254.169.254":
+        raise YouError(
+            "You.com URL host is not allowed",
+            endpoint=endpoint,
+            code="INVALID_URL",
+        )
+    return clean
 
 
 @dataclass
@@ -102,12 +201,18 @@ class YouResponse:
 
     @property
     def answer(self) -> str | None:
-        """Research synthesis text, if any (qualitative, unsourced)."""
+        """Research synthesis text, if any (qualitative, unsourced).
+
+        Capped to ``RESEARCH_ANSWER_MAX_CHARS`` with a provenance banner so
+        persisted answers never grow unbounded.
+        """
         output = self.payload.get("output")
         if isinstance(output, Mapping):
             content = output.get("content")
             if isinstance(content, str):
-                return content
+                return truncate_research_answer(
+                    content, request_id=self.request_id
+                )
         return None
 
     def to_dict(self) -> dict[str, Any]:
@@ -121,7 +226,8 @@ class YouResponse:
             "cache_hit": self.cache_hit,
             "usage": dict(self.usage),
             "results": self.results,
-            # Research synthesis, retained as unsourced context only.
+            # Research synthesis, retained as unsourced context only and
+            # capped to RESEARCH_ANSWER_MAX_CHARS with provenance banner.
             "answer": self.answer,
         }
 
@@ -195,7 +301,11 @@ class YouClient:
         extraction_mode: str | None = None,
         use_cache: bool = True,
     ) -> YouResponse:
-        """Search the web via ``POST /v1/search``."""
+        """Search the web via ``POST /v1/search``.
+
+        Domain scoping via include/exclude/boost_domains is caller-enforced;
+        URL safety is enforced at the extract boundary by _assert_safe_url.
+        """
         query = str(query or "").strip()
         if not query:
             raise YouError(
@@ -264,6 +374,7 @@ class YouClient:
                 endpoint="/v1/contents",
                 code="INVALID_URL_BATCH",
             )
+        clean_urls = [_assert_safe_url(u, endpoint="/v1/contents") for u in clean_urls]
         params: dict[str, Any] = {
             "urls": clean_urls,
             "crawl_timeout": int(crawl_timeout),
@@ -442,6 +553,7 @@ class YouClient:
                 result = self._post_json(endpoint, params, base_url)
                 status, payload, headers = _unpack_result(result)
                 elapsed = (time.time() - started) * 1000.0
+                _assert_payload_size(payload, endpoint)
                 if status == 429 or 500 <= status < 600:
                     if attempt < self.max_retries:
                         delay = _retry_after(headers) or self.backoff_seconds * (attempt + 1)
@@ -457,6 +569,17 @@ class YouClient:
                         True,
                     )
                 if status >= 400:
+                    self.ledger.record(
+                        provider="you",
+                        endpoint=endpoint,
+                        request_type="POST",
+                        parameters=params,
+                        cache_hit=False,
+                        status=f"http_{status}",
+                        rows_returned=0,
+                        elapsed_ms=elapsed,
+                        error=f"You.com response endpoint={endpoint} status={status}",
+                    )
                     raise _response_error(
                         "You.com response",
                         endpoint,
@@ -682,4 +805,4 @@ def _response_error(
     )
 
 
-__all__ = ["YouClient", "YouError", "YouResponse"]
+__all__ = ["YouClient", "YouError", "YouResponse", "RESEARCH_ANSWER_MAX_CHARS", "RESEARCH_ANSWER_PREFIX", "truncate_research_answer"]
