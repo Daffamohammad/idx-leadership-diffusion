@@ -382,6 +382,13 @@ function normalizeBreadthHistory(value: unknown): BreadthHistoryPoint[] {
     ];
   });
 }
+function safeNullableNumber(v: unknown): number | null {
+  if (v === null || v === undefined) return null;
+  if (typeof v === "number") return Number.isFinite(v) ? v : null;
+  if (typeof v !== "string" || v.trim() === "") return null;
+  const parsed = Number(v);
+  return Number.isFinite(parsed) ? parsed : null;
+}
 
 function normalizeGroupPriceHistory(value: unknown): Record<string, GroupPricePoint[]> {
   if (!value || typeof value !== "object" || Array.isArray(value)) return {};
@@ -394,6 +401,11 @@ function normalizeGroupPriceHistory(value: unknown): Record<string, GroupPricePo
       const date = candidate.date;
       const value = candidate.value;
       const benchmark = candidate.benchmark;
+      const open = safeNullableNumber(candidate.open);
+      const high = safeNullableNumber(candidate.high);
+      const low = safeNullableNumber(candidate.low);
+      const close = safeNullableNumber(candidate.close);
+      const volume = safeNullableNumber(candidate.volume);
       if (
         typeof date !== "string" ||
         date.length === 0 ||
@@ -410,7 +422,7 @@ function normalizeGroupPriceHistory(value: unknown): Record<string, GroupPricePo
       ) {
         return [];
       }
-      return [{ date, value, benchmark: benchmark ?? null }];
+      return [{ date, value, benchmark: benchmark ?? null, open, high, low, close, volume }];
     });
     if (points.length > 0) output[groupId] = points;
   }
