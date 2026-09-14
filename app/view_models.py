@@ -22,7 +22,7 @@ from idx_leadership.models import (
 from app.snapshot_adapter import row_to_group_snapshot
 
 
-CONFIRMATION_DATA_GAP = "DATA GAP — SECTORS LIVE NOT CONNECTED"
+CONFIRMATION_DATA_GAP = "Not available — no validated source is attached for this scope"
 
 MODE_LABELS = {
     "DEMO_FIXTURE": "DEMO FIXTURE",
@@ -298,6 +298,7 @@ class DashboardView:
     api_credit_audit: Mapping[str, Any] = field(default_factory=dict)
     methodology_sensitivity: Mapping[str, Any] = field(default_factory=dict)
     you_context: Mapping[str, Any] = field(default_factory=dict)
+    official_market_context: Mapping[str, Any] = field(default_factory=dict)
 
     def group(self, group_id: str | None) -> GroupView | None:
         if group_id is None:
@@ -396,6 +397,7 @@ def build_dashboard_view(payload: Mapping[str, Any]) -> DashboardView:
         api_credit_audit=_mapping_or_empty(payload.get("api_credit_audit")),
         methodology_sensitivity=_mapping_or_empty(payload.get("methodology_sensitivity")),
         you_context=_mapping_or_empty(payload.get("you_context")),
+        official_market_context=_mapping_or_empty(payload.get("official_market_context")),
     )
 
 
@@ -836,8 +838,8 @@ def render_market_brief(view: DashboardView, selected_group_id: str | None = Non
         else:
             lines.append("- No invalidation conditions are available for this group.")
 
-    # --- Data Gaps (brief contract v1) ---
-    lines.extend(["", "## Data Gaps", ""])
+    # --- Coverage Notes (brief contract v1 display label) ---
+    lines.extend(["", "## Coverage Notes", ""])
     if selected is not None and selected.data_gaps:
         for gap in selected.data_gaps:
             lines.append(f"- **{_data_gap_category_label(gap.category)}** — {gap.label}")

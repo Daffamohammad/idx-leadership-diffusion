@@ -21,8 +21,9 @@ from typing import Any
 import pandas as pd
 
 from idx_leadership.providers.factory import build_provider_from_config
+from idx_leadership.providers.sectors_client import SectorsClient
 from idx_leadership.utils import data_root, get_logger, project_root
-from idx_leadership.utils.errors import ProviderError
+from idx_leadership.utils.errors import CreditBudgetExceeded, ProviderError
 
 _log = get_logger(__name__)
 
@@ -34,11 +35,30 @@ def main() -> int:
     parser.add_argument("--out", default=None)
     parser.add_argument("--allow-live", action="store_true")
     parser.add_argument(
+        "--max-http-requests",
+        type=int,
+        default=SectorsClient.DEFAULT_MAX_HTTP_REQUESTS,
+        help=(
+            "Hard cap on outgoing live HTTP attempts, including retries "
+            f"(default: {SectorsClient.DEFAULT_MAX_HTTP_REQUESTS})."
+        ),
+    )
+    parser.add_argument(
         "--allow-outside-root",
         action="store_true",
         help="Acknowledge writing outputs outside the project root.",
     )
     args = parser.parse_args()
+    if args.max_http_requests < 1:
+        print("max_http_requests must be at least 1", file=sys.stderr)
+        return 2
+    if not args.allow_live:
+        print(
+            "BLOCKED run_stale_trading requires --allow-live; no offline provider "
+            "is configured for this study.",
+            file=sys.stderr,
+        )
+        return 2
     # Root containment for --out/--output (export pattern): outputs must
     # stay within the project root — or the system temp dir used by
     # isolated/pytest harnesses — unless --allow-outside-root is set.
@@ -71,13 +91,22 @@ def main() -> int:
     out_path = Path(args.out) if args.out else (data_root() / "normalized" / f"stale_trading_{as_of.isoformat()}.csv")
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
-    provider = build_provider_from_config(preferred="sectors", allow_live=args.allow_live)
+    provider = build_provider_from_config(
+        preferred="sectors",
+        allow_live=args.allow_live,
+        max_http_requests=args.max_http_requests,
+    )
     # Walk back to fetch a multi-day cross-section
     rows: list[dict] = []
+    request_cap_reached = False
     for i in range(args.back_days + 5):
         d = as_of - timedelta(days=i)
         try:
             cs = provider.get_full_universe_close(d)
+        except CreditBudgetExceeded as e:
+            print(f"BLOCKED live request cap reached at {d}: {e}", file=sys.stderr)
+            request_cap_reached = True
+            break
         except ProviderError as e:
             print(f"provider error at {d}: {e}", file=sys.stderr)
             continue
@@ -85,6 +114,13 @@ def main() -> int:
             continue
         cs = cs[["ticker", "date", "close"]]
         rows.append(cs)
+    if request_cap_reached:
+        print(
+            "BLOCKED stale-trading study was not written because the live request "
+            "cap stopped the date walk before completion.",
+            file=sys.stderr,
+        )
+        return 2
     if not rows:
         print("BLOCKED no data", file=sys.stderr)
         return 2

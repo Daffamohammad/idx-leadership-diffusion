@@ -17,8 +17,8 @@ export function formatIdrCompact(value: number, fractionDigits = 2): string {
 }
 
 const LABEL_OVERRIDES: Record<string, string> = {
-  DATA_GAP: "Data gap",
-  READY_WITH_GAPS: "Ready with gaps",
+  DATA_GAP: "Not available",
+  READY_WITH_GAPS: "Ready · partial coverage",
   SAMPLE_ONLY: "Sample only",
   CONTEXT_ONLY: "Context only",
   DIRECT_SOURCE_REVIEW: "Direct source review",

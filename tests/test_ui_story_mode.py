@@ -176,5 +176,5 @@ def test_overall_rollup_function():
 
 
 def test_human_readable_status():
-    assert human_readable_status("READY_WITH_GAPS") == "Ready With Gaps"
+    assert human_readable_status("READY_WITH_GAPS") == "Ready · partial coverage"
     assert human_readable_status("FAILED") == "Failed"

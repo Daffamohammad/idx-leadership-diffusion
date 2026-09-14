@@ -68,7 +68,31 @@ The snapshot preflight is the paid-run gate. It uses the latest persisted live
 universe when available, prices structured screener pages at one credit, and
 blocks a baseline above the hard 1,000-credit ceiling before constructing a
 live client. Retries reserve again at the client boundary and are stopped when
-the same ceiling is reached.
+the same ceiling is reached. The default snapshot builder also has a separate
+400-outgoing-attempt circuit breaker, including retries.
+
+## Demo acquisition scope
+
+The default live snapshot is intentionally bounded: it paginates the
+accessible company master and close cross-section, persists the complete
+security listing, and requests daily history for at most 250 deterministic
+names. The history sample takes one top market-cap name per available sector
+first, then fills remaining slots by market-cap rank. This keeps every sector
+visible in the demo without spending a per-symbol history call on all 962
+names. The resulting bundle must report both the listed universe and the
+analysis sample; they are different denominators.
+
+Run the network-free plan first:
+
+```bash
+.venv/bin/python -m scripts.build_market_snapshot --preflight-only
+```
+
+The expected current plan is approximately 296 baseline attempts (10
+company/taxonomy pages, 1 latest-close probe, 33 close pages, 250 daily
+history calls, IHSG, and suspensions), under the 400-attempt cap. A retry can
+consume the remaining headroom; the client stops before the next outgoing
+request.
 
 ## Minimal credentialed validation
 
@@ -175,7 +199,8 @@ The market-wide command is:
 
 ```bash
 .venv/bin/python -m scripts.build_market_snapshot \
-  --allow-live --allow-credit-spend --max-estimated-credits 1000 \
+  --allow-live --allow-credit-spend --max-symbols 250 \
+  --max-http-requests 400 --max-estimated-credits 1000 \
   --history-workers 1 --with-tavily
 ```
 

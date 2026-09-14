@@ -51,19 +51,19 @@
       "url": "https://www.idnfinancials.com/news/67352/foreign-trading-records-net-buy-bbca-leads-top-buys",
       "publisher": "IDNFinancials",
       "role": "dated_market_and_company_sample",
-      "quantitative_use": true,
+      "quantitative_use": false,
       "as_of": "2026-08-12",
-      "note": "Published market totals and top net-buy/net-sell rows are manually normalized in foreign_flow_sample.csv."
+      "note": "Published market totals and top net-buy/net-sell rows are manually normalized in foreign_flow_sample.csv as reported descriptive context; they are not quantitative product evidence."
     },
     {
       "url": "https://www.idnfinancials.com/news/67999/foreign-trading-is-a-net-sell-bbri-top-sell-idr-274-billion",
       "publisher": "IDNFinancials",
       "role": "dated_market_and_company_sample",
-      "quantitative_use": true,
+      "quantitative_use": false,
       "as_of": "2026-08-27",
-      "note": "Published regular-market totals and top net-buy/net-sell rows are manually normalized in foreign_flow_sample.csv."
+      "note": "Published regular-market totals and top net-buy/net-sell rows are manually normalized in foreign_flow_sample.csv as reported descriptive context; they are not quantitative product evidence."
     }
   ],
   "not_found": "No first-party per-ticker or per-group ownership-flow feed suitable for full-universe confirmation was established. A first-party market-level monthly release was found and integrated separately.",
-  "calculation_boundary": "The official IDX release is parsed only after table/date/total reconciliation; the bounded company sample remains separate. Search summaries and qualitative sidecars remain non-quantitative."
+  "calculation_boundary": "The official IDX release is parsed by the deterministic first-party HTML reducer only after table/date/total reconciliation; the bounded secondary company sample remains separate and quantitative_use=false. Search summaries and qualitative sidecars remain non-quantitative."
 }

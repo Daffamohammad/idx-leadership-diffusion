@@ -43,25 +43,27 @@ def build_data_gaps(
 
     if provider_mode in (ProviderMode.SECTORS_LIVE,):
         # Live run; confirmation layers are reachable but not yet
-        # materialised. The brief and the UI still report the gap.
-        add(DataGapCategory.FUNDAMENTALS, DataGapStatus.DATA_GAP, "Fundamentals confirmation not yet integrated into this snapshot")
-        add(DataGapCategory.FOREIGN_FLOW, DataGapStatus.DATA_GAP, "Foreign flow confirmation not yet integrated into this snapshot")
-        add(DataGapCategory.BROKER_ACTIVITY, DataGapStatus.NOT_INTEGRATED, "Broker activity is not integrated (insufficient lift)")
-        add(DataGapCategory.FREE_FLOAT, DataGapStatus.NOT_APPLIED, "Free-float weighting not applied (equal-weight default per D011)")
+        # materialised. Keep the machine status, but use neutral product
+        # language so the UI describes scope and provenance rather than
+        # exposing an internal quality label.
+        add(DataGapCategory.FUNDAMENTALS, DataGapStatus.DATA_GAP, "Fundamentals source is not attached for this scope")
+        add(DataGapCategory.FOREIGN_FLOW, DataGapStatus.DATA_GAP, "Foreign-flow source is not attached for this scope")
+        add(DataGapCategory.BROKER_ACTIVITY, DataGapStatus.NOT_INTEGRATED, "Broker activity is outside the current scope")
+        add(DataGapCategory.FREE_FLOAT, DataGapStatus.NOT_APPLIED, "Free-float weighting is not used; equal-weight method is active")
         if has_corporate_action_metadata:
             add(DataGapCategory.CORPORATE_ACTIONS, DataGapStatus.READY, "Corporate-action metadata present (annotation-only per D018)")
         else:
-            add(DataGapCategory.CORPORATE_ACTIONS, DataGapStatus.DATA_GAP, "Corporate-action metadata not retrieved")
+            add(DataGapCategory.CORPORATE_ACTIONS, DataGapStatus.DATA_GAP, "Corporate-action metadata is not attached")
     else:
         # Non-live modes (PUBLIC_PROTOTYPE, SECTORS_FIXTURE, DEMO_FIXTURE).
-        add(DataGapCategory.FUNDAMENTALS, DataGapStatus.DATA_GAP, "DATA GAP — Sectors live not connected")
-        add(DataGapCategory.FOREIGN_FLOW, DataGapStatus.DATA_GAP, "DATA GAP — Sectors live not connected")
-        add(DataGapCategory.BROKER_ACTIVITY, DataGapStatus.NOT_INTEGRATED, "NOT INTEGRATED")
-        add(DataGapCategory.FREE_FLOAT, DataGapStatus.NOT_APPLIED, "NOT APPLIED — equal-weight prototype")
+        add(DataGapCategory.FUNDAMENTALS, DataGapStatus.DATA_GAP, "Fundamentals source is not attached for this scope")
+        add(DataGapCategory.FOREIGN_FLOW, DataGapStatus.DATA_GAP, "Foreign-flow source is not attached for this scope")
+        add(DataGapCategory.BROKER_ACTIVITY, DataGapStatus.NOT_INTEGRATED, "Broker activity is outside the current scope")
+        add(DataGapCategory.FREE_FLOAT, DataGapStatus.NOT_APPLIED, "Free-float weighting is not used; equal-weight method is active")
         if provider_mode in (ProviderMode.PUBLIC_PROTOTYPE, ProviderMode.DEMO_FIXTURE):
-            add(DataGapCategory.TAXONOMY, DataGapStatus.PROTOTYPE, "PROTOTYPE — Sectors taxonomy unavailable")
+            add(DataGapCategory.TAXONOMY, DataGapStatus.PROTOTYPE, "IDX taxonomy is not attached; prototype grouping remains in use")
         else:
-            add(DataGapCategory.TAXONOMY, DataGapStatus.READY, "Sectors fixture taxonomy in use")
+            add(DataGapCategory.TAXONOMY, DataGapStatus.READY, "Sectors fixture taxonomy is in use")
 
     # Sectors benchmark coverage: only flagged when explicitly stale.
     add(DataGapCategory.BENCHMARK, DataGapStatus.READY, "Benchmark date and series present")

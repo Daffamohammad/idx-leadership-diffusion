@@ -178,7 +178,7 @@ def test_demo_brief_uses_frozen_section_order():
     output = _run_export()
     last = -1
     for section in BRIEF_SECTIONS:
-        idx = output.find(f"## {section}")
+        idx = output.find(f"## {'Coverage Notes' if section == 'Data Gaps' else section}")
         assert idx != -1, f"missing section {section!r}"
         assert idx > last, f"section {section!r} is out of order"
         last = idx
@@ -186,10 +186,10 @@ def test_demo_brief_uses_frozen_section_order():
 
 def test_demo_brief_data_gaps_have_no_duplicates():
     """The freeze-pass deduplication must prevent a category from
-    appearing twice under "## Data Gaps".
+    appearing twice under "## Coverage Notes".
     """
     output = _run_export()
-    data_gaps = output.split("## Data Gaps", 1)[1]
+    data_gaps = output.split("## Coverage Notes", 1)[1]
     for category in (
         "Fundamentals",
         "Foreign Flow",

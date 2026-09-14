@@ -10,7 +10,10 @@ confuse:
 Search providers can help discover a candidate page, but they are not the
 numeric source.  This module keeps the source URL explicit and parses the
 published table deterministically.  It never calls a search provider and it
-does not infer per-ticker flow from a market-level release.
+does not infer per-ticker flow from a market-level release.  A successful
+first-party HTML-table parse is a separate lane from dynamic-page discovery:
+the page URL and table cells must be retrieved directly, while search/crawl
+snippets and discovery metadata remain non-quantitative.
 """
 from __future__ import annotations
 
@@ -954,6 +957,7 @@ def parse_idx_monthly_investor_html(
             "negative_day_count": sum(1 for row in daily if row["net_foreign_value_idr"] < 0),
             "reconciliation": reconciliation,
             "search_agent_role": "DISCOVERY_ONLY",
+            "dynamic_page_discovery_separate": True,
             "full_month_release": True,
         },
         "source": {
@@ -961,6 +965,8 @@ def parse_idx_monthly_investor_html(
             "url": source_url,
             "retrieved_at": retrieved_at or datetime.now(timezone.utc).isoformat(),
             "parser": "idx_monthly_investor_html",
+            "parser_type": "DETERMINISTIC_FIRST_PARTY_HTML_REDUCER",
+            "source_kind": "FIRST_PARTY_DYNAMIC_TABLE",
             "table_endpoints": [
                 "/api/tabledailytradingbyinvestor/getforeign",
                 "/api/tabledailytradingbyinvestor/getdomestic",
@@ -971,6 +977,7 @@ def parse_idx_monthly_investor_html(
             "Foreign-to-foreign and domestic-to-domestic trades are retained for audit detail and excluded from net foreign.",
             "This release is market-level investor flow; it does not provide per-ticker ownership flow.",
             "The parser does not use search summaries or infer missing trading days.",
+            "Search/crawl discovery metadata is not numeric evidence; this artifact is reduced from directly retrieved official IDX table cells.",
         ],
     }
 

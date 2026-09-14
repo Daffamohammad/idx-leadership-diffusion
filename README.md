@@ -64,7 +64,7 @@ current build:
 
 | Product lane | Sections | Contract |
 | --- | --- | --- |
-| Real snapshot | Overview, Sector heatmap, Leadership Map, Groups, Ticker Analysis, What Changed | Persisted market observations and explicit coverage metadata; the current snapshot remains partial and has no comparable prior. |
+| Real snapshot | Overview, Sector heatmap, Leadership Map, Groups, Ticker Analysis, What Changed | Full accessible listing registry plus bounded persisted market observations; the analytical history sample remains bounded and has no comparable prior. |
 | Official release | Overview, Methodology | Official IDX July 2026 daily investor-type table, parsed and reconciled across 23 trading days into market-level net foreign flow. |
 | Source-backed sample | Foreign Flow | Real reported observations from a bounded top-list sample; not a full-universe signal. |
 | Static research lens | Konglo Map, Themes Map, Group Explorer for those taxonomies, Themes Explorer | Analyst-defined membership configuration; aggregate metrics may reuse the current snapshot, but the taxonomy is not official IDX data. |
@@ -113,7 +113,7 @@ provider connections while rendering.
 | `/` | `PublicHome` | marketing copy (no data dependency) |
 | `/overview` | `MarketOverview` | real Sector heatmap plus official IDX market-level release, bounded sample, and static context sections |
 | `/what-changed` | `WhatChanged` | real current snapshot; prior comparison is shown only when compatible history exists |
-| `/map` | `LeadershipMap` | YTD excess-return rotation mapping and table; 20D/60D momentum remain diagnostics and null YTD values stay `Data gap` |
+| `/map` | `LeadershipMap` | YTD excess-return rotation mapping and table; 20D/60D momentum remain diagnostics and null YTD values stay `Not available` |
 | `/maps/konglo` | `TaxonomyMapPage` | static analyst-defined membership lens with current-snapshot aggregates |
 | `/maps/themes` | `TaxonomyMapPage` | static analyst-defined membership lens with current-snapshot aggregates |
 | `/explorer` | `GroupExplorer` | real `features` joined to `security_master` per `group_id` |
@@ -136,7 +136,8 @@ reason rather than a blank chart.
 ```bash
 # 1. Build or refresh a snapshot. The live path is explicitly opt-in.
 .venv/bin/python -m scripts.build_market_snapshot \
-  --allow-live --allow-credit-spend --max-estimated-credits 1000 \
+  --allow-live --allow-credit-spend --max-symbols 250 \
+  --max-http-requests 400 --max-estimated-credits 1000 \
   --with-tavily --history-workers 1
 
 # 2. Export the live snapshot and make it the SPA default.
@@ -182,7 +183,7 @@ Static or bounded layers (explicitly labeled, never presented as live signals):
 - Konglo and Themes analyst-defined membership lenses
 - qualitative research events and web context
 
-Fundamentals remain a data gap. Unsupported quantitative views render a
+Fundamentals remain unavailable. Unsupported quantitative views render a
 one-line reason rather than a fabricated neutral value.
 
 An existing snapshot can receive a bounded, first-party Tavily research
@@ -224,9 +225,12 @@ market-level investor release shown on Overview and Methodology:
 - [July 2026 daily trading by type of investor](https://www.idx.co.id/id/data-pasar/laporan-statistik/digital-statistic/monthly/equity-trading-by-investor/table-daily-trading-by-type-of-investor?filter=eyJ5ZWFyIjoiMjAyNiIsIm1vbnRoIjoiNyIsInF1YXJ0ZXIiOjAsInR5cGUiOiJtb250aGx5In0%3D)
   renders the 23 trading-day rows used by the product.
 
-`src/idx_leadership/providers/idx_statistics.py` parses the two released HTML
-tables, aligns dates, derives `domestic sells to foreign − foreign sells to
-domestic`, and fails closed when totals do not reconcile. The offline-safe
+`src/idx_leadership/providers/idx_statistics.py` is the deterministic reducer
+for the two directly retrieved first-party HTML tables, aligns dates, derives
+`domestic_to_foreign - foreign_to_domestic`, and fails closed when totals do
+not reconcile. The page is dynamic, but its completed cached release is not
+downgraded; dynamic-page discovery and search snippets remain separate and
+non-quantitative. The offline-safe
 refresh command is:
 
 ```bash
@@ -272,9 +276,11 @@ persisted security master:
 
 The deterministic result is written to
 `data/derived/foreign_flow_sample.json` with `READY_WITH_GAPS` status. It is
-sample evidence only and is explicitly disabled from leadership, diffusion,
-and confirmation calculations. No network request is made and the Sectors
-API is not called by this command.
+reported descriptive sample evidence only: IDNFinancials/secondary rows keep
+their source values and provenance but are emitted with `quantitative_use=false`.
+The sample is explicitly disabled from leadership, diffusion, and confirmation
+calculations. No network request is made and the Sectors API is not called by
+this command.
 
 ## Prototype mode
 
@@ -319,7 +325,7 @@ must not be quoted as market observations.
 | Normalizers (taxonomy, close, free float, flow, corporate actions) | shipped, fixture-tested | `src/idx_leadership/providers/sectors_normalizers.py` |
 | Contract drift tests | shipped, fixture-only | `tests/test_provider_contracts.py` |
 | Sectors-shaped fixtures | shipped | `data/fixtures/sectors/` |
-| Live market-wide snapshot | exercised; `READY_WITH_GAPS` at 99.2% requested-history coverage for 500 used of 962 discovered rows; 265 policy-eligible | `scripts/build_market_snapshot.py` |
+| Live market-wide snapshot | exercised; 962-row accessible listing registry, 500-name bounded history sample, `READY_WITH_GAPS` at 99.2% requested-history coverage, 265 policy-eligible | `scripts/build_market_snapshot.py` |
 | Live parity | exercised; 3/3 close spot-checks matched | `scripts/compare_providers.py` |
 | Live credit audit | shipped, command ready, `BALANCE UNAVAILABLE` without balances | `scripts/audit_sectors_credit.py` |
 | Live price-basis audit | still open; raw/adjusted semantics remain `UNKNOWN / VERIFY` | `scripts/audit_price_basis.py` |
@@ -355,10 +361,11 @@ test -n "${TAVILY_API_KEY:-}" && echo "Tavily key present" || echo "Tavily key m
   --sectors-mode SECTORS_LIVE --live --allow-credit-spend \
   --as-of 2021-10-29
 
-# 6. Market-wide live snapshot. Preflight is the paid-run gate; the client
-#    hard-stops before any request that would exceed 1,000 Sectors credits.
+# 6. Bounded live snapshot. The full accessible master is listed, while
+#    daily history is limited to 250 selected names and 400 attempts.
 .venv/bin/python -m scripts.build_market_snapshot \
-  --allow-live --allow-credit-spend --max-estimated-credits 1000 \
+  --allow-live --allow-credit-spend --max-symbols 250 \
+  --max-http-requests 400 --max-estimated-credits 1000 \
   --history-workers 1 --with-tavily
 
 # 7. Export only the live snapshot for the SPA's default index.
@@ -390,9 +397,10 @@ streamlit run app/streamlit_app.py
 
 ## Current scope
 
-- Live Sectors security master of 962 discovered IDX company rows in the
-  exercised 2026-08-27 snapshot; the browser payload uses a disclosed 500-row
-  prefix sample, with 265 policy-eligible securities and 496/500 usable
+- Live Sectors discovery produced 962 unique company rows in the exercised
+  2026-08-27 snapshot. The browser payload now exposes all 962 rows through a
+  dedicated listing registry, while market features use a disclosed 500-name
+  bounded sample with 265 policy-eligible securities and 496/500 usable
   requested histories (99.2%).
 - 5D / 20D / 60D horizons.
 - Equal-weight group aggregation.
@@ -479,7 +487,9 @@ See `docs/METHODOLOGY.md` for the full specification.
 
 ## Data limitations
 
-- Prototype universe is not full IDX.
+- The 962-row live registry is the provider-accessible universe for this
+  snapshot; it is not a claim that every IDX instrument or historical listing
+  outside that provider feed is represented.
 - Equal-weight only; no market-cap or free-float weighting.
 - Live Sectors history is intentionally partial when the provider rate-limits
   a request batch. The current snapshot is labeled `READY_WITH_GAPS`, not
@@ -502,6 +512,7 @@ When credentials are available:
 - `config/providers.yaml` flipped to `enabled: true` for `sectors`
 - run the bounded validator, then
   `scripts/build_market_snapshot.py --allow-live --allow-credit-spend`
+  (bounded by default: 250 history symbols / 400 HTTP attempts)
 - run the live provider-parity spot-check before using the snapshot
 - Snapshots remain readable forever; no migration of historical
   data is required

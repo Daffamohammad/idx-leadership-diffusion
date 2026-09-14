@@ -440,7 +440,7 @@ export default function PriceChart({
           )}
           {isDataGap && (
             <div style={{ fontSize: 10, marginTop: 4, color: "#8f2424", fontWeight: 600 }}>
-              Data gap detected — values may be incomplete
+              Coverage is incomplete — some values may be missing
             </div>
           )}
         </div>
@@ -489,7 +489,7 @@ export default function PriceChart({
           )}
           {isDataGap && (
             <span style={{ fontSize: 9, fontFamily: "Geist Mono", color: "#8f2424", background: "#fdeaea", padding: "2px 6px", borderRadius: 4 }}>
-              Data gap
+              Not available
             </span>
           )}
         </div>

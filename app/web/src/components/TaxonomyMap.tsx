@@ -372,7 +372,7 @@ export default function TaxonomyMap({
             >
               <span style={{ fontSize: 12, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{group.name}</span>
               <span style={{ fontFamily: "Geist Mono, monospace", fontSize: 10, color: isDataGap ? "#686e73" : "#7c858c" }}>
-                {isDataGap ? `Data gap · ${dataGapReason(group)}` : `${formatEnumLabel(group.leadership)} · ${formatEnumLabel(group.diffusion)}${flow ? ` · ${formatEnumLabel(flow)} flow` : ""}`}
+                {isDataGap ? `Not available · ${dataGapReason(group)}` : `${formatEnumLabel(group.leadership)} · ${formatEnumLabel(group.diffusion)}${flow ? ` · ${formatEnumLabel(flow)} flow` : ""}`}
               </span>
             </button>
           );

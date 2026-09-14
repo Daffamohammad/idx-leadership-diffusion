@@ -112,11 +112,20 @@ export interface Coverage {
   observed_eligible_features?: number;
   coverage_pct?: number;
   coverage_gate_60pct_met?: boolean;
-  // Prefix sample disclosure (added 2026-08-29).
+  // Legacy/listing-scope disclosure (added 2026-08-29).
   is_prefix_sample?: boolean;
   discovered_count?: number;
   used_count?: number;
   discovered_universe_disclosure?: string;
+  // The live pipeline now keeps the complete listing while bounding only the
+  // expensive daily-history lane for a demo.
+  analysis_universe_count?: number;
+  analysis_scope?: "BOUNDED_DEMO" | "PAGE_CAPPED" | "FULL_DISCOVERED_UNIVERSE" | string;
+  analysis_selection_method?: string;
+  full_accessible_universe_listed?: boolean;
+  history_request_symbol_cap?: number | null;
+  live_http_request_cap?: number | null;
+  live_http_requests_made?: number;
   security_master_pagination_completeness?: "COMPLETE" | "PARTIAL" | "UNKNOWN" | null;
   close_pagination_completeness?: "COMPLETE" | "PARTIAL" | "UNKNOWN" | null;
   // Pagination / window-cap flags threaded from provider diagnostics
@@ -565,6 +574,93 @@ export interface IDXDailyStatistics {
   limitations: string[];
 }
 
+export interface OfficialMarketContext {
+  schema_version: string;
+  provider: "OJK" | string;
+  provider_mode: string;
+  status: DataStatus | string;
+  quantitative_use: boolean;
+  scope: string;
+  release_date: string;
+  period_end: string;
+  metrics: {
+    ihsg_close: number;
+    ihsg_ytd_pct: number;
+    equity_net_foreign_idr_trillion: number;
+    equity_net_foreign_direction: string;
+    equity_flow_ytd_idr_trillion: number;
+    equity_rnth_idr_trillion: number;
+    local_ownership_pct: number;
+    market_cap_idr_trillion: number;
+  };
+  quality: Record<string, unknown>;
+  source: {
+    publisher: string;
+    url: string;
+    published_at?: string;
+    retrieved_at?: string;
+    parser_agent?: string;
+    parser_version?: string;
+    parsed_pages?: number[];
+  };
+  context_compatibility?: {
+    role: string;
+    snapshot_as_of?: string;
+    snapshot_provider_mode?: string;
+    used_in_leadership_or_diffusion?: boolean;
+    not_per_ticker?: boolean;
+    not_per_group?: boolean;
+  };
+  limitations: string[];
+}
+
+export interface ListingRegistryRecord {
+  ticker: string;
+  company_name: string;
+  exchange: string;
+  listing_board: string | null;
+  listing_status: string | null;
+  active: boolean;
+  common_equity_status: string | null;
+  market_cap: number | null;
+  taxonomy: {
+    sector: string | null;
+    subsector: string | null;
+    industry: string | null;
+    subindustry: string | null;
+  };
+  taxonomy_status: string;
+  group_id: string | null;
+  analysis_requested: boolean;
+  analysis_status: string;
+  konglo_memberships: Array<Record<string, unknown>>;
+  theme_memberships: Array<Record<string, unknown>>;
+  source: string | null;
+  source_as_of: string | null;
+}
+
+export interface ListingRegistry {
+  schema_version: string;
+  status: string;
+  provider_mode: string;
+  as_of: string | null;
+  scope_label: string;
+  full_accessible_universe_listed: boolean;
+  discovered_count: number;
+  persisted_count: number;
+  listed_count: number;
+  duplicate_ticker_count: number;
+  analysis_requested_count: number;
+  observed_feature_count: number;
+  taxonomy_complete_count: number;
+  taxonomy_coverage_pct: number;
+  konglo_mapped_count: number;
+  theme_mapped_count: number;
+  membership_sources: Record<string, string>;
+  integrity: Record<string, unknown>;
+  records: ListingRegistryRecord[];
+}
+
 // ────────────────────────────────────────────────────────────────────────
 // Taxonomy views (sector / Konglo / Themes)
 // ────────────────────────────────────────────────────────────────────────
@@ -730,6 +826,7 @@ export interface SnapshotPayload {
     company_name?: string;
     group_id?: string;
     sector?: string;
+    [key: string]: unknown;
   }>;
   change_digest?: Record<string, unknown>;
   // Per-group evidence (contradictions + screen invalidation) from
@@ -740,5 +837,7 @@ export interface SnapshotPayload {
   foreign_flow_sample?: ForeignFlowSample;
   idx_investor_release?: IDXInvestorRelease;
   idx_daily_statistics?: IDXDailyStatistics;
+  official_market_context?: OfficialMarketContext | null;
+  listing_registry?: ListingRegistry;
   research_events?: ResearchEventBundle;
 }

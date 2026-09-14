@@ -89,7 +89,7 @@ button:focus-visible, a:focus-visible, select:focus-visible { outline: 2px solid
   .rotation-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
   .rotation-toolbar input { margin-left: 0 !important; width: min(100%, 320px); }
   .evidence-model-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
-  .idx-release-metrics, .idx-release-detail-grid, .idx-daily-statistics-grid, .idx-daily-flow-grid { grid-template-columns: 1fr !important; }
+  .idx-release-metrics, .idx-release-detail-grid, .idx-daily-statistics-grid, .idx-daily-flow-grid, .official-market-context-grid { grid-template-columns: 1fr !important; }
 }
 
 @media (max-width: 560px) {
@@ -97,7 +97,7 @@ button:focus-visible, a:focus-visible, select:focus-visible { outline: 2px solid
   .public-hero { padding-block: 54px 72px !important; }
   .hero-card-float { right: 10px !important; top: 16px !important; width: min(205px, calc(100% - 20px)) !important; }
   .public-cta-row { align-items: flex-start !important; flex-wrap: wrap; }
-  .market-read-stats, .method-coverage-grid, .map-summary-grid, .rotation-summary-grid, .evidence-model-grid { grid-template-columns: 1fr !important; }
+  .market-read-stats, .method-coverage-grid, .map-summary-grid, .rotation-summary-grid, .evidence-model-grid, .official-market-context-grid { grid-template-columns: 1fr !important; }
 }
 
 /* ── Custom cursor ─────────────────────────────────────── */

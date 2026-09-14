@@ -88,7 +88,7 @@ def test_export_market_brief_contains_every_frozen_section():
     output = _run_export()
     last = -1
     for section in BRIEF_SECTIONS:
-        marker = f"## {section}"
+        marker = f"## {'Coverage Notes' if section == 'Data Gaps' else section}"
         idx = output.find(marker)
         assert idx != -1, f"section missing in demo brief: {section}"
         assert idx > last, f"section {section!r} is out of order"
@@ -97,10 +97,9 @@ def test_export_market_brief_contains_every_frozen_section():
 
 def test_export_market_brief_data_gaps_use_structured_categories():
     output = _run_export()
-    # Each structured category must appear under "## Data Gaps" with
-    # a Title-Case label and no "— Sectors live not connected" duplication
-    # beyond the canonical "DATA GAP" label.
-    data_gaps_section = output.split("## Data Gaps", 1)[1]
+    # Each structured category must appear under the user-facing coverage
+    # section, with one clean label per category.
+    data_gaps_section = output.split("## Coverage Notes", 1)[1]
     for category in (
         "Fundamentals",
         "Foreign Flow",
@@ -115,6 +114,8 @@ def test_export_market_brief_data_gaps_use_structured_categories():
     # free-form duplicate string.
     assert "fundamental confirmation unavailable" not in output
     assert "foreign flow unavailable" not in output
+    assert "## Data Gaps" not in output
+    assert "DATA_GAP" not in output
 
 
 def test_export_market_brief_contradictions_section_present():

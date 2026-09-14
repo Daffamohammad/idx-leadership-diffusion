@@ -242,7 +242,7 @@
             "source_type": "WEB_CONTEXT",
             "category": "events",
             "provider": "tavily",
-            "url": "http://www.idx.co.id/Portals/0/StaticData/NewsAndAnnouncement/News/FileDownload/IDX-Publication_Description.pdf",
+            "url": "https://www.idx.co.id/Portals/0/StaticData/NewsAndAnnouncement/News/FileDownload/IDX-Publication_Description.pdf",
             "title": "IDX Publications --------------------------------------------------------- ...",
             "content": "Dividend Announcements; Announcement of Rights; Bonds, Sukuk, and ABS Corporate Action; Dividend Announcement, Issued History, Trading Activities, Shares",
             "relevance_score": 0.63750535,
@@ -429,7 +429,7 @@
             "id": "07826e-00"
           },
           {
-            "url": "http://www.idx.co.id/Portals/0/StaticData/NewsAndAnnouncement/News/FileDownload/IDX-Publication_Description.pdf",
+            "url": "https://www.idx.co.id/Portals/0/StaticData/NewsAndAnnouncement/News/FileDownload/IDX-Publication_Description.pdf",
             "title": "IDX Publications --------------------------------------------------------- ...",
             "content": "Dividend Announcements; Announcement of Rights; Bonds, Sukuk, and ABS Corporate Action; Dividend Announcement, Issued History, Trading Activities, Shares",
             "score": 0.63750535,

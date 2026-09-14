@@ -270,9 +270,10 @@ missing values.
 
 ## 15. Live Sectors coverage boundary
 
-The credentialed live run (as of 2026-08-27) discovered 962 company rows and
-used a disclosed 500-row prefix sample. Taxonomy was complete within the used
-sample, 265 securities were policy-eligible, and 496/500 requested histories
+The credentialed live run (as of 2026-08-27) discovered 962 unique company
+rows. The exported listing registry contains all validated rows with complete
+taxonomy, while market features use a disclosed 500-name bounded history
+sample. 265 securities were policy-eligible and 496/500 requested histories
 were usable (99.2%). The snapshot is therefore descriptive and
 `READY_WITH_GAPS`; diffusion remains `UNCONFIRMED` until a persisted
 comparable prior snapshot exists. The next refresh should reuse the persisted

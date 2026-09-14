@@ -31,8 +31,23 @@ def overall_rollup(endpoints: list[EndpointQuality]) -> str:
 
 
 def human_readable_status(s: str) -> str:
-    """Render the status string in a UI-friendly form."""
-    return s.replace("_", " ").title()
+    """Render an internal status as clean, user-facing product language."""
+    raw = getattr(s, "value", s)
+    key = str(raw).upper().replace(" ", "_")
+    labels = {
+        "READY": "Ready",
+        "READY_WITH_GAPS": "Ready · partial coverage",
+        "PARTIAL": "Partial coverage",
+        "DATA_GAP": "Not available",
+        "NOT_INTEGRATED": "Outside current scope",
+        "NOT_APPLIED": "Not used by current method",
+        "PROTOTYPE": "Prototype source",
+        "FIXTURE": "Fixture source",
+        "STALE": "Stale",
+        "FAILED": "Failed",
+        "UNAVAILABLE": "Unavailable",
+    }
+    return labels.get(key, str(raw).replace("_", " ").title())
 
 
 def highlight_row_color(status: str) -> str:

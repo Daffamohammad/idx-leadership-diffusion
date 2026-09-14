@@ -1,0 +1,57 @@
+{
+  "schema_version": "official-market-context-v1",
+  "provider": "OJK",
+  "provider_mode": "OJK_OFFICIAL_RELEASE",
+  "status": "READY",
+  "quantitative_use": true,
+  "scope": "MONTHLY_MARKET_CONTEXT",
+  "release_date": "2026-07-07",
+  "period_end": "2026-06-30",
+  "metrics": {
+    "ihsg_close": 5643.19,
+    "ihsg_ytd_pct": -34.74,
+    "equity_net_foreign_idr_trillion": -19.63,
+    "equity_net_foreign_direction": "NET_SELL",
+    "equity_flow_ytd_idr_trillion": -73.61,
+    "equity_rnth_idr_trillion": 24.19,
+    "local_ownership_pct": 59.41,
+    "market_cap_idr_trillion": 9897.0
+  },
+  "quality": {
+    "checks": {
+      "ihsg_row_found": true,
+      "local_ownership_row_found": true,
+      "market_cap_row_found": true,
+      "rnth_row_found": true,
+      "equity_flow_ytd_row_found": true,
+      "foreign_flow_narrative_found": true,
+      "source_url_present": true
+    },
+    "warning_count": 0,
+    "search_agent_role": "DISCOVERY_ONLY",
+    "discovery_agents": ["You.com"],
+    "parser_agent": "LlamaCloud",
+    "parser_file_id": "41acfb2f-61e9-465e-b94a-1f13fb7149c3"
+  },
+  "source": {
+    "publisher": "Otoritas Jasa Keuangan",
+    "url": "https://ojk.go.id/id/berita-dan-kegiatan/siaran-pers/Documents/Pages/RDKB-Juni-2026/SP%20131%20Resiliensi%20Dan%20Kinerja%20Intermediasi%20Sektor%20Jasa%20Keuangan%20Terjaga%20Sebagai%20Modalitas%20Mendorong%20Pertumbuhan%20RDKB%20Juni%202026.pdf",
+    "published_at": "2026-07-07",
+    "retrieved_at": "2026-09-13",
+    "parser_agent": "LlamaCloud",
+    "parser_version": "llamacloud-parse-v1",
+    "parsed_pages": [1, 2],
+    "tier": "cost_effective",
+    "file_id": "41acfb2f-61e9-465e-b94a-1f13fb7149c3"
+  },
+  "context_compatibility": {
+    "role": "DESCRIPTIVE_MARKET_CONTEXT",
+    "used_in_leadership_or_diffusion": false,
+    "not_per_ticker": true,
+    "not_per_group": true
+  },
+  "limitations": [
+    "These values describe the market-level OJK release and are not assigned to individual securities or taxonomy groups.",
+    "The release is a monthly context source; it does not replace the bounded daily per-security flow sample."
+  ]
+}

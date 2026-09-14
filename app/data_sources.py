@@ -20,6 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DEMO_FIXTURE_PATH = ROOT / "data" / "fixtures" / "demo_market.json"
 SNAPSHOT_ROOT = ROOT / "data" / "snapshots"
 METHODOLOGY_PATH = ROOT / "config" / "methodology.yaml"
+OFFICIAL_MARKET_CONTEXT_PATH = ROOT / "data" / "derived" / "official_market_context.json"
 
 
 @dataclass(frozen=True)
@@ -78,6 +79,7 @@ def load_source(option: SourceOption) -> dict[str, Any]:
 def load_demo_payload(path: Path = DEMO_FIXTURE_PATH) -> dict[str, Any]:
     payload = _read_json(path)
     payload["methodology_config"] = _read_yaml(METHODOLOGY_PATH)
+    payload["official_market_context"] = _load_official_market_context(payload.get("as_of"))
     payload["source_path"] = str(path)
     return payload
 
@@ -145,6 +147,9 @@ def load_snapshot_payload(snapshot_dir: Path) -> dict[str, Any]:
         "api_credit_audit": api_credit_audit,
         "security_master_diagnostics": security_master_diagnostics,
         "history_diagnostics": history_diagnostics,
+        "official_market_context": _load_official_market_context(
+            _manifest_value(manifest, "as_of", "latest_date")
+        ),
         "endpoints": endpoints,
         "change_digest": change_digest,
         "groups": _records(groups),
@@ -170,6 +175,18 @@ def _safe_mode_hint(manifest: dict[str, Any], snapshot_dir: Path) -> str:
     if provider == "sectors" or "sectors" in {part.lower() for part in snapshot_dir.parts}:
         return "SECTORS_FIXTURE"
     return "PUBLIC_PROTOTYPE"
+
+
+def _load_official_market_context(as_of: Any) -> dict[str, Any] | None:
+    """Load only a parser artifact published on or before the selected date."""
+    loaded = _read_json_optional(OFFICIAL_MARKET_CONTEXT_PATH)
+    if not isinstance(loaded, dict):
+        return None
+    cutoff = str(as_of or "")[:10]
+    period_end = str(loaded.get("period_end") or "")[:10]
+    if not cutoff or not period_end or period_end > cutoff:
+        return None
+    return loaded
 
 
 def _snapshot_siblings(snapshot_dir: Path) -> list[Path]:

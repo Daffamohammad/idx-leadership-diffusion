@@ -127,6 +127,10 @@ class SectorsClient:
     DEFAULT_MAX_RETRIES = 2
     DEFAULT_BACKOFF_SECONDS = 1.5
     DEFAULT_MAX_PAGES = 50
+    # A request-count ceiling is intentionally separate from the credit
+    # estimate.  It is a last-resort circuit breaker for demo runs when the
+    # provider's balance/debit is not visible to this client.
+    DEFAULT_MAX_HTTP_REQUESTS = 400
 
     def __init__(
         self,
@@ -146,6 +150,7 @@ class SectorsClient:
         cache_ttl_seconds: int | None = 60 * 60,
         min_request_interval_seconds: float = 0.0,
         max_estimated_credits: float | None = DEFAULT_MAX_ESTIMATED_CREDITS,
+        max_http_requests: int | None = DEFAULT_MAX_HTTP_REQUESTS,
     ) -> None:
         self.api_key = api_key or ""
         normalized_base_url = (base_url or self.BASE_URL).rstrip("/")
@@ -187,8 +192,14 @@ class SectorsClient:
         self.max_estimated_credits = (
             None if max_estimated_credits is None else max_estimated_credits
         )
+        if max_http_requests is not None:
+            max_http_requests = int(max_http_requests)
+            if max_http_requests < 0:
+                raise ValueError("max_http_requests must be non-negative or None")
+        self.max_http_requests = max_http_requests
         self._budget_lock = threading.Lock()
         self._budget_reserved_credits = 0.0
+        self._http_requests_made = 0
         self._request_slot_lock = threading.Lock()
         self._next_request_at = 0.0
         self.last_pagination_diagnostics: dict[str, Any] = {}
@@ -199,6 +210,13 @@ class SectorsClient:
 
         with self._budget_lock:
             return round(self._budget_reserved_credits, 6)
+
+    @property
+    def http_requests_made(self) -> int:
+        """Return outgoing live HTTP attempts, including retry attempts."""
+
+        with self._budget_lock:
+            return self._http_requests_made
 
     # ---- public surface -------------------------------------------------
 
@@ -581,24 +599,42 @@ class SectorsClient:
         budget is active rather than guessed.
         """
 
-        if self.mode is not ProviderMode.SECTORS_LIVE or self.max_estimated_credits is None:
+        if self.mode is not ProviderMode.SECTORS_LIVE:
             return 0.0
         cost = _budget_request_cost(path, params)
-        if cost is None:
+        if cost is None and self.max_estimated_credits is not None:
             raise CreditBudgetExceeded(
                 "credit budget cannot certify endpoint pricing; "
                 f"endpoint={path} requires a documented cost before live use"
             )
+        # If the caller deliberately disabled credit accounting, the request
+        # circuit breaker still applies. Unknown pricing is then allowed, but
+        # remains unpriced in the ledger/audit.
+        numeric_cost = float(cost or 0.0)
         with self._budget_lock:
-            proposed = self._budget_reserved_credits + cost
-            if proposed > self.max_estimated_credits + 1e-9:
+            if (
+                self.max_http_requests is not None
+                and self._http_requests_made >= self.max_http_requests
+            ):
+                raise CreditBudgetExceeded(
+                    "live request cap exhausted before HTTP request; "
+                    f"endpoint={path} requests={self._http_requests_made} "
+                    f"cap={self.max_http_requests}"
+                )
+            proposed = self._budget_reserved_credits + numeric_cost
+            if (
+                self.max_estimated_credits is not None
+                and proposed > self.max_estimated_credits + 1e-9
+            ):
                 raise CreditBudgetExceeded(
                     "credit budget exhausted before HTTP request; "
                     f"endpoint={path} reserved={self._budget_reserved_credits:.2f} "
-                    f"requested={cost:.2f} cap={self.max_estimated_credits:.2f}"
+                    f"requested={numeric_cost:.2f} cap={self.max_estimated_credits:.2f}"
                 )
-            self._budget_reserved_credits = proposed
-        return cost
+            if self.max_estimated_credits is not None:
+                self._budget_reserved_credits = proposed
+            self._http_requests_made += 1
+        return numeric_cost
 
     def _authorize_request(self, path: str) -> str:
         if self.mode is ProviderMode.SECTORS_FIXTURE:

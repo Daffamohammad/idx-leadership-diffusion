@@ -12,8 +12,8 @@ MUST pass both --allow-live AND --allow-credit-spend explicitly:
 
     python -m scripts.refresh_and_export \
         --as-of 2026-08-27 \
-        --max-symbols 500 \
-        --max-pages 5 \
+        --max-symbols 250 \
+        --max-http-requests 400 \
         --max-estimated-credits 1000 \
         --allow-live \
         --allow-credit-spend
@@ -30,13 +30,14 @@ Behavior by mode:
     strict data gates in the child builder; a failed gate stops before
     snapshot persistence and therefore before export/index updates.
 
-This wrapper preserves the partial-universe disclosure and ensures
+This wrapper preserves the full accessible security-master listing while
+keeping the expensive history lane bounded for the demo, and ensures
 the browser payload is always in sync with the latest live snapshot.
 
 For a complete live run, pass ``--full-live`` together with both explicit
 live/spend acknowledgements. The complete run uses the latest discovered
 universe and unbounded pagination; it never silently falls back to the
-bounded 500-symbol smoke configuration.
+bounded 250-symbol demo configuration.
 """
 from __future__ import annotations
 
@@ -49,6 +50,11 @@ from datetime import date
 from pathlib import Path
 
 from idx_leadership.utils import data_root, load_project_env, project_root
+from idx_leadership.providers.sectors_client import SectorsClient
+
+
+DEMO_MAX_SYMBOLS = 250
+DEMO_MAX_HTTP_REQUESTS = SectorsClient.DEFAULT_MAX_HTTP_REQUESTS
 
 
 def main() -> int:
@@ -60,10 +66,24 @@ def main() -> int:
         help="Use the latest discovered universe and all provider pages. "
              "Requires --allow-live and --allow-credit-spend.",
     )
-    parser.add_argument("--max-symbols", type=int, default=500,
-                        help="Max symbols to fetch (default: 500)")
-    parser.add_argument("--max-pages", type=int, default=5,
-                        help="Max pages per endpoint (default: 5)")
+    parser.add_argument(
+        "--max-symbols", type=int, default=DEMO_MAX_SYMBOLS,
+        help=(
+            "Max symbols whose daily history is requested in bounded mode; "
+            f"the full security master remains listed (default: {DEMO_MAX_SYMBOLS})"
+        ),
+    )
+    parser.add_argument(
+        "--max-pages", type=int, default=None,
+        help="Optional page cap; default fetches all accessible listing/close pages.",
+    )
+    parser.add_argument(
+        "--max-http-requests", type=int, default=DEMO_MAX_HTTP_REQUESTS,
+        help=(
+            "Hard cap on outgoing live HTTP attempts, including retries, "
+            f"in bounded mode (default: {DEMO_MAX_HTTP_REQUESTS})"
+        ),
+    )
     parser.add_argument("--max-estimated-credits", type=float, default=1000.0,
                         help="Max estimated credits (default: 1000)")
     parser.add_argument("--snapshot-id", type=str, default=None,
@@ -86,6 +106,7 @@ def main() -> int:
 
     effective_max_symbols = None if args.full_live else args.max_symbols
     effective_max_pages = None if args.full_live else args.max_pages
+    effective_max_http_requests = None if args.full_live else args.max_http_requests
 
     blockers = _operator_blockers(args)
     if blockers:
@@ -122,11 +143,13 @@ def main() -> int:
         # Full-live publication is strict: the child must pass pagination,
         # history, price-basis, benchmark, and credit gates before it can
         # create a snapshot for export.
-        cmd.append("--require-complete")
+        cmd.append("--full-live")
     if effective_max_symbols is not None:
         cmd.extend(["--max-symbols", str(effective_max_symbols)])
     if effective_max_pages is not None:
         cmd.extend(["--max-pages", str(effective_max_pages)])
+    if effective_max_http_requests is not None:
+        cmd.extend(["--max-http-requests", str(effective_max_http_requests)])
     preflight_only = not args.allow_live
     if preflight_only:
         cmd.append("--preflight-only")
@@ -165,7 +188,7 @@ def main() -> int:
         return 1
     print(f"Using snapshot: {snapshot_id}")
 
-    # Step 3: Verify partial-universe disclosure is preserved
+    # Step 3: Verify the full listing / bounded-history disclosure is preserved
     snapshot_dir = snapshot_root / snapshot_id
     coverage_path = snapshot_dir / "coverage.json"
     if coverage_path.exists():
@@ -175,7 +198,8 @@ def main() -> int:
             used = coverage.get("used_count")
             discovered = coverage.get("discovered_count")
             disclosure = coverage.get("discovered_universe_disclosure")
-            print(f"Partial universe: {used} of {discovered} discovered")
+            listed = coverage.get("security_master_total") or discovered
+            print(f"Listed universe: {listed} securities; history sample: {used} of {discovered}")
             print(f"Disclosure: {disclosure}")
 
     # Step 4: Export to browser JSON

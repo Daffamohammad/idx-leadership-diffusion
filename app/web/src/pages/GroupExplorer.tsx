@@ -116,7 +116,7 @@ const flowCfg: Record<FlowState, { label: string; color: string }> = {
   CONFIRMING: { label: "Confirming", color: "#1a6e62" },
   NEUTRAL: { label: "Neutral", color: "#5a5a5a" },
   AGAINST: { label: "Against", color: "#8f2424" },
-  DATA_GAP: { label: "Data gap", color: "#7a5010" },
+  DATA_GAP: { label: "Not available", color: "#7a5010" },
 };
 
 function ConstituentTable({ constituents }: { constituents: ConstituentData[] }) {

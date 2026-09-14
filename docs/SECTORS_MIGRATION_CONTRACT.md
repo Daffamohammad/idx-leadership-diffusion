@@ -138,8 +138,8 @@ These are labelled `METHODOLOGY VALIDATED ON PUBLIC DATA`, not `PRODUCTION DATA 
 # 3. Price-basis audit on known split
 .venv/bin/python -m scripts.audit_price_basis --ticker BBCA.JK --start 2021-10-01 --end 2021-10-29 --corporate-action-date 2021-10-13 --sectors-mode SECTORS_LIVE --live --allow-credit-spend --as-of 2021-10-29
 
-# 4. Bounded live snapshot (500-row prefix sample, 1K credit ceiling)
-.venv/bin/python -m scripts.build_market_snapshot --allow-live --allow-credit-spend --max-estimated-credits 1000 --history-workers 1 --as-of 2026-08-28
+# 4. Bounded live snapshot (full listing, 250-history demo sample, 400-attempt cap)
+.venv/bin/python -m scripts.build_market_snapshot --allow-live --allow-credit-spend --max-symbols 250 --max-http-requests 400 --max-estimated-credits 1000 --history-workers 1 --as-of 2026-08-28
 .venv/bin/python -m scripts.export_snapshot_json --snapshot-id snap_sectors_2026-08-28
 .venv/bin/python -m scripts.build_snapshot_index --provider-mode SECTORS_LIVE
 

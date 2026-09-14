@@ -65,10 +65,31 @@ REQUIRED_COLUMNS = (
 NUMERIC_COLUMNS = ("net_value_idr", "buy_value_idr", "sell_value_idr")
 ALLOWED_SCOPES = {"market", "company", "synthetic_test_only"}
 ALLOWED_MARKET_SCOPES = {"regular", "reported_market", "negotiated"}
+SECONDARY_SOURCE_KINDS = {
+    "secondary",
+    "secondary_article",
+    "news_article",
+}
 
 
 class ForeignFlowInputError(ValueError):
     """Raised when the normalized sample violates its contract."""
+
+
+def _is_secondary_source(row: pd.Series) -> bool:
+    """Return whether a row is descriptive-only rather than first-party data.
+
+    The input fixture may retain the reported numeric value for auditability,
+    but secondary publications must never be advertised as quantitative
+    evidence for the product.
+    """
+    source_kind = str(row.get("source_kind") or "").strip().lower()
+    source_name = str(row.get("source_name") or "").strip().lower()
+    return source_kind in SECONDARY_SOURCE_KINDS or "idnfinancials" in source_name
+
+
+def _row_quantitative_use(row: pd.Series) -> bool:
+    return bool(row["quantitative_use"]) and not _is_secondary_source(row)
 
 
 @dataclass
@@ -304,6 +325,7 @@ def _row_output(
         "taxonomy_version": taxonomy_version,
         "mapping_status": _as_optional_text(row.get("mapping_status")) or "NOT_APPLICABLE",
         "market_scope": str(row["market_scope"]),
+        "unit": "IDR",
         "net_value_idr": _as_int(row["net_value_idr"]),
         "buy_value_idr": _as_int(row["buy_value_idr"]),
         "sell_value_idr": _as_int(row["sell_value_idr"]),
@@ -315,7 +337,9 @@ def _row_output(
         "source_kind": str(row["source_kind"]),
         "source_name": str(row["source_name"]),
         "source_locator": str(row["source_locator"]),
-        "quantitative_use": bool(row["quantitative_use"]),
+        # Keep secondary reported values for descriptive audit context, but
+        # never let their input flag promote them to quantitative evidence.
+        "quantitative_use": _row_quantitative_use(row),
     }
 
 
@@ -323,6 +347,7 @@ def _source_provenance(frame: pd.DataFrame) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for url, source in frame.groupby("source_url", sort=True):
         first = source.iloc[0]
+        quantitative_use = all(_row_quantitative_use(row) for _, row in source.iterrows())
         rows.append(
             {
                 "source_url": str(url),
@@ -331,8 +356,12 @@ def _source_provenance(frame: pd.DataFrame) -> list[dict[str, Any]]:
                 "source_published_at": str(first["source_published_at"]),
                 "source_locators": sorted(source["source_locator"].unique().tolist()),
                 "observed_rows": int(len(source)),
-                "quantitative_use": True,
-                "numeric_role": "reported_net_and_market_components",
+                "quantitative_use": quantitative_use,
+                "numeric_role": (
+                    "reported_net_and_market_components"
+                    if quantitative_use
+                    else "reported_descriptive_sample"
+                ),
             }
         )
     return rows
@@ -588,6 +617,10 @@ def calculate_foreign_flow_sample(
     group_summaries = _group_summaries(company, taxonomy_version=taxonomy_version)
     rolling = _rolling_sample_flow(daily_samples)
     breadth = _breadth_observed(daily_samples, daily_markets)
+    public_rows = [*market_rows, *company_rows]
+    public_quantitative_use = bool(public_rows) and all(
+        row["quantitative_use"] is True for row in public_rows
+    )
 
     expected_set = set(expected_dates or [])
     observed_dates = set(frame["as_of"].unique().tolist())
@@ -624,7 +657,7 @@ def calculate_foreign_flow_sample(
             "min": str(frame["as_of"].min()),
             "max": str(frame["as_of"].max()),
         },
-        "quantitative_use": True,
+        "quantitative_use": public_quantitative_use,
         "scope": "sampled_market_and_company_rows",
         "calculation": {
             "input_sha256": hashlib.sha256(input_path.read_bytes()).hexdigest(),
@@ -671,13 +704,14 @@ def calculate_foreign_flow_sample(
             "numeric_ingestion": "manual_normalized_rows_from_published_reports",
             "first_party_structured_daily_per_ticker_feed_found": False,
             "qualitative_context_used_as_numeric_input": False,
+            "secondary_rows_quantitative_use": False,
         },
         "limitations": [
             "Company rows are published top-buy/top-sell samples, not the full IDX universe.",
             "A top-list sample is never eligible as a full-universe foreign-flow confirmation signal.",
             "Company rows report net flow only; buy/sell components are intentionally null.",
             "Market buy/sell components are rounded in the source and are not used to overwrite reported net.",
-            "Secondary reports are retained as source-backed sample evidence, not as a first-party entitlement claim.",
+            "Secondary reports are retained as reported descriptive sample evidence with quantitative_use=false, not as a first-party entitlement claim.",
             "The result does not alter leadership, diffusion, or confirmation classification.",
             "Synthetic rows are excluded from the public web payload and live only in synthetic_test_only.",
         ],

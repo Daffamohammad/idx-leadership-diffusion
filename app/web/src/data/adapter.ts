@@ -13,6 +13,8 @@ import type {
   ForeignFlowObservation,
   ForeignFlowSample,
   IDXDailyStatistics,
+  OfficialMarketContext,
+  ListingRegistryRecord,
   IDXInvestorFlowDirection,
   IDXInvestorRelease,
   LeadershipState,
@@ -276,6 +278,39 @@ export interface IDXDailyStatisticsAdapted {
   limitations: string[];
 }
 
+export interface OfficialMarketContextAdapted {
+  schemaVersion: string;
+  providerMode: string;
+  status: string;
+  quantitativeUse: boolean;
+  scope: string;
+  releaseDate: string;
+  periodEnd: string;
+  metrics: OfficialMarketContext["metrics"];
+  source: OfficialMarketContext["source"];
+  limitations: string[];
+}
+
+export interface ListingRegistryAdapted {
+  schemaVersion: string;
+  status: string;
+  providerMode: string;
+  asOf: string | null;
+  scopeLabel: string;
+  fullAccessibleUniverseListed: boolean;
+  discoveredCount: number;
+  persistedCount: number;
+  listedCount: number;
+  duplicateTickerCount: number;
+  analysisRequestedCount: number;
+  observedFeatureCount: number;
+  taxonomyCompleteCount: number;
+  taxonomyCoveragePct: number;
+  kongloMappedCount: number;
+  themeMappedCount: number;
+  records: ListingRegistryRecord[];
+}
+
 export interface ForeignFlowSampleDaily {
   asOf: string;
   sampleNetIdr: number;
@@ -341,6 +376,8 @@ export interface AdaptedSnapshot {
   foreignFlow: ForeignFlowAdapted | null;
   idxInvestorRelease: IDXInvestorReleaseAdapted | null;
   idxDailyStatistics: IDXDailyStatisticsAdapted | null;
+  officialMarketContext: OfficialMarketContextAdapted | null;
+  listingRegistry: ListingRegistryAdapted | null;
   researchEvents: ResearchEventView[];
 }
 
@@ -980,6 +1017,160 @@ function normalizeIDXDailyStatistics(
   };
 }
 
+function normalizeOfficialMarketContext(
+  value: unknown,
+): OfficialMarketContextAdapted | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const raw = value as Record<string, unknown>;
+  const metrics = raw.metrics;
+  const source = raw.source;
+  if (
+    typeof raw.schema_version !== "string" ||
+    typeof raw.provider_mode !== "string" ||
+    typeof raw.release_date !== "string" ||
+    typeof raw.period_end !== "string" ||
+    !metrics ||
+    typeof metrics !== "object" ||
+    Array.isArray(metrics) ||
+    !source ||
+    typeof source !== "object" ||
+    Array.isArray(source)
+  ) {
+    return null;
+  }
+  const metricsRaw = metrics as Record<string, unknown>;
+  const sourceRaw = source as Record<string, unknown>;
+  const finite = (input: unknown): number | null =>
+    typeof input === "number" && Number.isFinite(input) ? input : null;
+  const required = {
+    ihsg_close: finite(metricsRaw.ihsg_close),
+    ihsg_ytd_pct: finite(metricsRaw.ihsg_ytd_pct),
+    equity_net_foreign_idr_trillion: finite(metricsRaw.equity_net_foreign_idr_trillion),
+    equity_flow_ytd_idr_trillion: finite(metricsRaw.equity_flow_ytd_idr_trillion),
+    equity_rnth_idr_trillion: finite(metricsRaw.equity_rnth_idr_trillion),
+    local_ownership_pct: finite(metricsRaw.local_ownership_pct),
+    market_cap_idr_trillion: finite(metricsRaw.market_cap_idr_trillion),
+  };
+  if (
+    Object.values(required).some((entry) => entry === null) ||
+    typeof metricsRaw.equity_net_foreign_direction !== "string" ||
+    typeof sourceRaw.publisher !== "string" ||
+    typeof sourceRaw.url !== "string"
+  ) {
+    return null;
+  }
+  return {
+    schemaVersion: raw.schema_version,
+    providerMode: raw.provider_mode,
+    status: typeof raw.status === "string" ? raw.status : "READY",
+    quantitativeUse: raw.quantitative_use === true,
+    scope: typeof raw.scope === "string" ? raw.scope : "",
+    releaseDate: raw.release_date,
+    periodEnd: raw.period_end,
+    metrics: {
+      ihsg_close: required.ihsg_close as number,
+      ihsg_ytd_pct: required.ihsg_ytd_pct as number,
+      equity_net_foreign_idr_trillion:
+        required.equity_net_foreign_idr_trillion as number,
+      equity_net_foreign_direction: metricsRaw.equity_net_foreign_direction,
+      equity_flow_ytd_idr_trillion: required.equity_flow_ytd_idr_trillion as number,
+      equity_rnth_idr_trillion: required.equity_rnth_idr_trillion as number,
+      local_ownership_pct: required.local_ownership_pct as number,
+      market_cap_idr_trillion: required.market_cap_idr_trillion as number,
+    },
+    source: {
+      publisher: sourceRaw.publisher,
+      url: sourceRaw.url,
+      published_at:
+        typeof sourceRaw.published_at === "string" ? sourceRaw.published_at : undefined,
+      retrieved_at:
+        typeof sourceRaw.retrieved_at === "string" ? sourceRaw.retrieved_at : undefined,
+      parser_agent:
+        typeof sourceRaw.parser_agent === "string" ? sourceRaw.parser_agent : undefined,
+      parser_version:
+        typeof sourceRaw.parser_version === "string" ? sourceRaw.parser_version : undefined,
+      parsed_pages: Array.isArray(sourceRaw.parsed_pages)
+        ? sourceRaw.parsed_pages.filter((entry): entry is number => typeof entry === "number")
+        : undefined,
+    },
+    limitations: Array.isArray(raw.limitations)
+      ? raw.limitations.filter((entry): entry is string => typeof entry === "string")
+      : [],
+  };
+}
+
+function normalizeListingRegistry(value: unknown): ListingRegistryAdapted | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const raw = value as Record<string, unknown>;
+  if (!Array.isArray(raw.records) || typeof raw.schema_version !== "string") return null;
+  const number = (entry: unknown, fallback = 0): number =>
+    typeof entry === "number" && Number.isFinite(entry) ? entry : fallback;
+  const text = (entry: unknown, fallback = ""): string =>
+    typeof entry === "string" ? entry : fallback;
+  const nullableText = (entry: unknown): string | null =>
+    typeof entry === "string" ? entry : null;
+  const records: ListingRegistryRecord[] = raw.records.flatMap((entry) => {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) return [];
+    const item = entry as Record<string, unknown>;
+    const taxonomyRaw = item.taxonomy;
+    const taxonomy = taxonomyRaw && typeof taxonomyRaw === "object" && !Array.isArray(taxonomyRaw)
+      ? taxonomyRaw as Record<string, unknown>
+      : {};
+    if (typeof item.ticker !== "string" || !item.ticker.trim()) return [];
+    const memberships = (input: unknown): Array<Record<string, unknown>> =>
+      Array.isArray(input)
+        ? input.filter((candidate): candidate is Record<string, unknown> =>
+            !!candidate && typeof candidate === "object" && !Array.isArray(candidate),
+          )
+        : [];
+    return [{
+      ticker: item.ticker,
+      company_name: text(item.company_name, item.ticker),
+      exchange: text(item.exchange, "IDX"),
+      listing_board: nullableText(item.listing_board),
+      listing_status: nullableText(item.listing_status),
+      active: item.active !== false,
+      common_equity_status: nullableText(item.common_equity_status),
+      market_cap: typeof item.market_cap === "number" && Number.isFinite(item.market_cap)
+        ? item.market_cap
+        : null,
+      taxonomy: {
+        sector: nullableText(taxonomy.sector),
+        subsector: nullableText(taxonomy.subsector),
+        industry: nullableText(taxonomy.industry),
+        subindustry: nullableText(taxonomy.subindustry),
+      },
+      taxonomy_status: text(item.taxonomy_status, "MISSING_CLASSIFICATION"),
+      group_id: nullableText(item.group_id),
+      analysis_requested: item.analysis_requested === true,
+      analysis_status: text(item.analysis_status, "NOT_REPORTED"),
+      konglo_memberships: memberships(item.konglo_memberships),
+      theme_memberships: memberships(item.theme_memberships),
+      source: nullableText(item.source),
+      source_as_of: nullableText(item.source_as_of),
+    }];
+  });
+  return {
+    schemaVersion: raw.schema_version,
+    status: text(raw.status, "UNAVAILABLE"),
+    providerMode: text(raw.provider_mode, "UNAVAILABLE"),
+    asOf: nullableText(raw.as_of),
+    scopeLabel: text(raw.scope_label, "Persisted listing"),
+    fullAccessibleUniverseListed: raw.full_accessible_universe_listed === true,
+    discoveredCount: number(raw.discovered_count),
+    persistedCount: number(raw.persisted_count),
+    listedCount: number(raw.listed_count),
+    duplicateTickerCount: number(raw.duplicate_ticker_count),
+    analysisRequestedCount: number(raw.analysis_requested_count),
+    observedFeatureCount: number(raw.observed_feature_count),
+    taxonomyCompleteCount: number(raw.taxonomy_complete_count),
+    taxonomyCoveragePct: number(raw.taxonomy_coverage_pct),
+    kongloMappedCount: number(raw.konglo_mapped_count),
+    themeMappedCount: number(raw.theme_mapped_count),
+    records,
+  };
+}
+
 function adaptForeignFlow(
   payload: ForeignFlowSample | undefined,
 ): ForeignFlowAdapted | null {
@@ -1583,6 +1774,10 @@ export function adaptSnapshot(
     }
   }
   const foreignFlowAdapted = adaptForeignFlow(payload.foreign_flow_sample);
+  const officialMarketContext = normalizeOfficialMarketContext(
+    payload.official_market_context,
+  );
+  const listingRegistry = normalizeListingRegistry(payload.listing_registry);
   const researchEvents = adaptResearchEvents(payload.research_events);
 
   // Wire foreign flow sample context into the existing sector cells so
@@ -1667,6 +1862,8 @@ export function adaptSnapshot(
     idxDailyStatistics: normalizeIDXDailyStatistics(
       idxDailyStatistics ?? payload.idx_daily_statistics,
     ),
+    officialMarketContext,
+    listingRegistry,
     researchEvents,
   };
 }

@@ -61,6 +61,7 @@ def build_provider_from_config(
     max_pages: int | None = None,
     force_refresh: bool = False,
     max_estimated_credits: float | None = None,
+    max_http_requests: int | None = SectorsClient.DEFAULT_MAX_HTTP_REQUESTS,
     ledger: RequestLedger | None = None,
 ) -> MarketDataProvider:
     """Construct one provider without any mode fallback.
@@ -129,6 +130,7 @@ def build_provider_from_config(
             "max_pages": max_pages,
             "force_refresh": bool(force_refresh),
             "max_estimated_credits": resolved_max_estimated_credits,
+            "max_http_requests": max_http_requests,
             "timeout": int(options.get("request_timeout_seconds", 30)),
             "max_retries": int(options.get("max_retries", 2)),
             "backoff_seconds": float(options.get("retry_backoff_seconds", 1.5)),

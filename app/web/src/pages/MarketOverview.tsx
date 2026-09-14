@@ -12,6 +12,7 @@ import MarketHeatmap from "../components/MarketHeatmap";
 import ForeignFlowSample from "../components/ForeignFlowSample";
 import IDXStatisticsRelease from "../components/IDXStatisticsRelease";
 import IDXDailyStatistics from "../components/IDXDailyStatistics";
+import OfficialMarketContext from "../components/OfficialMarketContext";
 import ResearchEvents from "../components/ResearchEvents";
 import type { TaxonomyKind } from "../data/snapshot";
 import { formatDateLabel, formatEnumLabel, formatSnapshotId } from "../data/format";
@@ -159,6 +160,8 @@ export default function MarketOverview() {
       <IDXStatisticsRelease release={adapted.idxInvestorRelease} />
 
       <IDXDailyStatistics statistics={adapted.idxDailyStatistics} />
+
+      <OfficialMarketContext context={adapted.officialMarketContext} />
 
       <ForeignFlowSample sample={adapted.foreignFlow} asOf={asOf} />
 

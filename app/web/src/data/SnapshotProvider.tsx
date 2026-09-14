@@ -49,27 +49,37 @@ async function resolveLatestEntry(): Promise<IndexEntry | null> {
 const DEFAULT_IDX_RELEASE_PATH = "/idx/idx_investor_trading_2026-07.json";
 const DEFAULT_IDX_DAILY_STATISTICS_PATH = "/idx/idx_daily_statistics_latest.json";
 
-async function loadOptionalIDXRelease(): Promise<unknown | null> {
+async function loadOptionalIDXRelease(snapshotAsOf?: string): Promise<unknown | null> {
   const path =
     (import.meta.env.VITE_IDX_RELEASE_PATH as string | undefined)?.trim() ||
     DEFAULT_IDX_RELEASE_PATH;
   try {
     const response = await fetch(path, { cache: "no-store" });
     if (!response.ok) return null;
-    return await response.json();
+    const payload = await response.json();
+    const latest = payload?.as_of?.max;
+    if (snapshotAsOf && typeof latest === "string" && latest.slice(0, 10) > snapshotAsOf.slice(0, 10)) {
+      return null;
+    }
+    return payload;
   } catch {
     return null;
   }
 }
 
-async function loadOptionalIDXDailyStatistics(): Promise<unknown | null> {
+async function loadOptionalIDXDailyStatistics(snapshotAsOf?: string): Promise<unknown | null> {
   const path =
     (import.meta.env.VITE_IDX_DAILY_STATISTICS_PATH as string | undefined)?.trim() ||
     DEFAULT_IDX_DAILY_STATISTICS_PATH;
   try {
     const response = await fetch(path, { cache: "no-store" });
     if (!response.ok) return null;
-    return await response.json();
+    const payload = await response.json();
+    const asOf = payload?.as_of;
+    if (snapshotAsOf && typeof asOf === "string" && asOf.slice(0, 10) > snapshotAsOf.slice(0, 10)) {
+      return null;
+    }
+    return payload;
   } catch {
     return null;
   }
@@ -127,8 +137,8 @@ export function SnapshotProvider({ children }: { children: ReactNode }) {
         }
         if (cancelled) return;
         const [idxInvestorRelease, idxDailyStatistics] = await Promise.all([
-          loadOptionalIDXRelease(),
-          loadOptionalIDXDailyStatistics(),
+          loadOptionalIDXRelease(payload.as_of),
+          loadOptionalIDXDailyStatistics(payload.as_of),
         ]);
         const adapted: AdaptedSnapshot = adaptSnapshot(
           payload,

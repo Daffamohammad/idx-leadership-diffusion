@@ -189,7 +189,7 @@ export default function RotationView() {
           <p style={{ maxWidth: 760, margin: "6px 0 0", color: "#686e73", lineHeight: 1.55 }}>
             {isDiagnostic
               ? "The YTD baseline is unavailable in this snapshot. The map below shows available 20D excess return and 20D minus 60D momentum as diagnostics only; no rotation phase is assigned."
-              : "Relative strength uses YTD excess return versus IHSG. Relative momentum is 20D excess return minus 60D excess return. Null values remain visible as Data gap and are not plotted."}
+              : "Relative strength uses YTD excess return versus IHSG. Relative momentum is 20D excess return minus 60D excess return. Null values remain visible as Not available and are not plotted."}
           </p>
         </div>
         <div style={{ color: "#686e73", fontFamily: "Geist Mono, monospace", fontSize: 11, textAlign: "right" }}>
@@ -274,7 +274,7 @@ export default function RotationView() {
                 role="button"
                 tabIndex={0}
                 aria-label={isDiagnostic
-                  ? `${row.name}: YTD Data gap, diagnostic 20D excess ${formatPercent(row.excess20d)} and momentum ${formatPercent(row.relativeMomentum)}`
+                  ? `${row.name}: YTD not available, diagnostic 20D excess ${formatPercent(row.excess20d)} and momentum ${formatPercent(row.relativeMomentum)}`
                   : `${row.name}: ${formatEnumLabel(row.phase)}, ${formatPercent(row.relativeStrength)} relative strength, ${formatPercent(row.relativeMomentum)} relative momentum`}
                 onClick={() => openGroup(navigate, row)}
                 onKeyDown={(event) => {
@@ -285,7 +285,7 @@ export default function RotationView() {
                 }}
                 style={{ cursor: "pointer" }}
               >
-                <title>{isDiagnostic ? `${row.name}: YTD Data gap · diagnostic view` : `${row.name}: ${formatEnumLabel(row.phase)}`}</title>
+                <title>{isDiagnostic ? `${row.name}: YTD not available · diagnostic view` : `${row.name}: ${formatEnumLabel(row.phase)}`}</title>
                 <circle cx={x} cy={y} r={radius} fill={color} opacity=".9" stroke="#fff" strokeWidth="1.5" />
                 <text x={x} y={y} textAnchor="middle" dominantBaseline="middle" fontFamily="Geist Mono, monospace" fontSize="10" fill="#fff" pointerEvents="none">{row.constituents}</text>
               </g>
@@ -313,7 +313,7 @@ export default function RotationView() {
           <div className="eyebrow-muted" style={{ color: "#7a5010" }}>Diagnostic availability</div>
           <strong style={{ display: "block", marginTop: 5, color: "#202325", fontSize: 15 }}>YTD rotation is unavailable for this snapshot.</strong>
           <div style={{ marginTop: 5, fontSize: 12, lineHeight: 1.5 }}>
-            {formatCountLabel(diagnosticPlottable.length, "group")} are shown above using available 20D excess and momentum. The phase cards and rotation signal remain Data gap until the prior-year baseline is persisted.
+            {formatCountLabel(diagnosticPlottable.length, "group")} are shown above using available 20D excess and momentum. The phase cards and rotation signal remain unavailable until the prior-year baseline is persisted.
           </div>
         </div>
       ) : (
@@ -380,7 +380,7 @@ export default function RotationView() {
       <footer style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 14, color: "#686e73", fontFamily: "Geist Mono, monospace", fontSize: 10 }}>
         <span>Bubble size ∝ √(constituents)</span>
         <span>·</span>
-        <span>Data gap groups remain in the table and list</span>
+        <span>Groups with incomplete coverage remain in the table and list</span>
         <span>·</span>
         <span>{isDiagnostic ? "Diagnostic fallback: persisted 20D/60D values only" : "YTD baseline: last trading session of prior year"}</span>
       </footer>

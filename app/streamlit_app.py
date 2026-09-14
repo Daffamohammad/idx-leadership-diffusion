@@ -23,6 +23,7 @@ import pandas as pd
 import streamlit as st
 
 from app.data_sources import SourceOption, available_sources, load_source
+from app.data_quality import human_readable_status
 from app.view_models import (
     CONFIRMATION_DATA_GAP,
     DashboardView,
@@ -805,23 +806,44 @@ def method_quality(view: DashboardView) -> None:
         warnings = view.data_warnings.get("warnings", [])
         if isinstance(warnings, list) and warnings:
             st.warning(f"Live data warnings: {len(warnings)} persisted warning(s). See the selected snapshot artifacts for full diagnostics.")
+    market_context = view.official_market_context
+    context_metrics = market_context.get("metrics", {}) if isinstance(market_context, dict) else {}
+    if isinstance(context_metrics, dict) and context_metrics:
+        flow = context_metrics.get("equity_net_foreign_idr_trillion")
+        flow_direction = str(context_metrics.get("equity_net_foreign_direction") or "UNAVAILABLE").replace("_", " ").title()
+        context_rows = [
+            {"Metric": "Release period", "Value": str(market_context.get("period_end") or "UNAVAILABLE")},
+            {"Metric": "IHSG", "Value": f"{context_metrics.get('ihsg_close', 'UNAVAILABLE')} · YTD {context_metrics.get('ihsg_ytd_pct', 'UNAVAILABLE')}%"},
+            {"Metric": "Foreign equity flow", "Value": f"{flow} Rp T · {flow_direction}"},
+            {"Metric": "Equity RNTH", "Value": f"{context_metrics.get('equity_rnth_idr_trillion', 'UNAVAILABLE')} Rp T"},
+            {"Metric": "Local ownership", "Value": f"{context_metrics.get('local_ownership_pct', 'UNAVAILABLE')}%"},
+            {"Metric": "Equity market cap", "Value": f"{context_metrics.get('market_cap_idr_trillion', 'UNAVAILABLE')} Rp T"},
+        ]
+        st.markdown("### Official market context")
+        st.dataframe(pd.DataFrame(context_rows), width="stretch", hide_index=True)
+        source = market_context.get("source", {})
+        if isinstance(source, dict) and source.get("url"):
+            st.caption(
+                f"OJK release · parsed by {source.get('parser_agent', 'LlamaCloud')} on pages "
+                f"{', '.join(str(page) for page in source.get('parsed_pages', []))}. "
+                "Market-level context only; it is not assigned to a ticker or group."
+            )
     st.markdown('<div class="section-label">Per-layer Status</div>', unsafe_allow_html=True)
     quality_html = []
     for layer in view.quality_layers:
         status_class = "status-ready" if layer.status == "READY" else "status-gap"
         quality_html.append(
-            f'<div class="quality-item"><div class="quality-name">{html.escape(layer.layer)}</div><div class="quality-status {status_class}">{html.escape(layer.status)}</div><div class="quality-detail">{html.escape(layer.detail)}</div></div>'
+            f'<div class="quality-item"><div class="quality-name">{html.escape(layer.layer)}</div><div class="quality-status {status_class}">{html.escape(human_readable_status(layer.status))}</div><div class="quality-detail">{html.escape(layer.detail)}</div></div>'
         )
     st.markdown(f'<div class="quality-grid">{"".join(quality_html)}</div>', unsafe_allow_html=True)
-    st.markdown("### Known gaps")
+    st.markdown("### Coverage notes")
     # The rollup derives from the structured DataGapView list on each
     # group, with the worst observed status per frozen category.  This
-    # mirrors the brief contract "## Data Gaps" block.
+    # mirrors the brief contract "## Coverage Notes" block.
     rollup = data_gap_rollup(view.groups)
     gap_html = "".join(
         f'<div class="gap-label">{html.escape(row["label"])}</div>'
-        f'<div class="gap-detail">{html.escape(row["status"].replace("_", " ").title())}</div>'
-        f'<div class="gap-status">{html.escape(row["status"])}</div>'
+        f'<div class="gap-detail">{html.escape(human_readable_status(row["status"]))}</div>'
         for row in rollup
     )
     st.markdown(
@@ -838,8 +860,8 @@ def method_quality(view: DashboardView) -> None:
     )
     st.caption(
         "Categories are frozen in the brief contract (brief-v1).  "
-        "Live Sectors data will flip DATA_GAP / NOT_INTEGRATED to READY "
-        "for each category it covers; the rollup is derived, not asserted."
+        "Live Sectors data will update each category when its validated source "
+        "is attached; the rollup is derived, not asserted."
     )
     with st.expander("Active methodology configuration"):
         st.json(methodology)
@@ -864,10 +886,10 @@ def _sidebar(view: DashboardView) -> None:
     # summary.  Render it in the sidebar so the provenance detail is
     # one click away.
     rollup = data_gap_rollup(view.groups)
-    with st.sidebar.expander("Data-gap rollup", expanded=False):
+    with st.sidebar.expander("Coverage rollup", expanded=False):
         for row in rollup:
             st.sidebar.caption(
-                f"**{row['label']}** — `{row['status']}`"
+                f"**{row['label']}** — {human_readable_status(row['status'])}"
             )
     brief = render_market_brief(view)
     st.sidebar.download_button(

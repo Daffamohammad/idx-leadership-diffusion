@@ -259,3 +259,40 @@ def test_structured_companies_query_has_known_budget_cost(tmp_path):
     )
     assert response.status == 200
     assert c.budget_reserved_credits == 1.0
+
+
+def test_http_request_cap_blocks_before_next_transport_attempt(tmp_path):
+    calls = {"n": 0}
+
+    def transport(method, url, params, headers):
+        calls["n"] += 1
+        return 200, {"results": [], "pagination": {"has_next": False}}
+
+    c = _client(tmp_path, transport=transport, max_http_requests=2)
+    c.get("/v2/close/", {"date": "2026-08-20"})
+    c.get("/v2/close/", {"date": "2026-08-21"})
+    with pytest.raises(CreditBudgetExceeded, match="live request cap exhausted"):
+        c.get("/v2/close/", {"date": "2026-08-22"})
+
+    assert calls["n"] == 2
+    assert c.http_requests_made == 2
+
+
+def test_http_request_cap_counts_retry_attempts(tmp_path):
+    calls = {"n": 0}
+
+    def transport(method, url, params, headers):
+        calls["n"] += 1
+        return 500, {"error": "temporary"}
+
+    c = _client(
+        tmp_path,
+        transport=transport,
+        max_retries=1,
+        max_http_requests=1,
+    )
+    with pytest.raises(CreditBudgetExceeded, match="live request cap exhausted"):
+        c.get("/v2/close/", {})
+
+    assert calls["n"] == 1
+    assert c.http_requests_made == 1

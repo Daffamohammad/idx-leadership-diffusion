@@ -8,19 +8,20 @@ shapes and must not be treated as one undifferentiated search result:
 | Surface | What it provides | Parser | Product status |
 | --- | --- | --- | --- |
 | [Statistics index](https://www.idx.co.id/id/data-pasar/laporan-statistik/statistik/) | Dated Daily Statistics PDF links | `parse_idx_statistics_listing_html` | Link discovery is implemented |
-| [July 2026 daily trading by type of investor](https://www.idx.co.id/id/data-pasar/laporan-statistik/digital-statistic/monthly/equity-trading-by-investor/table-daily-trading-by-type-of-investor?filter=eyJ5ZWFyIjoiMjAyNiIsIm1vbnRoIjoiNyIsInF1YXJ0ZXIiOjAsInR5cGUiOiJtb250aGx5In0%3D) | 23 daily rows in Foreign Selling and Domestic Selling tables | `parse_idx_monthly_investor_html` | Integrated as real market-level release |
+| [July 2026 daily trading by type of investor](https://www.idx.co.id/id/data-pasar/laporan-statistik/digital-statistic/monthly/equity-trading-by-investor/table-daily-trading-by-type-of-investor?filter=eyJ5ZWFyIjoiMjAyNiIsIm1vbnRoIjoiNyIsInF1YXJ0ZXIiOjAsInR5cGUiOiJtb250aGx5In0%3D) | 23 daily rows in Foreign Selling and Domestic Selling tables | `parse_idx_monthly_investor_html` — deterministic first-party HTML reducer | Integrated as a complete market-level release |
 | Daily Statistics PDF contents | Daily tiles such as Today/YTD net foreign and Market PER/PBV | `scripts.refresh_idx_daily_statistics` + `llama_parse` reduction | Optional LlamaCloud ingest; promoted only after deterministic checks |
 
 ## Why a parser is required
 
 The search agent can discover the official URL and help identify the relevant
-release. It is not a reliable numeric extraction layer. The monthly page has
-structured HTML tables, so the parser:
+release. It is not a numeric extraction layer. The monthly page has structured
+HTML tables, so the directly retrieved first-party HTML reducer:
 
 1. selects both cross-investor tables by their published headers;
 2. parses and aligns every trading date;
-3. derives market-level net foreign flow as domestic sells to foreign minus
-   foreign sells to domestic;
+3. derives market-level net foreign flow as `domestic_to_foreign -
+   foreign_to_domestic` (domestic sells to foreign minus foreign sells to
+   domestic);
 4. reconciles the daily sums with each official Total row; and
 5. fails closed without writing an artifact when a table, date, or total is
    incomplete.
@@ -29,8 +30,10 @@ The PDF index parser only discovers PDF links. PDF values are ingested by an
 explicit, bounded LlamaParse command and reduced to a small target-metrics
 schema. Markdown is not treated as a database: the reducer checks the release
 date, IHSG arithmetic, the four Net Foreign values and units, and both
-fundamental values before writing an artifact. A raw LlamaParse response is an
-optional ignored audit sidecar, not a browser payload.
+fundamental values before writing an artifact. This LlamaCloud document lane
+is intentionally distinct from the deterministic first-party HTML table lane;
+neither lane promotes search snippets into numbers. A raw LlamaParse response
+is an optional ignored audit sidecar, not a browser payload.
 
 The current target schema is intentionally limited to the cards required by
 the product. Top-stock, index, and recapitulation tables remain available in
@@ -43,15 +46,20 @@ The validated July release is pinned at
 `app/web/public/idx/idx_investor_trading_2026-07.json`. It contains:
 
 - 23 trading-day rows;
-- reconciled cross-investor components and net foreign totals;
-- the exact official URL and parser provenance; and
+- reconciled cross-investor gross components and net foreign totals;
+- the exact official URL, deterministic reducer provenance, and reconciliation checks; and
 - an explicit limitation that the release is market-level, not per-ticker or
   per-group ownership flow.
 
-The web application loads this artifact as an optional evidence lane. If it is
+The web application loads this artifact as an optional local evidence lane. If it is
 missing, the core snapshot still loads and the release section says that the
 official release is unavailable; it never falls back to search snippets or
 values from the screenshot.
+
+The page itself is dynamic, but that does not downgrade a completed cached
+release. Discovery metadata and dynamic-page retrieval failures are tracked
+separately from the 23-day table payload. No LlamaCloud provenance is claimed
+for this HTML artifact.
 
 ## Refresh
 

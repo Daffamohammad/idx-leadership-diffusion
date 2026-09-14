@@ -158,8 +158,8 @@ function dataGapReason(group: TaxonomyGroupData): string {
 function metricDisplay(group: TaxonomyGroupData, metric: HeatmapMetric, value: number | null): string {
   if (metric === "leadership") return formatEnumLabel(group.leadership);
   if (metric === "diffusion") return formatEnumLabel(group.diffusion);
-  if (metric === "breadth") return value === null ? "Data gap" : `${value.toFixed(0)}%`;
-  return value === null ? "Data gap" : formatPercent(value);
+  if (metric === "breadth") return value === null ? "Not available" : `${value.toFixed(0)}%`;
+  return value === null ? "Not available" : formatPercent(value);
 }
 
 function directionBadge(direction: ForeignFlowDirection | null): string {
@@ -411,7 +411,7 @@ export default function MarketHeatmap({
         ))}
         <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
           <span aria-hidden="true" style={{ width: 12, height: 12, background: "#f1f2f0", border: "1px dashed #9aa19f" }} />
-          Data gap
+          Not available
         </span>
       </div>
 
@@ -430,7 +430,7 @@ export default function MarketHeatmap({
           const isPrototype = group.prototype;
           const isDataGap = group.dataQuality === "DATA_GAP" || value === null;
           const gapReason = dataGapReason(group);
-          const ariaLabel = `${group.name}: ${metricLabel(metric)} ${isDataGap ? `data gap, ${gapReason.toLowerCase()}` : metricDisplay(group, metric, value)}, leadership ${formatEnumLabel(group.leadership)}, diffusion ${formatEnumLabel(group.diffusion)}, ${formatCountLabel(group.constituents, "ticker")}.`;
+          const ariaLabel = `${group.name}: ${metricLabel(metric)} ${isDataGap ? `not available, ${gapReason.toLowerCase()}` : metricDisplay(group, metric, value)}, leadership ${formatEnumLabel(group.leadership)}, diffusion ${formatEnumLabel(group.diffusion)}, ${formatCountLabel(group.constituents, "ticker")}.`;
           return (
             <button
               key={`${group.taxonomyId}::${group.id}`}
@@ -495,7 +495,7 @@ export default function MarketHeatmap({
               >
                 {isDataGap ? (
                   <span style={{ color: "#686e73", fontSize: 12, fontWeight: 400 }}>
-                    Data gap · {gapReason}
+                    Not available · {gapReason}
                   </span>
                 ) : (
                   metricDisplay(group, metric, value)

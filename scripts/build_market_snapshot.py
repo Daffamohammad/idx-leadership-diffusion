@@ -8,6 +8,11 @@ The command is deliberately explicit about paid work:
 Without ``--as-of`` the runner first asks Sectors for its latest available
 full-universe close and uses that observed market date. A requested date that
 has no data fails clearly; it is never silently relabelled as current.
+
+The default live path is demo-bounded: it lists the full accessible security
+master but requests daily history for at most 250 selected names and 400
+outgoing HTTP attempts (including retries). Use ``--full-live`` only after a
+fresh preflight and explicit approval for the larger request scope.
 """
 from __future__ import annotations
 
@@ -62,6 +67,8 @@ _log = get_logger(__name__)
 DEFAULT_MAX_ESTIMATED_CREDITS = SectorsClient.DEFAULT_MAX_ESTIMATED_CREDITS
 COMPANIES_PAGE_SIZE = 200
 CLOSE_PAGE_SIZE = 30
+DEMO_MAX_SYMBOLS = 250
+DEMO_MAX_HTTP_REQUESTS = SectorsClient.DEFAULT_MAX_HTTP_REQUESTS
 
 
 class FullLiveGateError(ProviderError):
@@ -110,6 +117,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Block snapshot persistence unless the full-live data gates pass.",
     )
     parser.add_argument(
+        "--full-live",
+        action="store_true",
+        help="Remove demo caps and require the strict full-live data gates.",
+    )
+    parser.add_argument(
         "--max-pages",
         type=int,
         default=None,
@@ -118,8 +130,20 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--max-symbols",
         type=int,
-        default=None,
-        help="Optional symbol cap for a bounded live smoke; default uses the full master.",
+        default=DEMO_MAX_SYMBOLS,
+        help=(
+            "Symbol cap for bounded history acquisition; the full security "
+            f"master is still listed (default: {DEMO_MAX_SYMBOLS})."
+        ),
+    )
+    parser.add_argument(
+        "--max-http-requests",
+        type=int,
+        default=DEMO_MAX_HTTP_REQUESTS,
+        help=(
+            "Hard cap on outgoing live HTTP attempts, including retries; "
+            f"default: {DEMO_MAX_HTTP_REQUESTS}."
+        ),
     )
     parser.add_argument(
         "--min-history-days",
@@ -171,6 +195,11 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.full_live:
+        args.max_symbols = None
+        args.max_pages = None
+        args.max_http_requests = None
+        args.require_complete = True
     # Root containment for --out/--output (export pattern): outputs must
     # stay within the project root — or the system temp dir used by
     # isolated/pytest harnesses — unless --allow-outside-root is set.
@@ -214,6 +243,7 @@ def main(argv: list[str] | None = None) -> int:
         max_pages=args.max_pages,
         max_symbols=args.max_symbols,
         max_estimated_credits=args.max_estimated_credits,
+        max_http_requests=args.max_http_requests,
     )
     print(json.dumps({"live_credit_preflight": preflight}, indent=2, default=str))
     if preflight["status"] == "BLOCKED":
@@ -235,6 +265,7 @@ def main(argv: list[str] | None = None) -> int:
             max_pages=args.max_pages,
             force_refresh=args.force_refresh,
             max_estimated_credits=args.max_estimated_credits,
+            max_http_requests=args.max_http_requests,
         )
         # The factory returns the concrete class for the selected mode. Keep a
         # clear guard here so this runner cannot accidentally emit a live label
@@ -274,8 +305,12 @@ def main(argv: list[str] | None = None) -> int:
         master_all = provider.get_security_master()
         if not master_all:
             raise ProviderError("Sectors security master returned no rows")
-        master = _limit_master(master_all, args.max_symbols)
-        all_tickers = [entry.ticker for entry in master]
+        # Keep the complete accessible security master for the snapshot/UI,
+        # while restricting only the expensive per-symbol history lane for a
+        # bounded demo. The selection is deterministic and sector-balanced;
+        # it is never an accidental alphabetical prefix.
+        master = _select_analysis_master(master_all, args.max_symbols)
+        all_tickers = [entry.ticker for entry in master_all]
         history_tickers = [
             entry.ticker
             for entry in master
@@ -368,10 +403,11 @@ def main(argv: list[str] | None = None) -> int:
         if features.empty:
             raise ProviderError("eligibility filter left no securities with usable features")
 
-        # The raw candidate taxonomy preserves the full universe for
-        # disclosure. The policy-eligible taxonomy is the denominator for
-        # the 60% coverage gate. Acquisition-failed tickers remain in the
-        # policy-eligible set as missing data.
+        # These taxonomy frames describe the selected analysis universe. The
+        # complete accessible listing is persisted separately in the full
+        # security master/listed_universe sidecar. The policy-eligible
+        # taxonomy is the denominator for the 60% coverage gate; acquisition
+        # failures remain in that denominator as missing data.
         raw_candidate_taxonomy = taxonomy_frame.copy()
         raw_candidate_taxonomy["group_id"] = raw_candidate_taxonomy["sector"]
         taxonomy = raw_candidate_taxonomy[
@@ -481,7 +517,8 @@ def main(argv: list[str] | None = None) -> int:
             min_history_days=args.min_history_days,
         )
         coverage = _coverage_report(
-            master=master,
+            master=master_all,
+            analysis_master=master,
             universe=universe,
             history=history,
             quality=quality,
@@ -512,6 +549,7 @@ def main(argv: list[str] | None = None) -> int:
                 expected_price_basis=effective_price_basis,
                 as_of=as_of,
                 min_history_days=args.min_history_days,
+                analysis_scope_complete=(len(master) == len(master_all)),
             )
             if blockers:
                 # This is deliberately before sensitivity, Tavily, and the
@@ -549,7 +587,10 @@ def main(argv: list[str] | None = None) -> int:
         else:
             tavily_ledger_path = None
 
-        enriched_master = _enrich_master(master, history)
+        # Enrichment is best-effort for acquired names; preserving the full
+        # master here is what makes every discovered listing available to the
+        # browser even when its history was intentionally not requested.
+        enriched_master = _enrich_master(master_all, history)
         snapshot_id = f"snap_sectors_{as_of.isoformat()}"
         writer = SnapshotWriter(root=snapshot_root)
         # Compute the eligible ticker set hash for membership parity
@@ -590,12 +631,19 @@ def main(argv: list[str] | None = None) -> int:
             notes="; ".join(warnings)[:2000] if warnings else None,
             eligible_ticker_set_hash=eligible_hash,
             eligible_ticker_count=len(eligible_tickers),
+            # Manifest raw_ticker_count remains the analytical denominator;
+            # the complete listing is represented by security_master.json and
+            # coverage.security_master_total.
             raw_ticker_count=len(universe),
         )
 
         close_frame = current_close[current_close["ticker"].isin(all_tickers)].copy()
         _write_csv(close_frame, target / "close.csv")
         _write_csv(universe, target / "universe.csv")
+        _write_csv(
+            _listed_universe_frame(master_all, universe),
+            target / "listed_universe.csv",
+        )
         _write_json(target / "coverage.json", coverage)
         _write_json(
             target / "comparability.json",
@@ -654,7 +702,8 @@ def main(argv: list[str] | None = None) -> int:
         write_manifest(reader.aggregate_manifest(), path=snapshot_root / "manifest.json")
         print(
             f"LIVE_SNAPSHOT_COMPLETE snapshot={snapshot_id} as_of={as_of.isoformat()} "
-            f"universe={len(master)} eligible={int(universe['eligible'].sum())} "
+            f"listed_universe={len(master_all)} analysis_universe={len(master)} "
+            f"eligible={int(universe['eligible'].sum())} "
             f"quality={quality.status.value} coverage={quality.coverage_pct:.2f}%"
         )
         print(f"snapshot_dir={target}")
@@ -685,6 +734,8 @@ def main(argv: list[str] | None = None) -> int:
             code = (
                 "CREDIT_BUDGET_EXCEEDED"
                 if "credit budget" in message.lower()
+                else "LIVE_REQUEST_CAP_EXCEEDED"
+                if "request cap" in message.lower()
                 else "LIVE_PROVIDER_REQUEST_FAILED"
             )
             print(
@@ -734,6 +785,8 @@ def _validate_args(args: argparse.Namespace) -> str | None:
         return "BLOCKED --max-pages must be at least 1"
     if args.max_symbols is not None and args.max_symbols < 1:
         return "BLOCKED --max-symbols must be at least 1"
+    if args.max_http_requests is not None and args.max_http_requests < 1:
+        return "BLOCKED --max-http-requests must be at least 1"
     if args.min_history_days < 1:
         return "BLOCKED --min-history-days must be at least 1"
     if args.stale_trading_days < 0:
@@ -755,6 +808,7 @@ def _live_credit_preflight(
     max_pages: int | None,
     max_symbols: int | None,
     max_estimated_credits: float,
+    max_http_requests: int | None = None,
 ) -> dict[str, Any]:
     """Estimate the live runner's baseline reserve without opening HTTP."""
 
@@ -779,9 +833,16 @@ def _live_credit_preflight(
         "suspensions_call": 1,
     }
     planned = float(sum(components.values()))
-    status = "READY" if planned <= max_estimated_credits else "BLOCKED"
+    status = "READY"
     reason = None
-    if status == "BLOCKED":
+    if max_http_requests is not None and planned > max_http_requests:
+        status = "BLOCKED"
+        reason = (
+            f"baseline live request plan {planned:.0f} exceeds hard request cap "
+            f"{max_http_requests}; reduce --max-symbols/--max-pages"
+        )
+    elif planned > max_estimated_credits:
+        status = "BLOCKED"
         reason = (
             f"baseline live reserve {planned:.0f} exceeds cap "
             f"{max_estimated_credits:.0f}; reduce --max-symbols/--max-pages or omit --as-of"
@@ -789,8 +850,15 @@ def _live_credit_preflight(
     return {
         "status": status,
         "cap": max_estimated_credits,
+        "http_request_cap": max_http_requests,
         "planned_baseline_reserve": planned,
+        "planned_http_attempts": planned,
         "headroom_for_retries": max(0.0, max_estimated_credits - planned),
+        "http_attempt_headroom": (
+            max(0, max_http_requests - int(planned))
+            if max_http_requests is not None
+            else None
+        ),
         "universe_size_for_plan": universe_size,
         "universe_size_source": universe_source,
         "master_size_after_page_cap": master_size,
@@ -881,6 +949,7 @@ def _full_live_data_gate(
     expected_price_basis: str,
     as_of: date,
     min_history_days: int,
+    analysis_scope_complete: bool = True,
 ) -> list[dict[str, str]]:
     """Return strict full-live blockers without touching snapshot outputs."""
 
@@ -888,6 +957,13 @@ def _full_live_data_gate(
 
     def add(code: str, reason: str, next_action: str) -> None:
         blockers.append({"code": code, "reason": reason, "next_action": next_action})
+
+    if not analysis_scope_complete:
+        add(
+            "ANALYSIS_SCOPE_INCOMPLETE",
+            "full-live was requested with a bounded analysis sample; the complete accessible universe has not been processed for history.",
+            "Remove --max-symbols or run the bounded demo mode explicitly; do not label a sample as full-live.",
+        )
 
     master_pagination = str(
         provider.security_master_diagnostics.get("pagination_completeness") or "UNKNOWN"
@@ -1050,10 +1126,88 @@ def _full_live_data_gate(
     return blockers
 
 
+def _master_market_cap(entry: Any) -> float | None:
+    """Return a usable market-cap rank value without inventing one."""
+
+    value = _float_or_none(getattr(entry, "market_cap", None))
+    if value is None or not math.isfinite(value) or value < 0:
+        return None
+    return value
+
+
+def _master_rank_key(entry: Any) -> tuple[float, str]:
+    # Missing market caps sort after known values; ticker is the stable tie
+    # breaker so the same input produces the same demo sample every run.
+    market_cap = _master_market_cap(entry)
+    return (-(market_cap if market_cap is not None else -1.0), str(getattr(entry, "ticker", "")))
+
+
+def _select_analysis_master(master: list[Any], max_symbols: int | None) -> list[Any]:
+    """Select a deterministic, sector-balanced history sample.
+
+    The complete ``master`` is always retained by the caller. This function
+    limits only the expensive per-symbol history requests. One highest-ranked
+    listing per available sector is selected first, then remaining slots are
+    filled by market-cap rank. This prevents an alphabetic page boundary from
+    silently removing entire sectors from a demo.
+    """
+
+    rows = list(master)
+    if max_symbols is None or max_symbols >= len(rows):
+        return rows
+    if max_symbols < 1:
+        raise ValueError("max_symbols must be at least 1")
+
+    # The cap is for the expensive daily-history lane. Do not spend one of
+    # those slots on a non-common listing that the downstream universe will
+    # reject anyway. The full master remains untouched and is still persisted
+    # for the listing/UI.
+    history_candidates = [
+        entry
+        for entry in rows
+        if getattr(entry, "common_equity_status", None) != "NON_COMMON_EQUITY"
+    ]
+    if not history_candidates:
+        return []
+
+    ranked = sorted(history_candidates, key=_master_rank_key)
+    buckets: dict[str, list[Any]] = {}
+    for entry in ranked:
+        sector = str(getattr(entry, "sector", None) or "UNCLASSIFIED")
+        buckets.setdefault(sector, []).append(entry)
+
+    # Order sectors by the rank of their best name, then by sector label. This
+    # keeps selection deterministic while giving scarce caps to the most
+    # economically material available sectors first.
+    ordered_buckets = sorted(
+        buckets.values(),
+        key=lambda bucket: _master_rank_key(bucket[0]),
+    )
+    selected: list[Any] = []
+    selected_tickers: set[str] = set()
+    for bucket in ordered_buckets:
+        if len(selected) >= max_symbols:
+            break
+        entry = bucket[0]
+        ticker = str(getattr(entry, "ticker", ""))
+        if ticker and ticker not in selected_tickers:
+            selected.append(entry)
+            selected_tickers.add(ticker)
+
+    for entry in ranked:
+        if len(selected) >= max_symbols:
+            break
+        ticker = str(getattr(entry, "ticker", ""))
+        if ticker and ticker not in selected_tickers:
+            selected.append(entry)
+            selected_tickers.add(ticker)
+    return selected
+
+
 def _limit_master(master: list[Any], max_symbols: int | None) -> list[Any]:
-    if max_symbols is None:
-        return master
-    return master[:max_symbols]
+    """Backward-compatible alias for the bounded demo selector."""
+
+    return _select_analysis_master(master, max_symbols)
 
 
 def _resolve_horizons(methodology: dict[str, Any]) -> dict[str, int]:
@@ -1733,6 +1887,7 @@ def _build_comparability(
 def _coverage_report(
     *,
     master: list[Any],
+    analysis_master: list[Any] | None = None,
     universe: pd.DataFrame,
     history: pd.DataFrame,
     quality: QualityReport,
@@ -1741,6 +1896,7 @@ def _coverage_report(
     requested_history_tickers: list[str],
     min_history_days: int,
 ) -> dict[str, Any]:
+    analysis_master = list(analysis_master) if analysis_master is not None else list(master)
     complete_taxonomy = universe[list(("sector", "subsector", "industry", "subindustry"))].notna().all(axis=1)
     latest_dates = pd.to_datetime(history["date"], errors="coerce") if not history.empty else pd.Series(dtype="datetime64[ns]")
     latest_trade = latest_dates.max().date().isoformat() if not latest_dates.dropna().empty else None
@@ -1765,8 +1921,8 @@ def _coverage_report(
     # (ACQUIRED). Acquisition failures and empties are in the denominator
     # as missing data, not in the numerator.
     observed_eligible_features = acquired
-    # Prefix sample disclosure: when max_symbols caps the universe, the
-    # coverage report must make the partial-sample nature visible.
+    # Discovery metadata describes the listed universe; analysis metrics below
+    # describe only the bounded history sample when one was requested.
     raw_discovered_count = provider.security_master_diagnostics.get("unique_rows")
     try:
         discovered_count = int(raw_discovered_count)
@@ -1775,7 +1931,6 @@ def _coverage_report(
     # Discovery metadata is advisory. Never let a malformed or stale value
     # claim that the used sample is larger than the rows actually loaded.
     discovered_count = max(len(master), discovered_count)
-    is_prefix_sample = len(master) < discovered_count
     master_pagination = list(provider.security_master_diagnostics.get("pagination") or [])
     close_pagination = (
         [dict(provider.close_pagination_diagnostics)]
@@ -1784,21 +1939,56 @@ def _coverage_report(
     )
     master_pagination_completeness = _pagination_completeness(master_pagination)
     close_pagination_completeness = _pagination_completeness(close_pagination)
+    full_accessible_universe_listed = (
+        master_pagination_completeness == "COMPLETE"
+        and len(master) >= discovered_count
+    )
+    bounded_analysis = len(analysis_master) < len(master)
+    is_prefix_sample = (
+        bounded_analysis
+        or len(analysis_master) < discovered_count
+        or not full_accessible_universe_listed
+    )
+    if not full_accessible_universe_listed:
+        analysis_scope = "PAGE_CAPPED"
+        analysis_selection_method = "page_capped_listing"
+    elif is_prefix_sample:
+        analysis_scope = "BOUNDED_DEMO"
+        analysis_selection_method = "market_cap_priority_with_sector_coverage"
+    else:
+        analysis_scope = "FULL_DISCOVERED_UNIVERSE"
+        analysis_selection_method = "full_discovered_universe"
     return {
         "as_of": as_of.isoformat(),
         "provider": "Sectors v2",
         "provider_mode": ProviderMode.SECTORS_LIVE.value,
         "is_prefix_sample": is_prefix_sample,
         "discovered_count": discovered_count,
-        "used_count": len(master),
-        "discovered_universe_disclosure": (
-            f"Partial universe: {len(master)} of {discovered_count} discovered; "
-            "prefix sample; not full IDX coverage."
-            if is_prefix_sample
-            else f"Full universe: {len(master)} of {discovered_count} discovered."
-        ),
+        "used_count": len(analysis_master),
+        "analysis_universe_count": len(analysis_master),
+        "analysis_scope": analysis_scope,
+        "analysis_selection_method": analysis_selection_method,
         "security_master_pagination_completeness": master_pagination_completeness,
         "close_pagination_completeness": close_pagination_completeness,
+        "full_accessible_universe_listed": full_accessible_universe_listed,
+        "discovered_universe_disclosure": (
+            f"Full accessible universe listed: {len(master)} securities; "
+            f"history requested for a bounded demo sample of {len(analysis_master)}."
+            if (
+                full_accessible_universe_listed
+                and is_prefix_sample
+            )
+            else (
+                f"Full accessible universe analyzed: {len(analysis_master)} of "
+                f"{discovered_count} discovered."
+                if analysis_scope == "FULL_DISCOVERED_UNIVERSE"
+                else (
+                    f"Accessible listing is page-capped at {len(master)} of "
+                    f"{discovered_count} discovered; history requested for "
+                    f"{len(analysis_master)} demo securities."
+                )
+            )
+        ),
         "pagination_incomplete": (
             master_pagination_completeness in {"PARTIAL", "UNKNOWN"}
             or close_pagination_completeness in {"PARTIAL", "UNKNOWN"}
@@ -1838,6 +2028,11 @@ def _coverage_report(
         ) if policy_eligible > 0 else False,
         "security_master_diagnostics": provider.security_master_diagnostics,
         "history_diagnostics": provider.history_diagnostics,
+        "history_request_symbol_cap": (
+            len(requested_history_tickers) if is_prefix_sample else None
+        ),
+        "live_http_request_cap": provider.client.max_http_requests,
+        "live_http_requests_made": provider.client.http_requests_made,
     }
 
 
@@ -1913,6 +2108,63 @@ def _enrich_master(master: list[Any], history: pd.DataFrame) -> list[Any]:
     return [item.model_copy(update=updates.get(item.ticker, {})) for item in master]
 
 
+def _listed_universe_frame(
+    master: list[Any], analysis_universe: pd.DataFrame
+) -> pd.DataFrame:
+    """Persist every discovered listing with explicit demo-request status."""
+
+    rows = [
+        entry.model_dump(mode="json")
+        if hasattr(entry, "model_dump")
+        else dict(entry)
+        if isinstance(entry, dict)
+        else vars(entry)
+        for entry in master
+    ]
+    listed = pd.DataFrame(rows)
+    if listed.empty:
+        return listed
+    listed["ticker"] = listed["ticker"].astype(str)
+
+    requested = analysis_universe.copy() if analysis_universe is not None else pd.DataFrame()
+    if not requested.empty and "ticker" in requested.columns:
+        requested["ticker"] = requested["ticker"].astype(str)
+        requested = requested.drop_duplicates("ticker", keep="first")
+        requested_columns = [
+            column
+            for column in (
+                "ticker",
+                "eligible",
+                "exclusion_reason",
+                "acquisition_status",
+                "observed_days",
+                "latest_trade_date",
+                "median_daily_value",
+            )
+            if column in requested.columns
+        ]
+        listed = listed.merge(
+            requested[requested_columns],
+            on="ticker",
+            how="left",
+        )
+        listed["analysis_requested"] = listed["ticker"].isin(
+            set(requested["ticker"])
+        )
+        requested_status = (
+            listed["acquisition_status"].fillna("REQUESTED")
+            if "acquisition_status" in listed.columns
+            else pd.Series("REQUESTED", index=listed.index)
+        )
+        listed["analysis_status"] = requested_status.where(
+            listed["analysis_requested"], "NOT_REQUESTED"
+        )
+    else:
+        listed["analysis_requested"] = False
+        listed["analysis_status"] = "NOT_REQUESTED"
+    return listed
+
+
 def _provenance(
     *,
     provider: SectorsProvider,
@@ -1942,6 +2194,8 @@ def _provenance(
         "previous_comparison": previous_source,
         "credit_balance": "UNAVAILABLE — only request ledger estimates are recorded",
         "instrument_type": "UNKNOWN / VERIFY unless explicit vendor field or obvious non-common marker exists",
+        "live_http_request_cap": provider.client.max_http_requests,
+        "live_http_requests_made": provider.client.http_requests_made,
     }
 
 
@@ -1984,12 +2238,15 @@ def _credit_audit(entries: list[dict[str, Any]], provider: SectorsProvider) -> d
         "estimated_credits_total": documented_total,
         "budget_reserved_credits_total": reserved_total,
         "budget_limit": provider.client.max_estimated_credits,
+        "http_requests_made": provider.client.http_requests_made,
+        "http_request_cap": provider.client.max_http_requests,
         "credit_balance": "UNAVAILABLE",
         "by_endpoint": by_endpoint,
         "note": (
             "Estimated credits use documented per-endpoint rules. The separate "
             "budget reserve includes retry attempts and is a client-side ceiling; "
             "balance/actual debit was not exposed to this client."
+            " Outgoing HTTP attempts include retries and are separately capped."
         ),
     }
 
@@ -2025,7 +2282,9 @@ def _markdown_report(
         "",
         "- **Provider:** Sectors v2 (`SECTORS_LIVE`)",
         "- **Benchmark:** Sectors native `/v2/index-daily/ihsg/`",
-        f"- **Universe:** {coverage['security_master_total']} discovered; {coverage['eligible_securities']} eligible",
+        f"- **Listed universe:** {coverage['security_master_total']} discovered; "
+        f"**analysis sample:** {coverage['analysis_universe_count']} requested; "
+        f"{coverage['eligible_securities']} eligible in sample",
         f"- **Price-history coverage:** {coverage['price_history_coverage_pct']:.2f}% usable",
         f"- **Quality:** {quality.status.value} ({quality.coverage_pct:.2f}%)",
         f"- **Comparison observation:** {previous_source or 'none'}",

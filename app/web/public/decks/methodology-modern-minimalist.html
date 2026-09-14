@@ -196,7 +196,7 @@
     </p>
     <div class="meta">
       <span><strong>Snapshot as-of</strong> 2026-08-27</span>
-      <span><strong>Provider mode</strong> SECTORS_LIVE</span>
+      <span><strong>Provider mode</strong> Live Sectors (read-only)</span>
       <span><strong>Sectors credits</strong> 0 (read-only snapshot)</span>
       <span><strong>Theme</strong> Modern Minimalist</span>
     </div>
@@ -245,10 +245,10 @@
     <h2>One row per evidence layer</h2>
     <p>
       Status values are normalised end-to-end: <span class="pill">READY</span>
-      <span class="pill">READY_WITH_GAPS</span>
-      <span class="pill solid">SAMPLE_ONLY</span>
-      <span class="pill">DATA_GAP</span>
-      <span class="pill">CONTEXT_ONLY</span>.
+      <span class="pill">Ready · partial coverage</span>
+      <span class="pill solid">Reported sample</span>
+      <span class="pill">Not available</span>
+      <span class="pill">Context only</span>.
     </p>
     <table class="matrix">
       <thead>
@@ -257,15 +257,15 @@
         </tr>
       </thead>
       <tbody>
-        <tr><td>Prices</td><td>SECTORS_LIVE</td><td>Sectors API (read-only)</td><td>100%</td><td>yes</td></tr>
+        <tr><td>Prices</td><td>Live Sectors (read-only)</td><td>Sectors API (read-only)</td><td>100%</td><td>yes</td></tr>
         <tr><td>Benchmark</td><td>READY</td><td>^JKSE / IHSG</td><td>n/a</td><td>yes</td></tr>
-        <tr><td>Sectors</td><td>SECTORS_LIVE</td><td>Sectors taxonomy</td><td>100%</td><td>yes</td></tr>
-        <tr><td>Konglo</td><td>ANALYST_DEFINED</td><td>config/konglo.yaml</td><td>75% mapped</td><td>no</td></tr>
-        <tr><td>Themes</td><td>ANALYST_DEFINED</td><td>config/themes.yaml</td><td>prototype</td><td>no</td></tr>
-        <tr><td>Foreign flow</td><td>SAMPLE_ONLY</td><td>IDNFinancials articles</td><td>6 dates · 44 obs</td><td>review</td></tr>
-        <tr><td>Fundamentals</td><td>DATA_GAP</td><td>—</td><td>0%</td><td>no</td></tr>
-        <tr><td>Events</td><td>CONTEXT_ONLY</td><td>Tavily + You.com bounded</td><td>5 events</td><td>no</td></tr>
-        <tr><td>TradingView</td><td>CONTEXT_ONLY</td><td>Official embed (CDN)</td><td>live when reachable</td><td>no</td></tr>
+        <tr><td>Sectors</td><td>Live Sectors (read-only)</td><td>Sectors taxonomy</td><td>100%</td><td>yes</td></tr>
+        <tr><td>Konglo</td><td>Analyst-defined</td><td>config/konglo.yaml</td><td>75% mapped</td><td>no</td></tr>
+        <tr><td>Themes</td><td>Analyst-defined</td><td>config/themes.yaml</td><td>prototype</td><td>no</td></tr>
+        <tr><td>Foreign flow</td><td>Reported sample</td><td>IDNFinancials articles</td><td>6 dates · 44 obs</td><td>review</td></tr>
+        <tr><td>Fundamentals</td><td>Not available</td><td>—</td><td>0%</td><td>no</td></tr>
+        <tr><td>Events</td><td>Context only</td><td>Tavily + You.com bounded</td><td>5 events</td><td>no</td></tr>
+        <tr><td>TradingView</td><td>Context only</td><td>Official embed (CDN)</td><td>live when reachable</td><td>no</td></tr>
       </tbody>
     </table>
   </section>
@@ -290,7 +290,7 @@
           <li>BROADENING — breadth delta &gt; +5pp</li>
           <li>STABLE — |breadth delta| ≤ 5pp</li>
           <li>NARROWING — breadth delta &lt; −5pp</li>
-          <li>UNCONFIRMED — no comparable prior snapshot</li>
+          <li>Not confirmed — no comparable prior snapshot</li>
         </ul>
       </div>
       <div class="col">
@@ -329,7 +329,7 @@
       </div>
       <div class="tile">
         <h4>Konglo</h4>
-        <div class="value">ANALYST_DEFINED_PROTOTYPE</div>
+        <div class="value">Analyst-defined prototype</div>
         <div class="note">Conglomerate archetype mapping; confidence-weighted; UNMAPPED for uncertain rows.</div>
       </div>
       <div class="tile">
@@ -402,11 +402,11 @@
     <h2>Honest gates, not gate-keeping</h2>
     <ul>
       <li><span class="pill solid">READY</span> only when coverage_pct ≥ 60% and methodology_version matches prior.</li>
-      <li><span class="pill">READY_WITH_GAPS</span> surfaced whenever a denominator is below the 60% gate but ≥ 30%.</li>
-      <li><span class="pill">DATA_GAP</span> when no numeric observation exists (fundamentals today).</li>
-      <li><span class="pill">UNCONFIRMED</span> when trajectory requires a comparable prior that does not exist.</li>
-      <li><span class="pill solid">SAMPLE_ONLY</span> on every foreign-flow surface so users know it is not market-wide.</li>
-      <li><span class="pill">CONTEXT_ONLY</span> on every research-event badge; events never score signals.</li>
+      <li><span class="pill">Ready · partial coverage</span> surfaced whenever a denominator is below the 60% gate but ≥ 30%.</li>
+      <li><span class="pill">Not available</span> when no numeric observation exists (fundamentals today).</li>
+      <li><span class="pill">Not confirmed</span> when trajectory requires a comparable prior that does not exist.</li>
+      <li><span class="pill solid">Reported sample</span> on every foreign-flow surface so users know it is not market-wide.</li>
+      <li><span class="pill">Context only</span> on every research-event badge; events never score signals.</li>
     </ul>
     <p style="color: var(--muted); font-size: 13px; margin-top: 18px;">
       Build pipeline: pytest (472 passing) · tsc --noEmit clean · vite build successful · git diff --check clean · live app smoke-tested at http://127.0.0.1:5185/.

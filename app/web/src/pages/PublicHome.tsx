@@ -298,6 +298,7 @@ function MiniMap() {
       mapYValue(s, mapMode) !== null,
   )
   const coverage = data?.coverageHonest
+  const listedCoverage = data?.payload.coverage
   const gateMet = coverage?.coverage_gate_60pct_met ?? false
   const labelPositions = useMemo(
     () =>
@@ -459,7 +460,10 @@ function MiniMap() {
         aria-label="Snapshot coverage"
       >
         <span>
-          Raw <strong style={{ color: "#e6e7e4" }}>{coverage?.raw_candidate_constituents ?? 0}</strong>
+          Listed <strong style={{ color: "#e6e7e4" }}>{listedCoverage?.security_master_total ?? listedCoverage?.discovered_count ?? 0}</strong>
+        </span>
+        <span>
+          Sample raw <strong style={{ color: "#e6e7e4" }}>{coverage?.raw_candidate_constituents ?? 0}</strong>
         </span>
         <span>
           Policy-elig{" "}

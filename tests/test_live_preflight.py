@@ -37,3 +37,19 @@ def test_live_preflight_uses_discovered_count_not_prefix_sample(tmp_path: Path):
     assert plan["universe_size_for_plan"] == 962
     assert plan["history_symbols_after_cap"] == 962
     assert plan["universe_size_source"].endswith("discovered metadata")
+
+
+def test_live_preflight_blocks_before_http_when_request_cap_is_too_small(tmp_path: Path):
+    plan = _live_credit_preflight(
+        snapshot_root=tmp_path / "snapshots",
+        config_path="config/providers.yaml",
+        requested_as_of=None,
+        max_pages=None,
+        max_symbols=250,
+        max_estimated_credits=1_000.0,
+        max_http_requests=100,
+    )
+
+    assert plan["status"] == "BLOCKED"
+    assert "hard request cap" in plan["reason"]
+    assert plan["planned_http_attempts"] > plan["http_request_cap"]

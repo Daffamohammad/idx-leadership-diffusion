@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
+import yaml
 
 from idx_leadership.data.snapshots import SnapshotReader, validate_snapshot_id
 from idx_leadership.data.comparability import check_snapshot_compatibility
@@ -58,6 +59,28 @@ def _sanitize_audit(audit: Any) -> Any:
     if isinstance(audit, list):
         return [_sanitize_audit(item) for item in audit]
     return audit
+
+
+def _normalize_first_party_idx_urls(value: Any) -> Any:
+    """Normalize only the exact legacy IDX URL prefix in an export payload.
+
+    This is intentionally a literal prefix replacement. It does not rewrite
+    localhost URLs, other domains, or IDX-like domains with a different host.
+    Containers are copied so callers do not mutate the snapshot data loaded
+    from disk.
+    """
+    legacy_prefix = "http://www.idx.co.id/"
+    secure_prefix = "https://www.idx.co.id/"
+    if isinstance(value, dict):
+        return {
+            key: _normalize_first_party_idx_urls(item)
+            for key, item in value.items()
+        }
+    if isinstance(value, list):
+        return [_normalize_first_party_idx_urls(item) for item in value]
+    if isinstance(value, str):
+        return value.replace(legacy_prefix, secure_prefix)
+    return value
 
 
 def _iso_date(value: Any) -> str | None:
@@ -387,6 +410,309 @@ def _load_optional_json(path: Path) -> dict[str, Any] | None:
     return payload if isinstance(payload, dict) else None
 
 
+def _load_yaml_optional(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        return {}
+    try:
+        loaded = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError):
+        return {}
+    return loaded if isinstance(loaded, dict) else {}
+
+
+def _taxonomy_memberships(path: Path) -> list[dict[str, Any]]:
+    """Read explicit config memberships without inferring new relationships."""
+    document = _load_yaml_optional(path)
+    rows: list[dict[str, Any]] = []
+    direct = document.get("memberships")
+    if isinstance(direct, list):
+        rows.extend(item for item in direct if isinstance(item, dict))
+    nested = document.get("taxonomies")
+    if isinstance(nested, list):
+        for taxonomy in nested:
+            if not isinstance(taxonomy, dict):
+                continue
+            memberships = taxonomy.get("memberships")
+            if isinstance(memberships, list):
+                rows.extend(item for item in memberships if isinstance(item, dict))
+    return rows
+
+
+def _membership_map(path: Path) -> dict[str, list[dict[str, Any]]]:
+    mapped: dict[str, list[dict[str, Any]]] = {}
+    for row in _taxonomy_memberships(path):
+        ticker = str(row.get("ticker") or "").strip().upper()
+        group_id = str(row.get("taxonomy_group_id") or "").strip()
+        if not ticker or not group_id:
+            continue
+        mapped.setdefault(ticker, []).append(
+            {
+                "taxonomy_group_id": group_id,
+                "taxonomy_group_name": str(row.get("taxonomy_group_name") or group_id),
+                "confidence": _finite_number(row.get("confidence")) or 1.0,
+                "source": str(row.get("source") or "config taxonomy membership"),
+                "source_as_of": _iso_date(row.get("source_as_of")),
+            }
+        )
+    return mapped
+
+
+def _read_listed_universe_rows(snapshot_dir: Path) -> list[dict[str, Any]]:
+    path = snapshot_dir / "listed_universe.csv"
+    if not path.is_file():
+        return []
+    try:
+        return _records(pd.read_csv(path))
+    except (OSError, UnicodeError, ValueError, pd.errors.ParserError):
+        return []
+
+
+def _read_analysis_tickers(snapshot_dir: Path) -> set[str]:
+    path = snapshot_dir / "universe.csv"
+    if not path.exists():
+        return set()
+    try:
+        frame = pd.read_csv(path)
+    except (OSError, ValueError, pd.errors.ParserError):
+        return set()
+    if "ticker" not in frame.columns:
+        return set()
+    return {
+        str(value).strip().upper()
+        for value in frame["ticker"].dropna().tolist()
+        if str(value).strip()
+    }
+
+
+def _read_cached_full_listing(
+    *,
+    as_of: Any,
+    minimum_rows: int,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Reuse a prior validated live capture without spending provider credits."""
+    cutoff = _iso_date(as_of)
+    if not cutoff:
+        return [], {}
+    root = project_root() / "data" / "raw" / "sectors_validation"
+    reports = sorted(root.glob(f"{cutoff}_*/validation_report.json"), reverse=True)
+    for report_path in reports:
+        report = _load_optional_json(report_path)
+        if not report or report.get("status") not in {"PASS", "REVIEW_REQUIRED"}:
+            continue
+        taxonomy_check = report.get("checks", {}).get("taxonomy", {})
+        if taxonomy_check.get("status") != "PASS":
+            continue
+        try:
+            expected = int(taxonomy_check.get("structured_query_complete_rows") or taxonomy_check.get("rows") or 0)
+        except (TypeError, ValueError):
+            expected = 0
+        if expected < minimum_rows:
+            continue
+        fixture_dir = report_path.parent / "sanitized_fixtures"
+        rows: list[dict[str, Any]] = []
+        for path in sorted(fixture_dir.glob("companies_taxonomy_page_*.json")):
+            loaded = _load_optional_json(path) or {}
+            for item in (loaded.get("payload", {}) if isinstance(loaded, dict) else {}).get("results", []):
+                if not isinstance(item, dict):
+                    continue
+                query_values = item.get("query_values")
+                if not isinstance(query_values, dict):
+                    continue
+                ticker = str(item.get("symbol") or "").strip().upper()
+                if not ticker:
+                    continue
+                sector = query_values.get("sector")
+                rows.append(
+                    {
+                        "ticker": ticker,
+                        "company_name": item.get("company_name") or ticker,
+                        "exchange": "IDX",
+                        "sector": sector,
+                        "subsector": query_values.get("sub_sector"),
+                        "industry": query_values.get("industry"),
+                        "subindustry": query_values.get("sub_industry"),
+                        "group_id": sector,
+                        "listing_board": query_values.get("listing_board"),
+                        "active": True,
+                        "common_equity_status": "UNVERIFIED_COMPANY_LISTING",
+                        "source": "sectors_validation_fixture",
+                        "source_as_of": cutoff,
+                    }
+                )
+        unique: dict[str, dict[str, Any]] = {}
+        for row in rows:
+            unique.setdefault(str(row["ticker"]), row)
+        if len(unique) < expected or len(unique) < minimum_rows:
+            continue
+        relative_report = report_path.relative_to(project_root())
+        return list(unique.values()), {
+            "kind": "CACHED_VALIDATED_LIVE_CAPTURE",
+            "validation_report": str(relative_report),
+            "validation_status": report.get("status"),
+            "taxonomy_rows": len(unique),
+            "captured_at": report_path.parent.name.rsplit("_", 1)[-1],
+            "provider_mode": report.get("provider_mode"),
+        }
+    return [], {}
+
+
+def _build_listing_registry(
+    *,
+    snapshot_dir: Path,
+    security_master: Any,
+    coverage: Any,
+    features: pd.DataFrame | None,
+    manifest_entry: dict[str, Any],
+) -> dict[str, Any]:
+    """Expose one complete listing/taxonomy contract to the web UI.
+
+    The registry distinguishes rows persisted by the snapshot from the
+    provider's discovered count. A page-capped legacy bundle therefore
+    remains visibly incomplete instead of being promoted to a full listing.
+    """
+    listed_rows = _read_listed_universe_rows(snapshot_dir)
+    has_listing_sidecar = bool(listed_rows)
+    if not listed_rows and isinstance(security_master, list):
+        listed_rows = [row for row in security_master if isinstance(row, dict)]
+    coverage_map = coverage if isinstance(coverage, dict) else {}
+    try:
+        discovered_target = int(coverage_map.get("discovered_count") or len(listed_rows))
+    except (TypeError, ValueError):
+        discovered_target = len(listed_rows)
+    listing_source: dict[str, Any] = {
+        "kind": "SNAPSHOT_SECURITY_MASTER",
+        "provider_mode": manifest_entry.get("provider_mode"),
+    }
+    cached_rows, cached_source = _read_cached_full_listing(
+        as_of=manifest_entry.get("as_of"),
+        minimum_rows=max(1, discovered_target),
+    )
+    if cached_rows and len(listed_rows) < discovered_target:
+        listed_rows = cached_rows
+        listing_source = cached_source
+    analysis_tickers = _read_analysis_tickers(snapshot_dir)
+    feature_tickers: set[str] = set()
+    if features is not None and not features.empty and "ticker" in features.columns:
+        feature_tickers = {
+            str(value).strip().upper()
+            for value in features["ticker"].dropna().tolist()
+            if str(value).strip()
+        }
+
+    konglo_map = _membership_map(project_root() / "config" / "konglo.yaml")
+    theme_map = _membership_map(project_root() / "config" / "themes.yaml")
+    by_ticker: dict[str, dict[str, Any]] = {}
+    duplicate_tickers = 0
+    records: list[dict[str, Any]] = []
+    for raw in listed_rows:
+        ticker = str(raw.get("ticker") or raw.get("symbol") or "").strip().upper()
+        if not ticker:
+            continue
+        if ticker in by_ticker:
+            duplicate_tickers += 1
+            continue
+        taxonomy = {
+            key: raw.get(key)
+            for key in ("sector", "subsector", "industry", "subindustry")
+        }
+        taxonomy_complete = all(
+            value is not None and str(value).strip() not in {"", "nan", "None"}
+            for value in taxonomy.values()
+        )
+        try:
+            history_requested = int(coverage_map.get("history_requested_securities") or 0)
+        except (TypeError, ValueError):
+            history_requested = 0
+        legacy_requested = (
+            not has_listing_sidecar
+            and not analysis_tickers
+            and history_requested >= len(listed_rows)
+            and len(listed_rows) > 0
+        )
+        analysis_requested = bool(
+            raw.get("analysis_requested", legacy_requested or ticker in analysis_tickers or ticker in feature_tickers)
+        )
+        analysis_status = str(raw.get("analysis_status") or "").strip()
+        if not analysis_status:
+            analysis_status = (
+                "OBSERVED_FEATURES"
+                if ticker in feature_tickers
+                else "REQUESTED_NO_FEATURES"
+                if analysis_requested
+                else "NOT_REQUESTED"
+            )
+        row = {
+            "ticker": ticker,
+            "company_name": raw.get("company_name") or ticker,
+            "exchange": raw.get("exchange") or "IDX",
+            "listing_board": raw.get("listing_board"),
+            "listing_status": raw.get("listing_status"),
+            "active": raw.get("active") is not False,
+            "common_equity_status": raw.get("common_equity_status"),
+            "market_cap": _finite_number(raw.get("market_cap")),
+            "taxonomy": taxonomy,
+            "taxonomy_status": "COMPLETE" if taxonomy_complete else "MISSING_CLASSIFICATION",
+            "group_id": raw.get("group_id") or raw.get("sector"),
+            "analysis_requested": analysis_requested,
+            "analysis_status": analysis_status,
+            "konglo_memberships": konglo_map.get(ticker, []),
+            "theme_memberships": theme_map.get(ticker, []),
+            "source": raw.get("source") or manifest_entry.get("provider"),
+            "source_as_of": _iso_date(raw.get("source_as_of") or raw.get("last_trade_date")),
+        }
+        by_ticker[ticker] = row
+        records.append(row)
+
+    discovered_count = coverage_map.get("discovered_count")
+    try:
+        discovered = max(len(records), int(discovered_count))
+    except (TypeError, ValueError):
+        discovered = len(records)
+    persisted_count = len(records)
+    full_listing = (
+        coverage_map.get("full_accessible_universe_listed") is True
+        and persisted_count >= discovered
+    ) or (
+        listing_source.get("kind") == "CACHED_VALIDATED_LIVE_CAPTURE"
+        and persisted_count >= discovered
+    )
+    taxonomy_complete_count = sum(row["taxonomy_status"] == "COMPLETE" for row in records)
+    mapped_konglo = sum(bool(row["konglo_memberships"]) for row in records)
+    mapped_themes = sum(bool(row["theme_memberships"]) for row in records)
+    analysis_requested_count = sum(bool(row["analysis_requested"]) for row in records)
+    return {
+        "schema_version": "listing-registry-v1",
+        "status": "READY" if full_listing else "PARTIAL",
+        "provider_mode": manifest_entry.get("provider_mode"),
+        "as_of": _iso_date(manifest_entry.get("as_of")),
+        "scope_label": "Full accessible listing" if full_listing else "Persisted listing",
+        "listing_source": listing_source,
+        "full_accessible_universe_listed": full_listing,
+        "discovered_count": discovered,
+        "persisted_count": persisted_count,
+        "listed_count": persisted_count,
+        "duplicate_ticker_count": duplicate_tickers,
+        "analysis_requested_count": analysis_requested_count,
+        "observed_feature_count": len(feature_tickers),
+        "taxonomy_complete_count": taxonomy_complete_count,
+        "taxonomy_coverage_pct": round(taxonomy_complete_count / max(1, persisted_count) * 100.0, 2),
+        "konglo_mapped_count": mapped_konglo,
+        "theme_mapped_count": mapped_themes,
+        "membership_sources": {
+            "sector": "provider security master",
+            "konglo": "config/konglo.yaml",
+            "themes": "config/themes.yaml",
+        },
+        "integrity": {
+            "unique_ticker_count": len(records),
+            "duplicate_ticker_count": duplicate_tickers,
+            "records_match_persisted_count": len(records) == persisted_count,
+            "discovered_rows_without_persisted_record": max(0, discovered - persisted_count),
+        },
+        "records": records,
+    }
+
+
 def _enrich_with_taxonomy_views(
     payload: dict[str, Any],
     *,
@@ -425,6 +751,27 @@ def _enrich_with_taxonomy_views(
         comparability=payload.get("comparability") or {},
     )
     if sector_view is not None:
+        registry = payload.get("listing_registry")
+        memberships: list[dict[str, Any]] = []
+        if isinstance(registry, dict):
+            for record in registry.get("records", []):
+                if not isinstance(record, dict) or not record.get("group_id"):
+                    continue
+                group_id = str(record["group_id"])
+                memberships.append(
+                    {
+                        "ticker": str(record.get("ticker") or ""),
+                        "taxonomy_group_id": group_id,
+                        "taxonomy_group_name": str(
+                            (record.get("taxonomy") or {}).get("sector") or group_id
+                        ),
+                        "membership_type": "PRIMARY",
+                        "confidence": 1.0,
+                        "source": "provider security master",
+                        "source_as_of": record.get("source_as_of"),
+                    }
+                )
+        sector_view["memberships"] = memberships
         views["sector"] = sector_view
     payload["taxonomy_views"] = views
 
@@ -620,6 +967,31 @@ def _enrich_with_foreign_flow(
     payload["foreign_flow_sample"] = scoped
 
 
+def _enrich_with_official_market_context(
+    payload: dict[str, Any], *, manifest_entry: dict[str, Any]
+) -> None:
+    """Attach the bounded LlamaCloud/OJK market context at its time cutoff."""
+    path = project_root() / "data" / "derived" / "official_market_context.json"
+    loaded = _load_optional_json(path)
+    snapshot_as_of = _iso_date(payload.get("as_of"))
+    period_end = _iso_date((loaded or {}).get("period_end"))
+    if loaded is None or snapshot_as_of is None or period_end is None or period_end > snapshot_as_of:
+        payload["official_market_context"] = None
+        return
+    scoped = copy.deepcopy(loaded)
+    compatibility = scoped.setdefault("context_compatibility", {})
+    compatibility.update(
+        {
+            "role": "DESCRIPTIVE_MARKET_CONTEXT",
+            "snapshot_as_of": snapshot_as_of,
+            "snapshot_provider_mode": manifest_entry.get("provider_mode"),
+            "used_in_leadership_or_diffusion": False,
+            "publication_cutoff_enforced": True,
+        }
+    )
+    payload["official_market_context"] = scoped
+
+
 def _enrich_with_research_events(
     payload: dict[str, Any], *, manifest_entry: dict[str, Any]
 ) -> None:
@@ -722,6 +1094,13 @@ def export(
         ),
         "breadth_history": _build_breadth_history(reader, snapshot_id, snap),
         "security_master": snap.get("security_master"),
+        "listing_registry": _build_listing_registry(
+            snapshot_dir=reader.root / snapshot_id,
+            security_master=snap.get("security_master"),
+            coverage=snap.get("coverage"),
+            features=snap.get("features"),
+            manifest_entry=entry,
+        ),
         "change_digest": snap.get("change_digest"),
         "evidence": snap.get("evidence"),
         "complete": snap.get("complete"),
@@ -732,7 +1111,9 @@ def export(
         manifest_entry=entry,
     )
     _enrich_with_foreign_flow(payload, manifest_entry=entry)
+    _enrich_with_official_market_context(payload, manifest_entry=entry)
     _enrich_with_research_events(payload, manifest_entry=entry)
+    payload = _normalize_first_party_idx_urls(payload)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     _atomic_write_text(
         out_path,

@@ -168,6 +168,7 @@ class SectorsProvider(
         history_workers: int = 4,
         min_request_interval_seconds: float = 0.0,
         max_estimated_credits: float | None = SectorsClient.DEFAULT_MAX_ESTIMATED_CREDITS,
+        max_http_requests: int | None = SectorsClient.DEFAULT_MAX_HTTP_REQUESTS,
         force_cross_section_history: bool = False,
     ) -> None:
         if mode not in {ProviderMode.SECTORS_LIVE, ProviderMode.SECTORS_FIXTURE}:
@@ -201,6 +202,7 @@ class SectorsProvider(
             cache_ttl_seconds=cache_ttl_seconds,
             min_request_interval_seconds=min_request_interval_seconds,
             max_estimated_credits=max_estimated_credits,
+            max_http_requests=max_http_requests,
         )
 
     # ---- SecurityMasterProvider -----------------------------------------

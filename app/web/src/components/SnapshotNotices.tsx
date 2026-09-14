@@ -58,6 +58,35 @@ export function BundleNotices({ data }: { data: AdaptedSnapshot | null }) {
       </div>,
     );
   }
+  const coverage = data.payload.coverage;
+  const boundedAnalysis =
+    coverage?.analysis_scope === "BOUNDED_DEMO" ||
+    (coverage?.analysis_scope === undefined && coverage?.is_prefix_sample === true);
+  if (boundedAnalysis) {
+    const listed = coverage?.security_master_total ?? coverage?.discovered_count;
+    const analyzed = coverage?.analysis_universe_count ?? coverage?.used_count;
+    const fullListing = coverage?.full_accessible_universe_listed === true;
+    items.push(
+      <div
+        key="analysis-scope"
+        role="note"
+        style={{
+          ...bannerBase,
+          background: "#f5f6f4",
+          border: "1px solid #dfe2e1",
+          color: "#4d4d4d",
+        }}
+      >
+        <strong>Bounded demo analysis.</strong>{" "}
+        {fullListing
+          ? `The full accessible listing${listed !== undefined ? ` (${listed} securities)` : ""} is retained;`
+          : `This snapshot retains a bounded listing${listed !== undefined ? ` (${listed} securities)` : ""};`}{" "}
+        daily history and group metrics use
+        {analyzed !== undefined ? ` ${analyzed} selected securities` : " a selected sample"}
+        to keep live requests within the run cap.
+      </div>,
+    );
+  }
   if (items.length === 0) return null;
   return (
     <div

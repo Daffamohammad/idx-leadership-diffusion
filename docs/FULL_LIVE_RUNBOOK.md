@@ -7,16 +7,22 @@ separate from the bounded validation path documented in
 
 ## Current evidence
 
-The latest persisted Sectors snapshot is deliberately still partial:
+The latest persisted Sectors snapshot uses two deliberate denominators: a full
+accessible listing registry and a bounded analytical history sample.
 
 | Field | Evidence |
 | --- | --- |
 | Snapshot | `data/snapshots/snap_sectors_2026-08-27/` |
 | Provider mode | `SECTORS_LIVE` |
-| Coverage | 500 used of 962 discovered; prefix sample |
+| Listing registry | 962 unique accessible rows, taxonomy complete; exported in `listing_registry` |
+| Analytical history | 500 selected rows; 265 policy-eligible and 496/500 requested histories usable |
 | Quality | `READY_WITH_GAPS`; four securities below the 60-observation history floor |
 | Comparable prior | Unavailable; no compatible second Sectors snapshot |
 | Price basis | Native `close`; corporate-action adjustment semantics remain `UNKNOWN / VERIFY` |
+
+The browser export therefore lists all 962 validated rows without implying that
+daily history was requested for all of them. The 500-name history sample is the
+only denominator used for market features in this bounded demo.
 
 The network-free full-live preflight currently returns `BLOCKED`: the
 uncapped plan is 1,008 baseline credits (10 structured company pages, one
@@ -39,8 +45,9 @@ operator acknowledgements are absent. The second command reports the current
 universe size, page plan, credit reserve, and headroom without opening HTTP.
 
 Do not bypass a `BLOCKED` result by lowering a displayed number or by
-relabeling the existing 500-row snapshot as full coverage. A bounded run is a
-separate diagnostic and remains visibly partial.
+relabeling a bounded analysis sample as full coverage. The bounded demo keeps
+the complete accessible listing, but its daily-history metrics remain scoped
+to the explicitly selected sample.
 
 ## Credentialed operator run
 
@@ -56,7 +63,7 @@ the hard ceiling, an operator may run:
   --allow-credit-spend
 ```
 
-`--full-live` removes the default 500-symbol and five-page caps. The API key
+`--full-live` removes the default 250-symbol and 400-attempt caps. The API key
 must exist only in the local environment (`SECTORS_API_KEY`); it must never
 appear in a command transcript, source file, fixture, log, screenshot, or
 commit. Do not pass `--with-tavily` unless its separate budget and scope have
