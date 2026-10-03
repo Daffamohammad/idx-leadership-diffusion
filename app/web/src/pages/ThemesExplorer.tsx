@@ -21,10 +21,10 @@ function fmtSignedPct(v: number | null | undefined): string {
 }
 
 function signColor(v: number | null | undefined): string {
-  if (v === null || v === undefined || !Number.isFinite(v)) return "#8f8f8f";
-  if (v > 0) return "#1a6e62";
-  if (v < 0) return "#8f2424";
-  return "#5a5a5a";
+  if (v === null || v === undefined || !Number.isFinite(v)) return "var(--muted)";
+  if (v > 0) return "var(--up)";
+  if (v < 0) return "var(--down)";
+  return "var(--muted)";
 }
 
 function asLeadership(state: string) {
@@ -47,9 +47,9 @@ const headerLink: React.CSSProperties = {
   textTransform: "uppercase",
   padding: "4px 9px",
   borderRadius: 3,
-  border: "1px solid #dfe2e1",
-  color: "#202325",
-  background: "#fff",
+  border: "1px solid var(--line)",
+  color: "var(--ink)",
+  background: "var(--surface)",
   textDecoration: "none",
   minHeight: 24,
   boxSizing: "border-box",
@@ -144,7 +144,7 @@ export default function ThemesExplorer() {
               fontSize: 11,
               letterSpacing: "0.08em",
               textTransform: "uppercase",
-              color: "#8f8f8f",
+              color: "var(--muted)",
             }}
           >
             {kindLabel} Catalog · {taxonomyView.taxonomy_version}
@@ -157,12 +157,12 @@ export default function ThemesExplorer() {
             fontSize: 26,
             letterSpacing: "-.03em",
             fontWeight: 500,
-            color: "#202325",
+            color: "var(--ink)",
           }}
         >
           {taxonomyKind === "KONGLO" ? "Verified corporate ecosystems" : "Theme browser"}
         </h1>
-        <p style={{ margin: 0, color: "#686e73", fontSize: 13, maxWidth: 720 }}>
+        <p style={{ margin: 0, color: "var(--muted)", fontSize: 13, maxWidth: 720 }}>
           {taxonomyKind === "KONGLO"
             ? "A deliberately narrow research lens: a group is included only when an official company source supports the relationship. It is not an official IDX classification, a complete beneficial-ownership graph, or a claim that every company is controlled in the same legal manner."
             : "Static analyst-defined themes for cross-sector pattern exploration. Aggregate metrics use the current snapshot, while the membership lens is not an authoritative taxonomy. Multiple memberships are allowed and never double-counted across themes."}
@@ -188,13 +188,13 @@ export default function ThemesExplorer() {
       >
         <aside
           style={{
-            border: "1px solid #dfe2e1",
+            border: "1px solid var(--line)",
             borderRadius: 6,
-            background: "#fff",
+            background: "var(--surface)",
             overflow: "hidden",
           }}
         >
-          <div style={{ padding: "10px 12px", borderBottom: "1px solid #dfe2e1" }}>
+          <div style={{ padding: "10px 12px", borderBottom: "1px solid var(--line)" }}>
             <input
               type="search"
               value={filter}
@@ -204,16 +204,16 @@ export default function ThemesExplorer() {
               style={{
                 width: "100%",
                 padding: "7px 10px",
-                border: "1px solid #dfe2e1",
+                border: "1px solid var(--line)",
                 borderRadius: 4,
-                background: "#fff",
+                background: "var(--surface)",
                 fontFamily: "Geist Mono, ui-monospace, monospace",
                 fontSize: 12,
                 boxSizing: "border-box",
                 minHeight: 34,
               }}
             />
-            <div style={{ marginTop: 8, fontSize: 10, color: "#8f8f8f" }}>
+            <div style={{ marginTop: 8, fontSize: 10, color: "var(--muted)" }}>
               {filteredGroups.length} of {groups.length} groups
               {filter.trim() ? " match" : ""}
             </div>
@@ -224,7 +224,7 @@ export default function ThemesExplorer() {
             style={{ listStyle: "none", margin: 0, padding: 0, maxHeight: 520, overflowY: "auto" }}
           >
             {filteredGroups.length === 0 && (
-              <li style={{ padding: "16px 12px", fontSize: 12, color: "#8f8f8f" }}>
+              <li style={{ padding: "16px 12px", fontSize: 12, color: "var(--muted)" }}>
                 No group or ticker matches “{filter}”.
               </li>
             )}
@@ -242,15 +242,15 @@ export default function ThemesExplorer() {
                       gap: 10,
                       padding: "10px 12px",
                       textDecoration: "none",
-                      background: isSelected ? "#f4f3ed" : "transparent",
-                      borderLeft: isSelected ? "3px solid #202325" : "3px solid transparent",
+                      background: isSelected ? "var(--surface-subtle)" : "transparent",
+                      borderLeft: isSelected ? "3px solid var(--ink)" : "3px solid transparent",
                     }}
                   >
                     <div style={{ minWidth: 0 }}>
-                      <div style={{ fontSize: 13, color: "#202325", fontWeight: 500 }}>
+                      <div style={{ fontSize: 13, color: "var(--ink)", fontWeight: 500 }}>
                         {g.taxonomy_group_name}
                       </div>
-                      <div style={{ fontSize: 10, color: "#8f8f8f", marginTop: 2 }}>
+                      <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 2 }}>
                         {g.taxonomy_group_id} · {g.eligible_constituent_count} / {g.constituent_count} eligible
                       </div>
                     </div>
@@ -264,9 +264,9 @@ export default function ThemesExplorer() {
 
         <div
           style={{
-            border: "1px solid #dfe2e1",
+            border: "1px solid var(--line)",
             borderRadius: 6,
-            background: "#fff",
+            background: "var(--surface)",
             padding: 22,
           }}
         >
@@ -282,7 +282,7 @@ export default function ThemesExplorer() {
                     fontSize: 20,
                     letterSpacing: "-.02em",
                     fontWeight: 500,
-                    color: "#202325",
+                    color: "var(--ink)",
                   }}
                 >
                   {selected.taxonomy_group_name}
@@ -292,7 +292,7 @@ export default function ThemesExplorer() {
                     marginTop: 6,
                     fontFamily: "Geist Mono, ui-monospace, monospace",
                     fontSize: 10,
-                    color: "#8f8f8f",
+                    color: "var(--muted)",
                     letterSpacing: "0.06em",
                     textTransform: "uppercase",
                   }}
@@ -306,7 +306,7 @@ export default function ThemesExplorer() {
                       display: "inline-block",
                       padding: "9px 13px",
                       border: "1px solid #202325",
-                      color: "#202325",
+                      color: "var(--ink)",
                       textDecoration: "none",
                       fontSize: 12,
                       borderRadius: 4,
@@ -363,21 +363,21 @@ export default function ThemesExplorer() {
                   marginBottom: 16,
                 }}
               >
-                <span style={{ fontSize: 11, color: "#686e73" }}>Leadership</span>
+                <span style={{ fontSize: 11, color: "var(--muted)" }}>Leadership</span>
                 <LeadershipChip state={asLeadership(selected.leadership_state)} small />
-                <span style={{ fontSize: 11, color: "#686e73" }}>Diffusion</span>
+                <span style={{ fontSize: 11, color: "var(--muted)" }}>Diffusion</span>
                 <DiffusionChip state={asDiffusion(selected.diffusion_state)} small />
-                <span style={{ fontSize: 11, color: "#686e73" }}>Data</span>
+                <span style={{ fontSize: 11, color: "var(--muted)" }}>Data</span>
                 <DataStatusChip status={asDataStatus(selected.data_quality)} />
               </div>
 
               <div style={{ marginBottom: 14 }}>
                 <div className="eyebrow-muted" style={{ marginBottom: 6 }}>Coverage</div>
-                <div style={{ fontSize: 12, color: "#202325", lineHeight: 1.6 }}>
+                <div style={{ fontSize: 12, color: "var(--ink)", lineHeight: 1.6 }}>
                   {selected.eligible_constituent_count} eligible constituents out of {selected.constituent_count}
                   {" "}({selected.coverage_pct.toFixed(0)}% mapped).{" "}
                   {selected.off_scale ? (
-                    <span style={{ color: "#7a5010" }}>
+                    <span style={{ color: "var(--accent-ink)" }}>
                       Group is off-scale — value appears outside the standard map axis.
                     </span>
                   ) : null}
@@ -397,11 +397,11 @@ export default function ThemesExplorer() {
                           padding: "4px 0",
                           borderBottom: "1px dotted #ececec",
                           fontSize: 12,
-                          color: "#202325",
+                          color: "var(--ink)",
                         }}
                       >
                         <span>{formatEnumLabel(k)}</span>
-                        <span style={{ fontFamily: "Geist Mono, monospace", color: "#5a5a5a" }}>{v}</span>
+                        <span style={{ fontFamily: "Geist Mono, monospace", color: "var(--muted)" }}>{v}</span>
                       </li>
                     ))}
                   </ul>
@@ -410,7 +410,7 @@ export default function ThemesExplorer() {
 
               <div style={{ marginBottom: 14 }}>
                 <div className="eyebrow-muted" style={{ marginBottom: 6 }}>Membership evidence</div>
-                <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: "#4d4d4d", lineHeight: 1.7 }}>
+                <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: "var(--muted)", lineHeight: 1.7 }}>
                   <li>
                     {selectedMembers.length} membership record{selectedMembers.length === 1 ? "" : "s"} ·{" "}
                     {sourcedMembers} with an official source URL · {datedMembers} with a source date.
@@ -422,7 +422,7 @@ export default function ThemesExplorer() {
                       : "—"}{" "}
                     exactly as stored; it is never raised to strengthen a claim.
                   </li>
-                  <li style={{ color: relationshipRecorded === 0 ? "#7a5010" : "#4d4d4d" }}>
+                  <li style={{ color: relationshipRecorded === 0 ? "var(--accent-ink)" : "var(--muted)" }}>
                     {relationshipRecorded === 0
                       ? "Relationship subtype (control / subsidiary / affiliate / cross-shareholding / founder-director / ecosystem) is not recorded for any member in this snapshot, so every row stays Unresolved rather than being inferred from a job title or a similar name."
                       : `${relationshipRecorded} member${relationshipRecorded === 1 ? "" : "s"} carry a recorded relationship subtype; the rest stay Unresolved.`}
@@ -432,12 +432,12 @@ export default function ThemesExplorer() {
 
               <div style={{ marginBottom: 14 }}>
                 <div className="eyebrow-muted" style={{ marginBottom: 6 }}>Definition and version</div>
-                <div style={{ fontSize: 12, color: "#4d4d4d", lineHeight: 1.7 }}>
+                <div style={{ fontSize: 12, color: "var(--muted)", lineHeight: 1.7 }}>
                   <div>Version · {taxonomyView.taxonomy_version}</div>
                   <div>Membership policy · {formatEnumLabel(taxonomyView.membership_policy ?? "—")}</div>
                   <div>Source kind · {formatEnumLabel(taxonomyView.source_kind)}</div>
                   <div>Source as of · {formatDateLabel(taxonomyView.source_as_of ?? null)}</div>
-                  <div style={{ color: "#686e73", marginTop: 6 }}>
+                  <div style={{ color: "var(--muted)", marginTop: 6 }}>
                     Inclusion and exclusion criteria, per-member source URLs and dates are reviewable
                     on the full detail route; this panel is a catalog summary only.
                   </div>
@@ -448,15 +448,15 @@ export default function ThemesExplorer() {
                 <div
                   style={{
                     padding: "10px 12px",
-                    background: "#faf9f6",
+                    background: "var(--surface-subtle)",
                     border: "1px solid #ececec",
                     borderRadius: 4,
                     fontSize: 11,
-                    color: "#5a5a5a",
+                    color: "var(--muted)",
                     lineHeight: 1.55,
                   }}
                 >
-                  <strong style={{ color: "#202325" }}>Foreign-flow sample:</strong>{" "}
+                  <strong style={{ color: "var(--ink)" }}>Foreign-flow sample:</strong>{" "}
                   {formatEnumLabel(selected.sample_foreign_flow_direction)} ({selected.sample_foreign_flow_idr.toLocaleString("id-ID")} IDR).
                   Sample is bounded to published top-buy / top-sell lists and does not represent
                   full market totals.
@@ -487,7 +487,7 @@ function Metric({ label, value, color }: { label: string; value: string; color?:
         border: "1px solid #ececec",
         borderRadius: 4,
         padding: "8px 10px",
-        background: "#faf9f6",
+        background: "var(--surface-subtle)",
       }}
     >
       <div
@@ -496,7 +496,7 @@ function Metric({ label, value, color }: { label: string; value: string; color?:
           fontSize: 9,
           letterSpacing: "0.08em",
           textTransform: "uppercase",
-          color: "#8f8f8f",
+          color: "var(--muted)",
           marginBottom: 4,
         }}
       >
@@ -507,7 +507,7 @@ function Metric({ label, value, color }: { label: string; value: string; color?:
           fontFamily: "Geist Mono, ui-monospace, monospace",
           fontSize: 16,
           fontWeight: 500,
-          color: color ?? "#202325",
+          color: color ?? "var(--ink)",
           fontVariantNumeric: "tabular-nums",
         }}
       >

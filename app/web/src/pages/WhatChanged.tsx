@@ -48,7 +48,7 @@ const num = (v: number | null | undefined, suffix = "%") => {
   return (
     <span
       style={{
-        color: unavailable ? "#686e73" : v > 0 ? "#178477" : v < 0 ? "#b34e4c" : "#686e73",
+        color: unavailable ? "var(--muted)" : v > 0 ? "var(--up)" : v < 0 ? "var(--down)" : "var(--muted)",
         fontFamily: "Geist Mono",
         fontSize: 12,
       }}
@@ -117,7 +117,7 @@ function MiniMap({
     (classification) => classification === "missing-prior",
   ).length;
   return (
-    <div style={{ background: "#fff", border: "1px solid #dfe2e1", minHeight: 412, position: "relative", overflow: "hidden" }}>
+    <div style={{ background: "var(--surface)", border: "1px solid var(--line)", minHeight: 412, position: "relative", overflow: "hidden" }}>
       <div style={{ padding: "17px 20px 0", display: "flex", justifyContent: "space-between" }}>
         <div>
           <div style={{ fontSize: 17, fontWeight: 600 }}>{axisLabels.title}</div>
@@ -126,39 +126,39 @@ function MiniMap({
         <span className="eyebrow-muted">Latest snapshot</span>
       </div>
         <svg viewBox="0 0 720 348" width="100%" height="348" style={{ display: "block", marginTop: 3 }} aria-label={axisLabels.title}>
-        <rect x="46" y="22" width="630" height="270" fill="#fafaf8" />
+        <rect x="46" y="22" width="630" height="270" fill="var(--surface-subtle)" />
         <rect
           x={mapX(0, plot, domain)}
           y={plot.top}
           width={plot.left + plot.width - mapX(0, plot, domain)}
           height={yAxis - plot.top}
-          fill="#f6f8f8"
+          fill="var(--tint-note)"
         />
         <rect
           x={plot.left}
           y={yAxis}
           width={mapX(0, plot, domain) - plot.left}
           height={plot.top + plot.height - yAxis}
-          fill="#f9f7f5"
+          fill="var(--tint-cream)"
         />
         {[46, 151, 256, 361, 466, 571, 676].map((n) => (
-          <line key={n} x1={n} x2={n} y1="22" y2="292" stroke="#dfe2e1" strokeWidth="1" />
+          <line key={n} x1={n} x2={n} y1="22" y2="292" stroke="var(--line)" strokeWidth="1" />
         ))}
         {[22, 89, 157, 224, 292].map((n) => (
-          <line key={n} x1="46" x2="676" y1={n} y2={n} stroke="#dfe2e1" strokeWidth="1" />
+          <line key={n} x1="46" x2="676" y1={n} y2={n} stroke="var(--line)" strokeWidth="1" />
         ))}
-        <line x1={mapX(0, plot, domain)} x2={mapX(0, plot, domain)} y1={plot.top} y2={plot.top + plot.height} stroke="#b9c0be" />
-        <line x1={plot.left} x2={plot.left + plot.width} y1={yAxis} y2={yAxis} stroke="#b9c0be" />
-        <text x="60" y="43" fill="#778089" fontSize="10" fontFamily="Geist Mono">
+        <line x1={mapX(0, plot, domain)} x2={mapX(0, plot, domain)} y1={plot.top} y2={plot.top + plot.height} stroke="var(--line)" />
+        <line x1={plot.left} x2={plot.left + plot.width} y1={yAxis} y2={yAxis} stroke="var(--line)" />
+        <text x="60" y="43" fill="var(--muted)" fontSize="10" fontFamily="Geist Mono">
           {mapMode === "current" ? "Weak / broad" : "Improving"}
         </text>
-        <text x="570" y="43" fill="#315d87" fontSize="10" fontFamily="Geist Mono">
+        <text x="570" y="43" fill="var(--link)" fontSize="10" fontFamily="Geist Mono">
           {mapMode === "current" ? "Strong / broad" : "Leading"}
         </text>
-        <text x="60" y="278" fill="#778089" fontSize="10" fontFamily="Geist Mono">
+        <text x="60" y="278" fill="var(--muted)" fontSize="10" fontFamily="Geist Mono">
           {mapMode === "current" ? "Weak / narrow" : "Lagging"}
         </text>
-        <text x="560" y="278" fill="#b34e4c" fontSize="10" fontFamily="Geist Mono">
+        <text x="560" y="278" fill="var(--down)" fontSize="10" fontFamily="Geist Mono">
           {mapMode === "current" ? "Strong / narrow" : "Weakening"}
         </text>
         {sectors.map((s) => {
@@ -220,7 +220,7 @@ function MiniMap({
             bottom: plot.top + plot.height - 4,
           }, maxLabels);
           return positions.map((label) => (
-            <text key={`lbl-${label.id}`} x={label.x} y={label.y} textAnchor={label.textAnchor} fill="#16191c" fontSize="10" fontFamily="Geist" pointerEvents="none">
+            <text key={`lbl-${label.id}`} x={label.x} y={label.y} textAnchor={label.textAnchor} fill="var(--ink)" fontSize="10" fontFamily="Geist" pointerEvents="none">
               {label.text}
             </text>
           ));
@@ -232,13 +232,13 @@ function MiniMap({
             missingPriorCount > 0 ? `${missingPriorCount} group(s) not plotted — missing comparable prior` : "",
           ].filter(Boolean).join(" · ");
           return (
-            <text x="335" y="318" fill="#8f8f8f" fontSize="9" fontFamily="Geist Mono" textAnchor="middle">
+            <text x="335" y="318" fill="var(--muted)" fontSize="9" fontFamily="Geist Mono" textAnchor="middle">
               {notes}
             </text>
           );
         })()}
-        <text x="335" y="335" fill="#686e73" fontSize="10" fontFamily="Geist Mono">{axisLabels.x} (clamped if off scale)</text>
-        <text x="14" y="178" fill="#686e73" fontSize="10" fontFamily="Geist Mono" transform="rotate(-90 14 178)">{axisLabels.y} (clamped if off scale)</text>
+        <text x="335" y="335" fill="var(--muted)" fontSize="10" fontFamily="Geist Mono">{axisLabels.x} (clamped if off scale)</text>
+        <text x="14" y="178" fill="var(--muted)" fontSize="10" fontFamily="Geist Mono" transform="rotate(-90 14 178)">{axisLabels.y} (clamped if off scale)</text>
       </svg>
       <div
         className="eyebrow-muted"
@@ -254,13 +254,13 @@ function MiniMap({
 
 function ShiftFeed({ items, onSelect }: { items: SectorData[]; onSelect: (s: SectorData) => void }) {
   return (
-    <div style={{ borderTop: "2px solid #16191c" }}>
+    <div style={{ borderTop: "2px solid var(--ink)" }}>
       <div style={{ padding: "12px 0", display: "flex", justifyContent: "space-between" }}>
         <div style={{ fontSize: 17, fontWeight: 600 }}>Material shifts</div>
         <span className="eyebrow-muted">Ranked</span>
       </div>
       {items.length === 0 && (
-        <p style={{ color: "#686e73", fontSize: 12, padding: "20px 0" }}>
+        <p style={{ color: "var(--muted)", fontSize: 12, padding: "20px 0" }}>
           No leadership or diffusion transitions detected in this snapshot.
         </p>
       )}
@@ -278,7 +278,7 @@ function ShiftFeed({ items, onSelect }: { items: SectorData[]; onSelect: (s: Sec
             textAlign: "left",
             background: "transparent",
             border: 0,
-            borderTop: "1px solid #dfe2e1",
+            borderTop: "1px solid var(--line)",
             padding: "13px 0",
             cursor: "pointer",
           }}
@@ -286,10 +286,10 @@ function ShiftFeed({ items, onSelect }: { items: SectorData[]; onSelect: (s: Sec
           <span className="eyebrow-muted">{String(i + 1).padStart(2, "0")}</span>
           <div>
             <div style={{ fontSize: 13, fontWeight: 600 }}>{s.name}</div>
-            <div style={{ fontFamily: "Geist Mono", fontSize: 10, color: "#686e73", marginTop: 4 }}>
-              {formatEnumLabel(s.prevLeadership || s.leadership)} <span style={{ color: "#f26a3d" }}>→</span> {formatEnumLabel(s.leadership)}
+            <div style={{ fontFamily: "Geist Mono", fontSize: 10, color: "var(--muted)", marginTop: 4 }}>
+              {formatEnumLabel(s.prevLeadership || s.leadership)} <span style={{ color: "var(--accent-ink)" }}>→</span> {formatEnumLabel(s.leadership)}
               <br />
-              {formatEnumLabel(s.prevDiffusion || s.diffusion)} <span style={{ color: "#f26a3d" }}>→</span> {formatEnumLabel(s.diffusion)}
+              {formatEnumLabel(s.prevDiffusion || s.diffusion)} <span style={{ color: "var(--accent-ink)" }}>→</span> {formatEnumLabel(s.diffusion)}
             </div>
           </div>
           <div style={{ textAlign: "right", fontFamily: "Geist Mono", fontSize: 10 }}>
@@ -299,10 +299,10 @@ function ShiftFeed({ items, onSelect }: { items: SectorData[]; onSelect: (s: Sec
               style={{
                 color:
                   breadthChange === null
-                    ? "#686e73"
+                    ? "var(--muted)"
                     : breadthChange >= 0
-                      ? "#178477"
-                      : "#b34e4c",
+                      ? "var(--up)"
+                      : "var(--down)",
               }}
             >
               {formatPercent(breadthChange)}
@@ -411,7 +411,7 @@ function ConstituentCoverage({
   return (
     <div
       aria-label="Constituent participation by group"
-      style={{ border: "1px solid #dfe2e1", background: "#fafaf8", padding: "5px 14px" }}
+      style={{ border: "1px solid var(--line)", background: "var(--surface-subtle)", padding: "5px 14px" }}
     >
       {visibleSectors.map((sector, index) => {
         const rows = constituentsByGroup[sector.id] ?? [];
@@ -530,17 +530,17 @@ export default function WhatChanged() {
       </section>
       {/* Compact market-level summary strips — master §8 */}
       <section className="summary-strips" style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 12, marginBottom: 18 }}>
-        <div style={{ background: "#faf9f6", border: "1px solid #dfe2e1", padding: "12px 14px" }}>
+        <div style={{ background: "var(--surface-subtle)", border: "1px solid var(--line)", padding: "12px 14px" }}>
           <div className="eyebrow-muted" style={{ marginBottom: 8 }}>Leadership states</div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 6, fontFamily: "Geist Mono", fontSize: 11 }}>
             <span>Leading <b>{leadCounts.LEADING}</b></span>
             <span>Improving <b>{leadCounts.IMPROVING}</b></span>
             <span>Weakening <b>{leadCounts.WEAKENING}</b></span>
             <span>Lagging <b>{leadCounts.LAGGING}</b></span>
-            <span style={{ gridColumn: "1 / -1", color: "#686e73" }}>Unconfirmed <b>{leadCounts.UNCONFIRMED}</b></span>
+            <span style={{ gridColumn: "1 / -1", color: "var(--muted)" }}>Unconfirmed <b>{leadCounts.UNCONFIRMED}</b></span>
           </div>
         </div>
-        <div style={{ background: "#faf9f6", border: "1px solid #dfe2e1", padding: "12px 14px" }}>
+        <div style={{ background: "var(--surface-subtle)", border: "1px solid var(--line)", padding: "12px 14px" }}>
           <div className="eyebrow-muted" style={{ marginBottom: 8 }}>Diffusion</div>
           {hasComparable ? (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 6, fontFamily: "Geist Mono", fontSize: 11 }}>
@@ -550,25 +550,25 @@ export default function WhatChanged() {
               <span>Unconfirmed <b>{diffCounts.UNCONFIRMED}</b></span>
             </div>
           ) : (
-            <div style={{ fontSize: 11, lineHeight: 1.45, color: "#686e73" }}>
+            <div style={{ fontSize: 11, lineHeight: 1.45, color: "var(--muted)" }}>
               Current diffusion state is unconfirmed for {diffCounts.UNCONFIRMED} groups. A compatible prior is required to measure broadening or narrowing.
             </div>
           )}
-          {!hasComparable && <div style={{ marginTop: 6, fontSize: 10, color: "#7a5010" }}>Diffusion change unavailable without comparable prior</div>}
+          {!hasComparable && <div style={{ marginTop: 6, fontSize: 10, color: "var(--accent-ink)" }}>Diffusion change unavailable without comparable prior</div>}
         </div>
-        <div style={{ background: "#faf9f6", border: "1px solid #dfe2e1", padding: "12px 14px" }}>
+        <div style={{ background: "var(--surface-subtle)", border: "1px solid var(--line)", padding: "12px 14px" }}>
           <div className="eyebrow-muted" style={{ marginBottom: 8 }}>Confirmation</div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 6, fontFamily: "Geist Mono", fontSize: 11 }}>
             <span>Confirming <b>{confCounts.CONFIRMING}</b></span>
             <span>Against <b>{confCounts.AGAINST}</b></span>
             <span>Neutral <b>{confCounts.NEUTRAL}</b></span>
-            <span style={{ color: "#7a5010" }}>Not available <b>{confCounts.DATA_GAP}</b></span>
+            <span style={{ color: "var(--accent-ink)" }}>Not available <b>{confCounts.DATA_GAP}</b></span>
           </div>
-          <div style={{ marginTop: 6, fontSize: 10, color: "#7a5010" }}>Foreign flow: sample only, not full universe</div>
+          <div style={{ marginTop: 6, fontSize: 10, color: "var(--accent-ink)" }}>Foreign flow: sample only, not full universe</div>
         </div>
       </section>
       {/* WHAT CHANGED categorical digest */}
-      <section style={{ background: "#fff", border: "1px solid #dfe2e1", padding: "16px 18px", marginBottom: 22 }}>
+      <section style={{ background: "var(--surface)", border: "1px solid var(--line)", padding: "16px 18px", marginBottom: 22 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
           <div className="eyebrow-muted">{hasComparable ? "What changed since prior snapshot" : "What is available now"}</div>
           <span className="eyebrow-muted">{hasComparable ? `vs ${formatSnapshotId(payload?.previous_snapshot_id)}` : "Current levels only"}</span>
@@ -619,7 +619,7 @@ export default function WhatChanged() {
             display: "flex",
             alignItems: "baseline",
             justifyContent: "space-between",
-            borderTop: "2px solid #16191c",
+            borderTop: "2px solid var(--ink)",
             paddingTop: 12,
           }}
         >
@@ -630,14 +630,14 @@ export default function WhatChanged() {
           <button
             type="button"
             onClick={() => setSort(sort === "rank" ? "delta" : "rank")}
-            style={{ border: "1px solid #dfe2e1", background: "#fafaf8", padding: "6px 9px", fontSize: 11, cursor: "pointer" }}
+            style={{ border: "1px solid var(--line)", background: "var(--surface-subtle)", padding: "6px 9px", fontSize: 11, cursor: "pointer" }}
           >
             Sort: {sort === "rank" ? "Rank" : "Δ Breadth"} ↕
           </button>
         </div>
-        <div style={{ overflowX: "auto", marginTop: 12, borderTop: "1px solid #dfe2e1" }}>
+        <div style={{ overflowX: "auto", marginTop: 12, borderTop: "1px solid var(--line)" }}>
           <table style={{ width: "100%", minWidth: 920, borderCollapse: "collapse" }}>
-            <thead style={{ position: "sticky", top: 0, background: "#f3f3f0" }}>
+            <thead style={{ position: "sticky", top: 0, background: "var(--surface-subtle)" }}>
               <tr>
                 {["Rank", "Group", "Lead", "Diff", "20D Excess", "60D Excess", "Breadth", "Δ Breadth", "Conc.", "Persistence", "Confirmation"].map(
                   (x, i) => (
@@ -648,7 +648,7 @@ export default function WhatChanged() {
                         textAlign: i < 2 ? "left" : "right",
                         fontFamily: "Geist Mono",
                         fontSize: 9,
-                        color: "#686e73",
+                        color: "var(--muted)",
                         fontWeight: 500,
                         letterSpacing: ".06em",
                         textTransform: "uppercase",
@@ -662,7 +662,7 @@ export default function WhatChanged() {
             </thead>
             <tbody>
               {ordered.map((s) => (
-                <tr key={s.id} onClick={() => select(s)} style={{ borderTop: "1px solid #dfe2e1", cursor: "pointer" }}>
+                <tr key={s.id} onClick={() => select(s)} style={{ borderTop: "1px solid var(--line)", cursor: "pointer" }}>
                   <td style={{ padding: "10px 8px", fontFamily: "Geist Mono", fontSize: 11 }}>{s.rank ?? "—"}</td>
                   <td style={{ padding: "10px 8px", fontWeight: 600 }}>
                     <button
@@ -693,7 +693,7 @@ export default function WhatChanged() {
                       textAlign: "right",
                       fontFamily: "Geist Mono",
                       fontSize: 10,
-                      color: s.foreignFlow === "CONFIRMING" ? "#178477" : "#686e73",
+                      color: s.foreignFlow === "CONFIRMING" ? "var(--up)" : "var(--muted)",
                     }}
                   >
                     {formatEnumLabel(s.foreignFlow)}
@@ -704,7 +704,7 @@ export default function WhatChanged() {
           </table>
         </div>
       </section>
-      <section style={{ borderTop: "2px solid #16191c", paddingTop: 12 }}>
+      <section style={{ borderTop: "2px solid var(--ink)", paddingTop: 12 }}>
         <div className="surface-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1.1fr .82fr", gap: 28 }}>
           <div>
             <h2 style={{ margin: 0, fontSize: 18 }}>Under the surface</h2>
@@ -713,9 +713,9 @@ export default function WhatChanged() {
               {dataSources.breadthHistory && averageHistory.length > 0 ? (
                 <ResponsiveContainer width="100%" height={175}>
                   <AreaChart data={averageHistory} margin={{ top: 18, right: 5, bottom: 0, left: -25 }}>
-                    <CartesianGrid stroke="#dfe2e1" vertical={false} />
-                    <XAxis dataKey="as_of" tickFormatter={(value) => String(value).slice(0, 10)} tick={{ fontFamily: "Geist Mono", fontSize: 9, fill: "#686e73" }} axisLine={false} tickLine={false} />
-                    <YAxis domain={[0, 100]} tick={{ fontFamily: "Geist Mono", fontSize: 9, fill: "#686e73" }} axisLine={false} tickLine={false} />
+                    <CartesianGrid stroke="var(--line)" vertical={false} />
+                    <XAxis dataKey="as_of" tickFormatter={(value) => String(value).slice(0, 10)} tick={{ fontFamily: "Geist Mono", fontSize: 9, fill: "var(--muted)" }} axisLine={false} tickLine={false} />
+                    <YAxis domain={[0, 100]} tick={{ fontFamily: "Geist Mono", fontSize: 9, fill: "var(--muted)" }} axisLine={false} tickLine={false} />
                     <Area dataKey="breadth" stroke="#178477" fill="#178477" fillOpacity={0.12} strokeWidth={2} />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -742,13 +742,13 @@ export default function WhatChanged() {
               />
             )}
           </div>
-          <div style={{ borderLeft: "1px solid #dfe2e1", paddingLeft: 20 }}>
+          <div style={{ borderLeft: "1px solid var(--line)", paddingLeft: 20 }}>
             <div className="eyebrow-muted">Evidence stack</div>
             {dataSources.foreignFlow ? (
               sectors.slice(0, 5).map((s) => (
-                <div key={s.id} style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid #dfe2e1", padding: "8px 0", fontSize: 12 }}>
-                  <span style={{ color: "#686e73" }}>{s.name} leadership</span>
-                  <b style={{ fontFamily: "Geist Mono", fontSize: 10, color: "#315d87" }}>{formatEnumLabel(s.leadership)}</b>
+                <div key={s.id} style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid var(--line)", padding: "8px 0", fontSize: 12 }}>
+                  <span style={{ color: "var(--muted)" }}>{s.name} leadership</span>
+                  <b style={{ fontFamily: "Geist Mono", fontSize: 10, color: "var(--link)" }}>{formatEnumLabel(s.leadership)}</b>
                 </div>
               ))
             ) : (

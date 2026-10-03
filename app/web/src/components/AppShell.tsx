@@ -82,14 +82,14 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
     qualityStatus === "READY"
       ? "#178477"
       : qualityStatus === "READY_WITH_GAPS" || qualityStatus === "PARTIAL"
-        ? "#7a5010"
+        ? "var(--accent-ink)"
         : qualityStatus === "STALE" || qualityStatus === "FAILED"
-          ? "#8f2424"
+          ? "var(--down)"
           : snap.loading
-            ? "#7c858c"
+            ? "var(--muted)"
             : snap.error
-              ? "#8f2424"
-              : "#7c858c";
+              ? "var(--down)"
+              : "var(--muted)";
 
   return (
     <Tooltip.Provider delayDuration={150}>
@@ -141,9 +141,9 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
               </Tooltip.Trigger>
               {!sidebarExpanded && (
                 <Tooltip.Portal>
-                  <Tooltip.Content side="right" sideOffset={8} style={{ background: "#202325", color: "#fff", fontSize: 12, padding: "6px 10px", borderRadius: 6, zIndex: 100 }}>
+                  <Tooltip.Content side="right" sideOffset={8} style={{ background: "var(--ink)", color: "var(--bg)", fontSize: 12, padding: "6px 10px", borderRadius: 6, zIndex: 100 }}>
                     {item.label}
-                    <Tooltip.Arrow style={{ fill: "#202325" }} />
+                    <Tooltip.Arrow style={{ fill: "var(--ink)" }} />
                   </Tooltip.Content>
                 </Tooltip.Portal>
               )}
@@ -153,7 +153,7 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
         <div
           style={{
             padding: sidebarExpanded ? 18 : 16,
-            borderTop: "1px solid #dfe2e1",
+            borderTop: "1px solid var(--line)",
             whiteSpace: "nowrap",
           }}
         >
@@ -211,8 +211,8 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
           style={{
             minHeight: 45,
             padding: "8px 22px",
-            background: "#ffffff",
-            borderBottom: "1px solid #dfe2e1",
+            background: "var(--surface)",
+            borderBottom: "1px solid var(--line)",
             display: "flex",
             flexWrap: "wrap",
             gap: 12,
@@ -225,7 +225,7 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
             aria-label={sidebarExpanded ? "Minimize sidebar" : "Expand sidebar"}
             title={sidebarExpanded ? "Minimize sidebar" : "Expand sidebar"}
             style={{
-              border: "1px solid #dfe2e1",
+              border: "1px solid var(--line)",
               background: "transparent",
               width: 25,
               height: 25,
@@ -247,7 +247,7 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
             aria-controls="mobile-nav"
             title={mobileNavOpen ? "Close navigation menu" : "Open navigation menu"}
             style={{
-              border: "1px solid #dfe2e1",
+              border: "1px solid var(--line)",
               background: "transparent",
               minWidth: 32,
               height: 28,
@@ -265,9 +265,9 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
             title="Back to homepage"
             className="btn-sheen workspace-home"
             style={{
-              color: "#16191c",
+              color: "var(--ink)",
               textDecoration: "none",
-              border: "1px solid #dfe2e1",
+              border: "1px solid var(--line)",
               padding: "4px 8px",
               fontSize: 11,
               display: "inline-block",
@@ -277,7 +277,7 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
           </Link>
           <TickerSearch registry={snap.data?.listingRegistry ?? null} />
           <span className="eyebrow-muted tabnum workspace-asof">{asOf}</span>
-          <span className="workspace-separator" style={{ color: "#dfe2e1" }}>|</span>
+          <span className="workspace-separator" style={{ color: "var(--muted)" }}>|</span>
           <button
             type="button"
             onClick={() => {
@@ -339,7 +339,7 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
           <button
             className="btn-sheen"
             style={{
-              border: "1px solid #dfe2e1",
+              border: "1px solid var(--line)",
               background: "transparent",
               padding: "4px 10px",
               fontSize: 11,
@@ -356,8 +356,8 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
             aria-label="Primary"
             className="mobile-nav-panel"
             style={{
-              borderBottom: "1px solid #dfe2e1",
-              background: "#ffffff",
+              borderBottom: "1px solid var(--line)",
+              background: "var(--surface)",
               padding: "8px 12px 12px",
             }}
             onKeyDown={(e) => {
@@ -396,12 +396,12 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
                 padding: "48px 32px",
                 maxWidth: 720,
                 margin: "0 auto",
-                color: "#16191c",
+                color: "var(--ink)",
               }}
             >
               <div
                 className="eyebrow-muted"
-                style={{ color: "#8f2424", marginBottom: 8 }}
+                style={{ color: "var(--down)", marginBottom: 8 }}
               >
                 SNAPSHOT UNAVAILABLE
               </div>
@@ -414,15 +414,15 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
               >
                 No snapshot JSON loaded
               </h1>
-              <p style={{ color: "#4d4d4d", lineHeight: 1.6 }}>
+              <p style={{ color: "var(--muted)", lineHeight: 1.6 }}>
                 {snap.error}
               </p>
               <pre
                 style={{
                   fontFamily: "Geist Mono, monospace",
                   fontSize: 12,
-                  background: "#fafafa",
-                  border: "1px solid #ebebeb",
+                  background: "var(--surface-subtle)",
+                  border: "1px solid var(--line)",
                   padding: "12px 14px",
                   marginTop: 18,
                   whiteSpace: "pre-wrap",
@@ -439,7 +439,7 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
                 padding: "48px 32px",
                 maxWidth: 720,
                 margin: "0 auto",
-                color: "#686e73",
+                color: "var(--muted)",
                 fontFamily: "Geist Mono, monospace",
                 fontSize: 12,
               }}

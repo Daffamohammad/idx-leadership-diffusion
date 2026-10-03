@@ -43,14 +43,14 @@ function scaleY(value: number): number {
 }
 
 function colorFor(leadership: string, diffusion: string): string {
-  if (leadership === "LEADING" && diffusion === "BROADENING") return "#178477";
-  if (leadership === "LEADING") return "#3f9985";
-  if (leadership === "LAGGING" && diffusion === "NARROWING") return "#8f2424";
-  if (leadership === "LAGGING") return "#a35535";
-  if (diffusion === "NARROWING") return "#c69f4a";
-  if (leadership === "IMPROVING") return "#c69f4a";
-  if (leadership === "WEAKENING") return "#a35535";
-  return "#7c858c";
+  if (leadership === "LEADING" && diffusion === "BROADENING") return "var(--up)";
+  if (leadership === "LEADING") return "var(--up)";
+  if (leadership === "LAGGING" && diffusion === "NARROWING") return "var(--down)";
+  if (leadership === "LAGGING") return "var(--accent-ink)";
+  if (diffusion === "NARROWING") return "var(--accent-ink)";
+  if (leadership === "IMPROVING") return "var(--accent-ink)";
+  if (leadership === "WEAKENING") return "var(--accent-ink)";
+  return "var(--muted)";
 }
 
 function shortName(name: string): string {
@@ -113,16 +113,16 @@ export default function TaxonomyMap({
       <section
         aria-labelledby={`map-${taxonomyKind}-title`}
         style={{
-          border: "1px solid #dfe2e1",
+          border: "1px solid var(--line)",
           padding: 22,
-          background: "#faf9f6",
+          background: "var(--surface-subtle)",
         }}
       >
         <div className="eyebrow-muted" id={`map-${taxonomyKind}-title`}>
           {title}
         </div>
         <h2 style={{ marginTop: 6, marginBottom: 8, fontSize: 22 }}>{title}</h2>
-        <p style={{ margin: 0, color: "#686e73" }}>
+        <p style={{ margin: 0, color: "var(--muted)" }}>
           No plottable groups for this taxonomy at the current snapshot.
         </p>
       </section>
@@ -133,9 +133,9 @@ export default function TaxonomyMap({
     <section
       aria-labelledby={`map-${taxonomyKind}-title`}
       style={{
-        border: "1px solid #dfe2e1",
+        border: "1px solid var(--line)",
         padding: 22,
-        background: "#faf9f6",
+        background: "var(--surface-subtle)",
       }}
     >
       <header>
@@ -147,7 +147,7 @@ export default function TaxonomyMap({
           <p
             style={{
               margin: 0,
-              color: "#686e73",
+              color: "var(--muted)",
               fontSize: 13,
               fontFamily: "Geist Mono, monospace",
             }}
@@ -168,8 +168,8 @@ export default function TaxonomyMap({
           y={PLOT.top}
           width={PLOT.width}
           height={PLOT.height}
-          fill="#ffffff"
-          stroke="#dfe2e1"
+          fill="var(--surface)"
+          stroke="var(--line)"
         />
         {/* Quadrant divider */}
         <line
@@ -177,7 +177,7 @@ export default function TaxonomyMap({
           y1={PLOT.top}
           x2={scaleX(0)}
           y2={PLOT.top + PLOT.height}
-          stroke="#b9c0be"
+          stroke="var(--line)"
           strokeDasharray="4 4"
         />
         <line
@@ -185,7 +185,7 @@ export default function TaxonomyMap({
           y1={scaleY(50)}
           x2={PLOT.left + PLOT.width}
           y2={scaleY(50)}
-          stroke="#b9c0be"
+          stroke="var(--line)"
           strokeDasharray="4 4"
         />
         {/* Axis labels — centered within plot bounds */}
@@ -195,7 +195,7 @@ export default function TaxonomyMap({
           textAnchor="middle"
           fontSize={11}
           fontFamily="Geist Mono, monospace"
-          fill="#686e73"
+          fill="var(--muted)"
         >
           20D excess return vs IHSG
         </text>
@@ -206,37 +206,37 @@ export default function TaxonomyMap({
           textAnchor="middle"
           fontSize={11}
           fontFamily="Geist Mono, monospace"
-          fill="#686e73"
+          fill="var(--muted)"
         >
           Breadth (% outperforming)
         </text>
-        <text x={PLOT.left - 6} y={PLOT.top + 4} fontSize={10} fontFamily="Geist Mono, monospace" fill="#7c858c" textAnchor="end" dominantBaseline="middle">
+        <text x={PLOT.left - 6} y={PLOT.top + 4} fontSize={10} fontFamily="Geist Mono, monospace" fill="var(--muted)" textAnchor="end" dominantBaseline="middle">
           100%
         </text>
-        <text x={PLOT.left - 6} y={PLOT.top + PLOT.height + 4} fontSize={10} fontFamily="Geist Mono, monospace" fill="#7c858c" textAnchor="end" dominantBaseline="middle">
+        <text x={PLOT.left - 6} y={PLOT.top + PLOT.height + 4} fontSize={10} fontFamily="Geist Mono, monospace" fill="var(--muted)" textAnchor="end" dominantBaseline="middle">
           0%
         </text>
-        <text x={PLOT.left} y={PLOT.top + PLOT.height + 16} fontSize={10} fontFamily="Geist Mono, monospace" fill="#7c858c" textAnchor="start">
+        <text x={PLOT.left} y={PLOT.top + PLOT.height + 16} fontSize={10} fontFamily="Geist Mono, monospace" fill="var(--muted)" textAnchor="start">
           −15%
         </text>
-        <text x={PLOT.left + PLOT.width} y={PLOT.top + PLOT.height + 16} fontSize={10} fontFamily="Geist Mono, monospace" fill="#7c858c" textAnchor="end">
+        <text x={PLOT.left + PLOT.width} y={PLOT.top + PLOT.height + 16} fontSize={10} fontFamily="Geist Mono, monospace" fill="var(--muted)" textAnchor="end">
           +15%
         </text>
-        <text x={scaleX(0)} y={PLOT.top + PLOT.height + 16} fontSize={10} fontFamily="Geist Mono, monospace" fill="#7c858c" textAnchor="middle">
+        <text x={scaleX(0)} y={PLOT.top + PLOT.height + 16} fontSize={10} fontFamily="Geist Mono, monospace" fill="var(--muted)" textAnchor="middle">
           0%
         </text>
 
         {/* Quadrant annotations — centered within each quadrant */}
-        <text x={scaleX(7.5)} y={scaleY(78)} fontSize={10} fontFamily="Geist Mono, monospace" fill="#178477" opacity={0.7} textAnchor="middle">
+        <text x={scaleX(7.5)} y={scaleY(78)} fontSize={10} fontFamily="Geist Mono, monospace" fill="var(--up)" textAnchor="middle">
           Leading · Broadening
         </text>
-        <text x={scaleX(7.5)} y={scaleY(22)} fontSize={10} fontFamily="Geist Mono, monospace" fill="#a35535" opacity={0.7} textAnchor="middle">
+        <text x={scaleX(7.5)} y={scaleY(22)} fontSize={10} fontFamily="Geist Mono, monospace" fill="var(--accent-ink)" textAnchor="middle">
           Leading · Narrowing
         </text>
-        <text x={scaleX(-7.5)} y={scaleY(78)} fontSize={10} fontFamily="Geist Mono, monospace" fill="#a35535" opacity={0.7} textAnchor="middle">
+        <text x={scaleX(-7.5)} y={scaleY(78)} fontSize={10} fontFamily="Geist Mono, monospace" fill="var(--accent-ink)" textAnchor="middle">
           Lagging · Broadening
         </text>
-        <text x={scaleX(-7.5)} y={scaleY(22)} fontSize={10} fontFamily="Geist Mono, monospace" fill="#8f2424" opacity={0.7} textAnchor="middle">
+        <text x={scaleX(-7.5)} y={scaleY(22)} fontSize={10} fontFamily="Geist Mono, monospace" fill="var(--down)" textAnchor="middle">
           Lagging · Narrowing
         </text>
 
@@ -283,7 +283,7 @@ export default function TaxonomyMap({
                 r={radius}
                 fill={colour}
                 opacity={isHover ? 1 : 0.85}
-                stroke={isHover ? "#202325" : "rgba(0,0,0,0.15)"}
+                stroke={isHover ? "var(--ink)" : "rgba(0,0,0,0.15)"}
                 strokeWidth={isHover ? 1.5 : 1}
               />
               <text
@@ -294,7 +294,7 @@ export default function TaxonomyMap({
                 dominantBaseline="middle"
                 fontSize={11}
                 fontFamily="Geist Mono, monospace"
-                fill="#fff"
+                fill="var(--on-accent)"
                 pointerEvents="none"
               >
                 {String(group.constituents)}
@@ -315,7 +315,7 @@ export default function TaxonomyMap({
                   y1={targetY}
                   x2={label.x}
                   y2={label.y - 3}
-                  stroke={isActive ? "#202325" : "#9aa19f"}
+                  stroke={isActive ? "var(--ink)" : "#9aa19f"}
                   strokeWidth={isActive ? 1.2 : 0.8}
                 />
               )}
@@ -326,7 +326,7 @@ export default function TaxonomyMap({
                 fontSize={isActive ? 12 : 11}
                 fontFamily="Geist Mono, monospace"
                 fontWeight={isActive ? 600 : 400}
-                fill="#202325"
+                fill="var(--ink)"
                 dominantBaseline="hanging"
               >
                 {label.text}
@@ -336,17 +336,17 @@ export default function TaxonomyMap({
         })}
         {activeGroup && (
           <g pointerEvents="none">
-            <rect x={PLOT.left + PLOT.width - 286} y={8} width={278} height={48} fill="#202325" opacity={0.96} />
-            <text x={PLOT.left + PLOT.width - 272} y={25} fill="#fff" fontSize={12} fontFamily="Geist" fontWeight={600}>
+            <rect x={PLOT.left + PLOT.width - 286} y={8} width={278} height={48} fill="#121619" opacity={0.96} />
+            <text x={PLOT.left + PLOT.width - 272} y={25} fill="#ffffff" fontSize={12} fontFamily="Geist" fontWeight={600}>
               {shortName(activeGroup.name)}
             </text>
-            <text x={PLOT.left + PLOT.width - 272} y={43} fill="#d8dedc" fontSize={10} fontFamily="Geist Mono, monospace">
+            <text x={PLOT.left + PLOT.width - 272} y={43} fill="#b8bdc0" fontSize={10} fontFamily="Geist Mono, monospace">
               {formatEnumLabel(activeGroup.leadership)} · {formatEnumLabel(activeGroup.diffusion)} · {formatCountLabel(activeGroup.constituents, "ticker")}
             </text>
           </g>
         )}
         {groups.length === 0 && (
-          <text x={PLOT.left + PLOT.width / 2} y={PLOT.top + PLOT.height / 2} textAnchor="middle" fill="#686e73" fontSize={13} fontFamily="Geist">
+          <text x={PLOT.left + PLOT.width / 2} y={PLOT.top + PLOT.height / 2} textAnchor="middle" fill="var(--muted)" fontSize={13} fontFamily="Geist">
             No plottable groups in this snapshot
           </text>
         )}
@@ -368,10 +368,10 @@ export default function TaxonomyMap({
               onClick={() => onSelectGroup?.(group.id)}
               onFocus={() => setHoverId(groupKey)}
               onBlur={() => setHoverId(null)}
-              style={{ display: "grid", gap: 3, textAlign: "left", padding: "9px 10px", border: "1px solid #dfe2e1", background: isDataGap ? "#f1f2f0" : "#fff", color: "#202325", cursor: "pointer", minWidth: 0 }}
+              style={{ display: "grid", gap: 3, textAlign: "left", padding: "9px 10px", border: "1px solid var(--line)", background: isDataGap ? "var(--surface-subtle)" : "var(--surface)", color: "var(--ink)", cursor: "pointer", minWidth: 0 }}
             >
               <span style={{ fontSize: 12, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{group.name}</span>
-              <span style={{ fontFamily: "Geist Mono, monospace", fontSize: 10, color: isDataGap ? "#686e73" : "#7c858c" }}>
+              <span style={{ fontFamily: "Geist Mono, monospace", fontSize: 10, color: isDataGap ? "var(--muted)" : "var(--muted)" }}>
                 {isDataGap ? `Not available · ${dataGapReason(group)}` : `${formatEnumLabel(group.leadership)} · ${formatEnumLabel(group.diffusion)}${flow ? ` · ${formatEnumLabel(flow)} flow` : ""}`}
               </span>
             </button>
@@ -387,7 +387,7 @@ export default function TaxonomyMap({
           alignItems: "center",
           gap: 12,
           fontSize: 11,
-          color: "#686e73",
+          color: "var(--muted)",
           fontFamily: "Geist Mono, monospace",
         }}
       >

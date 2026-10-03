@@ -4,28 +4,28 @@ import { formatEnumLabel } from "../data/format";
 /* Vercel-style chips: hairline ring, mono text, color only on text */
 
 const leadershipCfg: Record<LeadershipState, { color: string; dot: string }> = {
-  LEADING:     { color: '#54718b', dot: '#54718b' },
-  IMPROVING:   { color: '#438b82', dot: '#438b82' },
-  WEAKENING:   { color: '#ad6765', dot: '#ad6765' },
-  LAGGING:     { color: '#7c858c', dot: '#7c858c' },
-  UNCONFIRMED: { color: '#7c858c', dot: '#7c858c' },
+  LEADING:     { color: 'var(--color-leading)', dot: 'var(--color-leading)' },
+  IMPROVING:   { color: 'var(--color-improving)', dot: 'var(--color-improving)' },
+  WEAKENING:   { color: 'var(--color-weakening)', dot: 'var(--color-weakening)' },
+  LAGGING:     { color: 'var(--muted)', dot: 'var(--muted)' },
+  UNCONFIRMED: { color: 'var(--muted)', dot: 'var(--muted)' },
 };
 
 const diffusionCfg: Record<DiffusionState, { color: string; symbol: string }> = {
-  BROADENING:  { color: '#438b82', symbol: '↑' },
-  STABLE:      { color: '#7c858c', symbol: '→' },
-  NARROWING:   { color: '#ad6765', symbol: '↓' },
-  UNCONFIRMED: { color: '#7c858c', symbol: '?' },
+  BROADENING:  { color: 'var(--color-improving)', symbol: '↑' },
+  STABLE:      { color: 'var(--muted)', symbol: '→' },
+  NARROWING:   { color: 'var(--color-weakening)', symbol: '↓' },
+  UNCONFIRMED: { color: 'var(--muted)', symbol: '?' },
 };
 
 const dataCfg: Record<DataStatus, { color: string; dotColor: string }> = {
-  READY: { color: "#297a3a", dotColor: "#297a3a" },
-  READY_WITH_GAPS: { color: "#7a5010", dotColor: "#7a5010" },
-  PARTIAL: { color: "#7a5010", dotColor: "#7a5010" },
-  STALE: { color: "#5a5a5a", dotColor: "#8f8f8f" },
-  FAILED: { color: "#8f2424", dotColor: "#8f2424" },
-  DATA_GAP: { color: "#7a5010", dotColor: "#7a5010" },
-  UNAVAILABLE: { color: "#7c858c", dotColor: "#8f8f8f" },
+  READY: { color: "var(--up)", dotColor: "var(--up)" },
+  READY_WITH_GAPS: { color: "var(--accent-ink)", dotColor: "var(--accent-ink)" },
+  PARTIAL: { color: "var(--accent-ink)", dotColor: "var(--accent-ink)" },
+  STALE: { color: "var(--muted)", dotColor: "var(--muted)" },
+  FAILED: { color: "var(--down)", dotColor: "var(--down)" },
+  DATA_GAP: { color: "var(--accent-ink)", dotColor: "var(--accent-ink)" },
+  UNAVAILABLE: { color: "var(--muted)", dotColor: "var(--muted)" },
 };
 
 const chipBase: React.CSSProperties = {
@@ -40,7 +40,7 @@ const chipBase: React.CSSProperties = {
   borderRadius: 4,
   whiteSpace: 'nowrap' as const,
   boxShadow: '#dfe2e1 0px 0px 0px 1px',
-  background: '#ffffff',
+  background: 'var(--surface)',
 };
 
 export function LeadershipChip({ state, small }: { state: LeadershipState; small?: boolean }) {

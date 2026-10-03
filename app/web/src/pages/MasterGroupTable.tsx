@@ -40,11 +40,11 @@ const headerCell: React.CSSProperties = {
   fontSize: 10,
   letterSpacing: "0.08em",
   textTransform: "uppercase",
-  color: "#686e73",
+  color: "var(--muted)",
   padding: "8px 10px",
   textAlign: "left",
-  borderBottom: "1px solid #dfe2e1",
-  background: "#faf9f6",
+  borderBottom: "1px solid var(--line)",
+  background: "var(--surface-subtle)",
   cursor: "pointer",
   userSelect: "none",
   whiteSpace: "nowrap",
@@ -57,7 +57,7 @@ const bodyCell: React.CSSProperties = {
   fontSize: 12,
   fontFamily: "Geist Mono, ui-monospace, monospace",
   borderBottom: "1px solid #ececec",
-  color: "#202325",
+  color: "var(--ink)",
   whiteSpace: "nowrap",
   verticalAlign: "middle",
 };
@@ -78,10 +78,10 @@ function breadthDeltaFor(s: SectorData): number | null {
 }
 
 function signColor(v: number | null | undefined): string {
-  if (v === null || v === undefined || !Number.isFinite(v)) return "#8f8f8f";
-  if (v > 0) return "#1a6e62";
-  if (v < 0) return "#8f2424";
-  return "#5a5a5a";
+  if (v === null || v === undefined || !Number.isFinite(v)) return "var(--muted)";
+  if (v > 0) return "var(--up)";
+  if (v < 0) return "var(--down)";
+  return "var(--muted)";
 }
 
 // The adapter exposes concentration on a 0–100 percentage scale.
@@ -189,10 +189,19 @@ export default function MasterGroupTable() {
   const rows = useMemo(() => {
     const q = filter.trim().toLowerCase();
     const filtered = q
-      ? sectors.filter((s) => s.name.toLowerCase().includes(q) || s.id.toLowerCase().includes(q))
+      ? sectors.filter(
+          (s) =>
+            s.name.toLowerCase().includes(q) ||
+            s.id.toLowerCase().includes(q) ||
+            // Ticker and company-name search has to reach sector members too;
+            // matching only the group name leaves ?taxonomy=SECTOR&filter=TICKER empty.
+            (data?.constituentsByGroup[s.id] ?? []).some(
+              (c) => c.ticker.toLowerCase().includes(q) || c.name.toLowerCase().includes(q),
+            ),
+        )
       : sectors;
     return [...filtered].sort((a, b) => compare(a, b, sortKey, sortDir));
-  }, [sectors, sortKey, sortDir, filter]);
+  }, [sectors, sortKey, sortDir, filter, data]);
   const taxRows = useMemo(() => {
     const q = filter.trim().toLowerCase();
     const filtered = q
@@ -309,7 +318,7 @@ export default function MasterGroupTable() {
               fontSize: 11,
               letterSpacing: "0.08em",
               textTransform: "uppercase",
-              color: "#8f8f8f",
+              color: "var(--muted)",
             }}
           >
             Master Group Table
@@ -322,12 +331,12 @@ export default function MasterGroupTable() {
             fontSize: 26,
             letterSpacing: "-.03em",
             fontWeight: 500,
-            color: "#202325",
+            color: "var(--ink)",
           }}
         >
           Analytical scanner
         </h1>
-        <p style={{ margin: 0, color: "#686e73", fontSize: 13, maxWidth: 720 }}>
+        <p style={{ margin: 0, color: "var(--muted)", fontSize: 13, maxWidth: 720 }}>
           Sortable cross-section of every group in the real persisted market snapshot. Read columns
           left-to-right to evaluate leadership, breadth, diffusion, concentration, and confirmation independently.
         </p>
@@ -360,15 +369,15 @@ export default function MasterGroupTable() {
           aria-label="Search groups or tickers"
           style={{
             padding: "7px 10px",
-            border: "1px solid #dfe2e1",
+            border: "1px solid var(--line)",
             borderRadius: 4,
-            background: "#fff",
+            background: "var(--surface)",
             fontFamily: "Geist Mono, ui-monospace, monospace",
             fontSize: 12,
             width: 260,
           }}
         />
-        <span style={{ color: "#8f8f8f", fontSize: 11 }}>
+        <span style={{ color: "var(--muted)", fontSize: 11 }}>
           {activeTaxonomy === "SECTOR"
             ? `${rows.length} of ${sectors.length} groups · sorted by ${sortLabel(sortKey)}${arrow(sortKey)}`
             : `${taxRows.length} of ${taxonomyGroups.length} groups · ${totalMemberships} memberships · ${uniqueTickers} unique tickers · ${eligibleTotal} eligible`}
@@ -396,7 +405,7 @@ export default function MasterGroupTable() {
       )}
 
       {view === "table" && activeTaxonomy !== "SECTOR" && (
-        <div className="table-scroll" style={{ border: "1px solid #dfe2e1", borderRadius: 6, background: "#fff" }}>
+        <div className="table-scroll" style={{ border: "1px solid var(--line)", borderRadius: 6, background: "var(--surface)" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 860 }} aria-label={`${activeTaxonomy} catalog`}>
             <thead>
               <tr>
@@ -412,7 +421,7 @@ export default function MasterGroupTable() {
             <tbody>
               {taxRows.map((g) => (
                 <tr key={g.id}>
-                  <td style={{ ...bodyCell, fontWeight: 600 }}>{g.name}<span style={{ display: "block", fontWeight: 400, fontSize: 11, color: "#686e73" }}>{g.id} · {g.taxonomyVersion}</span></td>
+                  <td style={{ ...bodyCell, fontWeight: 600 }}>{g.name}<span style={{ display: "block", fontWeight: 400, fontSize: 11, color: "var(--muted)" }}>{g.id} · {g.taxonomyVersion}</span></td>
                   <td style={{ ...bodyCell, textAlign: "right" }} className="tabnum">{g.eligible}/{g.constituents}</td>
                   <td style={{ ...bodyCell, textAlign: "right", color: signColor(g.excess20d) }} className="tabnum">{formatPercent(g.excess20d)}</td>
                   <td style={{ ...bodyCell, textAlign: "right", color: signColor(g.excess60d) }} className="tabnum">{formatPercent(g.excess60d)}</td>
@@ -431,7 +440,7 @@ export default function MasterGroupTable() {
               ))}
             </tbody>
           </table>
-          <p style={{ padding: "8px 12px", color: "#8f8f8f", fontSize: 11 }}>Overlapping themes do not represent unique market share. Missing metrics show — (neutral), never red or zero. Areas sized by member count where market cap is unavailable.</p>
+          <p style={{ padding: "8px 12px", color: "var(--muted)", fontSize: 11 }}>Overlapping themes do not represent unique market share. Missing metrics show — (neutral), never red or zero. Areas sized by member count where market cap is unavailable.</p>
         </div>
       )}
 
@@ -439,9 +448,9 @@ export default function MasterGroupTable() {
       <div
         style={{
           overflowX: "auto",
-          border: "1px solid #dfe2e1",
+          border: "1px solid var(--line)",
           borderRadius: 6,
-          background: "#fff",
+          background: "var(--surface)",
         }}
       >
         <table
@@ -542,7 +551,7 @@ export default function MasterGroupTable() {
                       data-group-id={s.id}
                       to={`/explorer?taxonomy=SECTOR&group=${encodeURIComponent(s.id)}`}
                       onClick={() => rememberCatalogFocus(s.id)}
-                      style={{ color: "#202325", textDecoration: "none", borderBottom: "1px dotted #b9c0be" }}
+                      style={{ color: "var(--ink)", textDecoration: "none", borderBottom: "1px dotted #b9c0be" }}
                     >
                       {s.name}
                     </Link>
@@ -550,10 +559,10 @@ export default function MasterGroupTable() {
                   <td style={bodyCell}>
                     <LeadershipChip state={s.leadership} small />
                   </td>
-                  <td style={{ ...bodyCell, color: "#686e73", fontSize: 11 }}>
+                  <td style={{ ...bodyCell, color: "var(--muted)", fontSize: 11 }}>
                     {formatEnumLabel(s.prevLeadership)}
                   </td>
-                  <td style={{ ...bodyCell, fontSize: 11, color: "#202325" }}>
+                  <td style={{ ...bodyCell, fontSize: 11, color: "var(--ink)" }}>
                     {transitionLabel(s)}
                   </td>
                   <td style={{ ...bodyCell, textAlign: "right", color: signColor(s.excessYtd) }}>
@@ -575,13 +584,13 @@ export default function MasterGroupTable() {
                   <td style={{ ...bodyCell, textAlign: "right" }}>
                     {top3Label(s.concentration)}
                   </td>
-                  <td style={{ ...bodyCell, color: "#5a5a5a", fontSize: 11 }}>
+                  <td style={{ ...bodyCell, color: "var(--muted)", fontSize: 11 }}>
                     {formatEnumLabel(s.foreignFlow)}
                   </td>
-                  <td style={{ ...bodyCell, textAlign: "right", color: "#5a5a5a" }}>
+                  <td style={{ ...bodyCell, textAlign: "right", color: "var(--muted)" }}>
                     {s.eligibleConstituents}/{s.constituents}
                   </td>
-                  <td style={{ ...bodyCell, textAlign: "right", color: "#5a5a5a" }}>
+                  <td style={{ ...bodyCell, textAlign: "right", color: "var(--muted)" }}>
                     {coveragePct.toFixed(0)}%
                   </td>
                   <td style={bodyCell}>
@@ -595,7 +604,7 @@ export default function MasterGroupTable() {
       </div>
       )}
 
-      <p style={{ marginTop: 12, color: "#8f8f8f", fontSize: 11, lineHeight: 1.5 }}>
+      <p style={{ marginTop: 12, color: "var(--muted)", fontSize: 11, lineHeight: 1.5 }}>
         Concentration column reflects absolute-move top-3 share (equal-weighted group return).
         Breadth Δ requires a comparable prior snapshot — where comparability is unavailable,
         diffusion displays as Unconfirmed. Confirmation is a sample-only foreign-flow signal,

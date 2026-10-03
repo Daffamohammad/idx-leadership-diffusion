@@ -242,17 +242,17 @@ function CustomTooltip({ active, payload, label, metricLabel, ticker, groupName,
   const rows = point
     ? [
         { name: metricLabel || ticker || groupName || "Price", value: point.price, color: "#d97956" },
-        { name: "IHSG (^JKSE)", value: point.bench, color: "#54718b" },
+        { name: "IHSG (^JKSE)", value: point.bench, color: "var(--color-leading)" },
         ...(showOHLC
           ? [
-              { name: "Open (index)", value: point.open ?? null, color: "#178477" },
-              { name: "High (index)", value: point.high ?? null, color: "#178477" },
+              { name: "Open (index)", value: point.open ?? null, color: "var(--up)" },
+              { name: "High (index)", value: point.high ?? null, color: "var(--up)" },
               { name: "Low (index)", value: point.low ?? null, color: "#d97956" },
               { name: "Close (index)", value: point.close ?? null, color: "#d97956" },
             ]
           : []),
         ...(showVolume && point.volume !== null && point.volume !== undefined
-          ? [{ name: "Volume", value: point.volume, color: "#8f8f8f" }]
+          ? [{ name: "Volume", value: point.volume, color: "var(--muted)" }]
           : []),
       ]
     : payload
@@ -260,13 +260,13 @@ function CustomTooltip({ active, payload, label, metricLabel, ticker, groupName,
         .map((entry) => ({
           name: entry.name || "Value",
           value: typeof entry.value === "number" ? entry.value : null,
-          color: entry.color || "#686e73",
+          color: entry.color || "var(--muted)",
         }));
   return (
     <div
       style={{
-        background: "#fff",
-        border: "1px solid #dfe2e1",
+        background: "var(--surface)",
+        border: "1px solid var(--line)",
         borderRadius: 8,
         padding: "10px 12px",
         fontFamily: "Geist Mono, monospace",
@@ -275,15 +275,15 @@ function CustomTooltip({ active, payload, label, metricLabel, ticker, groupName,
         minWidth: 160,
       }}
     >
-      <div style={{ fontWeight: 600, color: "#202325", marginBottom: 6, borderBottom: "1px solid #f0f1ef", paddingBottom: 4 }}>
+      <div style={{ fontWeight: 600, color: "var(--ink)", marginBottom: 6, borderBottom: "1px solid #f0f1ef", paddingBottom: 4 }}>
         {date ? formatDateLabel(date) : date}
       </div>
       {rows.map((entry, i) => {
         const valStr = formatTooltipValue(entry.value, entry.name === "Volume");
         return (
           <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: 16, marginBottom: 2 }}>
-            <span style={{ color: entry.color || "#686e73" }}>{entry.name}</span>
-            <span style={{ fontWeight: 600, color: "#202325" }}>{valStr}</span>
+            <span style={{ color: entry.color || "var(--muted)" }}>{entry.name}</span>
+            <span style={{ fontWeight: 600, color: "var(--ink)" }}>{valStr}</span>
           </div>
         );
       })}
@@ -319,37 +319,37 @@ function PriceTable({
       role="table"
     >
       <thead>
-        <tr style={{ borderBottom: "1px solid #dfe2e1" }}>
-          <th style={{ textAlign: "left", padding: "6px 8px", fontWeight: 600, color: "#686e73", fontSize: 10 }}>Date</th>
-          <th style={{ textAlign: "right", padding: "6px 8px", fontWeight: 600, color: "#686e73", fontSize: 10 }}>{metricLabel}</th>
-          <th style={{ textAlign: "right", padding: "6px 8px", fontWeight: 600, color: "#686e73", fontSize: 10 }}>Benchmark</th>
+        <tr style={{ borderBottom: "1px solid var(--line)" }}>
+          <th style={{ textAlign: "left", padding: "6px 8px", fontWeight: 600, color: "var(--muted)", fontSize: 10 }}>Date</th>
+          <th style={{ textAlign: "right", padding: "6px 8px", fontWeight: 600, color: "var(--muted)", fontSize: 10 }}>{metricLabel}</th>
+          <th style={{ textAlign: "right", padding: "6px 8px", fontWeight: 600, color: "var(--muted)", fontSize: 10 }}>Benchmark</th>
           {showOHLC && <>
-            <th style={{ textAlign: "right", padding: "6px 8px", fontWeight: 600, color: "#686e73", fontSize: 10 }}>Open (index)</th>
-            <th style={{ textAlign: "right", padding: "6px 8px", fontWeight: 600, color: "#686e73", fontSize: 10 }}>High (index)</th>
-            <th style={{ textAlign: "right", padding: "6px 8px", fontWeight: 600, color: "#686e73", fontSize: 10 }}>Low (index)</th>
-            <th style={{ textAlign: "right", padding: "6px 8px", fontWeight: 600, color: "#686e73", fontSize: 10 }}>Close (index)</th>
+            <th style={{ textAlign: "right", padding: "6px 8px", fontWeight: 600, color: "var(--muted)", fontSize: 10 }}>Open (index)</th>
+            <th style={{ textAlign: "right", padding: "6px 8px", fontWeight: 600, color: "var(--muted)", fontSize: 10 }}>High (index)</th>
+            <th style={{ textAlign: "right", padding: "6px 8px", fontWeight: 600, color: "var(--muted)", fontSize: 10 }}>Low (index)</th>
+            <th style={{ textAlign: "right", padding: "6px 8px", fontWeight: 600, color: "var(--muted)", fontSize: 10 }}>Close (index)</th>
           </>}
-          {showVolume && <th style={{ textAlign: "right", padding: "6px 8px", fontWeight: 600, color: "#686e73", fontSize: 10 }}>Volume</th>}
+          {showVolume && <th style={{ textAlign: "right", padding: "6px 8px", fontWeight: 600, color: "var(--muted)", fontSize: 10 }}>Volume</th>}
         </tr>
       </thead>
       <tbody>
         {data.slice(-60).map((row, i) => (
           <tr key={row.date + i} style={{ borderBottom: "1px solid #f0f1ef" }}>
-            <td style={{ padding: "4px 8px", color: "#202325" }}>{formatDateLabel(row.date)}</td>
-            <td style={{ textAlign: "right", padding: "4px 8px", color: "#202325", fontWeight: 500 }}>
+            <td style={{ padding: "4px 8px", color: "var(--ink)" }}>{formatDateLabel(row.date)}</td>
+            <td style={{ textAlign: "right", padding: "4px 8px", color: "var(--ink)", fontWeight: 500 }}>
               {row.price !== null ? row.price.toFixed(2) : "—"}
             </td>
-            <td style={{ textAlign: "right", padding: "4px 8px", color: "#54718b" }}>
+            <td style={{ textAlign: "right", padding: "4px 8px", color: "var(--color-leading)" }}>
               {row.bench !== null ? row.bench.toFixed(2) : "—"}
             </td>
             {showOHLC && <>
-              <td style={{ textAlign: "right", padding: "4px 8px", color: "#178477" }}>{formatTooltipValue(row.open)}</td>
-              <td style={{ textAlign: "right", padding: "4px 8px", color: "#178477" }}>{formatTooltipValue(row.high)}</td>
+              <td style={{ textAlign: "right", padding: "4px 8px", color: "var(--up)" }}>{formatTooltipValue(row.open)}</td>
+              <td style={{ textAlign: "right", padding: "4px 8px", color: "var(--up)" }}>{formatTooltipValue(row.high)}</td>
               <td style={{ textAlign: "right", padding: "4px 8px", color: "#d97956" }}>{formatTooltipValue(row.low)}</td>
               <td style={{ textAlign: "right", padding: "4px 8px", color: "#d97956" }}>{formatTooltipValue(row.close)}</td>
             </>}
             {showVolume && (
-              <td style={{ textAlign: "right", padding: "4px 8px", color: "#686e73" }}>
+              <td style={{ textAlign: "right", padding: "4px 8px", color: "var(--muted)" }}>
                 {row.volume !== null ? row.volume.toLocaleString() : "—"}
               </td>
             )}
@@ -495,29 +495,29 @@ export default function PriceChart({
           justifyContent: "center",
           border: "1px solid #e1e2de",
           borderRadius: 10,
-          background: "#faf9f6",
-          color: "#747a7d",
+          background: "var(--surface-subtle)",
+          color: "var(--muted)",
           fontSize: 12,
           fontFamily: "Geist Mono",
         }}
       >
         <div style={{ textAlign: "center" }}>
-          <div style={{ fontWeight: 600, color: "#202325", marginBottom: 4 }}>
+          <div style={{ fontWeight: 600, color: "var(--ink)", marginBottom: 4 }}>
             Chart unavailable
           </div>
           <div>
             {ticker ? `No price data for ${ticker}` : "No price data for this group"}
           </div>
-          <div style={{ fontSize: 10, marginTop: 4, color: "#8f8f8f" }}>
+          <div style={{ fontSize: 10, marginTop: 4, color: "var(--muted)" }}>
             Source: {source}
           </div>
           {asOf && (
-            <div style={{ fontSize: 10, marginTop: 2, color: "#8f8f8f" }}>
+            <div style={{ fontSize: 10, marginTop: 2, color: "var(--muted)" }}>
               As of {formatDateLabel(asOf)}
             </div>
           )}
           {isDataGap && (
-            <div style={{ fontSize: 10, marginTop: 4, color: "#8f2424", fontWeight: 600 }}>
+            <div style={{ fontSize: 10, marginTop: 4, color: "var(--down)", fontWeight: 600 }}>
               Coverage is incomplete — some values may be missing
             </div>
           )}
@@ -536,7 +536,7 @@ export default function PriceChart({
         minWidth: 0,
         border: "1px solid #e1e2de",
         borderRadius: 10,
-        background: "#faf9f6",
+        background: "var(--surface-subtle)",
         overflow: "hidden",
         boxSizing: "border-box",
       }}
@@ -553,28 +553,28 @@ export default function PriceChart({
           gap: 8,
           padding: "10px 14px",
           borderBottom: "1px solid #e1e2de",
-          background: "#fff",
+          background: "var(--surface)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-          <div style={{ fontWeight: 600, fontSize: 13, color: "#202325" }}>{label}</div>
+          <div style={{ fontWeight: 600, fontSize: 13, color: "var(--ink)" }}>{label}</div>
           {providerMode && (
-            <span style={{ fontSize: 9, fontFamily: "Geist Mono", color: "#686e73", background: "#f0f1ef", padding: "2px 6px", borderRadius: 4 }}>
+            <span style={{ fontSize: 9, fontFamily: "Geist Mono", color: "var(--muted)", background: "var(--surface-subtle)", padding: "2px 6px", borderRadius: 4 }}>
               {formatEnumLabel(providerMode)}
             </span>
           )}
           {priceBasis && (
-            <span style={{ fontSize: 9, fontFamily: "Geist Mono", color: "#686e73", background: "#f0f1ef", padding: "2px 6px", borderRadius: 4 }}>
+            <span style={{ fontSize: 9, fontFamily: "Geist Mono", color: "var(--muted)", background: "var(--surface-subtle)", padding: "2px 6px", borderRadius: 4 }}>
               {formatEnumLabel(priceBasis)} basis
             </span>
           )}
           {qualityBadgeLabel && (
-            <span style={{ fontSize: 9, fontFamily: "Geist Mono", color: "#8f2424", background: "#fdeaea", padding: "2px 6px", borderRadius: 4 }}>
+            <span style={{ fontSize: 9, fontFamily: "Geist Mono", color: "var(--down)", background: "var(--tint-danger)", padding: "2px 6px", borderRadius: 4 }}>
               {qualityBadgeLabel}
             </span>
           )}
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", minWidth: 0, fontSize: 10, color: "#747a7d", fontFamily: "Geist Mono" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", minWidth: 0, fontSize: 10, color: "var(--muted)", fontFamily: "Geist Mono" }}>
           <span>As of {formatDateLabel(asOf)}</span>
           <span>Source: {source}</span>
           {hasOHLC && <span>OHLC (index) available</span>}
@@ -589,7 +589,7 @@ export default function PriceChart({
           flexWrap: "wrap",
           gap: 0,
           borderBottom: "1px solid #e1e2de",
-          background: "#fff",
+          background: "var(--surface)",
           padding: "0 14px",
           maxWidth: "100%",
           minWidth: 0,
@@ -615,7 +615,7 @@ export default function PriceChart({
                 background: "none",
                 border: "none",
                 borderBottom: selected ? "2px solid #d97956" : "2px solid transparent",
-                color: disabled ? "#b6b6b6" : selected ? "#202325" : "#747a7d",
+                color: disabled ? "#b6b6b6" : selected ? "var(--ink)" : "var(--muted)",
                 fontFamily: "Geist Mono, monospace",
                 fontSize: 11,
                 fontWeight: selected ? 600 : 400,
@@ -636,10 +636,10 @@ export default function PriceChart({
           style={{
             padding: "7px 14px",
             borderBottom: "1px solid #e1e2de",
-            background: "#faf9f6",
+            background: "var(--surface-subtle)",
             fontSize: 11,
             lineHeight: 1.5,
-            color: "#7a5010",
+            color: "var(--accent-ink)",
           }}
         >
           Requested period <strong>{activeRange}</strong> is unavailable for this series —
@@ -652,7 +652,7 @@ export default function PriceChart({
         style={{
           height: chartHeight,
           position: "relative",
-          background: "#fff",
+          background: "var(--surface)",
           minWidth: 0,
           maxWidth: "100%",
           overflow: "hidden",
@@ -666,14 +666,14 @@ export default function PriceChart({
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f1ef" />
             <XAxis
               dataKey="date"
-              tick={{ fontSize: 9, fill: "#747a7d" }}
+              tick={{ fontSize: 9, fill: "var(--muted)" }}
               tickMargin={4}
               tickFormatter={formatCompactDate}
             />
             <YAxis
               yAxisId="left"
               domain={["auto", "auto"]}
-              tick={{ fontSize: 9, fill: "#747a7d" }}
+              tick={{ fontSize: 9, fill: "var(--muted)" }}
               tickFormatter={(v: number) =>
                 typeof v === "number" ? v.toFixed(2) : String(v)
               }
@@ -684,7 +684,7 @@ export default function PriceChart({
                 yAxisId="right"
                 orientation="right"
                 domain={[0, "auto"]}
-                tick={{ fontSize: 9, fill: "#747a7d" }}
+                tick={{ fontSize: 9, fill: "var(--muted)" }}
                 tickFormatter={(v: number) =>
                   typeof v === "number" ? v.toLocaleString("en-US") : String(v)
                 }
@@ -752,12 +752,12 @@ export default function PriceChart({
               dataKey="bench"
               yAxisId="left"
               name="IHSG (^JKSE)"
-              stroke="#54718b"
+              stroke="var(--color-leading)"
               strokeWidth={1.5}
               strokeDasharray="4 2"
               dot={false}
               connectNulls={false}
-              activeDot={{ r: 3, fill: "#54718b", stroke: "#fff", strokeWidth: 1.5 }}
+              activeDot={{ r: 3, fill: "var(--color-leading)", stroke: "#fff", strokeWidth: 1.5 }}
             />
             {showVolume && hasVolume && (
               <Bar
@@ -782,10 +782,10 @@ export default function PriceChart({
           gap: 12,
           padding: "6px 14px",
           borderTop: "1px solid #e1e2de",
-          background: "#fff",
+          background: "var(--surface)",
           fontSize: 9,
           fontFamily: "Geist Mono",
-          color: "#747a7d",
+          color: "var(--muted)",
         }}
       >
         <span>Range: {effectiveRange}</span>
@@ -796,13 +796,13 @@ export default function PriceChart({
       </div>
 
       {/* ── Accessible Table Fallback ── */}
-      <details style={{ borderTop: "1px solid #e1e2de", background: "#fff" }}>
+      <details style={{ borderTop: "1px solid #e1e2de", background: "var(--surface)" }}>
         <summary
           style={{
             padding: "8px 14px",
             fontSize: 10,
             fontFamily: "Geist Mono",
-            color: "#747a7d",
+            color: "var(--muted)",
             cursor: "pointer",
             userSelect: "none",
           }}

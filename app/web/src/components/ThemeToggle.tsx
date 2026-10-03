@@ -13,7 +13,7 @@ export default function ThemeToggle() {
     onClick={() => setDark(value => !value)}
     aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
     title={dark ? "Light mode" : "Dark mode"}
-    style={{ border: "1px solid #dfe2e1", background: "transparent", padding: "4px 8px", fontFamily: "Geist Mono", fontSize: 11, cursor: "pointer" }}
+    style={{ border: "1px solid var(--line)", background: "transparent", padding: "4px 8px", fontFamily: "Geist Mono", fontSize: 11, cursor: "pointer" }}
   >
     {dark ? "☀ LIGHT" : "◐ DARK"}
   </button>;

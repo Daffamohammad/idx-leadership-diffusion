@@ -25,10 +25,10 @@ const KIND_LABELS: Record<TaxonomyKind, string> = {
 type DetailTab = "overview" | "market" | "flow" | "structure";
 
 function signColor(v: number | null | undefined): string {
-  if (v === null || v === undefined || !Number.isFinite(v)) return "#8f8f8f";
-  if (v > 0) return "#1a6e62";
-  if (v < 0) return "#8f2424";
-  return "#5a5a5a";
+  if (v === null || v === undefined || !Number.isFinite(v)) return "var(--muted)";
+  if (v > 0) return "var(--up)";
+  if (v < 0) return "var(--down)";
+  return "var(--muted)";
 }
 
 export default function MarketOverview() {
@@ -81,7 +81,7 @@ export default function MarketOverview() {
 
   if (snap.loading) {
     return (
-      <main style={{ padding: 32, color: "#686e73" }}>
+      <main style={{ padding: 32, color: "var(--muted)" }}>
         Loading snapshot…
       </main>
     );
@@ -91,7 +91,7 @@ export default function MarketOverview() {
     return (
       <main style={{ padding: 32 }}>
         <h1 style={{ fontSize: 28 }}>Snapshot unavailable</h1>
-        <p style={{ color: "#8f2424" }}>{snap.error ?? "No snapshot loaded."}</p>
+        <p style={{ color: "var(--down)" }}>{snap.error ?? "No snapshot loaded."}</p>
         <Link to="/methodology">Review methodology</Link>
       </main>
     );
@@ -143,7 +143,7 @@ export default function MarketOverview() {
             <div className="eyebrow-muted">Market overview</div>
             <EvidenceBadge kind="SNAPSHOT" compact />
             {stale && (
-              <span style={{ border: "1px solid #d5c59d", borderRadius: 20, padding: "4px 9px", color: "#7a5010", fontFamily: "Geist Mono, monospace", fontSize: 10 }}>
+              <span style={{ border: "1px solid #d5c59d", borderRadius: 20, padding: "4px 9px", color: "var(--accent-ink)", fontFamily: "Geist Mono, monospace", fontSize: 10 }}>
                 {formatEnumLabel(quality)} · review details
               </span>
             )}
@@ -158,7 +158,7 @@ export default function MarketOverview() {
               gap: 12,
               fontSize: 12,
               fontFamily: "Geist Mono, monospace",
-              color: "#686e73",
+              color: "var(--muted)",
             }}
           >
             <span>Snapshot overview · Data as of {asOf}</span>
@@ -167,7 +167,7 @@ export default function MarketOverview() {
             <span>·</span>
             <span>Snapshot {formatSnapshotId(adapted.payload.snapshot_id, adapted.payload.as_of)}</span>
           </div>
-          <details style={{ marginTop: 8, fontSize: 12, color: "#686e73" }}>
+          <details style={{ marginTop: 8, fontSize: 12, color: "var(--muted)" }}>
             <summary style={{ cursor: "pointer" }}>Provenance and coverage</summary>
             <div style={{ marginTop: 6, lineHeight: 1.6 }}>
               {sectorCount} sectors · {kongloCount} konglo groups · {themeCount} themes ·{" "}
@@ -187,7 +187,7 @@ export default function MarketOverview() {
         <section className="dash-card" aria-labelledby="dash-market-title">
           <div className="eyebrow-muted">Market snapshot · 20D window</div>
           <h2 id="dash-market-title">Market and benchmark</h2>
-          <div style={{ display: "grid", gap: 8, fontSize: 13, color: "#40474d" }}>
+          <div style={{ display: "grid", gap: 8, fontSize: 13, color: "var(--ink)" }}>
             <div>Data as of <strong className="tabnum">{asOf}</strong> · {formatEnumLabel(providerMode)}</div>
             <div>{sectorCount} sectors · {registryTotal !== null ? `${registryTotal} listed records` : "registry unavailable"}</div>
             <div className="meta">Sector history covers 20D/60D excess vs IHSG. YTD is not available in this bundle (no prior-year baseline); no intraday chart is shown and no IHSG level is invented.</div>
@@ -234,7 +234,7 @@ export default function MarketOverview() {
           <div style={{ display: "grid", gap: 6 }}>
             {rankings.map((r, i) => (
               <Link key={r.id} to={`/explorer?taxonomy=${r.kind}&group=${encodeURIComponent(r.id)}`} style={{ display: "flex", justifyContent: "space-between", gap: 8, textDecoration: "none", color: "inherit", padding: "6px 0", borderBottom: "1px solid var(--line)" }}>
-                <span style={{ fontSize: 13 }}><span className="tabnum" style={{ color: "#9aa4ac", marginRight: 6 }}>{i + 1}</span>{r.name}</span>
+                <span style={{ fontSize: 13 }}><span className="tabnum" style={{ color: "var(--muted)", marginRight: 6 }}>{i + 1}</span>{r.name}</span>
                 <span className="tabnum" style={{ fontFamily: "Geist Mono, monospace", fontSize: 12, color: signColor(r.excess20d) }}>{formatPercent(r.excess20d)}</span>
               </Link>
             ))}
@@ -276,7 +276,7 @@ export default function MarketOverview() {
       {tab === "structure" && (
         <section className="dash-card" aria-label="Market structure">
           <h2 style={{ margin: "0 0 8px", fontSize: 15 }}>Structure</h2>
-          <div style={{ fontSize: 13, lineHeight: 1.6, color: "#40474d" }}>
+          <div style={{ fontSize: 13, lineHeight: 1.6, color: "var(--ink)" }}>
             {sectorCount} sectors / {registryTotal ?? "—"} memberships · {themeCount} themes (analyst-defined prototype) · {kongloCount} konglo groups (analyst-defined prototype).
             Unique members vs eligible members differ per group; see catalog for per-group counts. Theme/Konglo history is not persisted in this bundle; sector history is available.
           </div>

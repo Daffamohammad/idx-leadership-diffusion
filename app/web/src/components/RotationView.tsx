@@ -38,17 +38,17 @@ const QUADRANTS: Array<{
   fill: string;
   anchor: "start" | "end";
 }> = [
-  { phase: "IMPROVING", x: -27, y: 25, color: "#54718b", fill: "#edf3f7", anchor: "start" },
-  { phase: "LEADING", x: 27, y: 25, color: "#438b82", fill: "#e8f3f0", anchor: "end" },
-  { phase: "LAGGING", x: -27, y: -25, color: "#ad6765", fill: "#f8eaea", anchor: "start" },
-  { phase: "WEAKENING", x: 27, y: -25, color: "#aa8750", fill: "#f8f0df", anchor: "end" },
+  { phase: "IMPROVING", x: -27, y: 25, color: "var(--color-leading)", fill: "var(--quad-improving)", anchor: "start" },
+  { phase: "LEADING", x: 27, y: 25, color: "var(--color-improving)", fill: "var(--quad-leading)", anchor: "end" },
+  { phase: "LAGGING", x: -27, y: -25, color: "var(--color-weakening)", fill: "var(--quad-lagging)", anchor: "start" },
+  { phase: "WEAKENING", x: 27, y: -25, color: "var(--color-warning)", fill: "var(--quad-weakening)", anchor: "end" },
 ];
 
 const DIAGNOSTIC_QUADRANTS = [
-  { label: "Negative 20D · rising", x: -27, y: 25, color: "#54718b", anchor: "start" as const },
-  { label: "Positive 20D · rising", x: 27, y: 25, color: "#438b82", anchor: "end" as const },
-  { label: "Negative 20D · fading", x: -27, y: -25, color: "#ad6765", anchor: "start" as const },
-  { label: "Positive 20D · fading", x: 27, y: -25, color: "#aa8750", anchor: "end" as const },
+  { label: "Negative 20D · rising", x: -27, y: 25, color: "var(--color-leading)", anchor: "start" as const },
+  { label: "Positive 20D · rising", x: 27, y: 25, color: "var(--color-improving)", anchor: "end" as const },
+  { label: "Negative 20D · fading", x: -27, y: -25, color: "var(--color-weakening)", anchor: "start" as const },
+  { label: "Positive 20D · fading", x: 27, y: -25, color: "var(--color-warning)", anchor: "end" as const },
 ];
 
 function scaleX(value: number): number {
@@ -110,7 +110,7 @@ function dataQualityLabel(row: RotationRow): string {
 }
 
 function phaseColor(phase: RotationPhase): string {
-  return QUADRANTS.find((quadrant) => quadrant.phase === phase)?.color ?? "#7c858c";
+  return QUADRANTS.find((quadrant) => quadrant.phase === phase)?.color ?? "var(--muted)";
 }
 
 function openGroup(navigate: ReturnType<typeof useNavigate>, row: RotationGroupInput, mode: "groups" | "stocks"): void {
@@ -207,7 +207,16 @@ export default function RotationView() {
   const diagnosticPlottable = rows.filter((row) => row.excess20d !== null && row.relativeMomentum !== null);
   const isDiagnostic = plottable.length === 0 && diagnosticPlottable.length > 0;
   const basePlotted = isDiagnostic ? diagnosticPlottable : plottable;
-  const plottedRows = basePlotted.filter((r) => !hidden.has(isDiagnostic ? `diag-${r.id}` : r.phase));
+  // Diagnostic mode has no rotation phases to toggle, so visibility is grouped
+  // by the same per-row data-quality value the table already shows. Derived
+  // from the plotted rows themselves, so the controls never disappear when a
+  // bucket is fully hidden.
+  const diagnosticKeys = useMemo(() => {
+    const keys = new Set<string>();
+    for (const row of basePlotted) keys.add(dataQualityLabel(row));
+    return [...keys].sort();
+  }, [basePlotted]);
+  const plottedRows = basePlotted.filter((r) => !hidden.has(isDiagnostic ? `diag-${dataQualityLabel(r)}` : r.phase));
   const togglePhase = (key: string) => {
     setHidden((prev) => {
       const next = new Set(prev);
@@ -240,27 +249,27 @@ export default function RotationView() {
       <header style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 20, flexWrap: "wrap", marginBottom: 20 }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-            <div className="eyebrow-muted" style={{ color: "#438b82" }}>Rotation mapping</div>
+            <div className="eyebrow-muted" style={{ color: "var(--color-improving)" }}>Rotation mapping</div>
             <EvidenceBadge kind={taxonomyKind === "SECTOR" ? "SNAPSHOT" : "PROTOTYPE"} compact />
             {isDiagnostic && (
-              <span style={{ border: "1px solid #d5c59d", borderRadius: 20, padding: "4px 9px", color: "#7a5010", fontFamily: "Geist Mono, monospace", fontSize: 10 }}>
+              <span style={{ border: "1px solid #d5c59d", borderRadius: 20, padding: "4px 9px", color: "var(--accent-ink)", fontFamily: "Geist Mono, monospace", fontSize: 10 }}>
                 YTD unavailable · diagnostic view
               </span>
             )}
           </div>
           <h1 style={{ margin: "7px 0 8px", fontSize: 31, letterSpacing: "-.045em", fontWeight: 500 }}>Market rotation</h1>
-          <p style={{ maxWidth: 760, margin: 0, color: "#686e73", lineHeight: 1.55 }}>
+          <p style={{ maxWidth: 760, margin: 0, color: "var(--muted)", lineHeight: 1.55 }}>
             YTD-strength rotation lens. For the 20D excess × breadth-change lens see What Changed.
           </p>
-          <p style={{ maxWidth: 760, margin: "6px 0 0", color: "#686e73", lineHeight: 1.55 }}>
+          <p style={{ maxWidth: 760, margin: "6px 0 0", color: "var(--muted)", lineHeight: 1.55 }}>
             {isDiagnostic
               ? "The YTD baseline is unavailable in this snapshot. The map below shows available 20D excess return and 20D minus 60D momentum as diagnostics only; no rotation phase is assigned."
               : "Relative strength uses YTD excess return versus IHSG. Relative momentum is 20D excess return minus 60D excess return. Null values remain visible as Not available and are not plotted."}
           </p>
         </div>
-        <div style={{ color: "#686e73", fontFamily: "Geist Mono, monospace", fontSize: 11, textAlign: "right" }}>
+        <div style={{ color: "var(--muted)", fontFamily: "Geist Mono, monospace", fontSize: 11, textAlign: "right" }}>
           <div>Snapshot as of {snapshotAsOf}</div>
-          <div style={{ marginTop: 5 }}>{currentTaxonomyLabel} · {mode} · {formatCountLabel(plottedRows.length, "plotted")} of {formatCountLabel(rows.length, mode === "stocks" ? "ticker" : "group")}</div>
+          <div style={{ marginTop: 5 }}>{currentTaxonomyLabel} · {mode} · {plottedRows.length} of {rows.length} {mode === "stocks" ? "tickers" : "groups"} plotted</div>
         </div>
       </header>
 
@@ -276,7 +285,7 @@ export default function RotationView() {
                 disabled={!available}
                 aria-pressed={active}
                 onClick={() => setTaxonomyKind(option.kind)}
-                style={{ border: `1px solid ${active ? "#438b82" : "#dfe2e1"}`, background: active ? "#e8f3f0" : "#fff", color: available ? "#202325" : "#a3a7a5", padding: "6px 11px", cursor: available ? "pointer" : "not-allowed", fontSize: 11 }}
+                style={{ border: `1px solid ${active ? "var(--color-improving)" : "var(--line)"}`, background: active ? "var(--surface-subtle)" : "var(--surface)", color: available ? "var(--ink)" : "#a3a7a5", padding: "6px 11px", cursor: available ? "pointer" : "not-allowed", fontSize: 11 }}
               >
                 {option.label}
               </button>
@@ -284,8 +293,8 @@ export default function RotationView() {
           })}
         </div>
         <div role="group" aria-label="Rotation mode" style={{ display: "flex", gap: 6 }}>
-          <button type="button" aria-pressed={mode === "groups"} onClick={() => setMode("groups")} style={{ border: `1px solid ${mode === "groups" ? "#438b82" : "#dfe2e1"}`, background: mode === "groups" ? "#e8f3f0" : "#fff", padding: "6px 11px", fontSize: 11, cursor: "pointer" }}>Groups</button>
-          <button type="button" aria-pressed={mode === "stocks"} onClick={() => setMode("stocks")} style={{ border: `1px solid ${mode === "stocks" ? "#438b82" : "#dfe2e1"}`, background: mode === "stocks" ? "#e8f3f0" : "#fff", padding: "6px 11px", fontSize: 11, cursor: "pointer" }}>Stocks</button>
+          <button type="button" aria-pressed={mode === "groups"} onClick={() => setMode("groups")} style={{ border: `1px solid ${mode === "groups" ? "var(--color-improving)" : "var(--line)"}`, background: mode === "groups" ? "var(--surface-subtle)" : "var(--surface)", padding: "6px 11px", fontSize: 11, cursor: "pointer" }}>Groups</button>
+          <button type="button" aria-pressed={mode === "stocks"} onClick={() => setMode("stocks")} style={{ border: `1px solid ${mode === "stocks" ? "var(--color-improving)" : "var(--line)"}`, background: mode === "stocks" ? "var(--surface-subtle)" : "var(--surface)", padding: "6px 11px", fontSize: 11, cursor: "pointer" }}>Stocks</button>
         </div>
         <input
           type="search"
@@ -293,55 +302,55 @@ export default function RotationView() {
           placeholder={mode === "stocks" ? "Search ticker…" : "Search group…"}
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          style={{ marginLeft: "auto", minWidth: 220, border: "1px solid #dfe2e1", padding: "7px 10px", fontSize: 12 }}
+          style={{ marginLeft: "auto", minWidth: 220, border: "1px solid var(--line)", padding: "7px 10px", fontSize: 12 }}
         />
       </div>
 
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginBottom: 12, fontSize: 11 }}>
         <span className="eyebrow-muted">Show:</span>
-        {(isDiagnostic ? ["visible"] : ["LEADING", "IMPROVING", "WEAKENING", "LAGGING", "DATA_GAP"]).map((p) => {
-          const key = isDiagnostic ? `diag-all` : p;
-          const isHidden = hidden.has(p) || (isDiagnostic && hidden.has(`diag-${p}`));
-          void key;
-          if (isDiagnostic) return null;
+        {(isDiagnostic ? diagnosticKeys : ["LEADING", "IMPROVING", "WEAKENING", "LAGGING", "DATA_GAP"]).map((p) => {
+          const key = isDiagnostic ? `diag-${p}` : p;
+          const isHidden = hidden.has(key);
           return (
-            <label key={p} style={{ display: "inline-flex", gap: 4, alignItems: "center", border: "1px solid #dfe2e1", padding: "4px 8px", cursor: "pointer" }}>
-              <input type="checkbox" checked={!isHidden} onChange={() => togglePhase(p)} aria-label={`Toggle ${p}`} />
-              {p === "DATA_GAP" ? "Not available" : p.charAt(0) + p.slice(1).toLowerCase()}
+            <label key={p} style={{ display: "inline-flex", gap: 4, alignItems: "center", border: "1px solid var(--line)", padding: "4px 8px", cursor: "pointer" }}>
+              <input type="checkbox" checked={!isHidden} onChange={() => togglePhase(key)} aria-label={`Toggle ${isDiagnostic ? formatEnumLabel(p) : p}`} />
+              {isDiagnostic
+                ? formatEnumLabel(p)
+                : p === "DATA_GAP" ? "Not available" : p.charAt(0) + p.slice(1).toLowerCase()}
             </label>
           );
         })}
         <span style={{ marginLeft: "auto", display: "inline-flex", gap: 6 }}>
-          <button type="button" onClick={() => setZoom((z) => Math.min(3, +(z + 0.5).toFixed(2)))} aria-label="Zoom in" style={{ border: "1px solid #dfe2e1", background: "#fff", padding: "4px 10px", cursor: "pointer" }}>+</button>
-          <button type="button" onClick={() => setZoom(1)} aria-label="Reset zoom" style={{ border: "1px solid #dfe2e1", background: "#fff", padding: "4px 10px", cursor: "pointer" }}>Reset</button>
-          <button type="button" onClick={() => frameRef.current?.requestFullscreen?.()} aria-label="Fullscreen rotation map" style={{ border: "1px solid #dfe2e1", background: "#fff", padding: "4px 10px", cursor: "pointer" }}>Fullscreen</button>
+          <button type="button" onClick={() => setZoom((z) => Math.min(3, +(z + 0.5).toFixed(2)))} aria-label="Zoom in" style={{ border: "1px solid var(--line)", background: "var(--surface)", padding: "4px 10px", cursor: "pointer" }}>+</button>
+          <button type="button" onClick={() => setZoom(1)} aria-label="Reset zoom" style={{ border: "1px solid var(--line)", background: "var(--surface)", padding: "4px 10px", cursor: "pointer" }}>Reset</button>
+          <button type="button" onClick={() => frameRef.current?.requestFullscreen?.()} aria-label="Fullscreen rotation map" style={{ border: "1px solid var(--line)", background: "var(--surface)", padding: "4px 10px", cursor: "pointer" }}>Fullscreen</button>
         </span>
       </div>
 
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginBottom: 12, fontSize: 11, color: "#686e73" }}>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginBottom: 12, fontSize: 11, color: "var(--muted)" }}>
         <span className="eyebrow-muted">History:</span>
-        <button type="button" disabled title="Daily intervals require dated observation series with consistent snapshot/provider/price-basis/membership versions — not persisted in this bundle" style={{ border: "1px solid #dfe2e1", padding: "4px 10px", opacity: 0.5, cursor: "not-allowed" }}>Daily</button>
-        <button type="button" disabled title="Weekly sampling does not change the return formula into a weekly formula; weekly series not persisted in this bundle" style={{ border: "1px solid #dfe2e1", padding: "4px 10px", opacity: 0.5, cursor: "not-allowed" }}>Weekly</button>
+        <button type="button" disabled title="Daily intervals require dated observation series with consistent snapshot/provider/price-basis/membership versions — not persisted in this bundle" style={{ border: "1px solid var(--line)", padding: "4px 10px", opacity: 0.5, cursor: "not-allowed" }}>Daily</button>
+        <button type="button" disabled title="Weekly sampling does not change the return formula into a weekly formula; weekly series not persisted in this bundle" style={{ border: "1px solid var(--line)", padding: "4px 10px", opacity: 0.5, cursor: "not-allowed" }}>Weekly</button>
         <label style={{ display: "inline-flex", gap: 6, alignItems: "center", opacity: 0.6 }} title="Tails require real dated trails; trails are not drawn from repeated points, random coordinates, or forced phases">
           Tail <input type="range" disabled value={0} aria-label="Rotation tail length (unavailable)" />
         </label>
         <span>Plotted {plottedRows.length} of {rows.length} {mode === "stocks" ? "tickers" : "groups"} · table and plot share the same data, method, and period.</span>
       </div>
 
-      <div className="rotation-note" style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center", padding: "9px 12px", border: "1px solid #dfe2e1", background: "#faf9f6", color: "#686e73", fontSize: 11, marginBottom: 12 }}>
-        <strong style={{ color: "#202325" }}>{isDiagnostic ? "YTD signal" : "Current phase"}</strong>
+      <div className="rotation-note" style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center", padding: "9px 12px", border: "1px solid var(--line)", background: "var(--surface-subtle)", color: "var(--muted)", fontSize: 11, marginBottom: 12 }}>
+        <strong style={{ color: "var(--ink)" }}>{isDiagnostic ? "YTD signal" : "Current phase"}</strong>
         <span>{isDiagnostic
           ? `Baseline unavailable; ${formatCountLabel(diagnosticPlottable.length, mode === "stocks" ? "ticker" : "group")} remain visible in the diagnostic map and table.`
           : comparable ? "Comparable prior exists; this view still shows the current rotation classification." : "No compatible prior snapshot; no historical phase trail is shown."}</span>
-        {taxonomyKind !== "SECTOR" && <span style={{ color: "#315d87" }}>Analyst-defined taxonomy</span>}
+        {taxonomyKind !== "SECTOR" && <span style={{ color: "var(--link)" }}>Analyst-defined taxonomy</span>}
       </div>
 
-      <div ref={frameRef} className="rotation-map-frame" style={{ border: "1px solid #dfe2e1", background: "#fff", overflow: "hidden" }}>
+      <div ref={frameRef} className="rotation-map-frame" style={{ border: "1px solid var(--line)", background: "var(--surface)", overflow: "hidden" }}>
         <svg viewBox={(() => { const w = 1000 / zoom; const h = 450 / zoom; return `${(1000 - w) / 2} ${(450 - h) / 2} ${w} ${h}`; })()} role="img" aria-label={isDiagnostic ? "Market rotation diagnostic map" : "Market rotation map"} style={{ display: "block", width: "100%", height: "auto" }}>
-          <rect x={PLOT.left} y={PLOT.top} width={PLOT.width / 2} height={PLOT.height / 2} fill="#edf3f7" />
-          <rect x={PLOT.left + PLOT.width / 2} y={PLOT.top} width={PLOT.width / 2} height={PLOT.height / 2} fill="#e8f3f0" />
-          <rect x={PLOT.left} y={PLOT.top + PLOT.height / 2} width={PLOT.width / 2} height={PLOT.height / 2} fill="#f8eaea" />
-          <rect x={PLOT.left + PLOT.width / 2} y={PLOT.top + PLOT.height / 2} width={PLOT.width / 2} height={PLOT.height / 2} fill="#f8f0df" />
+          <rect x={PLOT.left} y={PLOT.top} width={PLOT.width / 2} height={PLOT.height / 2} fill="var(--quad-improving)" />
+          <rect x={PLOT.left + PLOT.width / 2} y={PLOT.top} width={PLOT.width / 2} height={PLOT.height / 2} fill="var(--quad-leading)" />
+          <rect x={PLOT.left} y={PLOT.top + PLOT.height / 2} width={PLOT.width / 2} height={PLOT.height / 2} fill="var(--quad-lagging)" />
+          <rect x={PLOT.left + PLOT.width / 2} y={PLOT.top + PLOT.height / 2} width={PLOT.width / 2} height={PLOT.height / 2} fill="var(--quad-weakening)" />
           {Array.from({ length: 13 }, (_, index) => {
             const x = PLOT.left + (index / 12) * PLOT.width;
             return <line key={`v-${index}`} x1={x} x2={x} y1={PLOT.top} y2={PLOT.top + PLOT.height} stroke="#dfe5e3" strokeWidth=".75" />;
@@ -357,18 +366,18 @@ export default function RotationView() {
               {"phase" in quadrant ? formatEnumLabel(quadrant.phase) : quadrant.label}
             </text>
           ))}
-          <text x={PLOT.left} y={PLOT.top + PLOT.height + 18} textAnchor="start" fontFamily="Geist Mono, monospace" fontSize="10" fill="#7c858c">−30%</text>
-          <text x={scaleX(0)} y={PLOT.top + PLOT.height + 18} textAnchor="middle" fontFamily="Geist Mono, monospace" fontSize="10" fill="#7c858c">0%</text>
-          <text x={PLOT.left + PLOT.width} y={PLOT.top + PLOT.height + 18} textAnchor="end" fontFamily="Geist Mono, monospace" fontSize="10" fill="#7c858c">+30%</text>
-          <text x={PLOT.left - 10} y={PLOT.top + 4} textAnchor="end" fontFamily="Geist Mono, monospace" fontSize="10" fill="#7c858c">+30%</text>
-          <text x={PLOT.left - 10} y={scaleY(0) + 4} textAnchor="end" fontFamily="Geist Mono, monospace" fontSize="10" fill="#7c858c">0%</text>
-          <text x={PLOT.left - 10} y={PLOT.top + PLOT.height} textAnchor="end" fontFamily="Geist Mono, monospace" fontSize="10" fill="#7c858c">−30%</text>
+          <text x={PLOT.left} y={PLOT.top + PLOT.height + 18} textAnchor="start" fontFamily="Geist Mono, monospace" fontSize="10" fill="var(--muted)">−30%</text>
+          <text x={scaleX(0)} y={PLOT.top + PLOT.height + 18} textAnchor="middle" fontFamily="Geist Mono, monospace" fontSize="10" fill="var(--muted)">0%</text>
+          <text x={PLOT.left + PLOT.width} y={PLOT.top + PLOT.height + 18} textAnchor="end" fontFamily="Geist Mono, monospace" fontSize="10" fill="var(--muted)">+30%</text>
+          <text x={PLOT.left - 10} y={PLOT.top + 4} textAnchor="end" fontFamily="Geist Mono, monospace" fontSize="10" fill="var(--muted)">+30%</text>
+          <text x={PLOT.left - 10} y={scaleY(0) + 4} textAnchor="end" fontFamily="Geist Mono, monospace" fontSize="10" fill="var(--muted)">0%</text>
+          <text x={PLOT.left - 10} y={PLOT.top + PLOT.height} textAnchor="end" fontFamily="Geist Mono, monospace" fontSize="10" fill="var(--muted)">−30%</text>
           {plottedRows.map((row) => {
             const xValue = isDiagnostic ? row.excess20d : row.relativeStrength;
             const x = clamp(scaleX(xValue ?? 0), PLOT.left, PLOT.left + PLOT.width);
             const y = clamp(scaleY(row.relativeMomentum ?? 0), PLOT.top, PLOT.top + PLOT.height);
             const radius = Math.max(8, Math.min(22, 5 + Math.sqrt(Math.max(1, row.constituents)) * 2));
-            const color = isDiagnostic ? "#7c858c" : phaseColor(row.phase);
+            const color = isDiagnostic ? "var(--muted)" : phaseColor(row.phase);
             return (
               <g
                 key={row.id}
@@ -388,7 +397,7 @@ export default function RotationView() {
               >
                 <title>{isDiagnostic ? `${row.name}: YTD not available · diagnostic view` : `${row.name}: ${formatEnumLabel(row.phase)}`}</title>
                 <circle cx={x} cy={y} r={radius} fill={color} opacity=".9" stroke="#fff" strokeWidth="1.5" />
-                <text x={x} y={y} textAnchor="middle" dominantBaseline="middle" fontFamily="Geist Mono, monospace" fontSize="10" fill="#fff" pointerEvents="none">{row.constituents}</text>
+                <text x={x} y={y} textAnchor="middle" dominantBaseline="middle" fontFamily="Geist Mono, monospace" fontSize="10" fill="var(--on-accent)" pointerEvents="none">{row.constituents}</text>
               </g>
             );
           })}
@@ -397,11 +406,11 @@ export default function RotationView() {
               {label.targetX !== undefined && label.targetY !== undefined && Math.hypot(label.x - label.targetX, label.y - label.targetY) > 16 && (
                 <line x1={label.targetX} y1={label.targetY} x2={label.x} y2={label.y - 3} stroke="#9aa19f" strokeWidth=".8" />
               )}
-              <text x={label.x} y={label.y} textAnchor={label.textAnchor} fontFamily="Geist Mono, monospace" fontSize="10" fill="#202325">{label.text}</text>
+              <text x={label.x} y={label.y} textAnchor={label.textAnchor} fontFamily="Geist Mono, monospace" fontSize="10" fill="var(--ink)" stroke="var(--surface)" strokeWidth="3" strokeLinejoin="round" paintOrder="stroke">{label.text}</text>
             </g>
           ))}
-          <text x={PLOT.left + PLOT.width / 2} y="438" textAnchor="middle" fontFamily="Geist Mono, monospace" fontSize="10" fill="#686e73">{isDiagnostic ? "20D excess return vs IHSG (%) · diagnostic" : "YTD excess return vs IHSG (%)"}</text>
-          <text x="18" y={PLOT.top + PLOT.height / 2} textAnchor="middle" transform={`rotate(-90 18 ${PLOT.top + PLOT.height / 2})`} fontFamily="Geist Mono, monospace" fontSize="10" fill="#686e73">20D excess − 60D excess (%)</text>
+          <text x={PLOT.left + PLOT.width / 2} y="438" textAnchor="middle" fontFamily="Geist Mono, monospace" fontSize="10" fill="var(--muted)">{isDiagnostic ? "20D excess return vs IHSG (%) · diagnostic" : "YTD excess return vs IHSG (%)"}</text>
+          <text x="18" y={PLOT.top + PLOT.height / 2} textAnchor="middle" transform={`rotate(-90 18 ${PLOT.top + PLOT.height / 2})`} fontFamily="Geist Mono, monospace" fontSize="10" fill="var(--muted)">20D excess − 60D excess (%)</text>
         </svg>
       </div>
 
@@ -409,12 +418,12 @@ export default function RotationView() {
         <div
           className="rotation-diagnostic-callout"
           role="status"
-          style={{ marginTop: 12, padding: "13px 15px", border: "1px solid #d5c59d", background: "#fffaf0", color: "#686e73" }}
+          style={{ marginTop: 12, padding: "13px 15px", border: "1px solid #d5c59d", background: "var(--tint-cream)", color: "var(--muted)" }}
         >
-          <div className="eyebrow-muted" style={{ color: "#7a5010" }}>Diagnostic availability</div>
-          <strong style={{ display: "block", marginTop: 5, color: "#202325", fontSize: 15 }}>YTD rotation is unavailable for this snapshot.</strong>
+          <div className="eyebrow-muted" style={{ color: "var(--accent-ink)" }}>Diagnostic availability</div>
+          <strong style={{ display: "block", marginTop: 5, color: "var(--ink)", fontSize: 15 }}>YTD rotation is unavailable for this snapshot.</strong>
           <div style={{ marginTop: 5, fontSize: 12, lineHeight: 1.5 }}>
-            {formatCountLabel(diagnosticPlottable.length, "group")} are shown above using available 20D excess and momentum. The phase cards and rotation signal remain unavailable until the prior-year baseline is persisted.
+            {formatCountLabel(diagnosticPlottable.length, mode === "stocks" ? "ticker" : "group")} are shown above using available 20D excess and momentum. The phase cards and rotation signal remain unavailable until the prior-year baseline is persisted.
           </div>
         </div>
       ) : (
@@ -425,7 +434,7 @@ export default function RotationView() {
             <div key={quadrant.phase} style={{ padding: "11px 13px", border: `1px solid ${quadrant.color}44`, background: quadrant.fill, minWidth: 0 }}>
               <div style={{ color: quadrant.color, fontSize: 11, fontWeight: 600 }}>{formatEnumLabel(quadrant.phase)}</div>
               <strong style={{ display: "block", marginTop: 6, fontSize: 21 }}>{count}</strong>
-              <div style={{ color: "#686e73", fontSize: 10 }}>{formatCountLabel(count, mode === "stocks" ? "ticker" : "group")}</div>
+              <div style={{ color: "var(--muted)", fontSize: 10 }}>{formatCountLabel(count, mode === "stocks" ? "ticker" : "group")}</div>
             </div>
             );
           })}
@@ -435,12 +444,12 @@ export default function RotationView() {
       <section style={{ marginTop: 22 }} aria-labelledby="rotation-table-title">
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "baseline", flexWrap: "wrap", marginBottom: 9 }}>
           <h2 id="rotation-table-title" style={{ margin: 0, fontSize: 18, fontWeight: 500 }}>Rotation table</h2>
-          <span style={{ color: "#686e73", fontSize: 11 }}>Click a {mode === "stocks" ? "ticker" : "group"} to open its detail · {formatCountLabel(plottedRows.length, "plotted")} of {formatCountLabel(rows.length, "total")}</span>
+          <span style={{ color: "var(--muted)", fontSize: 11 }}>Click a {mode === "stocks" ? "ticker" : "group"} to open its detail · {plottedRows.length} of {rows.length} {mode === "stocks" ? "tickers" : "groups"}</span>
         </div>
-        <div className="table-scroll" style={{ border: "1px solid #dfe2e1" }}>
+        <div className="table-scroll" style={{ border: "1px solid var(--line)" }}>
           <table style={{ width: "100%", minWidth: 920, borderCollapse: "collapse" }} aria-label="Rotation mapping table">
             <thead>
-              <tr style={{ background: "#faf9f6", borderBottom: "1px solid #dfe2e1", textAlign: "left" }}>
+              <tr style={{ background: "var(--surface-subtle)", borderBottom: "1px solid var(--line)", textAlign: "left" }}>
                 {[
                   "Group",
                   "Quadrant",
@@ -449,21 +458,21 @@ export default function RotationView() {
                   "Phase",
                   "YTD excess (%)",
                   "Data quality",
-                ].map((heading) => <th key={heading} style={{ padding: "9px 10px", fontFamily: "Geist Mono, monospace", fontSize: 10, color: "#686e73", whiteSpace: "nowrap" }}>{heading}</th>)}
+                ].map((heading) => <th key={heading} style={{ padding: "9px 10px", fontFamily: "Geist Mono, monospace", fontSize: 10, color: "var(--muted)", whiteSpace: "nowrap" }}>{heading}</th>)}
               </tr>
             </thead>
             <tbody>
               {rows.map((row) => (
-                <tr key={`table-${row.id}`} style={{ borderBottom: "1px solid #ececec", background: row.phase === "DATA_GAP" ? "#fafaf8" : "#fff" }}>
+                <tr key={`table-${row.id}`} style={{ borderBottom: "1px solid var(--line)", background: row.phase === "DATA_GAP" ? "var(--surface-subtle)" : "var(--surface)" }}>
                   <td style={{ padding: "9px 10px", fontSize: 12, fontWeight: 600, whiteSpace: "nowrap" }}>
-                    <button type="button" onClick={() => openGroup(navigate, row, mode)} style={{ border: 0, borderBottom: "1px dotted #9aa19f", background: "none", padding: 0, color: "#202325", cursor: "pointer", fontWeight: 600 }}>{row.name}</button>
+                    <button type="button" onClick={() => openGroup(navigate, row, mode)} style={{ border: 0, borderBottom: "1px dotted #9aa19f", background: "none", padding: 0, color: "var(--ink)", cursor: "pointer", fontWeight: 600 }}>{row.name}</button>
                   </td>
                   <td style={{ padding: "9px 10px", fontFamily: "Geist Mono, monospace", fontSize: 11 }}>{formatEnumLabel(row.phase)}</td>
                   <td style={{ padding: "9px 10px", textAlign: "right", fontFamily: "Geist Mono, monospace", fontSize: 11, color: phaseColor(row.phase) }}>{formatPercent(row.relativeStrength)}</td>
                   <td style={{ padding: "9px 10px", textAlign: "right", fontFamily: "Geist Mono, monospace", fontSize: 11, color: phaseColor(row.phase) }}>{formatPercent(row.relativeMomentum)}</td>
                   <td style={{ padding: "9px 10px", fontSize: 11 }}>{formatEnumLabel(row.phase)}</td>
                   <td style={{ padding: "9px 10px", textAlign: "right", fontFamily: "Geist Mono, monospace", fontSize: 11, color: phaseColor(row.phase) }}>{formatPercent(row.ytdExcess)}</td>
-                  <td style={{ padding: "9px 10px", fontSize: 11, color: row.phase === "DATA_GAP" ? "#7a5010" : "#686e73" }}>{formatEnumLabel(dataQualityLabel(row))}</td>
+                  <td style={{ padding: "9px 10px", fontSize: 11, color: row.phase === "DATA_GAP" ? "var(--accent-ink)" : "var(--muted)" }}>{formatEnumLabel(dataQualityLabel(row))}</td>
                 </tr>
               ))}
             </tbody>
@@ -474,14 +483,14 @@ export default function RotationView() {
       <div className="rotation-accessible-list" style={{ marginTop: 18, display: "grid", gap: 7 }} aria-label={`${currentTaxonomyLabel} rotation groups`}>
         <div className="eyebrow-muted">Accessible group list</div>
         {rows.map((row) => (
-          <button key={`list-${row.id}`} type="button" onClick={() => openGroup(navigate, row, mode)} style={{ display: "flex", justifyContent: "space-between", gap: 12, minWidth: 0, padding: "8px 10px", border: "1px solid #dfe2e1", background: row.phase === "DATA_GAP" ? "#f4f4f1" : "#fff", color: "#202325", textAlign: "left", cursor: "pointer" }}>
+          <button key={`list-${row.id}`} type="button" onClick={() => openGroup(navigate, row, mode)} style={{ display: "flex", justifyContent: "space-between", gap: 12, minWidth: 0, padding: "8px 10px", border: "1px solid var(--line)", background: row.phase === "DATA_GAP" ? "var(--surface-subtle)" : "var(--surface)", color: "var(--ink)", textAlign: "left", cursor: "pointer" }}>
             <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: 12 }}>{row.name}</span>
             <span style={{ flexShrink: 0, fontFamily: "Geist Mono, monospace", fontSize: 10, color: phaseColor(row.phase) }}>{formatEnumLabel(row.phase)} · {formatCountLabel(row.constituents, "ticker")}</span>
           </button>
         ))}
       </div>
 
-      <footer style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 14, color: "#686e73", fontFamily: "Geist Mono, monospace", fontSize: 10 }}>
+      <footer style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 14, color: "var(--muted)", fontFamily: "Geist Mono, monospace", fontSize: 10 }}>
         <span>Bubble size ∝ √(constituents)</span>
         <span>·</span>
         <span>Groups with incomplete coverage remain in the table and list</span>

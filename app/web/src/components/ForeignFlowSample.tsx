@@ -32,13 +32,13 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
       id="foreign-flow-sample"
         aria-label="Foreign flow sample"
         style={{
-          border: "1px dashed #dfe2e1",
+          border: "1px dashed var(--line)",
           padding: 22,
-          background: "#faf9f6",
+          background: "var(--surface-subtle)",
         }}
       >
         <div className="eyebrow-muted">Foreign-flow sample</div>
-        <p style={{ margin: "8px 0 0", color: "#686e73", fontSize: 13 }}>
+        <p style={{ margin: "8px 0 0", color: "var(--muted)", fontSize: 13 }}>
           The exporter did not emit a foreign-flow sample for this snapshot.
         </p>
       </section>
@@ -66,9 +66,9 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
     <section
       aria-label="Foreign flow sample"
       style={{
-        border: "1px solid #dfe2e1",
+        border: "1px solid var(--line)",
         padding: 22,
-        background: "#faf9f6",
+        background: "var(--surface-subtle)",
         display: "grid",
         gap: 18,
       }}
@@ -88,7 +88,7 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
             gap: 12,
             fontSize: 11,
             fontFamily: "Geist Mono, monospace",
-            color: "#686e73",
+            color: "var(--muted)",
           }}
         >
           <span>Persisted source-backed sample · bounded top-list</span>
@@ -114,9 +114,9 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
       >
         <article
           style={{
-            background: "#fff",
+            background: "var(--surface)",
             padding: 14,
-            border: "1px solid #dfe2e1",
+            border: "1px solid var(--line)",
           }}
         >
           <div className="eyebrow-muted">Latest market net</div>
@@ -127,23 +127,23 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
               marginTop: 4,
               color:
                 sample.lastMarketDirection === "NET_BUY"
-                  ? "#178477"
+                  ? "var(--up)"
                   : sample.lastMarketDirection === "NET_SELL"
-                    ? "#8f2424"
-                    : "#7c858c",
+                    ? "var(--down)"
+                    : "var(--muted)",
             }}
           >
             {formatEnumLabel(sample.lastMarketDirection)}
           </div>
-          <p style={{ margin: "6px 0 0", fontSize: 12, color: "#686e73" }}>
+          <p style={{ margin: "6px 0 0", fontSize: 12, color: "var(--muted)" }}>
             Reported market total (one observation per market date).
           </p>
         </article>
         <article
           style={{
-            background: "#fff",
+            background: "var(--surface)",
             padding: 14,
-            border: "1px solid #dfe2e1",
+            border: "1px solid var(--line)",
           }}
         >
           <div className="eyebrow-muted">Latest sample net</div>
@@ -154,23 +154,23 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
               marginTop: 4,
               color:
                 sample.lastSampleDirection === "NET_BUY"
-                  ? "#178477"
+                  ? "var(--up)"
                   : sample.lastSampleDirection === "NET_SELL"
-                    ? "#8f2424"
-                    : "#7c858c",
+                    ? "var(--down)"
+                    : "var(--muted)",
             }}
           >
             {formatEnumLabel(sample.lastSampleDirection)}
           </div>
-          <p style={{ margin: "6px 0 0", fontSize: 12, color: "#686e73" }}>
+          <p style={{ margin: "6px 0 0", fontSize: 12, color: "var(--muted)" }}>
             Top-list company rows. Distinct from market totals by design.
           </p>
         </article>
         <article
           style={{
-            background: "#fff",
+            background: "var(--surface)",
             padding: 14,
-            border: "1px solid #dfe2e1",
+            border: "1px solid var(--line)",
           }}
         >
           <div className="eyebrow-muted">Market ↔ sample alignment</div>
@@ -183,7 +183,7 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
           >
             {sample.marketSampleAligned ? "Aligned" : "Divergent"}
           </div>
-          <p style={{ margin: "6px 0 0", fontSize: 12, color: "#686e73" }}>
+          <p style={{ margin: "6px 0 0", fontSize: 12, color: "var(--muted)" }}>
             Sample is not a market-wide observation; divergence is expected.
           </p>
         </article>
@@ -202,10 +202,10 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
           <tbody>
             {breadthRows.map(([label, value]) => (
               <tr key={label}>
-                <td style={{ borderBottom: "1px solid #dfe2e1", padding: "6px 4px" }}>{label}</td>
+                <td style={{ borderBottom: "1px solid var(--line)", padding: "6px 4px" }}>{label}</td>
                 <td
                   align="right"
-                  style={{ borderBottom: "1px solid #dfe2e1", padding: "6px 4px" }}
+                  style={{ borderBottom: "1px solid var(--line)", padding: "6px 4px" }}
                 >
                   {value}
                 </td>
@@ -230,12 +230,12 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
         <TopList
           title="Latest top-buys (sample)"
           rows={sample.topBuys}
-          accent="#178477"
+          accent="var(--up)"
         />
         <TopList
           title="Latest top-sells (sample)"
           rows={sample.topSells}
-          accent="#8f2424"
+          accent="var(--down)"
         />
       </div>
 
@@ -258,7 +258,7 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
               style={{
                 display: "flex",
                 justifyContent: "space-between",
-                borderBottom: "1px solid #dfe2e1",
+                borderBottom: "1px solid var(--line)",
                 paddingBottom: 4,
               }}
             >
@@ -285,7 +285,7 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
             <li
               key={row.sourceUrl}
               style={{
-                borderBottom: "1px solid #dfe2e1",
+                borderBottom: "1px solid var(--line)",
                 paddingBottom: 6,
               }}
             >
@@ -294,7 +294,7 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
               </a>
               <span
                 style={{
-                  color: "#686e73",
+                  color: "var(--muted)",
                   marginLeft: 6,
                   fontFamily: "Geist Mono, monospace",
                   fontSize: 11,
@@ -309,7 +309,7 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
 
       <div>
         <h3 style={{ margin: "0 0 8px", fontSize: 14 }}>Methodology limitations</h3>
-        <ul style={{ margin: 0, padding: "0 0 0 18px", fontSize: 12, color: "#686e73" }}>
+        <ul style={{ margin: 0, padding: "0 0 0 18px", fontSize: 12, color: "var(--muted)" }}>
           {sample.limitations.map((line) => (
             <li key={line}>{line}</li>
           ))}
@@ -330,7 +330,7 @@ function DailyBars({
 }) {
   if (marketDaily.length === 0) {
     return (
-      <p style={{ margin: 0, color: "#686e73", fontSize: 12 }}>
+      <p style={{ margin: 0, color: "var(--muted)", fontSize: 12 }}>
         No market-level observations.
       </p>
     );
@@ -347,10 +347,10 @@ function DailyBars({
         const height = Math.max(4, Math.round(ratio * 96));
         const colour =
           row.direction === "NET_BUY"
-            ? "#178477"
+            ? "var(--up)"
             : row.direction === "NET_SELL"
-              ? "#8f2424"
-              : "#7c858c";
+              ? "var(--down)"
+              : "var(--muted)";
         return (
           <div
             key={row.asOf}
@@ -361,11 +361,11 @@ function DailyBars({
               textAlign: "center",
               fontFamily: "Geist Mono, monospace",
               fontSize: 10,
-              color: "#202325",
+              color: "var(--ink)",
             }}
             title={`${row.asOf} · ${formatIdrCompact(row.netValueIdr)}`}
           >
-            <div style={{ color: "#686e73" }}>{formatDateLabel(row.asOf).replace(/ \d{4}$/, "")}</div>
+            <div style={{ color: "var(--muted)" }}>{formatDateLabel(row.asOf).replace(/ \d{4}$/, "")}</div>
             <div
               style={{
                 background: colour,
@@ -401,8 +401,8 @@ function TopList({
   return (
     <article
       style={{
-        background: "#fff",
-        border: "1px solid #dfe2e1",
+        background: "var(--surface)",
+        border: "1px solid var(--line)",
         padding: 14,
       }}
     >
@@ -410,7 +410,7 @@ function TopList({
         {title}
       </div>
       {rows.length === 0 ? (
-        <p style={{ margin: "8px 0 0", fontSize: 12, color: "#686e73" }}>
+        <p style={{ margin: "8px 0 0", fontSize: 12, color: "var(--muted)" }}>
           No sample rows.
         </p>
       ) : (
@@ -421,16 +421,16 @@ function TopList({
               style={{
                 display: "flex",
                 justifyContent: "space-between",
-                borderBottom: "1px solid #dfe2e1",
+                borderBottom: "1px solid var(--line)",
                 paddingBottom: 4,
               }}
             >
               <span>
-                <Link to={`/ticker/${encodeURIComponent(row.ticker)}`} style={{ color: "#202325", fontWeight: 600, textUnderlineOffset: 3 }}>{row.ticker}</Link>
+                <Link to={`/ticker/${encodeURIComponent(row.ticker)}`} style={{ color: "var(--ink)", fontWeight: 600, textUnderlineOffset: 3 }}>{row.ticker}</Link>
                 <span
                   style={{
                     fontFamily: "Geist Mono, monospace",
-                    color: "#686e73",
+                    color: "var(--muted)",
                     marginLeft: 6,
                   }}
                 >

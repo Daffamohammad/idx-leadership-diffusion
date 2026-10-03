@@ -9,7 +9,7 @@ interface ListingRegistryPanelProps {
 }
 
 const card: React.CSSProperties = {
-  background: "#ffffff",
+  background: "var(--surface)",
   borderRadius: 6,
   boxShadow: "rgba(0,0,0,0.08) 0px 0px 0px 1px, rgb(250,250,250) 0px 0px 0px 2px",
 };
@@ -45,12 +45,12 @@ export default function ListingRegistryPanel({ registry }: ListingRegistryPanelP
 
   return (
     <section aria-labelledby="listing-registry-title" style={{ ...card, marginBottom: 18, overflow: "hidden" }}>
-      <div style={{ padding: "16px 18px", borderBottom: "1px solid #ebebeb" }}>
+      <div style={{ padding: "16px 18px", borderBottom: "1px solid var(--line)" }}>
         <div className="eyebrow-muted">Universe registry</div>
-        <h2 id="listing-registry-title" style={{ margin: "5px 0 6px", fontSize: 20, color: "#171717" }}>
+        <h2 id="listing-registry-title" style={{ margin: "5px 0 6px", fontSize: 20, color: "var(--ink)" }}>
           Listed securities and taxonomy mapping
         </h2>
-        <p style={{ margin: 0, color: "#666666", fontSize: 12, lineHeight: 1.5 }}>{completeness}</p>
+        <p style={{ margin: 0, color: "var(--muted)", fontSize: 12, lineHeight: 1.5 }}>{completeness}</p>
       </div>
       <div className="method-coverage-grid" style={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(0, 1fr))", gap: 10, padding: "12px 18px" }}>
         {[
@@ -60,9 +60,9 @@ export default function ListingRegistryPanel({ registry }: ListingRegistryPanelP
           ["Konglo listings mapped", registry.kongloMappedCount.toLocaleString("en-US")],
           ["Theme listings mapped", registry.themeMappedCount.toLocaleString("en-US")],
         ].map(([label, value]) => (
-          <div key={label} style={{ border: "1px solid #ebebeb", padding: "10px 12px", background: "#fafafa" }}>
-            <div style={{ fontFamily: "Geist Mono, monospace", fontSize: 18, color: "#171717" }}>{value}</div>
-            <div style={{ marginTop: 3, fontSize: 10, color: "#666666" }}>{label}</div>
+          <div key={label} style={{ border: "1px solid var(--line)", padding: "10px 12px", background: "var(--surface-subtle)" }}>
+            <div style={{ fontFamily: "Geist Mono, monospace", fontSize: 18, color: "var(--ink)" }}>{value}</div>
+            <div style={{ marginTop: 3, fontSize: 10, color: "var(--muted)" }}>{label}</div>
           </div>
         ))}
       </div>
@@ -72,25 +72,25 @@ export default function ListingRegistryPanel({ registry }: ListingRegistryPanelP
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Filter ticker, company, sector…"
-          style={{ flex: "1 1 260px", minWidth: 220, border: "1px solid #dfe2e1", padding: "9px 10px", fontSize: 12, color: "#202325" }}
+          style={{ flex: "1 1 260px", minWidth: 220, border: "1px solid var(--line)", padding: "9px 10px", fontSize: 12, color: "var(--ink)" }}
         />
-        <span style={{ color: "#686e73", fontSize: 11, fontFamily: "Geist Mono, ui-monospace, monospace" }}>
+        <span style={{ color: "var(--muted)", fontSize: 11, fontFamily: "Geist Mono, ui-monospace, monospace" }}>
           {formatCountLabel(records.length, "row")} shown
         </span>
       </div>
       <div className="table-scroll">
         <table style={{ width: "100%", minWidth: 980, borderCollapse: "collapse", fontSize: 11 }}>
           <thead>
-            <tr style={{ borderTop: "1px solid #ebebeb", borderBottom: "1px solid #ebebeb", background: "#fafafa" }}>
+            <tr style={{ borderTop: "1px solid var(--line)", borderBottom: "1px solid var(--line)", background: "var(--surface-subtle)" }}>
               {["Ticker", "Company", "Sector / subsector", "Industry", "Konglo", "Themes", "Taxonomy", "Analysis"].map((label) => (
-                <th key={label} style={{ padding: "9px 12px", textAlign: "left", color: "#666666", fontFamily: "Geist Mono, monospace", fontSize: 10, fontWeight: 400 }}>{label}</th>
+                <th key={label} style={{ padding: "9px 12px", textAlign: "left", color: "var(--muted)", fontFamily: "Geist Mono, monospace", fontSize: 10, fontWeight: 400 }}>{label}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {records.map((record: ListingRegistryRecord) => (
               <tr key={record.ticker} style={{ borderBottom: "1px solid #f0f0f0" }}>
-                <td style={{ padding: "8px 12px", fontFamily: "Geist Mono, monospace", fontWeight: 600 }}><Link to={`/ticker/${encodeURIComponent(record.ticker)}`} style={{ color: "#202325", textUnderlineOffset: 3 }}>{record.ticker}</Link></td>
+                <td style={{ padding: "8px 12px", fontFamily: "Geist Mono, monospace", fontWeight: 600 }}><Link to={`/ticker/${encodeURIComponent(record.ticker)}`} style={{ color: "var(--ink)", textUnderlineOffset: 3 }}>{record.ticker}</Link></td>
                 <td style={{ padding: "8px 12px", maxWidth: 240 }}>{record.company_name}</td>
                 <td style={{ padding: "8px 12px" }}>{clean(record.taxonomy.sector)} · {clean(record.taxonomy.subsector)}</td>
                 <td style={{ padding: "8px 12px" }}>{clean(record.taxonomy.industry)}</td>
@@ -103,7 +103,7 @@ export default function ListingRegistryPanel({ registry }: ListingRegistryPanelP
           </tbody>
         </table>
       </div>
-      <div style={{ padding: "12px 18px", color: "#686e73", fontSize: 11, lineHeight: 1.5 }}>
+      <div style={{ padding: "12px 18px", color: "var(--muted)", fontSize: 11, lineHeight: 1.5 }}>
         Sector membership comes from the provider security master. Konglo and theme memberships come only from the explicit configuration files; an unmapped row is not assigned by inference.
       </div>
     </section>

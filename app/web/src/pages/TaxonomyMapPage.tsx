@@ -31,7 +31,7 @@ export default function TaxonomyMapPage() {
 
   if (snap.loading) {
     return (
-      <main style={{ padding: 32, color: "#686e73" }}>
+      <main style={{ padding: 32, color: "var(--muted)" }}>
         Loading snapshot…
       </main>
     );
@@ -40,7 +40,7 @@ export default function TaxonomyMapPage() {
     return (
       <main style={{ padding: 32 }}>
         <h1 style={{ fontSize: 28 }}>Snapshot unavailable</h1>
-        <p style={{ color: "#8f2424" }}>{snap.error ?? "No snapshot loaded."}</p>
+        <p style={{ color: "var(--down)" }}>{snap.error ?? "No snapshot loaded."}</p>
         <Link to="/overview">Return to overview</Link>
       </main>
     );
@@ -63,7 +63,7 @@ export default function TaxonomyMapPage() {
     >
       <header
         style={{
-          borderBottom: "1px solid #dfe2e1",
+          borderBottom: "1px solid var(--line)",
           paddingBottom: 16,
           display: "flex",
           flexWrap: "wrap",
@@ -85,7 +85,7 @@ export default function TaxonomyMapPage() {
               gap: 12,
               fontSize: 12,
               fontFamily: "Geist Mono, monospace",
-              color: "#686e73",
+              color: "var(--muted)",
               flexWrap: "wrap",
             }}
           >
@@ -107,8 +107,8 @@ export default function TaxonomyMapPage() {
             to={taxonomyKind === "KONGLO" ? "/konglo" : "/themes"}
             style={{
               padding: "10px 14px",
-              border: "1px solid #dfe2e1",
-              color: "#202325",
+              border: "1px solid var(--line)",
+              color: "var(--ink)",
               textDecoration: "none",
               fontSize: 12,
             }}
@@ -119,8 +119,8 @@ export default function TaxonomyMapPage() {
             to={`/map?taxonomy=${taxonomyKind}&mode=groups`}
             style={{
               padding: "10px 14px",
-              border: "1px solid #dfe2e1",
-              color: "#202325",
+              border: "1px solid var(--line)",
+              color: "var(--ink)",
               textDecoration: "none",
               fontSize: 12,
             }}
@@ -132,7 +132,7 @@ export default function TaxonomyMapPage() {
             style={{
               padding: "10px 14px",
               border: "1px solid #202325",
-              color: "#202325",
+              color: "var(--ink)",
               textDecoration: "none",
               fontSize: 12,
             }}
@@ -144,7 +144,7 @@ export default function TaxonomyMapPage() {
             style={{
               padding: "10px 14px",
               border: "1px solid #202325",
-              color: "#202325",
+              color: "var(--ink)",
               textDecoration: "none",
               fontSize: 12,
             }}

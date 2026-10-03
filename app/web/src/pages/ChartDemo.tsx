@@ -60,18 +60,18 @@ export default function ChartDemo() {
           <h1 style={{ fontSize: 26, letterSpacing: "-.03em", margin: "0 0 6px" }}>
             Interactive price context
           </h1>
-          <p style={{ color: "#747a7d", margin: 0, lineHeight: 1.5 }}>
+          <p style={{ color: "var(--muted)", margin: 0, lineHeight: 1.5 }}>
             Equal-weight group performance versus IHSG from persisted snapshot data.
           </p>
         </div>
         {data.sectors.length > 0 && (
-          <label style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 12, color: "#686e73" }}>
+          <label style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 12, color: "var(--muted)" }}>
             Group
             <select
               aria-label="Select chart group"
               value={group?.id ?? ""}
               onChange={(event) => setSelected(event.target.value)}
-              style={{ minWidth: 190, padding: "8px 10px", border: "1px solid #dfe2e1", background: "#fff", color: "#202325" }}
+              style={{ minWidth: 190, padding: "8px 10px", border: "1px solid var(--line)", background: "var(--surface)", color: "var(--ink)" }}
             >
               {data.sectors.map((sector) => (
                 <option key={sector.id} value={sector.id}>{sector.name}</option>
@@ -107,11 +107,11 @@ export default function ChartDemo() {
         />
       )}
 
-      <div style={{ marginTop: 16, display: "flex", gap: 16, flexWrap: "wrap", fontSize: 11, color: "#747a7d", fontFamily: "Geist Mono, monospace" }}>
+      <div style={{ marginTop: 16, display: "flex", gap: 16, flexWrap: "wrap", fontSize: 11, color: "var(--muted)", fontFamily: "Geist Mono, monospace" }}>
         <span>Snapshot: {formatSnapshotId(data.payload.snapshot_id, data.payload.as_of)}</span>
         <span>Source: {source}</span>
         <span>As of: {data.payload.as_of}</span>
-        <Link to="/explorer" style={{ color: "#245b76" }}>Open group explorer →</Link>
+        <Link to="/explorer" style={{ color: "var(--link)" }}>Open group explorer →</Link>
       </div>
     </main>
   );

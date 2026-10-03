@@ -15,8 +15,8 @@ export function EmptyState({ label, title, body, height = 160 }: EmptyStateProps
   return (
     <div
       style={{
-        background: "#fafafa",
-        border: "1px dashed #dfe2e1",
+        background: "var(--surface-subtle)",
+        border: "1px dashed var(--line)",
         padding: "20px 22px",
         minHeight: height,
         display: "flex",
@@ -27,14 +27,14 @@ export function EmptyState({ label, title, body, height = 160 }: EmptyStateProps
     >
       <div
         className="eyebrow-muted"
-        style={{ color: "#7a5010" }}
+        style={{ color: "var(--accent-ink)" }}
       >
         {label}
       </div>
-      <div style={{ fontSize: 13, fontWeight: 500, color: "#16191c" }}>
+      <div style={{ fontSize: 13, fontWeight: 500, color: "var(--ink)" }}>
         {title}
       </div>
-      <div style={{ fontSize: 12, color: "#4d4d4d", lineHeight: 1.55 }}>
+      <div style={{ fontSize: 12, color: "var(--muted)", lineHeight: 1.55 }}>
         {body}
       </div>
     </div>

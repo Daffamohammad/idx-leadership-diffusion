@@ -62,7 +62,7 @@ export default function TickerAnalysis() {
 
   if (snap.loading) {
     return (
-      <main style={{ padding: 32, color: "#686e73" }}>
+      <main style={{ padding: 32, color: "var(--muted)" }}>
         Loading snapshot for ticker analysis…
       </main>
     );
@@ -72,7 +72,7 @@ export default function TickerAnalysis() {
     return (
       <main style={{ padding: 32 }}>
         <h1>Snapshot unavailable</h1>
-        <p style={{ color: "#8f2424" }}>{snap.error ?? "No snapshot loaded."}</p>
+        <p style={{ color: "var(--down)" }}>{snap.error ?? "No snapshot loaded."}</p>
         <Link to="/overview">Return to overview</Link>
       </main>
     );
@@ -99,7 +99,7 @@ export default function TickerAnalysis() {
     >
       <header
         style={{
-          borderBottom: "1px solid #dfe2e1",
+          borderBottom: "1px solid var(--line)",
           paddingBottom: 16,
           display: "flex",
           flexWrap: "wrap",
@@ -124,7 +124,7 @@ export default function TickerAnalysis() {
               gap: 12,
               fontSize: 12,
               fontFamily: "Geist Mono, monospace",
-              color: "#686e73",
+              color: "var(--muted)",
               minWidth: 0,
               maxWidth: "100%",
               overflowWrap: "anywhere",
@@ -149,7 +149,7 @@ export default function TickerAnalysis() {
             alignSelf: "flex-end",
             padding: "8px 14px",
             border: "1px solid #202325",
-            color: "#202325",
+            color: "var(--ink)",
             textDecoration: "none",
             fontSize: 12,
           }}
@@ -189,9 +189,9 @@ export default function TickerAnalysis() {
       <section
         aria-label="Foreign flow sample context"
         style={{
-          border: "1px solid #dfe2e1",
+          border: "1px solid var(--line)",
           padding: 20,
-          background: "#faf9f6",
+          background: "var(--surface-subtle)",
         }}
       >
         <div className="eyebrow-muted">Foreign-flow sample context</div>
@@ -206,14 +206,14 @@ export default function TickerAnalysis() {
             <div>
               Net: {formatIdrCompact(foreignContext.netValueIdr)}
             </div>
-            <div style={{ fontSize: 11, color: "#686e73" }}>
+            <div style={{ fontSize: 11, color: "var(--muted)" }}>
               <a href={foreignContext.sourceUrl} target="_blank" rel="noreferrer">
                 Source: {foreignContext.sourceName}
               </a>
             </div>
           </div>
         ) : (
-          <p style={{ margin: 0, fontSize: 13, color: "#686e73" }}>
+          <p style={{ margin: 0, fontSize: 13, color: "var(--muted)" }}>
             This ticker does not appear in the latest published top-buy or
             top-sell foreign-flow sample. The sample is bounded to the
             published source articles and is not a full universe observation.
@@ -224,9 +224,9 @@ export default function TickerAnalysis() {
       <section
         aria-label="Research events"
         style={{
-          border: "1px solid #dfe2e1",
+          border: "1px solid var(--line)",
           padding: 20,
-          background: "#faf9f6",
+          background: "var(--surface-subtle)",
         }}
       >
         <div className="eyebrow-muted">Research events</div>
@@ -234,7 +234,7 @@ export default function TickerAnalysis() {
           {events.length === 0 ? "No dated events" : `${events.length} dated event(s)`}
         </h2>
         {events.length === 0 ? (
-          <p style={{ margin: 0, fontSize: 13, color: "#686e73" }}>
+          <p style={{ margin: 0, fontSize: 13, color: "var(--muted)" }}>
             No research event for this ticker in the current bundle. Events
             are explicitly context-only — they never become signals.
           </p>
@@ -257,12 +257,12 @@ export default function TickerAnalysis() {
                   paddingLeft: 12,
                 }}
               >
-                <div style={{ fontFamily: "Geist Mono, monospace", fontSize: 11, color: "#686e73" }}>
+                <div style={{ fontFamily: "Geist Mono, monospace", fontSize: 11, color: "var(--muted)" }}>
                   {formatDateLabel(event.eventDate)} · {formatEnumLabel(event.category)}
                 </div>
                 <div style={{ fontWeight: 600 }}>{event.title}</div>
-                <div style={{ color: "#202325", marginTop: 2 }}>{event.summary}</div>
-                <div style={{ fontSize: 11, color: "#686e73", marginTop: 2 }}>
+                <div style={{ color: "var(--ink)", marginTop: 2 }}>{event.summary}</div>
+                <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 2 }}>
                   <a href={event.sourceUrl} target="_blank" rel="noreferrer">
                     Source: {event.sourceName}
                   </a>
@@ -276,9 +276,9 @@ export default function TickerAnalysis() {
       <section
         aria-label="Methodology feature snapshot"
         style={{
-          border: "1px solid #dfe2e1",
+          border: "1px solid var(--line)",
           padding: 20,
-          background: "#fff",
+          background: "var(--surface)",
         }}
       >
         <div className="eyebrow-muted">Methodology snapshot</div>
@@ -294,8 +294,8 @@ export default function TickerAnalysis() {
           >
             <thead>
               <tr>
-                <th align="left" style={{ borderBottom: "1px solid #dfe2e1" }}>Field</th>
-                <th align="left" style={{ borderBottom: "1px solid #dfe2e1" }}>Value</th>
+                <th align="left" style={{ borderBottom: "1px solid var(--line)" }}>Field</th>
+                <th align="left" style={{ borderBottom: "1px solid var(--line)" }}>Value</th>
               </tr>
             </thead>
             <tbody>
@@ -308,7 +308,7 @@ export default function TickerAnalysis() {
             </tbody>
           </table>
         ) : (
-          <p style={{ margin: 0, color: "#686e73" }}>
+          <p style={{ margin: 0, color: "var(--muted)" }}>
             This ticker does not appear in the snapshot's feature table.
           </p>
         )}

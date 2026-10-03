@@ -15,9 +15,9 @@ function formatSigned(value: number, fractionDigits = 2): string {
 }
 
 function flowColour(direction: string): string {
-  if (direction === "NET_BUY") return "#178477";
-  if (direction === "NET_SELL") return "#8f2424";
-  return "#686e73";
+  if (direction === "NET_BUY") return "var(--up)";
+  if (direction === "NET_SELL") return "var(--down)";
+  return "var(--muted)";
 }
 
 export default function IDXDailyStatistics({ statistics }: IDXDailyStatisticsProps) {
@@ -31,7 +31,7 @@ export default function IDXDailyStatistics({ statistics }: IDXDailyStatisticsPro
       style={{
         border: "1px solid #ead39b",
         padding: 22,
-        background: "#fffdf7",
+        background: "var(--surface-subtle)",
         display: "grid",
         gap: 18,
       }}
@@ -48,8 +48,8 @@ export default function IDXDailyStatistics({ statistics }: IDXDailyStatisticsPro
                 padding: "3px 8px",
                 border: "1px solid #ead39b",
                 borderRadius: 999,
-                color: "#6e5a24",
-                background: "#fff8e8",
+                color: "var(--accent-ink)",
+                background: "var(--tint-flag)",
                 fontFamily: "Geist Mono, ui-monospace, monospace",
                 fontSize: 10,
               }}
@@ -66,7 +66,7 @@ export default function IDXDailyStatistics({ statistics }: IDXDailyStatisticsPro
             display: "flex",
             flexWrap: "wrap",
             gap: 12,
-            color: "#686e73",
+            color: "var(--muted)",
             fontFamily: "Geist Mono, ui-monospace, monospace",
             fontSize: 11,
           }}
@@ -77,7 +77,7 @@ export default function IDXDailyStatistics({ statistics }: IDXDailyStatisticsPro
           <span>·</span>
           <span>{hasWarnings ? "Review warning attached" : "Validation checks passed"}</span>
         </div>
-        <p style={{ margin: 0, color: "#6e5a24", fontSize: 12, lineHeight: 1.5 }}>
+        <p style={{ margin: 0, color: "var(--accent-ink)", fontSize: 12, lineHeight: 1.5 }}>
           Market-level evidence from the official Daily Statistics release. It does not create per-ticker or group ownership-flow data.
         </p>
       </header>
@@ -100,13 +100,13 @@ export default function IDXDailyStatistics({ statistics }: IDXDailyStatisticsPro
           label="Market PER"
           value={fundamental.market_per.toFixed(2)}
           detail="times"
-          colour="#202325"
+          colour="var(--ink)"
         />
         <MetricCard
           label="Market PBV"
           value={fundamental.market_pbv.toFixed(2)}
           detail="times"
-          colour="#202325"
+          colour="var(--ink)"
         />
       </div>
 
@@ -127,10 +127,10 @@ export default function IDXDailyStatistics({ statistics }: IDXDailyStatisticsPro
 
       {hasWarnings && (
         <details>
-          <summary style={{ cursor: "pointer", color: "#6e5a24", fontSize: 12 }}>
+          <summary style={{ cursor: "pointer", color: "var(--accent-ink)", fontSize: 12 }}>
             Show parser review notes
           </summary>
-          <ul style={{ margin: "10px 0 0", paddingLeft: 18, color: "#6e5a24", fontSize: 12, lineHeight: 1.5 }}>
+          <ul style={{ margin: "10px 0 0", paddingLeft: 18, color: "var(--accent-ink)", fontSize: 12, lineHeight: 1.5 }}>
             {quality.warnings.map((warning) => <li key={warning}>{warning}</li>)}
           </ul>
         </details>
@@ -142,7 +142,7 @@ export default function IDXDailyStatistics({ statistics }: IDXDailyStatisticsPro
           flexWrap: "wrap",
           gap: 10,
           alignItems: "center",
-          color: "#686e73",
+          color: "var(--muted)",
           fontFamily: "Geist Mono, ui-monospace, monospace",
           fontSize: 10,
         }}
@@ -175,12 +175,12 @@ function MetricCard({
   colour: string;
 }) {
   return (
-    <article style={{ minWidth: 0, background: "#ffffff", border: "1px solid #ead39b", padding: 14 }}>
+    <article style={{ minWidth: 0, background: "var(--surface)", border: "1px solid #ead39b", padding: 14 }}>
       <div className="eyebrow-muted">{label}</div>
       <div style={{ marginTop: 6, color: colour, fontFamily: "Geist Mono, ui-monospace, monospace", fontSize: 22, lineHeight: 1.2 }}>
         {value}
       </div>
-      <div style={{ marginTop: 5, color: "#686e73", fontSize: 11 }}>{detail}</div>
+      <div style={{ marginTop: 5, color: "var(--muted)", fontSize: 11 }}>{detail}</div>
     </article>
   );
 }
@@ -194,7 +194,7 @@ function FlowCard({
 }) {
   const colour = flowColour(flow.direction);
   return (
-    <article style={{ minWidth: 0, background: "#ffffff", border: "1px solid #ead39b", padding: 16 }}>
+    <article style={{ minWidth: 0, background: "var(--surface)", border: "1px solid #ead39b", padding: 16 }}>
       <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "baseline" }}>
         <h4 style={{ margin: 0, fontSize: 14 }}>{label}</h4>
         <span style={{ color: colour, fontFamily: "Geist Mono, ui-monospace, monospace", fontSize: 11 }}>
@@ -203,11 +203,11 @@ function FlowCard({
       </div>
       <div style={{ marginTop: 12, display: "grid", gap: 7, fontFamily: "Geist Mono, ui-monospace, monospace" }}>
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-          <span style={{ color: "#686e73", fontSize: 11 }}>IDR billion</span>
+          <span style={{ color: "var(--muted)", fontSize: 11 }}>IDR billion</span>
           <strong style={{ color: colour, fontSize: 18 }}>{formatSigned(flow.idr_billion)}</strong>
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-          <span style={{ color: "#686e73", fontSize: 11 }}>USD million{flow.usd_approximate ? "~" : ""}</span>
+          <span style={{ color: "var(--muted)", fontSize: 11 }}>USD million{flow.usd_approximate ? "~" : ""}</span>
           <strong style={{ color: colour, fontSize: 15 }}>{formatSigned(flow.usd_million)}</strong>
         </div>
       </div>

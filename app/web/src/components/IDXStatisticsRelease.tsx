@@ -7,9 +7,9 @@ interface IDXStatisticsReleaseProps {
 }
 
 function directionColour(direction: string): string {
-  if (direction === "NET_BUY") return "#178477";
-  if (direction === "NET_SELL") return "#8f2424";
-  return "#686e73";
+  if (direction === "NET_BUY") return "var(--up)";
+  if (direction === "NET_SELL") return "var(--down)";
+  return "var(--muted)";
 }
 
 function shortDate(value: string): string {
@@ -22,14 +22,14 @@ export default function IDXStatisticsRelease({ release }: IDXStatisticsReleasePr
       <section
         aria-labelledby="idx-release-title"
         style={{
-          border: "1px dashed #dfe2e1",
+          border: "1px dashed var(--line)",
           padding: 22,
-          background: "#faf9f6",
+          background: "var(--surface-subtle)",
         }}
       >
         <div className="eyebrow-muted" id="idx-release-title">Official IDX release</div>
         <h2 style={{ margin: "6px 0 8px", fontSize: 22 }}>Investor trading statistics unavailable</h2>
-        <p style={{ margin: 0, color: "#686e73", fontSize: 13, lineHeight: 1.5 }}>
+        <p style={{ margin: 0, color: "var(--muted)", fontSize: 13, lineHeight: 1.5 }}>
           No validated IDX Digital Statistic release is attached to this snapshot.
         </p>
       </section>
@@ -46,9 +46,9 @@ export default function IDXStatisticsRelease({ release }: IDXStatisticsReleasePr
     <section
       aria-labelledby="idx-release-title"
       style={{
-        border: "1px solid #b9ded6",
+        border: "1px solid var(--line)",
         padding: 22,
-        background: "#f8fcfb",
+        background: "var(--tint-ok)",
         display: "grid",
         gridTemplateColumns: "minmax(0, 1fr)",
         minWidth: 0,
@@ -69,7 +69,7 @@ export default function IDXStatisticsRelease({ release }: IDXStatisticsReleasePr
             display: "flex",
             flexWrap: "wrap",
             gap: 12,
-            color: "#686e73",
+            color: "var(--muted)",
             fontFamily: "Geist Mono, ui-monospace, monospace",
             fontSize: 11,
           }}
@@ -80,7 +80,7 @@ export default function IDXStatisticsRelease({ release }: IDXStatisticsReleasePr
           <span>·</span>
           <span>Published source: Indonesia Stock Exchange</span>
         </div>
-        <p style={{ margin: 0, color: "#315d57", fontSize: 12, lineHeight: 1.5 }}>
+        <p style={{ margin: 0, color: "var(--up)", fontSize: 12, lineHeight: 1.5 }}>
           Real market-level release. It does not contain per-ticker ownership flow and is not used to confirm group leadership.
         </p>
       </header>
@@ -109,7 +109,7 @@ export default function IDXStatisticsRelease({ release }: IDXStatisticsReleasePr
           label="Observed direction days"
           value={`${positiveDays} buy · ${negativeDays} sell`}
           sublabel="From the published daily rows"
-          colour="#202325"
+          colour="var(--ink)"
           compactValue
         />
       </div>
@@ -127,8 +127,8 @@ export default function IDXStatisticsRelease({ release }: IDXStatisticsReleasePr
             gap: 5,
             minHeight: 138,
             padding: "8px 4px 0",
-            borderTop: "1px solid #dfe2e1",
-            borderBottom: "1px solid #dfe2e1",
+            borderTop: "1px solid var(--line)",
+            borderBottom: "1px solid var(--line)",
           }}
         >
           {release.daily.map((row) => {
@@ -144,7 +144,7 @@ export default function IDXStatisticsRelease({ release }: IDXStatisticsReleasePr
                   alignItems: "end",
                   justifyItems: "center",
                   gap: 3,
-                  color: "#686e73",
+                  color: "var(--muted)",
                   fontFamily: "Geist Mono, ui-monospace, monospace",
                   fontSize: 9,
                 }}
@@ -171,7 +171,7 @@ export default function IDXStatisticsRelease({ release }: IDXStatisticsReleasePr
       </div>
 
       <details>
-        <summary style={{ cursor: "pointer", fontSize: 12, color: "#315d57" }}>
+        <summary style={{ cursor: "pointer", fontSize: 12, color: "var(--up)" }}>
           Show source composition and parser checks
         </summary>
         <div
@@ -202,7 +202,7 @@ export default function IDXStatisticsRelease({ release }: IDXStatisticsReleasePr
           flexWrap: "wrap",
           gap: 10,
           alignItems: "center",
-          color: "#686e73",
+          color: "var(--muted)",
           fontFamily: "Geist Mono, ui-monospace, monospace",
           fontSize: 10,
         }}
@@ -231,7 +231,7 @@ function MetricCard({
   compactValue?: boolean;
 }) {
   return (
-    <article style={{ background: "#fff", border: "1px solid #dfe2e1", padding: 14, minWidth: 0 }}>
+    <article style={{ background: "var(--surface)", border: "1px solid var(--line)", padding: 14, minWidth: 0 }}>
       <div className="eyebrow-muted">{label}</div>
       <div
         style={{
@@ -245,16 +245,16 @@ function MetricCard({
       >
         {value}
       </div>
-      <div style={{ marginTop: 5, color: "#686e73", fontSize: 11 }}>{sublabel}</div>
+      <div style={{ marginTop: 5, color: "var(--muted)", fontSize: 11 }}>{sublabel}</div>
     </article>
   );
 }
 
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1.3fr)", gap: 8, borderBottom: "1px solid #dfe2e1", padding: "7px 0" }}>
-      <dt style={{ color: "#686e73" }}>{label}</dt>
-      <dd style={{ margin: 0, color: "#202325", overflowWrap: "anywhere" }}>{value}</dd>
+    <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1.3fr)", gap: 8, borderBottom: "1px solid var(--line)", padding: "7px 0" }}>
+      <dt style={{ color: "var(--muted)" }}>{label}</dt>
+      <dd style={{ margin: 0, color: "var(--ink)", overflowWrap: "anywhere" }}>{value}</dd>
     </div>
   );
 }

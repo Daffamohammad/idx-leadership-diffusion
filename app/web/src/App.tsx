@@ -47,16 +47,16 @@ function RouteErrorElement() {
         display: "grid",
         placeItems: "center",
         padding: 32,
-        background: "#faf9f6",
-        color: "#202325",
+        background: "var(--surface-subtle)",
+        color: "var(--ink)",
       }}
     >
       <section
         style={{
           width: "min(560px, 100%)",
           padding: 28,
-          background: "#fff",
-          border: "1px solid #dfe2e1",
+          background: "var(--surface)",
+          border: "1px solid var(--line)",
           borderTop: "3px solid #d97956",
         }}
       >
@@ -64,10 +64,10 @@ function RouteErrorElement() {
         <h1 style={{ margin: "8px 0 10px", fontSize: 24, letterSpacing: "-.03em" }}>
           This view is temporarily unavailable
         </h1>
-        <p style={{ margin: 0, color: "#686e73", lineHeight: 1.55 }}>
+        <p style={{ margin: 0, color: "var(--muted)", lineHeight: 1.55 }}>
           The snapshot loaded, but this page encountered a rendering problem.
         </p>
-        <p style={{ margin: "12px 0 20px", color: "#8f2424", fontFamily: "Geist Mono", fontSize: 11 }}>
+        <p style={{ margin: "12px 0 20px", color: "var(--down)", fontFamily: "Geist Mono", fontSize: 11 }}>
           {message}
         </p>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
@@ -75,7 +75,7 @@ function RouteErrorElement() {
             to="/overview"
             style={{
               padding: "9px 13px",
-              background: "#202325",
+              background: "var(--ink)",
               color: "#fff",
               textDecoration: "none",
               fontSize: 12,
@@ -88,9 +88,9 @@ function RouteErrorElement() {
             onClick={() => window.location.reload()}
             style={{
               padding: "8px 12px",
-              background: "#fff",
+              background: "var(--surface)",
               border: "1px solid #b9c0be",
-              color: "#202325",
+              color: "var(--ink)",
               cursor: "pointer",
               fontSize: 12,
             }}

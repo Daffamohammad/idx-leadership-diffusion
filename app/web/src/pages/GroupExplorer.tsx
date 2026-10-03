@@ -36,7 +36,7 @@ import { WindowCapNotice } from "../components/SnapshotNotices";
 import { catalogHref, rememberCatalogFocus } from "../data/catalogFocus";
 
 const card: React.CSSProperties = {
-  background: "#ffffff",
+  background: "var(--surface)",
   borderRadius: 6,
   boxShadow: "rgba(0,0,0,0.08) 0px 0px 0px 1px, rgb(250,250,250) 0px 0px 0px 2px",
 };
@@ -50,12 +50,12 @@ function displayMetric(val: number | null | undefined, suffix = "%"): string {
 function Num({ val, suffix = "%" }: { val: number | null | undefined; suffix?: string }) {
   const color =
     val === null || val === undefined || !Number.isFinite(val)
-      ? "#8f8f8f"
+      ? "var(--muted)"
       : val > 0
-        ? "#1a6e62"
+        ? "var(--up)"
         : val < 0
-          ? "#8f2424"
-          : "#5a5a5a";
+          ? "var(--down)"
+          : "var(--muted)";
   return (
     <span
       style={{
@@ -75,7 +75,7 @@ function SectionHead({ label }: { label: string }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "32px 0 14px" }}>
       <span className="eyebrow-muted">{label}</span>
-      <div style={{ flex: 1, height: 1, background: "#ebebeb" }} />
+      <div style={{ flex: 1, height: 1, background: "var(--line)" }} />
     </div>
   );
 }
@@ -99,7 +99,7 @@ function MetricCard({
           fontFamily: "Geist Mono, monospace",
           fontSize: 24,
           fontWeight: 500,
-          color: color || "#171717",
+          color: color || "var(--ink)",
           letterSpacing: "-0.02em",
           fontVariantNumeric: "tabular-nums",
         }}
@@ -107,17 +107,17 @@ function MetricCard({
         {value}
       </div>
       {sub && (
-        <div style={{ fontSize: 11, color: "#666666", marginTop: 4 }}>{sub}</div>
+        <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 4 }}>{sub}</div>
       )}
     </div>
   );
 }
 
 const flowCfg: Record<FlowState, { label: string; color: string }> = {
-  CONFIRMING: { label: "Confirming", color: "#1a6e62" },
-  NEUTRAL: { label: "Neutral", color: "#5a5a5a" },
-  AGAINST: { label: "Against", color: "#8f2424" },
-  DATA_GAP: { label: "Not available", color: "#7a5010" },
+  CONFIRMING: { label: "Confirming", color: "var(--up)" },
+  NEUTRAL: { label: "Neutral", color: "var(--muted)" },
+  AGAINST: { label: "Against", color: "var(--down)" },
+  DATA_GAP: { label: "Not available", color: "var(--accent-ink)" },
 };
 
 function ConstituentTable({ constituents }: { constituents: ConstituentData[] }) {
@@ -125,7 +125,7 @@ function ConstituentTable({ constituents }: { constituents: ConstituentData[] })
     <div className="table-scroll" style={{ ...card }}>
       <table style={{ width: "100%", minWidth: 1180, borderCollapse: "collapse" }}>
         <thead>
-          <tr style={{ borderBottom: "1px solid #ebebeb" }}>
+          <tr style={{ borderBottom: "1px solid var(--line)" }}>
             {["Ticker", "Company", "YTD Ret", "YTD Exc", "20D Ret", "20D Exc", "60D Exc", "Part.", "Abs. Move", "Membership", "Foreign Flow"].map(
               (col) => (
                 <th
@@ -137,9 +137,9 @@ function ConstituentTable({ constituents }: { constituents: ConstituentData[] })
                     fontWeight: 400,
                     letterSpacing: "0.06em",
                     textTransform: "uppercase",
-                    color: "#666666",
+                    color: "var(--muted)",
                     textAlign: col === "Ticker" || col === "Company" ? "left" : "right",
-                    background: "#fafafa",
+                    background: "var(--surface-subtle)",
                     whiteSpace: "nowrap",
                   }}
                 >
@@ -157,15 +157,15 @@ function ConstituentTable({ constituents }: { constituents: ConstituentData[] })
                 key={c.ticker}
                 style={{ borderBottom: i < constituents.length - 1 ? "1px solid #ebebeb" : "none" }}
               >
-                <td style={{ padding: "9px 12px", fontFamily: "Geist Mono, monospace", fontSize: 12, fontWeight: 600, color: "#171717" }}>
+                <td style={{ padding: "9px 12px", fontFamily: "Geist Mono, monospace", fontSize: 12, fontWeight: 600, color: "var(--ink)" }}>
                   <Link
                     to={`/ticker/${c.ticker}`}
-                    style={{ color: "#171717", textDecoration: "underline" }}
+                    style={{ color: "var(--ink)", textDecoration: "underline" }}
                   >
                     {c.ticker}
                   </Link>
                 </td>
-                <td style={{ padding: "9px 12px", fontSize: 12, color: "#4d4d4d", maxWidth: 220 }}>
+                <td style={{ padding: "9px 12px", fontSize: 12, color: "var(--muted)", maxWidth: 220 }}>
                   {c.name || "—"}
                 </td>
                 <td style={{ padding: "9px 12px", textAlign: "right" }}>
@@ -189,15 +189,15 @@ function ConstituentTable({ constituents }: { constituents: ConstituentData[] })
                     textAlign: "right",
                     fontFamily: "Geist Mono, monospace",
                     fontSize: 11,
-                    color: c.participating === null ? "#8f8f8f" : c.participating ? "#1a6e62" : "#8f8f8f",
+                    color: c.participating === null ? "var(--muted)" : c.participating ? "var(--up)" : "var(--muted)",
                   }}
                 >
                   {c.participating === null ? "—" : c.participating ? "● Yes" : "○ No"}
                 </td>
-                <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "Geist Mono, monospace", fontSize: 12, color: "#171717" }}>
+                <td style={{ padding: "9px 12px", textAlign: "right", fontFamily: "Geist Mono, monospace", fontSize: 12, color: "var(--ink)" }}>
                   {c.contribution === null ? "—" : `${c.contribution}%`}
                 </td>
-                <td style={{ padding: "9px 12px", textAlign: "right", fontSize: 11, color: "#666", whiteSpace: "nowrap" }}>
+                <td style={{ padding: "9px 12px", textAlign: "right", fontSize: 11, color: "var(--muted)", whiteSpace: "nowrap" }}>
                   {formatEnumLabel(c.membershipType)}
                 </td>
                 <td
@@ -255,17 +255,17 @@ function ContribBars({ constituents }: { constituents: ConstituentData[] }) {
               fontFamily: "Geist Mono, monospace",
               fontSize: 11,
               fontWeight: r.isOther ? 400 : 600,
-              color: r.isOther ? "#8f8f8f" : "#171717",
+              color: r.isOther ? "var(--muted)" : "var(--ink)",
             }}
           >
             {r.label}
           </span>
-          <div style={{ flex: 1, height: 6, background: "#ebebeb", borderRadius: 1, overflow: "hidden" }}>
+          <div style={{ flex: 1, height: 6, background: "var(--line)", borderRadius: 1, overflow: "hidden" }}>
             <div
               style={{
                 height: "100%",
                 width: `${r.val}%`,
-                background: r.isOther ? "#c9c9c9" : "#171717",
+                background: r.isOther ? "var(--line)" : "var(--ink)",
                 borderRadius: 1,
                 transition: "width 0.3s",
               }}
@@ -276,7 +276,7 @@ function ContribBars({ constituents }: { constituents: ConstituentData[] }) {
               width: 32,
               fontFamily: "Geist Mono, monospace",
               fontSize: 11,
-              color: "#666666",
+              color: "var(--muted)",
               textAlign: "right",
             }}
           >
@@ -315,7 +315,7 @@ function CatalogBackLink({ taxonomyKind, groupId, label }: {
     <Link
       to={catalogHref(taxonomyKind)}
       onClick={() => rememberCatalogFocus(groupId)}
-      style={{ color: "#686e73", fontSize: 12, textDecoration: "none" }}
+      style={{ color: "var(--muted)", fontSize: 12, textDecoration: "none" }}
     >
       ← Back to {label}
     </Link>
@@ -337,15 +337,15 @@ const th: React.CSSProperties = {
   fontWeight: 400,
   letterSpacing: "0.06em",
   textTransform: "uppercase",
-  color: "#666666",
+  color: "var(--muted)",
   textAlign: "left",
-  background: "#fafafa",
+  background: "var(--surface-subtle)",
   whiteSpace: "nowrap",
 };
 
 const thRight: React.CSSProperties = { ...th, textAlign: "right" };
 
-const td: React.CSSProperties = { padding: "10px 12px", fontSize: 12, color: "#333333" };
+const td: React.CSSProperties = { padding: "10px 12px", fontSize: 12, color: "var(--ink)" };
 const tdMono: React.CSSProperties = { ...td, fontFamily: "Geist Mono, monospace", fontVariantNumeric: "tabular-nums" };
 const tdRight: React.CSSProperties = { ...tdMono, textAlign: "right" };
 
@@ -421,11 +421,11 @@ function MembershipTable({ members, compact }: { members: TaxonomyMembershipData
           aria-label="Search memberships by ticker, group or relationship"
           style={{
             padding: "7px 10px",
-            border: "1px solid #dfe2e1",
+            border: "1px solid var(--line)",
             borderRadius: 4,
             fontFamily: "Geist Mono, monospace",
             fontSize: 12,
-            background: "#fff",
+            background: "var(--surface)",
             minWidth: 220,
             boxSizing: "border-box",
           }}
@@ -438,7 +438,7 @@ function MembershipTable({ members, compact }: { members: TaxonomyMembershipData
       <div className="table-scroll" style={card}>
         <table style={{ width: "100%", minWidth: compact ? 720 : 860, borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ borderBottom: "1px solid #ebebeb" }}>
+            <tr style={{ borderBottom: "1px solid var(--line)" }}>
               <th style={th}>
                 <button type="button" style={sortButtonStyle} onClick={() => toggleSort("ticker")}>
                   Ticker{arrow("ticker")}
@@ -472,29 +472,29 @@ function MembershipTable({ members, compact }: { members: TaxonomyMembershipData
                   opacity: member.membership_type === "EXCLUDED" ? 0.6 : 1,
                 }}
               >
-                <td style={{ ...tdMono, fontWeight: 600, color: "#171717" }}>
+                <td style={{ ...tdMono, fontWeight: 600, color: "var(--ink)" }}>
                   <Link
                     to={`/ticker/${encodeURIComponent(member.ticker)}`}
-                    style={{ color: "#171717", textDecoration: "underline" }}
+                    style={{ color: "var(--ink)", textDecoration: "underline" }}
                   >
                     {member.ticker}
                   </Link>
                 </td>
                 <td style={{ ...td, textAlign: "right" }}>{formatEnumLabel(member.membership_type)}</td>
-                <td style={{ ...td, textAlign: "right", color: member.relationship ? "#333333" : "#8f8f8f" }}>
+                <td style={{ ...td, textAlign: "right", color: member.relationship ? "var(--ink)" : "var(--muted)" }}>
                   {relationshipLabel(member)}
                 </td>
                 <td style={tdRight}>{Math.round(member.confidence * 100)}%</td>
                 <td style={{ ...td, maxWidth: 360 }}>
                   {member.source?.startsWith("http") ? (
-                    <a href={member.source} target="_blank" rel="noreferrer" style={{ color: "#245b76" }}>
+                    <a href={member.source} target="_blank" rel="noreferrer" style={{ color: "var(--link)" }}>
                       Official source
                     </a>
                   ) : (
                     member.source || "—"
                   )}
                 </td>
-                <td style={{ ...tdRight, color: "#666" }}>{formatDateLabel(member.source_as_of)}</td>
+                <td style={{ ...tdRight, color: "var(--muted)" }}>{formatDateLabel(member.source_as_of)}</td>
               </tr>
             ))}
           </tbody>
@@ -542,18 +542,18 @@ function LeadersLaggards({ constituents }: { constituents: ConstituentData[] }) 
               gap: 12,
               padding: "7px 10px",
               borderRadius: 4,
-              background: "#fafafa",
+              background: "var(--surface-subtle)",
               border: "1px solid #efefef",
             }}
           >
             <span style={{ minWidth: 0 }}>
               <Link
                 to={`/ticker/${encodeURIComponent(c.ticker)}`}
-                style={{ fontFamily: "Geist Mono, monospace", fontSize: 12, fontWeight: 600, color: "#171717" }}
+                style={{ fontFamily: "Geist Mono, monospace", fontSize: 12, fontWeight: 600, color: "var(--ink)" }}
               >
                 {c.ticker}
               </Link>
-              <span style={{ fontSize: 11, color: "#8f8f8f", marginLeft: 8 }}>
+              <span style={{ fontSize: 11, color: "var(--muted)", marginLeft: 8 }}>
                 {c.name || "—"}
               </span>
             </span>
@@ -562,7 +562,7 @@ function LeadersLaggards({ constituents }: { constituents: ConstituentData[] }) 
                 fontFamily: "Geist Mono, monospace",
                 fontSize: 12,
                 fontVariantNumeric: "tabular-nums",
-                color: tone === "up" ? "#1a6e62" : "#8f2424",
+                color: tone === "up" ? "var(--up)" : "var(--down)",
               }}
             >
               {score >= 0 ? "+" : ""}{score.toFixed(1)}%
@@ -692,7 +692,7 @@ function ComparisonPanel({ current, peers }: {
   return (
     <div style={{ ...card, padding: "16px 18px", marginBottom: 12 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", marginBottom: 12 }}>
-        <label htmlFor="compare-group" style={{ fontSize: 13, fontWeight: 500, color: "#171717" }}>
+        <label htmlFor="compare-group" style={{ fontSize: 13, fontWeight: 500, color: "var(--ink)" }}>
           Compare with
         </label>
         <select
@@ -704,9 +704,9 @@ function ComparisonPanel({ current, peers }: {
             padding: "7px 11px",
             fontSize: 12,
             borderRadius: 4,
-            border: "1px solid #dfe2e1",
-            background: "#fff",
-            color: "#171717",
+            border: "1px solid var(--line)",
+            background: "var(--surface)",
+            color: "var(--ink)",
             fontFamily: "Geist, sans-serif",
             cursor: "pointer",
             maxWidth: 320,
@@ -726,7 +726,7 @@ function ComparisonPanel({ current, peers }: {
         <div className="table-scroll">
           <table style={{ width: "100%", minWidth: 460, borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ borderBottom: "1px solid #ebebeb" }}>
+              <tr style={{ borderBottom: "1px solid var(--line)" }}>
                 <th style={th}>Metric</th>
                 <th style={thRight}>{current.name}</th>
                 <th style={thRight}>{peer.name}</th>
@@ -736,15 +736,15 @@ function ComparisonPanel({ current, peers }: {
               {rows.map((row, index) => (
                 <tr key={row.label} style={{ borderBottom: index < rows.length - 1 ? "1px solid #ebebeb" : "none" }}>
                   <td style={td}>{row.label}</td>
-                  <td style={{ ...tdRight, color: "#171717" }}>{row.left}</td>
-                  <td style={{ ...tdRight, color: "#4d4d4d" }}>{row.right}</td>
+                  <td style={{ ...tdRight, color: "var(--ink)" }}>{row.left}</td>
+                  <td style={{ ...tdRight, color: "var(--muted)" }}>{row.right}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       ) : (
-        <p style={{ margin: 0, fontSize: 12, color: "#686e73", lineHeight: 1.6 }}>
+        <p style={{ margin: 0, fontSize: 12, color: "var(--muted)", lineHeight: 1.6 }}>
           Pick a peer group to place its stored aggregates beside this one. Values are shown
           exactly as the snapshot records them — no difference or percentage change is derived
           between two groups, because they do not share a documented weighting history. IHSG
@@ -839,12 +839,12 @@ function TaxonomyGroupDetail({
               fontSize: 11,
               letterSpacing: "0.06em",
               textTransform: "uppercase",
-              color: "#8f8f8f",
+              color: "var(--muted)",
             }}
           >
             Code · {group.id} · {formatSnapshotId(data.payload.snapshot_id, data.payload.as_of)}
           </div>
-          <p style={{ margin: "8px 0 0", color: "#686e73", fontSize: 13, lineHeight: 1.5, maxWidth: 640 }}>
+          <p style={{ margin: "8px 0 0", color: "var(--muted)", fontSize: 13, lineHeight: 1.5, maxWidth: 640 }}>
             Aggregate metrics use the current snapshot. Membership is an analyst-defined research
             lens and is not an official IDX classification.
           </p>
@@ -852,17 +852,17 @@ function TaxonomyGroupDetail({
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
           <Link
             to={`/map?taxonomy=${group.taxonomyKind}&mode=groups`}
-            style={{ padding: "9px 13px", border: "1px solid #dfe2e1", color: "#202325", textDecoration: "none", fontSize: 12, borderRadius: 4 }}
+            style={{ padding: "9px 13px", border: "1px solid var(--line)", color: "var(--ink)", textDecoration: "none", fontSize: 12, borderRadius: 4 }}
           >
             Rotation →
           </Link>
           <Link
             to={`/groups?taxonomy=${group.taxonomyKind}&view=table`}
-            style={{ padding: "9px 13px", border: "1px solid #dfe2e1", color: "#202325", textDecoration: "none", fontSize: 12, borderRadius: 4 }}
+            style={{ padding: "9px 13px", border: "1px solid var(--line)", color: "var(--ink)", textDecoration: "none", fontSize: 12, borderRadius: 4 }}
           >
             Table →
           </Link>
-          <Link to="/overview" style={{ padding: "9px 13px", border: "1px solid #202325", color: "#202325", textDecoration: "none", fontSize: 12 }}>
+          <Link to="/overview" style={{ padding: "9px 13px", border: "1px solid #202325", color: "var(--ink)", textDecoration: "none", fontSize: 12 }}>
             Overview
           </Link>
         </div>
@@ -872,14 +872,14 @@ function TaxonomyGroupDetail({
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
           <LeadershipChip state={group.leadership as Parameters<typeof LeadershipChip>[0]["state"]} />
           <DiffusionChip state={group.diffusion as Parameters<typeof DiffusionChip>[0]["state"]} />
-          <span style={{ fontFamily: "Geist Mono, monospace", fontSize: 11, color: "#666", border: "1px solid #ebebeb", padding: "2px 8px", borderRadius: 4 }}>
+          <span style={{ fontFamily: "Geist Mono, monospace", fontSize: 11, color: "var(--muted)", border: "1px solid var(--line)", padding: "2px 8px", borderRadius: 4 }}>
             {formatEnumLabel(group.dataQuality)}
           </span>
-          <span style={{ fontFamily: "Geist Mono, monospace", fontSize: 11, color: "#666" }}>
+          <span style={{ fontFamily: "Geist Mono, monospace", fontSize: 11, color: "var(--muted)" }}>
             {formatCountLabel(group.constituents, "ticker")} · {group.eligible} with 20D history
           </span>
           {group.sampleForeignFlowIdr !== null && group.sampleForeignFlowDirection && (
-            <span style={{ fontFamily: "Geist Mono, monospace", fontSize: 11, color: "#7a5010" }}>
+            <span style={{ fontFamily: "Geist Mono, monospace", fontSize: 11, color: "var(--accent-ink)" }}>
               Flow sample {formatEnumLabel(group.sampleForeignFlowDirection)}
             </span>
           )}
@@ -900,7 +900,7 @@ function TaxonomyGroupDetail({
 
       <SectionHead label="Coverage notes" />
       <div style={{ ...card, padding: "16px 18px" }}>
-        <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: "#4d4d4d", lineHeight: 1.7 }}>
+        <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: "var(--muted)", lineHeight: 1.7 }}>
           {coverageNotes.map((note) => (
             <li key={note}>{note}</li>
           ))}
@@ -910,13 +910,13 @@ function TaxonomyGroupDetail({
       <SectionHead label="Performance and membership" />
       <div style={{ ...card, padding: "16px 18px", marginBottom: 12 }}>
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 8 }}>
-          <div style={{ fontSize: 13, fontWeight: 500, color: "#171717" }}>Constituent performance</div>
+          <div style={{ fontSize: 13, fontWeight: 500, color: "var(--ink)" }}>Constituent performance</div>
           <span className="eyebrow-muted">YTD is primary · 20D and 60D are diagnostics</span>
         </div>
         {constituents.length > 0 ? (
           <ConstituentTable constituents={constituents} />
         ) : (
-          <div style={{ color: "#686e73", fontSize: 12, padding: "12px 0" }}>
+          <div style={{ color: "var(--muted)", fontSize: 12, padding: "12px 0" }}>
             Constituent rows unavailable in this snapshot. Membership definitions are preserved below.
           </div>
         )}
@@ -924,14 +924,14 @@ function TaxonomyGroupDetail({
 
       <div style={{ ...card, padding: "16px 18px", marginBottom: 12 }}>
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 12 }}>
-          <div style={{ fontSize: 13, fontWeight: 500, color: "#171717" }}>Leaders and laggards</div>
+          <div style={{ fontSize: 13, fontWeight: 500, color: "var(--ink)" }}>Leaders and laggards</div>
         </div>
         <LeadersLaggards constituents={constituents} />
       </div>
 
       <div style={{ ...card, padding: "16px 18px", marginBottom: 12 }}>
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 8 }}>
-          <div style={{ fontSize: 13, fontWeight: 500, color: "#171717" }}>Contribution and price context</div>
+          <div style={{ fontSize: 13, fontWeight: 500, color: "var(--ink)" }}>Contribution and price context</div>
           <span className="eyebrow-muted">Persisted price history only</span>
         </div>
         {constituents.length > 0 && <ContribBars constituents={constituents} />}
@@ -959,7 +959,7 @@ function TaxonomyGroupDetail({
             />
           </div>
         ) : (
-          <div style={{ marginTop: 12, color: "#686e73", fontSize: 12 }}>
+          <div style={{ marginTop: 12, color: "var(--muted)", fontSize: 12 }}>
             No persisted group price history is available. No synthetic history is shown.
           </div>
         )}
@@ -971,7 +971,7 @@ function TaxonomyGroupDetail({
       <SectionHead label="Membership evidence" />
       <div style={{ ...card, padding: "16px 18px" }}>
         <MembershipTable members={members} />
-        <div style={{ marginTop: 12, fontSize: 11, color: "#8f8f8f", lineHeight: 1.55 }}>
+        <div style={{ marginTop: 12, fontSize: 11, color: "var(--muted)", lineHeight: 1.55 }}>
           Relationship subtype (control / subsidiary / affiliate / cross-shareholding /
           founder-director / ecosystem) is shown only where a source-backed value is stored;
           otherwise the row stays <strong>Unresolved</strong>. Confidence and source date are
@@ -979,7 +979,7 @@ function TaxonomyGroupDetail({
         </div>
       </div>
 
-      <div style={{ marginTop: 12, color: "#686e73", fontSize: 11, lineHeight: 1.5 }}>
+      <div style={{ marginTop: 12, color: "var(--muted)", fontSize: 11, lineHeight: 1.5 }}>
         Snapshot: {formatSnapshotId(data.payload.snapshot_id, data.payload.as_of)} · As of {formatDateLabel(data.payload.as_of)} · {quantitativeMembers.length} membership records enter quantitative rows; excluded memberships remain visible for audit.
       </div>
     </div>
@@ -1001,35 +1001,35 @@ function ResearchEvidencePanel({
   const status = getTavilyCategoryStatus(payload, category);
   const hasContext = context.records.length > 0;
   const verdict = hasContext ? "CONTEXT_ONLY" : status === "FAILED" ? "FAILED" : "DATA_GAP";
-  const verdictColor = hasContext ? "#7a5010" : status === "FAILED" ? "#8f2424" : "#7a5010";
+  const verdictColor = hasContext ? "var(--accent-ink)" : status === "FAILED" ? "var(--down)" : "var(--accent-ink)";
   return (
     <div style={{ ...card, padding: "16px 18px", minWidth: 0 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 10 }}>
         <div className="eyebrow-muted">{label}</div>
         <DataStatusChip status={status} />
       </div>
-      <p style={{ margin: "0 0 12px", fontSize: 12, color: "#666666", lineHeight: 1.5 }}>
+      <p style={{ margin: "0 0 12px", fontSize: 12, color: "var(--muted)", lineHeight: 1.5 }}>
         {context.note || (hasContext
           ? "Qualitative web context only; it does not change the confirmation metric."
           : "No source-backed context is attached to this snapshot.")}
       </p>
       {hasContext ? (
         <>
-          <div style={{ fontSize: 11, color: "#7a5010", marginBottom: 8 }}>
+          <div style={{ fontSize: 11, color: "var(--accent-ink)", marginBottom: 8 }}>
             Market-level sources; not attributed to {groupName}.
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {context.records.slice(0, 3).map((record) => (
-              <div key={`${record.request_id ?? record.url}-${record.url}`} style={{ borderTop: "1px solid #ebebeb", paddingTop: 9 }}>
+              <div key={`${record.request_id ?? record.url}-${record.url}`} style={{ borderTop: "1px solid var(--line)", paddingTop: 9 }}>
                 <a
                   href={record.url}
                   target="_blank"
                   rel="noreferrer"
-                  style={{ color: "#245b76", fontSize: 12, fontWeight: 500, lineHeight: 1.35, textDecoration: "none" }}
+                  style={{ color: "var(--link)", fontSize: 12, fontWeight: 500, lineHeight: 1.35, textDecoration: "none" }}
                 >
                   {record.title}
                 </a>
-                <div style={{ marginTop: 4, fontSize: 11, color: "#777777", lineHeight: 1.45 }}>
+                <div style={{ marginTop: 4, fontSize: 11, color: "var(--muted)", lineHeight: 1.45 }}>
                   {shortenEvidence(record.content, 150)}
                 </div>
               </div>
@@ -1037,10 +1037,10 @@ function ResearchEvidencePanel({
           </div>
         </>
       ) : (
-        <div style={{ fontSize: 12, color: "#8f8f8f" }}>No eligible source was attached.</div>
+        <div style={{ fontSize: 12, color: "var(--muted)" }}>No eligible source was attached.</div>
       )}
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 14 }}>
-        <span style={{ fontSize: 11, color: "#666666" }}>Overall</span>
+        <span style={{ fontSize: 11, color: "var(--muted)" }}>Overall</span>
         <span
           style={{
             fontFamily: "Geist Mono, monospace",
@@ -1048,8 +1048,8 @@ function ResearchEvidencePanel({
             letterSpacing: "0.071em",
             textTransform: "uppercase",
             color: verdictColor,
-            boxShadow: "rgb(235,235,235) 0 0 0 1px",
-            background: "#ffffff",
+            boxShadow: "0 0 0 1px var(--line)",
+            background: "var(--surface)",
             padding: "2px 8px",
             borderRadius: 4,
           }}
@@ -1072,6 +1072,19 @@ export default function GroupExplorer() {
   const dataSources = data?.dataSources ?? { breadthHistory: false, constituents: false, fundamentals: false, foreignFlow: false, trajectory: false };
   const queryGroup = new URLSearchParams(location.search).get("group") ?? undefined;
   const queryTaxonomy = normalizeTaxonomyKind(new URLSearchParams(location.search).get("taxonomy"));
+  // Shareable chart period for the sector detail path. ?period=1M|3M|6M|1Y|ALL
+  // is read on load and written back when a period tab is chosen, so the view
+  // can be linked and so the sector path behaves like the taxonomy path.
+  const periodParam = (searchParams.get("period") ?? "").toUpperCase();
+  const sectorPeriod: ChartRange = (CHART_PERIODS as string[]).includes(periodParam)
+    ? (periodParam as ChartRange)
+    : "ALL";
+  const setSectorPeriod = (next: ChartRange) => {
+    const params = new URLSearchParams(searchParams);
+    if (next === "ALL") params.delete("period");
+    else params.set("period", next);
+    setSearchParams(params, { replace: true });
+  };
   useEffect(() => {
     if (sectors.length > 0) {
       setSelected(findGroupFromLocation(location.state, queryGroup, sectors));
@@ -1132,7 +1145,7 @@ export default function GroupExplorer() {
             style={{
               fontSize: 30,
               fontWeight: 400,
-              color: "#171717",
+              color: "var(--ink)",
               letterSpacing: "-1.5px",
               lineHeight: 1.1,
               marginBottom: 0,
@@ -1156,9 +1169,9 @@ export default function GroupExplorer() {
             fontSize: 13,
             borderRadius: 6,
             border: "none",
-            boxShadow: "rgb(235,235,235) 0 0 0 1px",
-            background: "#ffffff",
-            color: "#171717",
+            boxShadow: "0 0 0 1px var(--line)",
+            background: "var(--surface)",
+            color: "var(--ink)",
             fontFamily: "Geist, sans-serif",
             cursor: "pointer",
           }}
@@ -1181,37 +1194,37 @@ export default function GroupExplorer() {
               fontSize: 11,
               letterSpacing: "0.065em",
               textTransform: "uppercase",
-              color: "#666666",
-              boxShadow: "rgb(235,235,235) 0 0 0 1px",
-              background: "#ffffff",
+              color: "var(--muted)",
+              boxShadow: "0 0 0 1px var(--line)",
+              background: "var(--surface)",
               padding: "2px 8px",
               borderRadius: 4,
             }}
           >
             {sector.eligibleConstituents} eligible / {sector.constituents} total
           </span>
-          <span style={{ fontFamily: "Geist Mono", fontSize: 11, color: "#666666" }}>
+          <span style={{ fontFamily: "Geist Mono", fontSize: 11, color: "var(--muted)" }}>
             Leadership state persisted for {sector.persistence} observation{sector.persistence !== 1 ? "s" : ""}
           </span>
           {sector.prevLeadership && (
-            <span style={{ fontFamily: "Geist Mono", fontSize: 10, color: "#7a5010", border: "1px solid #ebebeb", padding: "2px 6px", borderRadius: 4 }}>
+            <span style={{ fontFamily: "Geist Mono", fontSize: 10, color: "var(--accent-ink)", border: "1px solid var(--line)", padding: "2px 6px", borderRadius: 4 }}>
               {formatEnumLabel(sector.prevLeadership)} → {formatEnumLabel(sector.leadership)}
             </span>
           )}
         </div>
-        <p style={{ fontSize: 13, color: "#4d4d4d", lineHeight: 1.6, maxWidth: 720 }}>
+        <p style={{ fontSize: 13, color: "var(--muted)", lineHeight: 1.6, maxWidth: 720 }}>
           {sector.interpretation}
         </p>
-        <div style={{ marginTop: 10, display: "flex", gap: 16, flexWrap: "wrap", fontSize: 11, color: "#666666", fontFamily: "Geist Mono" }}>
-          <span>YTD Excess <b style={{ color: sector.excessYtd !== null && sector.excessYtd >= 0 ? "#1a6e62" : "#8f2424" }}>{displayMetric(sector.excessYtd)}</b></span>
-          <span>20D Excess <b style={{ color: sector.excess20d !== null && sector.excess20d >= 0 ? "#1a6e62" : "#8f2424" }}>{displayMetric(sector.excess20d)}</b></span>
-          <span>Breadth <b>{displayMetric(sector.breadth)}</b> {delta !== undefined ? <span style={{ color: delta !== null && delta > 0 ? "#1a6e62" : delta !== null && delta < 0 ? "#8f2424" : "#666" }}>({delta === null ? "Δ unavailable" : `${formatPercent(delta)} vs prior observation`})</span> : ""}</span>
+        <div style={{ marginTop: 10, display: "flex", gap: 16, flexWrap: "wrap", fontSize: 11, color: "var(--muted)", fontFamily: "Geist Mono" }}>
+          <span>YTD Excess <b style={{ color: sector.excessYtd !== null && sector.excessYtd >= 0 ? "var(--up)" : "var(--down)" }}>{displayMetric(sector.excessYtd)}</b></span>
+          <span>20D Excess <b style={{ color: sector.excess20d !== null && sector.excess20d >= 0 ? "var(--up)" : "var(--down)" }}>{displayMetric(sector.excess20d)}</b></span>
+          <span>Breadth <b>{displayMetric(sector.breadth)}</b> {delta !== undefined ? <span style={{ color: delta !== null && delta > 0 ? "var(--up)" : delta !== null && delta < 0 ? "var(--down)" : "var(--muted)" }}>({delta === null ? "Δ unavailable" : `${formatPercent(delta)} vs prior observation`})</span> : ""}</span>
           <span>Top-3 <b>{displayMetric(sector.concentration)}</b></span>
           {sector.missingConstituents > 0 && (
-            <span style={{ color: "#7a5010" }}>{sector.missingConstituents} constituent{sector.missingConstituents !== 1 ? "s" : ""} missing from the 20D metric</span>
+            <span style={{ color: "var(--accent-ink)" }}>{sector.missingConstituents} constituent{sector.missingConstituents !== 1 ? "s" : ""} missing from the 20D metric</span>
           )}
         </div>
-        <div style={{ marginTop: 8, fontSize: 10, color: "#8f8f8f" }}>
+        <div style={{ marginTop: 8, fontSize: 10, color: "var(--muted)" }}>
           {sector.diffusion === "UNCONFIRMED" ? "No comparable prior snapshot is available. Current breadth can be shown, but diffusion change cannot yet be classified." : `Diffusion: ${formatEnumLabel(sector.diffusion)}${sector.prevDiffusion ? ` (previous ${formatEnumLabel(sector.prevDiffusion)})` : ""}${sector.diffusionV2 ? ` · v2 detail ${formatEnumLabel(sector.diffusionV2)}` : ""}`}
         </div>
       </div>
@@ -1225,10 +1238,10 @@ export default function GroupExplorer() {
           sub={sector.ytdStartDate ? `from ${formatDateLabel(sector.ytdStartDate)} vs IHSG` : "baseline unavailable"}
           color={
             sector.excessYtd === null
-              ? "#8f8f8f"
+              ? "var(--muted)"
               : sector.excessYtd >= 0
-                ? "#1a6e62"
-                : "#8f2424"
+                ? "var(--up)"
+                : "var(--down)"
           }
         />
         <MetricCard
@@ -1245,7 +1258,7 @@ export default function GroupExplorer() {
           label="Breadth"
           value={displayMetric(sector.breadth)}
           sub={delta != null ? `${formatPercent(delta)} vs prior` : "change unavailable"}
-          color={sector.breadth === null ? "#8f8f8f" : "#1a6e62"}
+          color={sector.breadth === null ? "var(--muted)" : "var(--up)"}
         />
         <MetricCard
           label="Concentration"
@@ -1253,12 +1266,12 @@ export default function GroupExplorer() {
           sub="Top-3 contribution"
           color={
             sector.concentration === null
-              ? "#8f8f8f"
+              ? "var(--muted)"
               : sector.concentration > 60
-                ? "#8f2424"
+                ? "var(--down)"
                 : sector.concentration > 45
-                  ? "#7a5010"
-                  : "#1a6e62"
+                  ? "var(--accent-ink)"
+                  : "var(--up)"
           }
         />
         <MetricCard
@@ -1271,7 +1284,7 @@ export default function GroupExplorer() {
       <SectionHead label="Time series" />
       {dataSources.breadthHistory && groupBreadthHistory.length > 0 ? (
         <div style={{ ...card, padding: "16px 18px", marginBottom: 12 }}>
-          <div style={{ fontSize: 13, fontWeight: 500, color: "#171717", marginBottom: 8 }}>
+          <div style={{ fontSize: 13, fontWeight: 500, color: "var(--ink)", marginBottom: 8 }}>
             {sector.name} — breadth history
           </div>
           <ResponsiveContainer width="100%" height={180}>
@@ -1318,9 +1331,11 @@ export default function GroupExplorer() {
             providerMode={manifestEntry?.provider_mode}
             priceBasis={manifestEntry?.price_basis}
             dataStatus={data.payload.quality?.status}
+            initialRange={sectorPeriod}
+            onRangeChange={setSectorPeriod}
             height={300}
           />
-          <div style={{ marginTop: 10, fontSize: 11, color: "#777777", lineHeight: 1.45 }}>
+          <div style={{ marginTop: 10, fontSize: 11, color: "var(--muted)", lineHeight: 1.45 }}>
             Descriptive equal-weight group performance versus IHSG. This chart is
             presentation-only and does not change leadership or diffusion signals.
           </div>
@@ -1341,10 +1356,10 @@ export default function GroupExplorer() {
         <>
           <div style={{ ...card, padding: "16px 18px", marginBottom: 12 }}>
             <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
-              <span style={{ fontSize: 13, fontWeight: 500, color: "#171717" }}>Absolute 20D move contribution</span>
+              <span style={{ fontSize: 13, fontWeight: 500, color: "var(--ink)" }}>Absolute 20D move contribution</span>
               <span className="eyebrow-muted">Top-3 absolute move: {displayMetric(sector.concentration)} · top-1 capped at 100% · equal-weight convention</span>
             </div>
-            <p style={{ fontSize: 11, color: "#666", lineHeight: 1.5, margin: "0 0 12px" }}>
+            <p style={{ fontSize: 11, color: "var(--muted)", lineHeight: 1.5, margin: "0 0 12px" }}>
               {(() => {
                 const part = constituents.filter((c) => c.participating === true).length;
                 const total = constituents.filter((c) => c.excess20d !== null).length;
@@ -1356,14 +1371,14 @@ export default function GroupExplorer() {
               })()}
             </p>
             <ContribBars constituents={constituents} />
-            <div style={{ marginTop: 12, display: "flex", gap: 16, fontSize: 11, color: "#666", fontFamily: "Geist Mono", flexWrap: "wrap" }}>
+            <div style={{ marginTop: 12, display: "flex", gap: 16, fontSize: 11, color: "var(--muted)", fontFamily: "Geist Mono", flexWrap: "wrap" }}>
               <span>Positive contributors: {constituents.filter((c) => c.excess20d !== null && c.excess20d > 0).length}</span>
               <span>Negative contributors: {constituents.filter((c) => c.excess20d !== null && c.excess20d <= 0).length}</span>
               <span>Participating: {constituents.filter((c) => c.participating).length}/{constituents.filter((c) => c.excess20d !== null).length}</span>
             </div>
           </div>
           <ConstituentTable constituents={constituents} />
-          <div style={{ marginTop: 8, fontSize: 10, color: "#8f8f8f", lineHeight: 1.4 }}>
+          <div style={{ marginTop: 8, fontSize: 10, color: "var(--muted)", lineHeight: 1.4 }}>
             Methodology: absolute 20D return sorted descending; top-N shares use the sum of absolute constituent returns. Signed attribution (buy/sell) is separate and undefined when net is unstable.
             Equal-weight convention; no market-cap weighting.
           </div>
@@ -1379,7 +1394,7 @@ export default function GroupExplorer() {
 
       <SectionHead label="Coverage notes" />
       <div style={{ ...card, padding: "16px 18px", marginBottom: 12 }}>
-        <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: "#4d4d4d", lineHeight: 1.7 }}>
+        <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: "var(--muted)", lineHeight: 1.7 }}>
           <li>
             {sector.eligibleConstituents} of {sector.constituents} members carry the 20D history
             required for the diagnostic metric.
@@ -1392,7 +1407,7 @@ export default function GroupExplorer() {
             .
           </li>
           {sector.missingConstituents > 0 && (
-            <li style={{ color: "#7a5010" }}>
+            <li style={{ color: "var(--accent-ink)" }}>
               {sector.missingConstituents} member{sector.missingConstituents !== 1 ? "s are" : " is"} missing from the 20D metric.
             </li>
           )}
@@ -1443,7 +1458,7 @@ export default function GroupExplorer() {
             <li key={c.metric}>
               <strong>{c.severity === "CRITICAL" ? "CRITICAL" : "Warning"}</strong>
               {` — ${c.label}`}
-              {c.evidence ? <span style={{ color: "#686e73" }}>{` — ${c.evidence}`}</span> : null}
+              {c.evidence ? <span style={{ color: "var(--muted)" }}>{` — ${c.evidence}`}</span> : null}
             </li>
           ))}
         </ol>
@@ -1459,24 +1474,24 @@ export default function GroupExplorer() {
       <div
         style={{
           borderRadius: 6,
-          border: "1px solid #ebebeb",
-          background: "#fafafa",
+          border: "1px solid var(--line)",
+          background: "var(--surface-subtle)",
           padding: "16px 18px",
           margin: "12px 0 40px",
         }}
       >
-        <div style={{ fontSize: 13, fontWeight: 500, color: "#171717", marginBottom: 8 }}>Screen invalidation</div>
+        <div style={{ fontSize: 13, fontWeight: 500, color: "var(--ink)", marginBottom: 8 }}>Screen invalidation</div>
         {sector.invalidation.length ? (
-          <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: "#333333", lineHeight: 1.6 }}>
+          <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: "var(--ink)", lineHeight: 1.6 }}>
             {sector.invalidation.map((row, i) => (
               <li key={i}>
                 {row.condition}
-                {row.threshold ? <span style={{ color: "#686e73" }}>{` (${row.threshold})`}</span> : null}
+                {row.threshold ? <span style={{ color: "var(--muted)" }}>{` (${row.threshold})`}</span> : null}
               </li>
             ))}
           </ul>
         ) : (
-          <p style={{ fontSize: 12, color: "#666666", margin: 0 }}>
+          <p style={{ fontSize: 12, color: "var(--muted)", margin: 0 }}>
             Per-group invalidation conditions are not emitted by the current web snapshot.
             Review the versioned methodology and the next comparable snapshot before treating
             a state as changed.
@@ -1485,7 +1500,7 @@ export default function GroupExplorer() {
         <p
           style={{
             fontSize: 10,
-            color: "#8f8f8f",
+            color: "var(--muted)",
             marginTop: 10,
             fontFamily: "Geist Mono, monospace",
             letterSpacing: "0.04em",

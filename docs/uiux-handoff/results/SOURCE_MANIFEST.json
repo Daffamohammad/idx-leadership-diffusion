@@ -1,5 +1,5 @@
 {
-  "baseRevision": "ed6fd61",
+  "baseRevision": "2c81894",
   "bundle": {
     "snapshotId": "snap_sectors_2026-08-27",
     "asOf": "2026-08-27",
@@ -14,21 +14,52 @@
   "apiHold": "Sectors API remains HOLD: no live HTTP, refreshes, credit spending, preflight silently followed by live execution, or fallback to Sectors. Cached Sectors artifacts may be used offline. Gates/auditing/ledger unchanged.",
   "providers": {
     "mode": "offline from snapshots/cache only",
-    "sectors": { "calls": 0, "mode": "HOLD" },
-    "youCom": { "calls": 0, "ceiling": "5 per package / 20 per provider first cycle", "mode": "none this package" },
-    "tavily": { "calls": 0, "ceiling": "5 per package / 20 per provider first cycle", "mode": "none this package" },
-    "llamaParse": { "calls": 0, "ceiling": "2 docs / 10 pages each / 20 pages total", "mode": "none this package" }
+    "sectors": {
+      "calls": 0,
+      "mode": "HOLD"
+    },
+    "youCom": {
+      "calls": 0,
+      "ceiling": "5 per package / 20 per provider first cycle",
+      "mode": "none this package"
+    },
+    "tavily": {
+      "calls": 0,
+      "ceiling": "5 per package / 20 per provider first cycle",
+      "mode": "none this package"
+    },
+    "llamaParse": {
+      "calls": 0,
+      "ceiling": "2 docs / 10 pages each / 20 pages total",
+      "mode": "none this package"
+    }
   },
   "runtimeDataAccess": {
     "checkedBy": "browser QC offline-data assertion across 13 routes",
     "sameOriginXhrFetch": 4,
-    "allowedPrefixes": ["/snapshots/", "/idx/"],
+    "allowedPrefixes": [
+      "/snapshots/",
+      "/idx/"
+    ],
     "unexpectedRequests": 0,
-    "expectedExternalContext": ["Fontshare font CSS", "TradingView iframe (external context, not scraped)"]
+    "expectedExternalContext": [
+      "Fontshare font CSS",
+      "TradingView iframe (external context, not scraped)"
+    ]
   },
   "dependencies": [
-    { "name": "@radix-ui/react-icons", "registry": "npm", "license": "MIT", "rationale": "Single icon family for rail/actions per DESIGN_SELECTIONS; verified exports only" },
-    { "name": "@radix-ui/react-tooltip", "registry": "npm", "license": "MIT", "rationale": "Collapsed-rail tooltips with accessible names; selective Radix adoption" }
+    {
+      "name": "@radix-ui/react-icons",
+      "registry": "npm",
+      "license": "MIT",
+      "rationale": "Single icon family for rail/actions per DESIGN_SELECTIONS; verified exports only"
+    },
+    {
+      "name": "@radix-ui/react-tooltip",
+      "registry": "npm",
+      "license": "MIT",
+      "rationale": "Collapsed-rail tooltips with accessible names; selective Radix adoption"
+    }
   ],
   "fonts": {
     "selection": "General Sans 400/500/600 for UI; Geist Mono for tickers/numbers",
@@ -36,12 +67,24 @@
     "fallback": "Geist/system/ui-monospace retained"
   },
   "taxonomy": {
-    "views": { "sector": 11, "konglo": 6, "themes": 9 },
-    "memberships": { "sector": 962, "konglo": 9, "themes": 40 },
+    "views": {
+      "sector": 11,
+      "konglo": 6,
+      "themes": 9
+    },
+    "memberships": {
+      "sector": 962,
+      "konglo": 9,
+      "themes": 40
+    },
     "relationshipSubtype": {
       "presentInBundle": false,
       "note": "No relationship-subtype field exists in config/konglo.yaml, config/themes.yaml, or the snapshot. UI renders 'Unresolved' and never infers control/subsidiary/affiliate from a job title or name.",
-      "optionalSchemaFieldsAdded": ["relationship", "relationship_as_of", "relationship_source"],
+      "optionalSchemaFieldsAdded": [
+        "relationship",
+        "relationship_as_of",
+        "relationship_source"
+      ],
       "populated": false
     },
     "sourceStyle": {
@@ -53,7 +96,7 @@
   "quantitativeUse": false,
   "checks": {
     "typecheck": "clean (tsc -b --noEmit)",
-    "build": "green ~609ms; index.html 0.81 kB, CSS 29.14 kB (gzip 7.24 kB), JS 1060.82 kB (gzip 302.49 kB)",
+    "build": "green ~595ms; index.html 0.81 kB, CSS 30.32 kB (gzip 7.59 kB), JS 1066.99 kB (gzip 302.65 kB)",
     "gitDiffCheck": "clean",
     "pytest": "not rerun (no Python/schema/exporter/calculation changes); 729-test baseline not reported as current",
     "browserQC": {
@@ -61,9 +104,10 @@
       "server": "vite preview on http://127.0.0.1:4319",
       "geometry": "65/65 PASS (13 routes x 5 viewports)",
       "interaction": "12 PASS / 1 INFO / 0 FAIL",
-      "regression": "9/9 PASS",
+      "regression": "13/13 PASS",
+      "contrast": "0 findings across 76 audits (19 routes x 2 themes x 2 viewports)",
       "consoleErrors": 0,
-      "screenshots": 70
+      "screenshots": 92
     }
   },
   "regressionPreserved": [
@@ -72,15 +116,71 @@
     "AMMN 61/21 points for the same bundle/ranges",
     "Partial/Ready-with-gaps badge + expandable provenance",
     "TradingView mounted beyond the old timeout and fits its container (verified at 9s)",
-    "LocalProfile localStorage persistence + focus return on Escape"
+    "LocalProfile localStorage persistence + focus return on Escape",
+    "P2-1 dark header contrast, P2-2 sector ticker search, P2-3 sector period URL, P2-4 rotation diagnostic toggles"
   ],
   "warningsRetained": [
-    "Single-chunk >500 kB build warning (1060.82 kB JS); code-split still open"
+    "Single-chunk >500 kB build warning (1066.99 kB JS); code-split still open"
   ],
   "unresolvedConflicts": [
     "Theme/Konglo bounded filing research deferred (no new source runs this package)",
     "Treemap dedicated parent-child view deferred (heatmap + accessible table interim)",
     "Relationship subtype unavailable in the bundle, so every membership shows 'Unresolved'",
-    "Theme definition/exclusion/version metadata still sourced from taxonomy config, not primary research"
-  ]
+    "Theme definition/exclusion/version metadata still sourced from taxonomy config, not primary research",
+    "Homepage DiaTextReveal sweep uses brand stops below 3.0 mid-animation; the resting state is compliant and the audit measures it"
+  ],
+  "contrastAudit": {
+    "routes": 19,
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "viewports": [
+      "1440x900",
+      "390x844"
+    ],
+    "audits": 76,
+    "findings": 0,
+    "trajectory": [
+      4100,
+      272,
+      76,
+      8,
+      0
+    ],
+    "models": [
+      "SVG fill as text colour; smallest containing SVG shape as background",
+      "paint-order:stroke halo colour as effective background",
+      "3.0 threshold for large text, 4.5 otherwise; disabled/aria-disabled exempt",
+      "background-clip:text resolves to the last gradient stop (animation fill-mode:forwards at 100%)"
+    ],
+    "acceptedTransients": [
+      "homepage DiaTextReveal sweep stops are below 3.0 mid-animation; resting stop is compliant"
+    ]
+  },
+  "themeTokensAdded": {
+    "tint": [
+      "--tint-warn",
+      "--tint-flag",
+      "--tint-note",
+      "--tint-ok",
+      "--tint-danger",
+      "--tint-cream",
+      "--tint-alert"
+    ],
+    "alert": [
+      "--alert-line",
+      "--alert-ink"
+    ],
+    "contrast": [
+      "--on-accent",
+      "--quad-improving",
+      "--quad-leading",
+      "--quad-lagging",
+      "--quad-weakening"
+    ],
+    "link": [
+      "--link #1849a9 light / #7fb0d8 dark \u2014 previously referenced but never declared, resolving to unset"
+    ]
+  }
 }

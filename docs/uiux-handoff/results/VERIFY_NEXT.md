@@ -1,8 +1,8 @@
 # VERIFY_NEXT — independent sequence for Codex
 
 1. **Inspect the diff**
-   - `git log --oneline -6`, `git show --stat HEAD`, `git diff ed6fd61..HEAD --check`.
-   - Confirm the touched surface is limited to `app/web/src/{data/catalogFocus.ts,data/snapshot.ts,data/adapter.ts,components/{AppShell,PriceChart}.tsx,pages/{App,GroupExplorer,MarketOverview,MasterGroupTable,TaxonomyMapPage,ThemesExplorer}.tsx}` plus this results directory.
+   - `git log --oneline -6`, `git show --stat HEAD`, `git diff 2c81894..HEAD --check`.
+   - Confirm the touched surface is limited to `app/web/src/{index.css,components/*,pages/*}` plus this results directory. No Python, schema, exporter, or calculation file should be modified.
 
 2. **Validate sources / formulas / schemas**
    - No live calls: only `/snapshots/*.json` + `/idx/*.json` fetches; no Sectors/search/parser execution. Independently confirm by loading each route with the network panel open, or by re-running the `offline-data` assertion (expect ~4 XHR/fetch total, all under `/snapshots/` or `/idx/`).
@@ -18,16 +18,17 @@
    - If Python/schema/exporter/calculation changes are ever added, run relevant tests first, then `.venv/bin/python -m pytest -q`. Do **not** report the 729 baseline as current without rerunning.
 
 4. **Browser walkthrough** — follow `VISUAL_QC.md`
-   - Serve the built app on a **free port** and verify you are on the right app first: `curl -s http://127.0.0.1:<port>/ | head -3`. Port `4173` on this machine is an unrelated application.
+   - Serve the built app on a **free port** and verify you are on the right app first: `curl -s http://127.0.0.1:<port>/ | head -3`. Port `4173` on this machine is an unrelated application; this round used `4319`.
    - Viewports 1440×900, 1368×858, 1291×858, 768×1024, 390×844; light + dark.
    - Assert `documentElement.scrollWidth === clientWidth` and workspace `scrollWidth ≤ clientWidth`; non-zero chart/iframe bounds; **0 console errors**.
    - Interaction: catalog search + URL state, open detail, comparison select, disabled-period reason, **focus restore via both the back link and browser Back**, header search Enter/arrow/Escape, rail collapse → tooltip → expand, mobile menu.
-   - Regression §7: Top-3 formatting, flow 65% Review + flags, AMMN 61/21, partial badge, TradingView mounted after 9s and fitting its container, local-profile storage/focus.
+   - Regression: 13 checks including the four P2 confirmations — `sector-ticker-search`, `sector-period-url`, `rotation-diagnostic-visibility`, `dark-mode-header-contrast`.
+   - **Contrast:** run the audit over all 19 routes in light *and* dark at 1440×900 and 390×844 (76 audits). Expect `total: 0`. If a finding reappears, fix the colour — do not narrow the audit.
 
 5. **Polish remaining PARTIALs** (in this order)
    - Theme/Konglo bounded primary-source metadata (definitions, inclusion/exclusion, membership type, version, dated relationship subtype) within the 5/package and 20/provider ceilings — this also fills the currently-empty `Relationship` column.
    - Dedicated treemap with parent–child grouping (heatmap + table remains the agreed interim).
-   - SPA code-split for the 1,060.82 kB chunk (measure before optimizing).
+   - SPA code-split for the 1,066.99 kB chunk (measure before optimizing).
    - Extended period gating beyond 2Y/5Y already covered by `periodDisabledReason`.
 
 6. **Keep verdicts separate**

@@ -22,7 +22,7 @@ import {
 } from "../data/researchContext";
 
 const card: React.CSSProperties = {
-  background: '#ffffff',
+  background: 'var(--surface)',
   borderRadius: 6,
   boxShadow: 'rgba(0,0,0,0.08) 0px 0px 0px 1px, rgb(250,250,250) 0px 0px 0px 2px',
 };
@@ -190,7 +190,7 @@ function SectionHead({ label }: { label: string }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '36px 0 14px' }}>
       <span className="eyebrow-muted">{label}</span>
-      <div style={{ flex: 1, height: 1, background: '#ebebeb' }} />
+      <div style={{ flex: 1, height: 1, background: 'var(--line)' }} />
     </div>
   );
 }
@@ -234,7 +234,7 @@ function AcquisitionDiagnostics({
           style={{
             cursor: "pointer",
             fontSize: 11,
-            color: "#245b76",
+            color: "var(--link)",
             fontFamily: "Geist Mono, monospace",
           }}
         >
@@ -246,7 +246,7 @@ function AcquisitionDiagnostics({
             marginTop: 6,
             fontSize: 11,
             fontFamily: "Geist Mono, monospace",
-            color: "#4d4d4d",
+            color: "var(--muted)",
             lineHeight: 1.6,
             wordBreak: "break-word",
           }}
@@ -259,7 +259,7 @@ function AcquisitionDiagnostics({
   return (
     <div style={{ ...card, padding: "12px 16px", marginBottom: 16 }} aria-label="Acquisition diagnostics">
       <div className="eyebrow-muted" style={{ marginBottom: 8 }}>Acquisition diagnostics</div>
-      <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: "#4d4d4d", lineHeight: 1.7 }}>
+      <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: "var(--muted)", lineHeight: 1.7 }}>
         <li>
           Failed acquisitions:{" "}
           {failedCount !== undefined ? <strong>{failedCount}</strong> : "not reported by this export"}
@@ -279,7 +279,7 @@ function AcquisitionDiagnostics({
         <li>
           Pagination:{" "}
           {paginationIncomplete ? (
-            <strong style={{ color: "#7a5900" }}>
+            <strong style={{ color: "var(--accent-ink)" }}>
               incomplete — universe coverage may be understated; denominators reflect observed rows only.
             </strong>
           ) : (
@@ -300,7 +300,7 @@ function AcquisitionDiagnostics({
         <li>
           Bundle completeness:{" "}
           {bundleComplete === false ? (
-            <strong style={{ color: "#8f2424" }}>
+            <strong style={{ color: "var(--down)" }}>
               partial — written before the atomic-completeness sentinel; treat levels as provisional.
             </strong>
           ) : bundleComplete === true ? (
@@ -314,7 +314,7 @@ function AcquisitionDiagnostics({
           {coverage?.suspension_check === "checked" ? (
             "ran against the provider suspension feed."
           ) : coverage?.suspension_check === "failed" ? (
-            <strong style={{ color: "#7a5900" }}>
+            <strong style={{ color: "var(--accent-ink)" }}>
               feed failed — suspended names may remain eligible; treat halts as unfiltered.
             </strong>
           ) : coverage?.suspension_check === "not_supported" ? (
@@ -326,7 +326,7 @@ function AcquisitionDiagnostics({
         <li>
           Session timing:{" "}
           {coverage?.intraday_build === true ? (
-            <strong style={{ color: "#7a5900" }}>
+            <strong style={{ color: "var(--accent-ink)" }}>
               built mid-session — latest bars may be partial, not final closes.
             </strong>
           ) : coverage?.intraday_build === false ? (
@@ -526,12 +526,12 @@ function EvidenceMatrix({
 
   return (
     <div className="table-scroll" style={{ ...card, marginBottom: 40 }}>
-      <div style={{ padding: '14px 18px', borderBottom: '1px solid #ebebeb' }}>
+      <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--line)' }}>
         <div className="eyebrow-muted">Evidence matrix</div>
-        <h2 style={{ fontSize: 18, margin: '4px 0 0', color: '#171717' }}>
+        <h2 style={{ fontSize: 18, margin: '4px 0 0', color: 'var(--ink)' }}>
           Layer · status · source · coverage
         </h2>
-        <p style={{ margin: '6px 0 0', fontSize: 11, fontFamily: 'Geist Mono, monospace', color: '#666666' }}>
+        <p style={{ margin: '6px 0 0', fontSize: 11, fontFamily: 'Geist Mono, monospace', color: 'var(--muted)' }}>
           One row per evidence layer. Status and source coverage are reported separately.
         </p>
       </div>
@@ -543,11 +543,11 @@ function EvidenceMatrix({
                 key={label}
                 align="left"
                 style={{
-                  borderBottom: '1px solid #ebebeb',
+                  borderBottom: '1px solid var(--line)',
                   padding: '10px 14px',
                   fontSize: 11,
                   fontFamily: 'Geist Mono, monospace',
-                  color: '#666666',
+                  color: 'var(--muted)',
                   textTransform: 'uppercase',
                 }}
               >
@@ -561,12 +561,12 @@ function EvidenceMatrix({
             <tr key={row.name} style={{ borderBottom: index < layers.length - 1 ? '1px solid #f0f0f0' : 'none' }}>
               <td style={{ padding: '10px 14px', fontWeight: 600 }}>{row.name}</td>
               <td style={{ padding: '10px 14px', fontFamily: 'Geist Mono, monospace' }}>{formatEnumLabel(row.status)}</td>
-              <td style={{ padding: '10px 14px', color: '#4d4d4d' }}>{row.source}</td>
+              <td style={{ padding: '10px 14px', color: 'var(--muted)' }}>{row.source}</td>
               <td style={{ padding: '10px 14px', fontFamily: 'Geist Mono, monospace', whiteSpace: 'nowrap' }}>{row.asOf}</td>
               <td style={{ padding: '10px 14px', fontFamily: 'Geist Mono, monospace' }}>{row.coverage}</td>
               <td style={{ padding: '10px 14px' }}>{row.quant}</td>
               <td style={{ padding: '10px 14px' }}>{row.signalEligible ? "Yes" : "No"}</td>
-              <td style={{ padding: '10px 14px', color: '#666666' }}>{row.limitation}</td>
+              <td style={{ padding: '10px 14px', color: 'var(--muted)' }}>{row.limitation}</td>
             </tr>
           ))}
         </tbody>
@@ -702,10 +702,10 @@ export default function Methodology() {
   return (
     <div className="content-shell" style={{ padding: '36px var(--page-gutter)', maxWidth: 'var(--content-max)' }}>
       <div style={{ marginBottom: 36 }}>
-        <h1 style={{ fontSize: 30, fontWeight: 400, color: '#171717', letterSpacing: '-1.5px', lineHeight: 1.1, marginBottom: 8 }}>
+        <h1 style={{ fontSize: 30, fontWeight: 400, color: 'var(--ink)', letterSpacing: '-1.5px', lineHeight: 1.1, marginBottom: 8 }}>
           Methodology &amp; Data Quality
         </h1>
-        <p style={{ fontSize: 14, color: '#4d4d4d', lineHeight: 1.5 }}>
+        <p style={{ fontSize: 14, color: 'var(--muted)', lineHeight: 1.5 }}>
           Transparent documentation of analytical definitions, data sources, and coverage boundaries.
         </p>
       </div>
@@ -719,12 +719,12 @@ export default function Methodology() {
       {isPrefixSample && discoveredCount && (
         <div
           style={{
-            background: "#fff8e1",
+            background: "var(--tint-warn)",
             border: "1px solid #ffe082",
             borderRadius: 8,
             padding: "12px 16px",
             marginBottom: 18,
-            color: "#7a5900",
+            color: "var(--accent-ink)",
             fontSize: 13,
           }}
           role="alert"
@@ -749,9 +749,9 @@ export default function Methodology() {
             <col />
           </colgroup>
           <thead>
-            <tr style={{ borderBottom: '1px solid #ebebeb' }}>
+            <tr style={{ borderBottom: '1px solid var(--line)' }}>
               {['Data Layer', 'Status', 'As of', 'Notes'].map(col => (
-                <th key={col} style={{ padding: '9px 16px', fontFamily: 'Geist Mono, monospace', fontSize: 10, fontWeight: 400, letterSpacing: '0.07em', textTransform: 'uppercase', color: '#666666', textAlign: 'left', background: '#fafafa' }}>
+                <th key={col} style={{ padding: '9px 16px', fontFamily: 'Geist Mono, monospace', fontSize: 10, fontWeight: 400, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--muted)', textAlign: 'left', background: 'var(--surface-subtle)' }}>
                   {col}
                 </th>
               ))}
@@ -760,10 +760,10 @@ export default function Methodology() {
           <tbody>
             {dataRows.map((row, i) => (
               <tr key={row.label} style={{ borderBottom: i < dataRows.length - 1 ? '1px solid #ebebeb' : 'none' }}>
-                <td style={{ padding: '10px 16px', fontSize: 13, fontWeight: 500, color: '#171717' }}>{row.label}</td>
+                <td style={{ padding: '10px 16px', fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>{row.label}</td>
                 <td style={{ padding: '10px 16px' }}><DataStatusChip status={row.status} /></td>
-                <td style={{ padding: '10px 16px', fontFamily: 'Geist Mono, monospace', fontSize: 11, color: '#666666', whiteSpace: 'nowrap' }}>{row.asOf}</td>
-                <td style={{ padding: '12px 16px', fontSize: 12, color: '#666666', lineHeight: 1.6, overflowWrap: 'anywhere' }}>{row.note || '—'}</td>
+                <td style={{ padding: '10px 16px', fontFamily: 'Geist Mono, monospace', fontSize: 11, color: 'var(--muted)', whiteSpace: 'nowrap' }}>{row.asOf}</td>
+                <td style={{ padding: '12px 16px', fontSize: 12, color: 'var(--muted)', lineHeight: 1.6, overflowWrap: 'anywhere' }}>{row.note || '—'}</td>
               </tr>
             ))}
           </tbody>
@@ -777,22 +777,22 @@ export default function Methodology() {
         style={{
           ...card,
           padding: "16px 18px",
-          borderLeft: `3px solid ${diffusionReadiness.status === "READY" ? "#297a3a" : "#7a5010"}`,
+          borderLeft: `3px solid ${diffusionReadiness.status === "READY" ? "var(--up)" : "var(--accent-ink)"}`,
         }}
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
           <div>
             <div className="eyebrow-muted" style={{ marginBottom: 6 }}>Diffusion evidence</div>
-            <div style={{ fontFamily: "Geist Mono, monospace", fontSize: 22, color: "#171717" }}>
+            <div style={{ fontFamily: "Geist Mono, monospace", fontSize: 22, color: "var(--ink)" }}>
               {diffusionReadiness.confirmedGroups}/{diffusionReadiness.totalGroups} groups classified
             </div>
           </div>
           <DataStatusChip status={diffusionReadiness.status} />
         </div>
-        <p style={{ margin: "12px 0 0", fontSize: 13, color: "#4d4d4d", lineHeight: 1.55 }}>
+        <p style={{ margin: "12px 0 0", fontSize: 13, color: "var(--muted)", lineHeight: 1.55 }}>
           {diffusionReadiness.note}
         </p>
-        <p style={{ margin: "8px 0 0", fontSize: 12, color: "#666666", lineHeight: 1.55 }}>
+        <p style={{ margin: "8px 0 0", fontSize: 12, color: "var(--muted)", lineHeight: 1.55 }}>
           Leadership uses the current return and acceleration inputs independently; missing diffusion data does not invalidate a valid leadership state.
         </p>
       </div>
@@ -813,9 +813,9 @@ export default function Methodology() {
             ? []
             : ['Per-group rolling breadth and performance history is not emitted; current breadth describes the latest eligible cross-section only.']),
         ].map((msg, i) => (
-          <div key={i} style={{ display: 'flex', gap: 12, padding: '12px 14px', borderRadius: 6, border: '1px solid #ebebeb', background: '#fafafa' }}>
-            <span style={{ fontFamily: 'Geist Mono, monospace', fontSize: 10, fontWeight: 500, letterSpacing: '0.04em', color: '#7a5010', flexShrink: 0, paddingTop: 1 }}>Not available</span>
-            <span style={{ fontSize: 13, color: '#4d4d4d', lineHeight: 1.55 }}>{msg}</span>
+          <div key={i} style={{ display: 'flex', gap: 12, padding: '12px 14px', borderRadius: 6, border: '1px solid var(--line)', background: 'var(--surface-subtle)' }}>
+            <span style={{ fontFamily: 'Geist Mono, monospace', fontSize: 10, fontWeight: 500, letterSpacing: '0.04em', color: 'var(--accent-ink)', flexShrink: 0, paddingTop: 1 }}>Not available</span>
+            <span style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.55 }}>{msg}</span>
           </div>
         ))}
       </div>
@@ -829,24 +829,24 @@ export default function Methodology() {
               <div className="eyebrow-muted">{label}</div>
               <DataStatusChip status={status} />
             </div>
-            <p style={{ margin: '0 0 12px', fontSize: 12, color: '#666666', lineHeight: 1.5 }}>
+            <p style={{ margin: '0 0 12px', fontSize: 12, color: 'var(--muted)', lineHeight: 1.5 }}>
               {context.note || researchCategoryNote(data?.payload ?? null, category)}
             </p>
             {context.records.length === 0 ? (
-              <div style={{ fontSize: 12, color: '#8f8f8f' }}>No eligible first-party source was attached.</div>
+              <div style={{ fontSize: 12, color: 'var(--muted)' }}>No eligible first-party source was attached.</div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {context.records.slice(0, 3).map((record) => (
-                  <div key={`${record.request_id ?? record.url}-${record.url}`} style={{ borderTop: '1px solid #ebebeb', paddingTop: 9 }}>
+                  <div key={`${record.request_id ?? record.url}-${record.url}`} style={{ borderTop: '1px solid var(--line)', paddingTop: 9 }}>
                     <a
                       href={record.url}
                       target="_blank"
                       rel="noreferrer"
-                      style={{ color: '#245b76', fontSize: 12, fontWeight: 500, lineHeight: 1.35, textDecoration: 'none' }}
+                      style={{ color: 'var(--link)', fontSize: 12, fontWeight: 500, lineHeight: 1.35, textDecoration: 'none' }}
                     >
                       {record.title}
                     </a>
-                    <div style={{ marginTop: 4, fontSize: 11, color: '#777777', lineHeight: 1.45 }}>
+                    <div style={{ marginTop: 4, fontSize: 11, color: 'var(--muted)', lineHeight: 1.45 }}>
                       {shortenEvidence(record.content, 170)}
                     </div>
                   </div>
@@ -857,10 +857,10 @@ export default function Methodology() {
         ))}
       </div>
       {(crawl.records.length > 0 || tavilyContext) && (
-        <div style={{ ...card, padding: '12px 16px', marginTop: 12, marginBottom: 6, background: '#fafafa' }}>
+        <div style={{ ...card, padding: '12px 16px', marginTop: 12, marginBottom: 6, background: 'var(--surface-subtle)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
             <span className="eyebrow-muted">Evidence boundary</span>
-            <span style={{ fontSize: 12, color: '#4d4d4d' }}>
+            <span style={{ fontSize: 12, color: 'var(--muted)' }}>
               {tavilyContext?.status === 'REQUESTED' ? 'Tavily requested' : 'Tavily not requested'}
               {crawl.records.length > 0 ? ` · ${crawl.records.length} bounded IDX crawl source(s)` : ''}
               {' · context only; metrics are unchanged'}
@@ -878,7 +878,7 @@ export default function Methodology() {
                   <div className="eyebrow-muted">{label}</div>
                   <DataStatusChip status={status} />
                 </div>
-                <p style={{ margin: '0 0 12px', fontSize: 12, color: '#666666', lineHeight: 1.5 }}>
+                <p style={{ margin: '0 0 12px', fontSize: 12, color: 'var(--muted)', lineHeight: 1.5 }}>
                   {context.note || (context.records.length > 0
                     ? `${formatCountLabel(context.records.length, "You.com source")} attached; qualitative context only, not normalized into a confirmation metric.`
                     : 'No source-backed context attached; quantitative confirmation is not evaluated.')}
@@ -886,13 +886,13 @@ export default function Methodology() {
                 {context.research_answer && (() => {
                   const capped = truncateResearchAnswer(context.research_answer);
                   return (
-                    <div style={{ margin: '0 0 12px', padding: '10px 12px', background: '#fafafa', borderLeft: '2px solid #7a5010', fontSize: 11, color: '#4d4d4d', lineHeight: 1.5 }}>
+                    <div style={{ margin: '0 0 12px', padding: '10px 12px', background: 'var(--surface-subtle)', borderLeft: '2px solid #7a5010', fontSize: 11, color: 'var(--muted)', lineHeight: 1.5 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 4 }}>
                         <div className="eyebrow-muted">Research synthesis (unsourced)</div>
                         <EvidenceBadge kind="CONTEXT" compact />
                       </div>
                       {capped.text}
-                      <div style={{ marginTop: 6, fontSize: 10, color: "#8f8f8f", fontFamily: "Geist Mono, monospace" }}>
+                      <div style={{ marginTop: 6, fontSize: 10, color: "var(--muted)", fontFamily: "Geist Mono, monospace" }}>
                         {capped.truncated
                           ? `Truncated to the ${RESEARCH_ANSWER_MAX_CHARS}-char display cap (${capped.originalLength} chars persisted); full text remains in the snapshot sidecar. Context only — never a signal.`
                           : `Shown within the ${RESEARCH_ANSWER_MAX_CHARS}-char display cap. Context only — never a signal.`}
@@ -901,20 +901,20 @@ export default function Methodology() {
                   );
                 })()}
                 {context.records.length === 0 ? (
-                  <div style={{ fontSize: 12, color: '#8f8f8f' }}>No eligible first-party source was attached.</div>
+                  <div style={{ fontSize: 12, color: 'var(--muted)' }}>No eligible first-party source was attached.</div>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                     {context.records.slice(0, 3).map((record) => (
-                      <div key={`${record.request_id ?? record.url}-${record.url}`} style={{ borderTop: '1px solid #ebebeb', paddingTop: 9 }}>
+                      <div key={`${record.request_id ?? record.url}-${record.url}`} style={{ borderTop: '1px solid var(--line)', paddingTop: 9 }}>
                         <a
                           href={record.url}
                           target="_blank"
                           rel="noreferrer"
-                          style={{ color: '#245b76', fontSize: 12, fontWeight: 500, lineHeight: 1.35, textDecoration: 'none' }}
+                          style={{ color: 'var(--link)', fontSize: 12, fontWeight: 500, lineHeight: 1.35, textDecoration: 'none' }}
                         >
                           {record.title}
                         </a>
-                        <div style={{ marginTop: 4, fontSize: 11, color: '#777777', lineHeight: 1.45 }}>
+                        <div style={{ marginTop: 4, fontSize: 11, color: 'var(--muted)', lineHeight: 1.45 }}>
                           {shortenEvidence(record.content, 170)}
                         </div>
                       </div>
@@ -924,10 +924,10 @@ export default function Methodology() {
               </div>
             ))}
           </div>
-          <div style={{ ...card, padding: '12px 16px', marginTop: 12, marginBottom: 6, background: '#fafafa' }}>
+          <div style={{ ...card, padding: '12px 16px', marginTop: 12, marginBottom: 6, background: 'var(--surface-subtle)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
               <span className="eyebrow-muted">Evidence boundary</span>
-              <span style={{ fontSize: 12, color: '#4d4d4d' }}>
+              <span style={{ fontSize: 12, color: 'var(--muted)' }}>
                 {youContext.status === 'REQUESTED' ? 'You.com requested' : 'You.com not requested'}
                 {attachedYouSources > 0 ? ` · ${formatCountLabel(attachedYouSources, "source")} attached` : ''}
                 {' · context only; metrics are unchanged'}
@@ -943,8 +943,8 @@ export default function Methodology() {
       <div className="method-coverage-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 16 }}>
         {coverageItems.map(item => (
           <div key={item.label} style={{ ...card, padding: '14px 16px' }}>
-            <div style={{ fontFamily: 'Geist Mono, monospace', fontSize: 24, fontWeight: 500, color: '#171717', letterSpacing: '-0.02em', marginBottom: 4 }}>{item.value}</div>
-            <div style={{ fontSize: 11, color: '#666666' }}>{item.label}</div>
+            <div style={{ fontFamily: 'Geist Mono, monospace', fontSize: 24, fontWeight: 500, color: 'var(--ink)', letterSpacing: '-0.02em', marginBottom: 4 }}>{item.value}</div>
+            <div style={{ fontSize: 11, color: 'var(--muted)' }}>{item.label}</div>
           </div>
         ))}
       </div>
@@ -959,7 +959,7 @@ export default function Methodology() {
       />
 
       <div style={{ ...card, overflow: 'hidden', marginBottom: 6 }}>
-        <div style={{ padding: '10px 14px', borderBottom: '1px solid #ebebeb', fontFamily: 'Geist Mono, monospace', fontSize: 10, letterSpacing: '0.07em', textTransform: 'uppercase', color: '#666666', background: '#fafafa' }}>
+        <div style={{ padding: '10px 14px', borderBottom: '1px solid var(--line)', fontFamily: 'Geist Mono, monospace', fontSize: 10, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--muted)', background: 'var(--surface-subtle)' }}>
           {coverage?.excluded_securities !== undefined
             ? `Exclusions · ${coverage.excluded_securities} securities`
             : excludedCount === null
@@ -967,29 +967,29 @@ export default function Methodology() {
               : `Exclusions · ${excludedCount} securities`}
         </div>
         {exclusionRows.length === 0 ? (
-          <div style={{ padding: "12px 14px", fontSize: 12, color: "#666666" }}>
+          <div style={{ padding: "12px 14px", fontSize: 12, color: "var(--muted)" }}>
             Exclusion counts are not present in this snapshot.
           </div>
         ) : exclusionRows.map((ex, i) => (
           <div key={ex.reason} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '9px 14px', borderBottom: i < exclusionRows.length - 1 ? '1px solid #ebebeb' : 'none' }}>
-            <span style={{ flex: 1, fontSize: 13, color: '#4d4d4d' }}>{formatEnumLabel(ex.reason)}</span>
-            <span style={{ fontFamily: 'Geist Mono, monospace', fontSize: 12, color: '#171717', fontWeight: 500, width: 28, textAlign: 'right' }}>{ex.count}</span>
-            <div style={{ width: 100, height: 3, background: '#ebebeb', borderRadius: 1, overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: '100%', background: '#4d4d4d', borderRadius: 1 }} />
+            <span style={{ flex: 1, fontSize: 13, color: 'var(--muted)' }}>{formatEnumLabel(ex.reason)}</span>
+            <span style={{ fontFamily: 'Geist Mono, monospace', fontSize: 12, color: 'var(--ink)', fontWeight: 500, width: 28, textAlign: 'right' }}>{ex.count}</span>
+            <div style={{ width: 100, height: 3, background: 'var(--line)', borderRadius: 1, overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: '100%', background: 'var(--muted)', borderRadius: 1 }} />
             </div>
           </div>
         ))}
       </div>
-      <p style={{ fontSize: 10, color: '#8f8f8f', fontFamily: 'Geist Mono, monospace', letterSpacing: '0.04em', fontStyle: 'italic' }}>
+      <p style={{ fontSize: 10, color: 'var(--muted)', fontFamily: 'Geist Mono, monospace', letterSpacing: '0.04em', fontStyle: 'italic' }}>
         Counts are read from the current snapshot coverage and quality metadata.
       </p>
 
       <SectionHead label="Live Warnings" />
       <div style={{ ...card, padding: '12px 16px', marginBottom: 6 }}>
         {(data?.payload.data_warnings?.warnings ?? []).length === 0 ? (
-          <div style={{ fontSize: 12, color: '#666666' }}>No persisted data warnings.</div>
+          <div style={{ fontSize: 12, color: 'var(--muted)' }}>No persisted data warnings.</div>
         ) : (
-          <ul style={{ margin: 0, paddingLeft: 18, color: '#4d4d4d', fontSize: 12, lineHeight: 1.6 }}>
+          <ul style={{ margin: 0, paddingLeft: 18, color: 'var(--muted)', fontSize: 12, lineHeight: 1.6 }}>
             {(data?.payload.data_warnings?.warnings ?? []).map((warning) => <li key={warning}>{formatQualityIssues([warning])}</li>)}
           </ul>
         )}
@@ -999,7 +999,7 @@ export default function Methodology() {
       <SectionHead label="Analytical Definitions" />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 1, borderRadius: 6, overflow: 'hidden', boxShadow: 'rgba(0,0,0,0.08) 0px 0px 0px 1px, rgb(250,250,250) 0px 0px 0px 2px' }}>
         {methodCards.map((m, i) => (
-          <div key={m.title} style={{ background: '#ffffff', borderBottom: i < methodCards.length - 1 ? '1px solid #ebebeb' : 'none' }}>
+          <div key={m.title} style={{ background: 'var(--surface)', borderBottom: i < methodCards.length - 1 ? '1px solid #ebebeb' : 'none' }}>
             <button
               type="button"
               aria-expanded={expanded === m.title}
@@ -1012,18 +1012,18 @@ export default function Methodology() {
               }}
             >
               <div>
-                <div style={{ fontSize: 13, fontWeight: 500, color: '#171717', marginBottom: 2 }}>{m.title}</div>
-                <div style={{ fontSize: 12, color: '#666666', lineHeight: 1.5 }}>{m.def}</div>
+                <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)', marginBottom: 2 }}>{m.title}</div>
+                <div style={{ fontSize: 12, color: 'var(--muted)', lineHeight: 1.5 }}>{m.def}</div>
               </div>
-              <span style={{ fontSize: 14, color: '#8f8f8f', flexShrink: 0, lineHeight: 1, marginTop: 2 }}>{expanded === m.title ? '−' : '+'}</span>
+              <span style={{ fontSize: 14, color: 'var(--muted)', flexShrink: 0, lineHeight: 1, marginTop: 2 }}>{expanded === m.title ? '−' : '+'}</span>
             </button>
             {expanded === m.title && (
-              <div id={`method-${m.title.toLowerCase()}`} style={{ padding: '0 18px 16px', borderTop: '1px solid #ebebeb' }}>
+              <div id={`method-${m.title.toLowerCase()}`} style={{ padding: '0 18px 16px', borderTop: '1px solid var(--line)' }}>
                 <div style={{ paddingTop: 14 }}>
-                  <div style={{ fontFamily: 'Geist Mono, monospace', fontSize: 12, color: '#171717', background: '#fafafa', padding: '8px 12px', borderRadius: 4, border: '1px solid #ebebeb', marginBottom: 10 }}>
+                  <div style={{ fontFamily: 'Geist Mono, monospace', fontSize: 12, color: 'var(--ink)', background: 'var(--surface-subtle)', padding: '8px 12px', borderRadius: 4, border: '1px solid var(--line)', marginBottom: 10 }}>
                     {m.formula}
                   </div>
-                  <p style={{ fontSize: 13, color: '#4d4d4d', lineHeight: 1.6 }}>{m.detail}</p>
+                  <p style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.6 }}>{m.detail}</p>
                 </div>
               </div>
             )}
@@ -1045,13 +1045,13 @@ export default function Methodology() {
           ["Latest Common Date", formatDateLabel(quality?.latest_common_date)],
         ].map(([label, val], i, arr) => (
           <div key={String(label)} style={{ display: 'flex', padding: '10px 16px', borderBottom: i < arr.length - 1 ? '1px solid #ebebeb' : 'none' }}>
-            <span style={{ width: 200, fontSize: 12, color: '#666666' }}>{label}</span>
-            <span style={{ fontFamily: 'Geist Mono, monospace', fontSize: 12, color: '#171717' }}>{val}</span>
+            <span style={{ width: 200, fontSize: 12, color: 'var(--muted)' }}>{label}</span>
+            <span style={{ fontFamily: 'Geist Mono, monospace', fontSize: 12, color: 'var(--ink)' }}>{val}</span>
           </div>
         ))}
-        <div style={{ padding: '12px 16px', borderTop: '1px solid #ebebeb' }}>
+        <div style={{ padding: '12px 16px', borderTop: '1px solid var(--line)' }}>
           <div className="eyebrow-muted">Full method reference: docs/METHODOLOGY.md</div>
-          <p style={{ margin: '8px 0 0', fontSize: 12, color: '#686e73' }}>
+          <p style={{ margin: '8px 0 0', fontSize: 12, color: 'var(--muted)' }}>
             STALE means the snapshot as-of date lags the latest available benchmark or common trading date shown above; coverage and transitions remain as persisted and are not refreshed in the browser.
           </p>
         </div>

@@ -14,37 +14,37 @@ const EVIDENCE_CONFIG: Record<
 > = {
   SNAPSHOT: {
     label: "Real snapshot",
-    color: "#1a6e62",
-    background: "#f0f8f6",
+    color: "var(--up)",
+    background: "var(--tint-ok)",
     border: "#b9ded6",
     description: "Persisted market observations used for quantitative signals.",
   },
   OFFICIAL_RELEASE: {
     label: "Official IDX release",
-    color: "#1a6e62",
-    background: "#eef8f5",
+    color: "var(--up)",
+    background: "var(--tint-ok)",
     border: "#a9d9ce",
     description: "First-party IDX publication parsed from its released table.",
   },
   SAMPLE: {
     label: "Source-backed sample",
-    color: "#7a5010",
-    background: "#fff8e8",
+    color: "var(--accent-ink)",
+    background: "var(--tint-flag)",
     border: "#ead39b",
     description: "Real observations with bounded coverage; not a full-universe feed.",
   },
   PROTOTYPE: {
     label: "Static research lens",
-    color: "#315d87",
-    background: "#f1f6fa",
+    color: "var(--link)",
+    background: "var(--tint-note)",
     border: "#bed7e6",
     description: "Analyst-defined configuration used for exploration, not official classification.",
   },
   CONTEXT: {
     label: "Static context",
-    color: "#686e73",
-    background: "#f5f6f4",
-    border: "#dfe2e1",
+    color: "var(--muted)",
+    background: "var(--surface-subtle)",
+    border: "var(--line)",
     description: "Persisted descriptive context; it does not create a quantitative signal.",
   },
 };
@@ -102,8 +102,8 @@ export function EvidenceModel({
       className="evidence-model"
       aria-labelledby="evidence-model-title"
       style={{
-        border: "1px solid #dfe2e1",
-        background: "#faf9f6",
+        border: "1px solid var(--line)",
+        background: "var(--surface-subtle)",
         padding: 18,
         display: "grid",
         gap: 14,
@@ -114,7 +114,7 @@ export function EvidenceModel({
         <h2 id="evidence-model-title" style={{ margin: 0, fontSize: 20, letterSpacing: "-.02em" }}>
           Hybrid research workspace
         </h2>
-        <p style={{ margin: 0, color: "#686e73", fontSize: 12, lineHeight: 1.55 }}>
+        <p style={{ margin: 0, color: "var(--muted)", fontSize: 12, lineHeight: 1.55 }}>
           {intro}
         </p>
       </header>
@@ -131,8 +131,8 @@ export function EvidenceModel({
             key={`${lane.kind}-${lane.title}`}
             style={{
               minWidth: 0,
-              background: "#ffffff",
-              border: "1px solid #dfe2e1",
+              background: "var(--surface)",
+              border: "1px solid var(--line)",
               padding: "13px 14px",
               display: "grid",
               alignContent: "start",
@@ -141,16 +141,16 @@ export function EvidenceModel({
           >
             <EvidenceBadge kind={lane.kind} compact />
             <h3 style={{ margin: 0, fontSize: 13, fontWeight: 600 }}>{lane.title}</h3>
-            <p style={{ margin: 0, color: "#4d4d4d", fontSize: 12, lineHeight: 1.5 }}>
+            <p style={{ margin: 0, color: "var(--muted)", fontSize: 12, lineHeight: 1.5 }}>
               {lane.detail}
             </p>
-            <div style={{ color: "#686e73", fontFamily: "Geist Mono, ui-monospace, monospace", fontSize: 10, lineHeight: 1.45 }}>
+            <div style={{ color: "var(--muted)", fontFamily: "Geist Mono, ui-monospace, monospace", fontSize: 10, lineHeight: 1.45 }}>
               {lane.meta}
             </div>
             {lane.to && (
               <Link
                 to={lane.to}
-                style={{ color: "#245b76", fontSize: 11, textDecoration: "none", marginTop: 2 }}
+                style={{ color: "var(--link)", fontSize: 11, textDecoration: "none", marginTop: 2 }}
               >
                 {lane.actionLabel ?? "Open section"} →
               </Link>

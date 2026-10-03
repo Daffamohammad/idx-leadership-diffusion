@@ -140,8 +140,8 @@ export default function TradingViewWidget({
   return (
     <div
       style={{
-        border: "1px solid #dfe2e1",
-        background: "#fff",
+        border: "1px solid var(--line)",
+        background: "var(--surface)",
         padding: 12,
         minWidth: 0,
         maxWidth: "100%",
@@ -169,14 +169,14 @@ export default function TradingViewWidget({
           style={{
             fontSize: 11,
             fontFamily: "Geist Mono, monospace",
-            color: status === "blocked" ? "#8f2424" : "#686e73",
+            color: status === "blocked" ? "var(--down)" : "var(--muted)",
           }}
         >
           {status === "loading" ? "Loading chart…" : status === "embedded" ? "External chart" : "External chart unavailable"}
         </span>
       </header>
       {(status === "blocked" || status === "unsupported") && (
-        <p style={{ margin: 0, fontSize: 12, color: "#686e73" }}>
+        <p style={{ margin: 0, fontSize: 12, color: "var(--muted)" }}>
           The external chart could not be loaded. Use the snapshot chart above for the recorded observation.
         </p>
       )}

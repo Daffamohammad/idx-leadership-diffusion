@@ -36,16 +36,16 @@ export default function ResearchEvents({
         id="research-events"
         aria-label="Research events"
         style={{
-          border: "1px dashed #dfe2e1",
+          border: "1px dashed var(--line)",
           padding: 22,
-          background: "#faf9f6",
+          background: "var(--surface-subtle)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
           <div className="eyebrow-muted">Research events</div>
           <EvidenceBadge kind="CONTEXT" compact />
         </div>
-        <p style={{ margin: "8px 0 0", fontSize: 13, color: "#686e73" }}>
+        <p style={{ margin: "8px 0 0", fontSize: 13, color: "var(--muted)" }}>
           {emptyMessage}
         </p>
       </section>
@@ -59,9 +59,9 @@ export default function ResearchEvents({
       id="research-events"
       aria-label="Research events"
       style={{
-        border: "1px solid #dfe2e1",
+        border: "1px solid var(--line)",
         padding: 22,
-        background: "#faf9f6",
+        background: "var(--surface-subtle)",
       }}
     >
       <header style={{ marginBottom: 12 }}>
@@ -76,7 +76,7 @@ export default function ResearchEvents({
           style={{
             margin: 0,
             fontSize: 11,
-            color: "#686e73",
+            color: "var(--muted)",
             fontFamily: "Geist Mono, monospace",
           }}
         >
@@ -101,7 +101,7 @@ export default function ResearchEvents({
                 gap: 8,
                 alignItems: "center",
                 fontSize: 11,
-                color: "#686e73",
+                color: "var(--muted)",
                 fontFamily: "Geist Mono, monospace",
               }}
             >
@@ -118,8 +118,8 @@ export default function ResearchEvents({
               )}
             </div>
             <div style={{ fontWeight: 600 }}>{event.title}</div>
-            <div style={{ fontSize: 13, color: "#202325" }}>{event.summary}</div>
-            <div style={{ fontSize: 11, color: "#686e73" }}>
+            <div style={{ fontSize: 13, color: "var(--ink)" }}>{event.summary}</div>
+            <div style={{ fontSize: 11, color: "var(--muted)" }}>
               {event.sourceUrl.startsWith("http://") ||
               event.sourceUrl.startsWith("https://") ? (
                 <a href={event.sourceUrl} target="_blank" rel="noopener noreferrer">

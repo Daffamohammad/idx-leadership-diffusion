@@ -3,9 +3,9 @@
 Environment: real Chromium-based **Google Chrome** driven by `playwright-core` (temp harness outside the repo, so no dependency was added to `app/web`).
 Server: `npm run preview --prefix app/web` on `http://127.0.0.1:4319` (`--port 4319 --strictPort --host 127.0.0.1`).
 Bundle: `snap_sectors_2026-08-27`, as of 27 Aug 2026, `complete=false`.
-Theme: light (default) plus one dark-theme confirmation.
+Theme: light **and** dark, at 1440×900 and 390×844 for the contrast pass.
 
-> **Port trap (reproduce correctly):** `4173` is occupied on this machine by an unrelated app (`Pages I Kept for You`). `vite preview` then bound IPv6 only and the first pass silently tested the wrong application. Always confirm with `curl -s http://127.0.0.1:<port>/ | head` before trusting a run.
+> **Port trap (reproduce correctly):** `4173` is occupied on this machine by an unrelated app (`Pages I Kept for You`). `vite preview` then bound IPv6 only and the first pass silently tested the wrong application. Always confirm with `curl -s http://127.0.0.1:<port>/ | head` before trusting a run. The harness for this round ran on **4319**.
 
 ## Result
 
@@ -13,9 +13,10 @@ Theme: light (default) plus one dark-theme confirmation.
 | --- | --- | --- |
 | Geometry (13 routes × 5 viewports) | 65 | **65 PASS / 0 FAIL** |
 | Interaction (navigation, focus, search, filter, detail, rail, offline) | 13 | **12 PASS / 1 INFO / 0 FAIL** |
-| Regression matrix | 9 | **9 PASS / 0 FAIL** |
+| Regression matrix | 13 | **13 PASS / 0 FAIL** |
+| **WCAG contrast (19 routes × 2 themes × 2 viewports)** | 76 audits | **0 findings** |
 | Console + page errors | — | **0** |
-| Screenshots | 70 | written to the harness `shots/` directory |
+| Screenshots | 92 | written to the harness `shots/` directory |
 
 ## Geometry — routes
 
@@ -67,7 +68,7 @@ All measured bounds are non-zero and `≤ parent`, so the old 8-second timeout (
 
 | Check | Result |
 | --- | --- |
-| No `null` / `undefined` / `NaN` / `Infinity` / `[object Object]` / provider-job text in rendered copy across 13 routes | PASS |
+| No `null` / `undefined` / `NaN` / `Infinity` / `[object Object]` / provider-job text in rendered copy across **19** routes | PASS |
 | AMMN 61/21 points for the same bundle/ranges (`Points: 61` on ALL, `Points: 21` on 1M) | PASS |
 | TradingView mounted beyond the old timeout and fits its container (checked at 9s) | PASS |
 | Partial / stale badge + expandable provenance + "Data as of" + no "Today" for old data | PASS |
@@ -75,7 +76,29 @@ All measured bounds are non-zero and `≤ parent`, so the old 8-second timeout (
 | Top-3 0–100 formatting (`100%` present, no raw `null`) | PASS |
 | Local profile persistence: open dialog → Escape closes → focus returns to the trigger | PASS |
 | Keyboard detail navigation + focus restoration | PASS |
+| **P2-2** sector ticker search — `?taxonomy=SECTOR&filter=BBCA` → 1 row `["Financials"]` | PASS |
+| **P2-3** sector period URL — `?period=1M` restores; click 3M → `?period=3M`; click ALL → param removed | PASS |
+| **P2-4** rotation diagnostic visibility — 1 checkbox `Toggle Not available`, circles 11 → 0 → 11 | PASS |
+| **P2-1** dark header — `headerBg=rgb(26,32,38)`, `whiteHeader=false`, home link 13.94:1, separator 6.48:1 | PASS |
 | No page/console errors | PASS |
+
+## WCAG contrast audit — 0 findings
+
+`contrast.js` walks every element with direct text and compares the foreground against the background a reader actually sees:
+
+- SVG text uses `fill` as the foreground and the **smallest containing SVG shape** as the background (an ancestor walk alone reads the frame colour and reports white-on-white).
+- `paint-order: stroke` is honoured — a halo's stroke colour becomes the effective background behind the letterforms.
+- `background-clip: text` resolves to the **last gradient colour stop**, because the headline sweep ends `animation-fill-mode: forwards` at `background-position: 100%`. (Transient mid-sweep frames are recorded as a known issue in `HANDOFF.md`, not hidden.)
+- Large text (≥24px, or ≥18.66px bold) uses the 3.0 threshold; everything else uses 4.5. `disabled` and `aria-disabled` are exempt per WCAG 1.4.3.
+
+| Theme | 1440×900 | 390×844 |
+| --- | --- | --- |
+| Light | **0** | **0** |
+| Dark | **0** | **0** |
+
+Routes audited (19): `/`, `/what-changed`, `/overview`, `/map?taxonomy=SECTOR`, `/map?taxonomy=KONGLO&mode=stocks`, `/maps/konglo`, `/maps/themes`, `/groups?taxonomy=SECTOR`, `/groups?taxonomy=KONGLO`, `/groups?taxonomy=THEMES&view=heatmap`, `/themes`, `/konglo`, `/tickers`, `/chart-demo`, `/explorer?…Energy`, `/explorer?…THEME_COAL_ENERGY`, `/explorer?…KONGLO_SALIM&compare=KONGLO_ASTRA`, `/ticker/AMMN.JK`, `/methodology`.
+
+Trajectory across passes: **4,100 → 272 → 76 → 8 → 0**.
 
 ## Reproduction
 
@@ -84,6 +107,7 @@ All measured bounds are non-zero and `≤ parent`, so the old 8-second timeout (
 3. Confirm you are on the intended app: `curl -s http://127.0.0.1:4319/ | head -3`
 4. Drive the routes/viewports above and record `documentElement.scrollWidth/clientWidth`, workspace widths, chart/iframe bounds, console errors, screenshots.
 5. Re-run the interaction and regression checks listed above.
+6. Run the contrast pass over all 19 routes in **both** themes at 1440×900 and 390×844; expect `{"total":0,"byTheme":{"light":0,"dark":0},"unique":0}`. Delete any `dark-contrast-*.png` left over from a failing pass — those are stale evidence.
 
 ## Caveat
 

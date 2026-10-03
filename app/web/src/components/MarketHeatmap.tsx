@@ -72,6 +72,43 @@ function colorFor(value: number | null, metric: HeatmapMetric): string {
   return `rgb(${red}, ${green}, ${Math.round(110 + t * 60)})`;
 }
 
+function relativeLuminance(r: number, g: number, b: number): number {
+  const chan = (v: number) => {
+    const c = v / 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  };
+  return 0.2126 * chan(r) + 0.7152 * chan(g) + 0.0722 * chan(b);
+}
+
+function contrastRatio(bg: [number, number, number], ink: [number, number, number]): number {
+  const l1 = relativeLuminance(...bg);
+  const l2 = relativeLuminance(...ink);
+  const hi = Math.max(l1, l2);
+  const lo = Math.min(l1, l2);
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+const NEAR_BLACK: [number, number, number] = [11, 13, 15];
+const WHITE: [number, number, number] = [255, 255, 255];
+
+/** Near-black or white, whichever reads better on `color`. Always >= 4.58:1. */
+function inkOn(color: string): string {
+  const rgb = color.startsWith("#")
+    ? (() => {
+        const h = color.slice(1);
+        const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
+        return [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16));
+      })()
+    : /^rgb\(/.test(color)
+      ? color.match(/\d+/g)!.slice(0, 3).map(Number)
+      : null;
+  if (!rgb) return "#101215";
+  const bg = rgb as [number, number, number];
+  return contrastRatio(bg, NEAR_BLACK) >= contrastRatio(bg, WHITE)
+    ? "rgb(11, 13, 15)"
+    : "rgb(255, 255, 255)";
+}
+
 function metricLabel(metric: HeatmapMetric): string {
   switch (metric) {
     case "excess20d":
@@ -213,8 +250,8 @@ export default function MarketHeatmap({
       <section
         aria-labelledby="heatmap-title"
         style={{
-          border: "1px solid #dfe2e1",
-          background: "#faf9f6",
+          border: "1px solid var(--line)",
+          background: "var(--surface-subtle)",
           padding: 28,
         }}
       >
@@ -224,7 +261,7 @@ export default function MarketHeatmap({
         <h2 style={{ marginTop: 6, marginBottom: 12, fontSize: 22 }}>
           No taxonomy groups available
         </h2>
-        <p style={{ margin: 0, color: "#686e73", lineHeight: 1.5 }}>
+        <p style={{ margin: 0, color: "var(--muted)", lineHeight: 1.5 }}>
           The exporter did not emit a taxonomy view for this snapshot. The
           heatmap will render once a taxonomy YAML is registered and the
           snapshot is rebuilt.
@@ -241,8 +278,8 @@ export default function MarketHeatmap({
     <section
       aria-labelledby="heatmap-title"
       style={{
-        border: "1px solid #dfe2e1",
-        background: "#faf9f6",
+        border: "1px solid var(--line)",
+        background: "var(--surface-subtle)",
         padding: 24,
         display: "grid",
         gap: 18,
@@ -273,7 +310,7 @@ export default function MarketHeatmap({
               flexWrap: "wrap",
               gap: 12,
               fontSize: 11,
-              color: "#686e73",
+              color: "var(--muted)",
               fontFamily: "Geist Mono, monospace",
             }}
           >
@@ -287,7 +324,7 @@ export default function MarketHeatmap({
             <span>·</span>
             <span>No recommendation language</span>
           </div>
-          <p style={{ margin: "12px 0 0", fontSize: 12, color: "#202325" }}>
+          <p style={{ margin: "12px 0 0", fontSize: 12, color: "var(--ink)" }}>
             Click a tile to open group detail.
           </p>
         </div>
@@ -296,14 +333,14 @@ export default function MarketHeatmap({
             style={{
               border: "1px solid #b9c0be",
               padding: "8px 12px",
-              background: "#fff",
+              background: "var(--surface)",
               minWidth: 220,
             }}
           >
             <legend
               style={{
                 fontSize: 11,
-                color: "#686e73",
+                color: "var(--muted)",
                 fontFamily: "Geist Mono, monospace",
                 padding: "0 6px",
               }}
@@ -331,9 +368,9 @@ export default function MarketHeatmap({
                       padding: "4px 10px",
                       fontSize: 12,
                       border: "1px solid",
-                      borderColor: isActive ? "#202325" : "#dfe2e1",
-                      background: isActive ? "#202325" : "#fff",
-                      color: isActive ? "#fff" : available ? "#202325" : "#7c858c",
+                      borderColor: isActive ? "var(--ink)" : "var(--line)",
+                      background: isActive ? "var(--ink)" : "var(--surface)",
+                      color: isActive ? "var(--bg)" : available ? "var(--ink)" : "var(--muted)",
                       cursor: available ? "pointer" : "not-allowed",
                     }}
                   >
@@ -347,14 +384,14 @@ export default function MarketHeatmap({
             style={{
               border: "1px solid #b9c0be",
               padding: "8px 12px",
-              background: "#fff",
+              background: "var(--surface)",
               minWidth: 240,
             }}
           >
             <legend
               style={{
                 fontSize: 11,
-                color: "#686e73",
+                color: "var(--muted)",
                 fontFamily: "Geist Mono, monospace",
                 padding: "0 6px",
               }}
@@ -383,9 +420,9 @@ export default function MarketHeatmap({
                       padding: "4px 10px",
                       fontSize: 12,
                       border: "1px solid",
-                      borderColor: isActive ? "#202325" : "#dfe2e1",
-                      background: isActive ? "#202325" : "#fff",
-                      color: isActive ? "#fff" : "#202325",
+                      borderColor: isActive ? "var(--ink)" : "var(--line)",
+                      background: isActive ? "var(--ink)" : "var(--surface)",
+                      color: isActive ? "var(--bg)" : "var(--ink)",
                       cursor: "pointer",
                     }}
                   >
@@ -400,9 +437,9 @@ export default function MarketHeatmap({
 
       <div
         aria-label={`${metricLabel(metric)} legend`}
-        style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10, fontSize: 11, color: "#686e73" }}
+        style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10, fontSize: 11, color: "var(--muted)" }}
       >
-        <span style={{ fontFamily: "Geist Mono, monospace", color: "#202325" }}>Legend · {metricLabel(metric)}</span>
+        <span style={{ fontFamily: "Geist Mono, monospace", color: "var(--ink)" }}>Legend · {metricLabel(metric)}</span>
         {legend.map((item) => (
           <span key={item.label} style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
             <span aria-hidden="true" style={{ width: 12, height: 12, background: item.color, border: "1px solid rgba(0,0,0,.12)" }} />
@@ -410,7 +447,7 @@ export default function MarketHeatmap({
           </span>
         ))}
         <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
-          <span aria-hidden="true" style={{ width: 12, height: 12, background: "#f1f2f0", border: "1px dashed #9aa19f" }} />
+          <span aria-hidden="true" style={{ width: 12, height: 12, background: "var(--surface-subtle)", border: "1px dashed #9aa19f" }} />
           Not available
         </span>
       </div>
@@ -430,6 +467,8 @@ export default function MarketHeatmap({
           const isPrototype = group.prototype;
           const isDataGap = group.dataQuality === "DATA_GAP" || value === null;
           const gapReason = dataGapReason(group);
+          const cellBg = isDataGap ? "var(--surface-subtle)" : colorFor(value, metric);
+          const cellInk = isDataGap ? "var(--muted)" : inkOn(colorFor(value, metric));
           const ariaLabel = `${group.name}: ${metricLabel(metric)} ${isDataGap ? `not available, ${gapReason.toLowerCase()}` : metricDisplay(group, metric, value)}, leadership ${formatEnumLabel(group.leadership)}, diffusion ${formatEnumLabel(group.diffusion)}, ${formatCountLabel(group.constituents, "ticker")}.`;
           return (
             <button
@@ -440,12 +479,12 @@ export default function MarketHeatmap({
                 onSelectGroup?.(group.taxonomyKind, group.taxonomyId, group.id)
               }
               style={{
-                background: isDataGap ? "#f1f2f0" : colorFor(value, metric),
+                background: cellBg,
                 border: isDataGap ? "1px dashed #a7afac" : "1px solid rgba(0,0,0,0.08)",
                 padding: "12px 12px 10px",
                 minHeight: 96,
                 textAlign: "left",
-                color: isDataGap ? "#686e73" : "#101215",
+                color: cellInk,
                 cursor: "pointer",
                 display: "grid",
                 gap: 4,
@@ -458,7 +497,7 @@ export default function MarketHeatmap({
                   alignItems: "center",
                   fontSize: 11,
                   fontFamily: "Geist Mono, monospace",
-                  color: "rgba(16,18,21,0.75)",
+                  color: cellInk,
                 }}
               >
                 <span>{formatEnumLabel(group.taxonomyKind)}</span>
@@ -494,7 +533,7 @@ export default function MarketHeatmap({
                 }}
               >
                 {isDataGap ? (
-                  <span style={{ color: "#686e73", fontSize: 12, fontWeight: 400 }}>
+                  <span style={{ color: "var(--muted)", fontSize: 12, fontWeight: 400 }}>
                     Not available · {gapReason}
                   </span>
                 ) : (
@@ -507,7 +546,7 @@ export default function MarketHeatmap({
                   justifyContent: "space-between",
                   fontSize: 11,
                   fontFamily: "Geist Mono, monospace",
-                  color: "rgba(16,18,21,0.75)",
+                  color: cellInk,
                 }}
               >
                 <span>{formatCountLabel(group.constituents, "ticker")}</span>
@@ -518,7 +557,7 @@ export default function MarketHeatmap({
                   style={{
                     fontSize: 11,
                     fontFamily: "Geist Mono, monospace",
-                    color: "rgba(16,18,21,0.85)",
+                    color: cellInk,
                   }}
                   title="Foreign-flow sample context (latest published market date)"
                 >
@@ -536,7 +575,7 @@ export default function MarketHeatmap({
           flexWrap: "wrap",
           gap: 12,
           fontSize: 11,
-          color: "#686e73",
+          color: "var(--muted)",
           fontFamily: "Geist Mono, monospace",
         }}
       >

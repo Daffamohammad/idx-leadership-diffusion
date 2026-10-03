@@ -29,9 +29,9 @@ export function BundleNotices({ data }: { data: AdaptedSnapshot | null }) {
         role="alert"
         style={{
           ...bannerBase,
-          background: "#fdf3ec",
-          border: "1px solid #e8b48f",
-          color: "#7a3a1a",
+          background: "var(--tint-alert)",
+          border: "1px solid var(--alert-line)",
+          color: "var(--alert-ink)",
         }}
       >
         <strong>Snapshot needs verification.</strong> Data as of {formatDateLabel(data.payload.as_of)}.
@@ -46,9 +46,9 @@ export function BundleNotices({ data }: { data: AdaptedSnapshot | null }) {
         role="alert"
         style={{
           ...bannerBase,
-          background: "#fff8e1",
+          background: "var(--tint-warn)",
           border: "1px solid #ffe082",
-          color: "#7a5900",
+          color: "var(--accent-ink)",
         }}
       >
         <strong>Incomplete pagination.</strong> The provider reported a partial
@@ -71,9 +71,9 @@ export function BundleNotices({ data }: { data: AdaptedSnapshot | null }) {
         role="note"
         style={{
           ...bannerBase,
-          background: "#f5f6f4",
-          border: "1px solid #dfe2e1",
-          color: "#4d4d4d",
+          background: "var(--surface-subtle)",
+          border: "1px solid var(--line)",
+          color: "var(--muted)",
         }}
       >
         <strong>Bounded demo analysis.</strong>{" "}
@@ -116,9 +116,9 @@ export function WindowCapNotice({
       aria-label="90-day history limitation"
       style={{
         ...bannerBase,
-        background: "#f5f6f4",
-        border: "1px solid #dfe2e1",
-        color: "#4d4d4d",
+        background: "var(--surface-subtle)",
+        border: "1px solid var(--line)",
+        color: "var(--muted)",
         fontSize: compact ? 11 : 12,
       }}
     >
