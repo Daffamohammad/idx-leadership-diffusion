@@ -1,56 +1,56 @@
-# Kurasi desain — IDX Leadership Diffusion
+# Design curation — IDX Leadership Diffusion
 
-Tanggal pemeriksaan: 3 Oktober 2026. Ini pilihan untuk implementasi eksternal, bukan daftar dependency yang sudah terpasang. Situs diperiksa melalui halaman/dokumentasi publik; seluruh demo belum diuji secara visual atau diaudit kode/lisensinya satu per satu.
+Review date: 3 October 2026. These are selections for external implementation, not dependencies already installed. The sites were reviewed through public pages/documentation; not every demo has been visually tested or individually audited for code quality/licensing.
 
-## Pilihan utama
+## Primary selections
 
-| Kebutuhan | Pilihan | Penerapan |
+| Need | Selection | Application |
 | --- | --- | --- |
-| Button dan kontrol | [shadcn/ui, varian Radix](https://ui.shadcn.com/docs/components/radix/button) | Button primary/secondary/outline/ghost/icon, input, badge, segmented tabs, table, empty/skeleton states. Adaptasi token proyek; adopsi komponen secara selektif. |
-| Interaksi kompleks | [Radix Primitives](https://www.radix-ui.com/primitives) | Tooltip pada rail, dropdown, popover, tabs, dialog/sheet dengan focus management. Pertahankan native dialog yang bekerja bila tidak ada kebutuhan tambahan. |
-| Ikon | [Radix Icons](https://www.radix-ui.com/icons) | Satu keluarga SVG untuk navigasi dan aksi; gunakan ekspor yang benar-benar tersedia. Jangan mencampur Lucide/Tabler yang muncul dalam contoh shadcn. |
-| Font UI | [General Sans — Fontshare](https://www.fontshare.com/fonts/general-sans) | Body, judul, tombol dan label: 400/500/600. Pilihan editorial saya untuk tabel dan workspace riset. Pertahankan Geist sebagai fallback bila font gagal tersedia. |
-| Font angka | Geist Mono yang sudah digunakan proyek | Ticker, angka tabel, tanggal pendek; tabular numbers dan alignment kanan. Jangan memakai monospace untuk seluruh narasi. |
-| Logo | SVG asli pada `app/web/src/components/BrandMark.tsx` | Rapikan optical alignment, clear space, compact/expanded lockup, favicon dan warna dark mode. Pertahankan nama dan identitas proyek. |
-| Layout | [Astryx](https://astryx.atmeta.com/components) | Referensi App Shell, Side Nav, Metadata List, Table, Tab List dan Bottom Sheet; adaptasi hierarki, bukan instalasi seluruh design system. |
-| Motion | [Transitions.dev](https://transitions.dev/library.html) | Referensi tab indicator, tooltip, disclosure dan toast. CSS singkat dan interruptible; reduced motion wajib. |
-| Polish opsional | [beUI](https://beui.dev/) | Referensi Tabs, Tooltip, Drawer, Command Palette; ambil pola yang membantu orientasi dan keyboard. Motion library tidak wajib. |
-| Evidence/context | [Beautiful UI](https://www.beautifului.dev/) | Referensi Context Cards, Filter/Records Table, Sidebar Nav dan Search. Sumber, periode, coverage dan detail penelitian tetap terlihat. |
+| Buttons and controls | [shadcn/ui, Radix variant](https://ui.shadcn.com/docs/components/radix/button) | Primary/secondary/outline/ghost/icon buttons, inputs, badges, segmented tabs, tables, and empty/skeleton states. Adapt project tokens and adopt components selectively. |
+| Complex interactions | [Radix Primitives](https://www.radix-ui.com/primitives) | Rail tooltips, dropdowns, popovers, tabs, and dialogs/sheets with focus management. Preserve working native dialogs when no additional capability is needed. |
+| Icons | [Radix Icons](https://www.radix-ui.com/icons) | One SVG family for navigation/actions; use exports that actually exist. Do not mix in Lucide/Tabler icons from shadcn examples. |
+| UI font | [General Sans — Fontshare](https://www.fontshare.com/fonts/general-sans) | Body text, headings, buttons, and labels at 400/500/600. My editorial choice for tables and research workspaces. Retain Geist as a fallback if the font is unavailable. |
+| Numerical font | The project’s existing Geist Mono | Tickers, table numbers, and short dates; tabular numbers and right alignment. Do not use monospace for all prose. |
+| Logo | Original SVG in `app/web/src/components/BrandMark.tsx` | Refine optical alignment, clear space, compact/expanded lockups, favicon, and dark-mode colors. Preserve the project’s name and identity. |
+| Layout | [Astryx](https://astryx.atmeta.com/components) | References for App Shell, Side Nav, Metadata List, Table, Tab List, and Bottom Sheet. Adapt the hierarchy rather than installing the entire design system. |
+| Motion | [Transitions.dev](https://transitions.dev/library.html) | References for tab indicators, tooltips, disclosures, and toasts. Short, interruptible CSS transitions; reduced-motion support is required. |
+| Optional polish | [beUI](https://beui.dev/) | References for Tabs, Tooltip, Drawer, and Command Palette. Select patterns that support orientation and keyboard use. A motion library is not mandatory. |
+| Evidence/context | [Beautiful UI](https://www.beautifului.dev/) | References for Context Cards, Filter/Records Table, Sidebar Nav, and Search. Keep sources, periods, coverage, and research details visible. |
 
-Radix menyatakan primitives mendukung keyboard, semantics dan focus management. Tetap uji perilaku hasil integrasi, bukan menganggap dependency menjamin aksesibilitas aplikasi. Radix Icons menggunakan grid asli 15×15; uji kejernihan pada ukuran final yang dipilih. Fontshare mengidentifikasi General Sans sebagai Closed Source: simpan lisensi keluarga yang diunduh; jangan mengasumsikan SIL OFL atau izin modifikasi file font. [Radix](https://www.radix-ui.com/primitives), [Icons](https://www.radix-ui.com/icons), [Fontshare catalogue](https://www.fontshare.com/), [Fontshare license explanation](https://fontshare.com/licenses/sil-ofl).
+Radix states that its primitives support keyboard interaction, semantics, and focus management. Test integrated behavior rather than assuming a dependency guarantees application accessibility. Radix Icons use a native 15×15 grid; test clarity at the final selected size. Fontshare identifies General Sans as Closed Source: retain the downloaded family’s license and do not assume SIL OFL or permission to modify font files. [Radix](https://www.radix-ui.com/primitives), [Icons](https://www.radix-ui.com/icons), [Fontshare catalogue](https://www.fontshare.com/), [Fontshare license explanation](https://fontshare.com/licenses/sil-ofl).
 
-## Status semua 13 library pengguna
+## Assessment of all 13 user-selected libraries
 
-| Library | Keputusan | Alasan dan batas |
+| Library | Decision | Rationale and limits |
 | --- | --- | --- |
-| [ObsidianUI](https://www.obsidianui.dev/components#component-gallery) | Cadangan landing page | Gallery menonjolkan komponen interaktif/animasi; marquee, art gallery dan text-stream tidak diperlukan untuk dashboard riset inti. Jangan menambah Motion hanya untuk dekorasi. |
-| [Bencho](https://bencho.dev/) | Referensi interaksi opsional | Search, hover dan label-input dapat menginspirasi feedback. Demo heat map bukan model financial treemap yang siap dianggap sesuai. |
-| [Fontshare](https://fontshare.com/) | Dipilih | General Sans; validasi lisensi dan font assets saat implementasi. Satoshi adalah alternatif jika ada masalah aset; jangan memakai keduanya bersamaan. |
-| [Transitions.dev](https://transitions.dev/library.html) | Dipilih sebagai referensi motion | Tab indicator/tooltip/disclosure sesuai. Pilih contoh free dan jangan menganggap komponen Pro sudah dimiliki. |
-| [beUI](https://beui.dev/) | Dipilih selektif sebagai referensi | Ada Tabs, Tooltip, Drawer, Command Palette. Hindari magnetic button, metallic/glass effects, bouncy slider dan angka berputar pada data pasar. |
-| [Radix Primitives](https://www.radix-ui.com/primitives) | Fondasi interaksi terpilih | Adopsi per komponen untuk kebutuhan keyboard/focus/overlay, tanpa rewrite seluruh aplikasi. |
-| [Radix Icons](https://www.radix-ui.com/icons) | Keluarga ikon terpilih | Satu set untuk sidebar, search, profile, chart controls dan actions. |
-| [shadcn/ui](https://ui.shadcn.com/) | Fondasi kontrol terpilih | Tentukan varian Radix secara eksplisit; URL generik beberapa komponen saat pemeriksaan mengarah ke Base UI. Jangan memasang dua primitive systems. |
-| [Beautiful UI](https://www.beautifului.dev/) | Referensi evidence dan table | Pilih context/filter/search patterns; chat, AI thinking trace dan approval cards bukan fitur yang diminta. |
-| [Astryx](https://astryx.atmeta.com/components) | Referensi layout terpilih | Shell, navigation, metadata, table, responsive overlays relevan. Lisensi source/assets perlu dicek sebelum menyalin. |
-| [Reverse UI](https://reverseui.com/#components-section) | Tidak dipakai pada core | Gallery berisi logo/particle/visual effects. Identitas proyek sudah memiliki logo; efek tersebut tidak membantu membaca data. |
-| [Kinetics](https://kinetics.colorion.co/#library) | Tidak dipakai pada core | Physics/spring bukan kebutuhan utama. Jangan menambah engine motion kedua atau memakai gerak sebagai satu-satunya feedback. |
-| [UI Arc](https://uiarc.dev/components/) | Cadangan, perlu verifikasi komponen | URL /components tidak terbaca melalui alat riset; homepage [uiarc.dev](https://uiarc.dev/) dapat diperiksa. Jangan mengklaim katalog di URL yang gagal sudah diaudit. |
+| [ObsidianUI](https://www.obsidianui.dev/components#component-gallery) | Landing-page reserve | The gallery emphasizes interactive/animated components; marquee, art-gallery, and text-stream patterns are unnecessary for the core research dashboard. Do not add Motion solely for decoration. |
+| [Bencho](https://bencho.dev/) | Optional interaction reference | Search, hover, and label-input patterns may inspire feedback. Its heat-map demo is not automatically a suitable financial treemap implementation. |
+| [Fontshare](https://fontshare.com/) | Selected | General Sans; verify the license and font assets during implementation. Satoshi is an alternative if assets cause problems; do not use both simultaneously. |
+| [Transitions.dev](https://transitions.dev/library.html) | Selected motion reference | Tab-indicator, tooltip, and disclosure patterns fit. Choose free examples and do not assume access to Pro components. |
+| [beUI](https://beui.dev/) | Selective reference | Includes Tabs, Tooltip, Drawer, and Command Palette. Avoid magnetic buttons, metallic/glass effects, bouncy sliders, and spinning market-number animations. |
+| [Radix Primitives](https://www.radix-ui.com/primitives) | Selected interaction foundation | Adopt individual components for keyboard/focus/overlay needs without rewriting the application. |
+| [Radix Icons](https://www.radix-ui.com/icons) | Selected icon family | One set for the sidebar, search, profile, chart controls, and actions. |
+| [shadcn/ui](https://ui.shadcn.com/) | Selected control foundation | Choose the Radix variant explicitly; some generic component URLs redirected to Base UI during review. Do not install two primitive systems. |
+| [Beautiful UI](https://www.beautifului.dev/) | Evidence/table reference | Select context/filter/search patterns. Chat, AI thinking traces, and approval cards are not requested features. |
+| [Astryx](https://astryx.atmeta.com/components) | Selected layout reference | Relevant shell, navigation, metadata, tables, and responsive overlays. Check source/asset licenses before copying. |
+| [Reverse UI](https://reverseui.com/#components-section) | Excluded from the core | The gallery includes logo/particle/visual effects. The project already has a logo; these effects do not improve data reading. |
+| [Kinetics](https://kinetics.colorion.co/#library) | Excluded from the core | Physics/spring motion is not a primary need. Do not introduce a second motion engine or rely on movement as the only feedback. |
+| [UI Arc](https://uiarc.dev/components/) | Reserve; component verification required | The research tool could not access /components; the [uiarc.dev](https://uiarc.dev/) homepage was accessible. Do not claim the inaccessible catalog was audited. |
 
-## Aturan desain implementasi
+## Implementation design rules
 
-- Dashboard finansial yang tenang: tiga kartu utama, hierarki jelas, detail saat diminta. Banyak angka boleh; dekorasi dan badge berulang dikurangi.
-- Brand coral dipakai untuk identitas/aksi terpilih, hijau/merah untuk perubahan bertanda dengan angka dan label. Jangan memakai merah/hijau sebagai instruksi beli/jual.
-- Gunakan token semantic untuk light/dark mode. Ganti global inversion/filter jika merusak warna chart/widget; jangan sekadar membalik seluruh root.
-- Font body 14–16px; tabel 12–14px; metadata 11–12px. Angka tabular, decimal alignment dan unit konsisten. Hindari huruf uppercase mikro untuk semua teks.
-- Spacing dari skala konsisten; table rows terbaca; radius kecil dan konsisten; borders untuk struktur, shadow ringan untuk overlay.
-- Tombol default 36–40px, target sentuh mobile 44px; icon-only action wajib accessible name dan tooltip/focus cue. Navigation menggunakan link asli.
-- Hover/focus/selected/disabled/loading/error/empty states wajib dirancang. Hindari transition: all, animated counters dan page-load choreography pada workspace.
-- Motion sekitar 120–180ms untuk feedback sederhana, 180–240ms untuk overlay; respect prefers-reduced-motion. Search, sort dan filter tidak menunggu animasi.
-- Bukan kewajiban memasang semua library. Reuse React/Router/Tailwind/Recharts; tambahkan paket hanya untuk kebutuhan konkret yang tidak ditangani kode/platform yang ada.
+- A calm financial dashboard: three primary cards, clear hierarchy, and details on demand. Data density is acceptable; reduce decoration and repetitive badges.
+- Use coral for branding/selected actions and green/red for signed changes with numbers and labels. Do not use red/green as buy/sell instructions.
+- Use semantic light/dark tokens. Replace global inversion/filters if they damage chart/widget colors; do not simply invert the entire root.
+- Body text 14–16px, tables 12–14px, metadata 11–12px. Use tabular numbers, decimal alignment, and consistent units. Avoid tiny uppercase text throughout the interface.
+- Use a consistent spacing scale, readable table rows, small consistent radii, structural borders, and restrained overlay shadows.
+- Default buttons 36–40px; mobile touch targets 44px. Icon-only actions need accessible names and tooltip/focus cues. Navigation uses actual links.
+- Design hover/focus/selected/disabled/loading/error/empty states. Avoid transition: all, animated counters, and workspace page-load choreography.
+- Motion around 120–180ms for simple feedback and 180–240ms for overlays; respect prefers-reduced-motion. Search, sorting, and filtering must not wait for animations.
+- There is no requirement to install every library. Reuse React/Router/Tailwind/Recharts; add packages only for concrete needs unmet by existing code/platform capabilities.
 
-## Dependency dan lisensi
+## Dependencies and licensing
 
-Pada baseline belum ada Radix/shadcn/Motion dependencies. Model eksternal harus mencatat nama/version, alasan, bundle impact dan license untuk setiap penambahan; pakai registry/vendor resmi, lockfile, named icon imports. Jangan menjalankan installer massal atau mengganti framework, router, charts dan package manager.
+The baseline has no Radix/shadcn/Motion dependencies. The external model must record the name/version, rationale, bundle impact, and license of each addition. Use official registries/vendors, lockfiles, and named icon imports. Do not run bulk installers or replace the framework, router, charts, or package manager.
 
-Pilih sumber kode free yang memiliki lisensi sesuai; referensi visual tidak otomatis memberi izin mengambil semua aset. Tidak membeli Pro, font berbayar, subscription atau layanan baru. Klaim kompatibilitas React 19/Tailwind 4/Vite harus dibuktikan melalui build aktual.
+Choose free source code with an appropriate license; visual references do not automatically authorize taking all assets. Do not buy Pro access, paid fonts, subscriptions, or new services. Demonstrate React 19/Tailwind 4/Vite compatibility through an actual build.
