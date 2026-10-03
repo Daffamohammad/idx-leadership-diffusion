@@ -241,14 +241,14 @@ function CustomTooltip({ active, payload, label, metricLabel, ticker, groupName,
   const point = payload.find((entry) => entry.payload)?.payload;
   const rows = point
     ? [
-        { name: metricLabel || ticker || groupName || "Price", value: point.price, color: "#d97956" },
+        { name: metricLabel || ticker || groupName || "Price", value: point.price, color: "var(--accent-ink)" },
         { name: "IHSG (^JKSE)", value: point.bench, color: "var(--color-leading)" },
         ...(showOHLC
           ? [
               { name: "Open (index)", value: point.open ?? null, color: "var(--up)" },
               { name: "High (index)", value: point.high ?? null, color: "var(--up)" },
-              { name: "Low (index)", value: point.low ?? null, color: "#d97956" },
-              { name: "Close (index)", value: point.close ?? null, color: "#d97956" },
+              { name: "Low (index)", value: point.low ?? null, color: "var(--accent-ink)" },
+              { name: "Close (index)", value: point.close ?? null, color: "var(--accent-ink)" },
             ]
           : []),
         ...(showVolume && point.volume !== null && point.volume !== undefined
