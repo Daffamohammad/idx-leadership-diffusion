@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "098507c2-2387-46b3-af1a-8ef632cdb90e",
+  "status": "current",
+  "command": "deliver",
+  "type": "sequence",
+  "input": "/Users/daffa/Hackathon/idx-leadership-diffusion/.archify/sequence-web-request-20261003-170157/candidate.json",
+  "output": "/Users/daffa/Hackathon/idx-leadership-diffusion/.archify/sequence-web-request-20261003-170157/web-request-cache-miss.html",
+  "specification": {
+    "sha256": "5abc23577efc93910b67bb3314c6502ac5feaecd8500beceb69febf44ef7710a",
+    "bytes": 3106
+  },
+  "artifact": {
+    "sha256": "854205cef9704df55522f62c0dd3367e2b53086860f2ade4379321cc9a2dbb19",
+    "bytes": 753001
+  }
+}

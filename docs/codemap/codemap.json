@@ -1,15 +1,23 @@
 {
-  "generated_at": "2026-08-28T03:03:51.774718+00:00",
-  "generated_from_commit": "035a01ba7ec50882fda758755c5364a4d47847ee",
+  "generated_at": "2026-10-03T10:40:07.319998+00:00",
+  "generated_from_commit": "b71cb4674b41b0ee6dc028b409998170498a05b4",
   "scope": [
+    "CODEX_HANDOFF.md",
     "FRONTIER_PASS_1_AUDIT.md",
     "FRONTIER_PASS_2_AUDIT.md",
     "GROUNDWORK_AUDIT.md",
+    "HANDOFF.md",
+    "IMPLEMENTATION_REPORT.md",
+    "OFFLINE_REFINEMENT_AUDIT.md",
     "README.md",
+    "TEST_REPORT.md",
     "app/components.py",
     "app/data_quality.py",
+    "app/data_sources.py",
+    "app/snapshot_adapter.py",
     "app/story_mode.py",
     "app/streamlit_app.py",
+    "app/view_models.py",
     "app/web/index.html",
     "app/web/package.json",
     "app/web/src/App.tsx",
@@ -17,41 +25,85 @@
     "app/web/src/components/BrandMark.tsx",
     "app/web/src/components/CustomCursor.tsx",
     "app/web/src/components/EmptyState.tsx",
+    "app/web/src/components/EvidenceModel.tsx",
+    "app/web/src/components/ForeignFlowSample.tsx",
+    "app/web/src/components/IDXDailyStatistics.tsx",
+    "app/web/src/components/IDXStatisticsRelease.tsx",
     "app/web/src/components/ImageWithFallback.tsx",
+    "app/web/src/components/ListingRegistryPanel.tsx",
+    "app/web/src/components/MarketHeatmap.tsx",
+    "app/web/src/components/OfficialMarketContext.tsx",
+    "app/web/src/components/PriceChart.tsx",
+    "app/web/src/components/ResearchEvents.tsx",
+    "app/web/src/components/RotationView.tsx",
+    "app/web/src/components/SnapshotNotices.tsx",
     "app/web/src/components/StatusChips.tsx",
+    "app/web/src/components/TaxonomyMap.tsx",
     "app/web/src/components/ThemeToggle.tsx",
+    "app/web/src/components/TradingViewWidget.tsx",
     "app/web/src/data/SnapshotContext.tsx",
     "app/web/src/data/SnapshotProvider.tsx",
     "app/web/src/data/adapter.ts",
+    "app/web/src/data/format.ts",
+    "app/web/src/data/mapGeometry.ts",
+    "app/web/src/data/mapLabels.ts",
+    "app/web/src/data/readiness.ts",
+    "app/web/src/data/researchContext.ts",
+    "app/web/src/data/rotation.ts",
     "app/web/src/data/snapshot.ts",
     "app/web/src/index.css",
     "app/web/src/main.tsx",
+    "app/web/src/pages/ChartDemo.tsx",
     "app/web/src/pages/GroupExplorer.tsx",
     "app/web/src/pages/LeadershipMap.tsx",
+    "app/web/src/pages/MarketOverview.tsx",
+    "app/web/src/pages/MasterGroupTable.tsx",
     "app/web/src/pages/Methodology.tsx",
     "app/web/src/pages/PublicHome.tsx",
+    "app/web/src/pages/TaxonomyMapPage.tsx",
+    "app/web/src/pages/ThemesExplorer.tsx",
+    "app/web/src/pages/TickerAnalysis.tsx",
     "app/web/src/pages/WhatChanged.tsx",
+    "app/web/src/vite-env.d.ts",
     "app/web/tsconfig.json",
     "app/web/vite.config.ts",
+    "config/konglo.yaml",
+    "config/methodology.yaml",
+    "config/providers.yaml",
+    "config/themes.yaml",
+    "config/universe.yaml",
     "docs/ARCHITECTURE.md",
+    "docs/ARCHITECTURE_BASELINE.md",
+    "docs/ARCHITECTURE_DECISIONS.md",
     "docs/CHANGE_SUMMARY.md",
     "docs/DATA_CONTRACTS.md",
     "docs/DECISION_LOG.md",
     "docs/ENRICHMENT_RESEARCH.md",
+    "docs/FEATURE_ARCHITECTURE.md",
+    "docs/FINAL_AUDIT.md",
+    "docs/FULL_LIVE_RUNBOOK.md",
+    "docs/HYBRID_PRODUCT_MODEL.md",
+    "docs/IDX_STATISTICS_SOURCE.md",
     "docs/KNOWN_GAPS.md",
     "docs/LIVE_METHODOLOGY_AUDIT.md",
     "docs/LIVE_SECTORS_RUNBOOK.md",
     "docs/METHODOLOGY.md",
     "docs/METHODOLOGY_SENSITIVITY.md",
     "docs/NEXT_ITERATION.md",
+    "docs/PRODUCT_ARCHITECTURE_PLAN.md",
     "docs/PROVIDER_PARITY_REPORT.md",
+    "docs/REFACTOR_EXECUTION_PLAN.md",
+    "docs/RESEARCH_AUDIT.md",
     "docs/SECTORS_API_AUDIT.md",
     "docs/SECTORS_BLOCKERS.md",
     "docs/SECTORS_CREDIT_AUDIT.md",
     "docs/SECTORS_INTEGRATION_PLAN.md",
+    "docs/SECTORS_MIGRATION_CONTRACT.md",
+    "docs/SECTORS_MIGRATION_READINESS.md",
     "docs/SECTORS_PRICE_BASIS.md",
     "docs/SECTORS_REFRESH_BUDGET.md",
     "docs/TAXONOMY_AUDIT.md",
+    "docs/TAXONOMY_ROTATION_RUNBOOK.md",
     "docs/UNIVERSE_ELIGIBILITY.md",
     "docs/codemap/_build.py",
     "scripts/__init__.py",
@@ -63,24 +115,36 @@
     "scripts/audit_state_turnover.py",
     "scripts/build_history.py",
     "scripts/build_market_snapshot.py",
+    "scripts/build_research_events.py",
     "scripts/build_snapshot.py",
     "scripts/build_snapshot_index.py",
+    "scripts/build_taxonomy_views.py",
+    "scripts/calculate_foreign_flow_sample.py",
     "scripts/compare_providers.py",
     "scripts/credit_audit.py",
+    "scripts/download_ksei_holding.py",
+    "scripts/enrich_tavily_context.py",
+    "scripts/enrich_you_context.py",
     "scripts/export_diagnostics.py",
     "scripts/export_market_brief.py",
     "scripts/export_snapshot_json.py",
     "scripts/plan_sectors_refresh.py",
+    "scripts/refresh_and_export.py",
+    "scripts/refresh_idx_daily_statistics.py",
+    "scripts/refresh_idx_statistics.py",
     "scripts/refresh_public_data.py",
     "scripts/refresh_sectors_core.py",
+    "scripts/research/run_research_pass.py",
     "scripts/run_diffusion_sensitivity.py",
     "scripts/run_horizon_sensitivity.py",
     "scripts/run_stale_trading.py",
     "scripts/run_state_turnover.py",
     "scripts/validate_data.py",
     "scripts/validate_sectors_live.py",
+    "scripts/yfinance_harness.py",
     "src/idx_leadership/aggregation/groups.py",
     "src/idx_leadership/analytics/__init__.py",
+    "src/idx_leadership/analytics/claim_gates.py",
     "src/idx_leadership/analytics/contradictions.py",
     "src/idx_leadership/analytics/data_gaps.py",
     "src/idx_leadership/analytics/invalidation.py",
@@ -93,6 +157,7 @@
     "src/idx_leadership/data/manifests.py",
     "src/idx_leadership/data/quality.py",
     "src/idx_leadership/data/snapshots.py",
+    "src/idx_leadership/events/__init__.py",
     "src/idx_leadership/evidence/builder.py",
     "src/idx_leadership/features/__init__.py",
     "src/idx_leadership/features/breadth.py",
@@ -100,6 +165,9 @@
     "src/idx_leadership/features/concentration_v2.py",
     "src/idx_leadership/features/relative_strength.py",
     "src/idx_leadership/features/returns.py",
+    "src/idx_leadership/intelligence/__init__.py",
+    "src/idx_leadership/intelligence/contract.py",
+    "src/idx_leadership/intelligence/readout.py",
     "src/idx_leadership/models/__init__.py",
     "src/idx_leadership/models/benchmark_observation.py",
     "src/idx_leadership/models/enums.py",
@@ -118,48 +186,148 @@
     "src/idx_leadership/providers/capabilities.py",
     "src/idx_leadership/providers/factory.py",
     "src/idx_leadership/providers/fixture.py",
+    "src/idx_leadership/providers/idx_discovery.py",
+    "src/idx_leadership/providers/idx_statistics.py",
     "src/idx_leadership/providers/ledger.py",
+    "src/idx_leadership/providers/llama_parse.py",
     "src/idx_leadership/providers/market_universe.py",
+    "src/idx_leadership/providers/official_market_context.py",
     "src/idx_leadership/providers/public.py",
     "src/idx_leadership/providers/sectors.py",
     "src/idx_leadership/providers/sectors_client.py",
+    "src/idx_leadership/providers/sectors_contracts.py",
+    "src/idx_leadership/providers/sectors_fixture.py",
     "src/idx_leadership/providers/sectors_normalizers.py",
+    "src/idx_leadership/providers/tavily_client.py",
+    "src/idx_leadership/providers/you_client.py",
+    "src/idx_leadership/signals/__init__.py",
     "src/idx_leadership/signals/change_digest.py",
     "src/idx_leadership/signals/diffusion.py",
     "src/idx_leadership/signals/diffusion_v2.py",
     "src/idx_leadership/signals/leadership.py",
-    "src/idx_leadership/signals/transitions.py"
+    "src/idx_leadership/signals/transitions.py",
+    "src/idx_leadership/taxonomy/__init__.py",
+    "src/idx_leadership/taxonomy/aggregation.py",
+    "src/idx_leadership/taxonomy/models.py",
+    "src/idx_leadership/taxonomy/registry.py",
+    "src/idx_leadership/utils/__init__.py",
+    "src/idx_leadership/utils/config.py",
+    "src/idx_leadership/utils/dates.py",
+    "src/idx_leadership/utils/errors.py",
+    "src/idx_leadership/utils/logging.py",
+    "tests/__init__.py",
+    "tests/conftest.py",
+    "tests/conftest_app.py",
+    "tests/synthetic_market.py",
+    "tests/test_429_blocked_path.py",
+    "tests/test_a_closure.py",
+    "tests/test_adv_concurrency.py",
+    "tests/test_adv_drift.py",
+    "tests/test_adv_hygiene.py",
+    "tests/test_adv_injection.py",
+    "tests/test_adv_secret.py",
+    "tests/test_adv_spend.py",
+    "tests/test_adv_ssrf.py",
+    "tests/test_adv_traversal.py",
+    "tests/test_adv_trust.py",
+    "tests/test_aggregation.py",
+    "tests/test_analytics.py",
+    "tests/test_breadth.py",
+    "tests/test_brief_contract.py",
+    "tests/test_capability_provider.py",
+    "tests/test_comparability_and_adapter.py",
+    "tests/test_concentration.py",
+    "tests/test_concentration_v2.py",
+    "tests/test_config.py",
+    "tests/test_denominator_contract.py",
+    "tests/test_diffusion_group_size.py",
+    "tests/test_e2e_demo.py",
+    "tests/test_e2e_snapshot_export.py",
+    "tests/test_endpoint_status.py",
+    "tests/test_evidence.py",
+    "tests/test_export_url_normalization.py",
+    "tests/test_foreign_flow_sample.py",
+    "tests/test_golden_financials.py",
+    "tests/test_group_size_diffusion.py",
+    "tests/test_idx_discovery.py",
+    "tests/test_idx_statistics.py",
+    "tests/test_intelligence_contract_v3.py",
+    "tests/test_live_preflight.py",
+    "tests/test_llama_parse.py",
+    "tests/test_market_universe.py",
+    "tests/test_methodology_sensitivity.py",
+    "tests/test_methodology_versioning.py",
+    "tests/test_no_lookahead.py",
+    "tests/test_no_lookahead_synthetic.py",
+    "tests/test_official_market_context.py",
+    "tests/test_parity_public_sectors.py",
+    "tests/test_pipeline.py",
+    "tests/test_prodpass_stress.py",
+    "tests/test_provider_contracts.py",
+    "tests/test_provider_modes_and_readiness.py",
+    "tests/test_providers.py",
+    "tests/test_refresh_and_export.py",
+    "tests/test_relative_strength.py",
+    "tests/test_research_context.py",
+    "tests/test_research_events.py",
+    "tests/test_research_pass_driver.py",
+    "tests/test_returns.py",
+    "tests/test_schema.py",
+    "tests/test_sectors_client.py",
+    "tests/test_sectors_provider.py",
+    "tests/test_sentinel_and_429.py",
+    "tests/test_snapshot_adapter.py",
+    "tests/test_snapshot_comparability.py",
+    "tests/test_snapshot_enrichment.py",
+    "tests/test_snapshots.py",
+    "tests/test_state_turnover.py",
+    "tests/test_states.py",
+    "tests/test_synthetic_scenarios.py",
+    "tests/test_tavily_client.py",
+    "tests/test_taxonomy.py",
+    "tests/test_transitions.py",
+    "tests/test_ui_productization.py",
+    "tests/test_ui_story_mode.py",
+    "tests/test_yfinance_harness.py",
+    "tests/test_you_client.py",
+    "tests/test_you_context.py"
   ],
   "nodes": [
     {
       "id": "app",
       "path": "app/streamlit_app.py",
-      "role": "Read-only Streamlit UI: four tabs (What Changed, Leadership Map, Group Explorer, Method/Quality) + per-endpoint DQ sidebar + story-mode rendering + data-quality helpers.",
+      "role": "Read-only Streamlit UI: Overview, Leadership Map, Group Explorer, Method/Quality + coverage-language rendering + listing registry panel data + brief export via view models.",
       "entrypoints": [
         "app/streamlit_app.py:main",
-        "app/story_mode.py:build_story_card",
-        "app/data_quality.py:render_endpoint_status"
+        "app/view_models.py:render_market_brief",
+        "app/data_quality.py:human_readable_status",
+        "app/story_mode.py:build_story_card"
       ],
       "tests": [
         "tests/test_ui_story_mode.py",
+        "tests/test_brief_contract.py",
         "tests/conftest_app.py"
       ],
       "constraints": [
         "No business logic \u2014 read-only",
+        "Coverage language only, no raw status badges",
         "No LLM narrative"
       ],
-      "evidence": "app/streamlit_app.py:148 main",
+      "evidence": "app/streamlit_app.py:916 main",
       "files": [
         "app/components.py",
         "app/data_quality.py",
+        "app/data_sources.py",
+        "app/snapshot_adapter.py",
         "app/story_mode.py",
-        "app/streamlit_app.py"
+        "app/streamlit_app.py",
+        "app/view_models.py"
       ]
     },
     {
       "id": "web-app",
       "path": "app/web/src/App.tsx",
-      "role": "Read-only Vite/React/TypeScript SPA that mirrors the Figma design prototype. Five routes: PublicHome, WhatChanged (/overview), LeadershipMap (/map), GroupExplorer (/explorer), Methodology. Consumes a single JSON dump of the snapshot bundle; renders explicit empty states where the prototype universe does not yet emit data (breadth history, foreign flow, fundamentals).",
+      "role": "Read-only Vite/React/TypeScript SPA. Routes: PublicHome, MarketOverview, LeadershipMap, Konglo/Themes maps, GroupExplorer, MasterGroupTable, ThemesExplorer, TickerAnalysis, WhatChanged, Methodology. Consumes static /snapshots/*.json + /idx/*.json; listing registry, official market context, and sample flow render as separate evidence lanes.",
       "entrypoints": [
         "app/web/src/App.tsx:App",
         "app/web/src/data/SnapshotProvider.tsx:SnapshotProvider",
@@ -171,9 +339,10 @@
       "constraints": [
         "Read-only \u2014 no analytical logic, no vendor SDK imports",
         "Snapshot data is loaded via /snapshots/<id>.json + /snapshots/index.json",
-        "Pages never fabricate values: missing data renders an EmptyState card"
+        "Pages never fabricate values: missing data renders an EmptyState card",
+        "UI reload never invokes a provider"
       ],
-      "evidence": "app/web/src/App.tsx:13 SnapshotProvider",
+      "evidence": "app/web/src/App.tsx:23 SnapshotProvider",
       "files": [
         "app/web/index.html",
         "app/web/package.json",
@@ -182,20 +351,46 @@
         "app/web/src/components/BrandMark.tsx",
         "app/web/src/components/CustomCursor.tsx",
         "app/web/src/components/EmptyState.tsx",
+        "app/web/src/components/EvidenceModel.tsx",
+        "app/web/src/components/ForeignFlowSample.tsx",
+        "app/web/src/components/IDXDailyStatistics.tsx",
+        "app/web/src/components/IDXStatisticsRelease.tsx",
         "app/web/src/components/ImageWithFallback.tsx",
+        "app/web/src/components/ListingRegistryPanel.tsx",
+        "app/web/src/components/MarketHeatmap.tsx",
+        "app/web/src/components/OfficialMarketContext.tsx",
+        "app/web/src/components/PriceChart.tsx",
+        "app/web/src/components/ResearchEvents.tsx",
+        "app/web/src/components/RotationView.tsx",
+        "app/web/src/components/SnapshotNotices.tsx",
         "app/web/src/components/StatusChips.tsx",
+        "app/web/src/components/TaxonomyMap.tsx",
         "app/web/src/components/ThemeToggle.tsx",
+        "app/web/src/components/TradingViewWidget.tsx",
         "app/web/src/data/SnapshotContext.tsx",
         "app/web/src/data/SnapshotProvider.tsx",
         "app/web/src/data/adapter.ts",
+        "app/web/src/data/format.ts",
+        "app/web/src/data/mapGeometry.ts",
+        "app/web/src/data/mapLabels.ts",
+        "app/web/src/data/readiness.ts",
+        "app/web/src/data/researchContext.ts",
+        "app/web/src/data/rotation.ts",
         "app/web/src/data/snapshot.ts",
         "app/web/src/index.css",
         "app/web/src/main.tsx",
+        "app/web/src/pages/ChartDemo.tsx",
         "app/web/src/pages/GroupExplorer.tsx",
         "app/web/src/pages/LeadershipMap.tsx",
+        "app/web/src/pages/MarketOverview.tsx",
+        "app/web/src/pages/MasterGroupTable.tsx",
         "app/web/src/pages/Methodology.tsx",
         "app/web/src/pages/PublicHome.tsx",
+        "app/web/src/pages/TaxonomyMapPage.tsx",
+        "app/web/src/pages/ThemesExplorer.tsx",
+        "app/web/src/pages/TickerAnalysis.tsx",
         "app/web/src/pages/WhatChanged.tsx",
+        "app/web/src/vite-env.d.ts",
         "app/web/tsconfig.json",
         "app/web/vite.config.ts",
         "scripts/build_snapshot_index.py",
@@ -205,27 +400,28 @@
     {
       "id": "scripts",
       "path": "scripts/build_market_snapshot.py",
-      "role": "CLI entry points: refresh, build, compare, audit, sensitivity studies. Orchestrates the full engine.",
+      "role": "CLI entry points: refresh, build, compare, audit, enrichment (tavily/you), IDX statistics + daily-statistics parse, taxonomy views, foreign-flow sample, research events, export. Orchestrates the full engine.",
       "entrypoints": [
-        "scripts/refresh_sectors_core:main",
-        "scripts/build_market_snapshot:main",
-        "scripts/compare_providers:main",
-        "scripts/audit_close_basis:main",
-        "scripts/credit_audit:main",
-        "scripts/run_state_turnover:main",
-        "scripts/run_stale_trading:main",
-        "scripts/run_horizon_sensitivity:main",
-        "scripts/run_diffusion_sensitivity:main"
+        "scripts/build_market_snapshot.py:main",
+        "scripts/refresh_idx_daily_statistics.py:main",
+        "scripts/enrich_tavily_context.py:main",
+        "scripts/enrich_you_context.py:main",
+        "scripts/export_snapshot_json.py:main",
+        "scripts/calculate_foreign_flow_sample.py:main",
+        "scripts/build_taxonomy_views.py:main",
+        "scripts/build_research_events.py:main"
       ],
       "tests": [
         "tests/test_pipeline.py",
-        "tests/test_snapshots.py"
+        "tests/test_refresh_and_export.py",
+        "tests/test_live_preflight.py"
       ],
       "constraints": [
         "Deterministic",
-        "Live HTTP gated by --allow-live"
+        "Live HTTP gated by --allow-live",
+        "Demo caps 250 symbols / 400 HTTP / 1000 credits"
       ],
-      "evidence": "scripts/build_market_snapshot.py:1 main",
+      "evidence": "scripts/build_market_snapshot.py:196 main",
       "files": [
         "scripts/__init__.py",
         "scripts/audit_close_basis.py",
@@ -236,26 +432,37 @@
         "scripts/audit_state_turnover.py",
         "scripts/build_history.py",
         "scripts/build_market_snapshot.py",
+        "scripts/build_research_events.py",
         "scripts/build_snapshot.py",
+        "scripts/build_taxonomy_views.py",
+        "scripts/calculate_foreign_flow_sample.py",
         "scripts/compare_providers.py",
         "scripts/credit_audit.py",
+        "scripts/download_ksei_holding.py",
+        "scripts/enrich_tavily_context.py",
+        "scripts/enrich_you_context.py",
         "scripts/export_diagnostics.py",
         "scripts/export_market_brief.py",
         "scripts/plan_sectors_refresh.py",
+        "scripts/refresh_and_export.py",
+        "scripts/refresh_idx_daily_statistics.py",
+        "scripts/refresh_idx_statistics.py",
         "scripts/refresh_public_data.py",
         "scripts/refresh_sectors_core.py",
+        "scripts/research/run_research_pass.py",
         "scripts/run_diffusion_sensitivity.py",
         "scripts/run_horizon_sensitivity.py",
         "scripts/run_stale_trading.py",
         "scripts/run_state_turnover.py",
         "scripts/validate_data.py",
-        "scripts/validate_sectors_live.py"
+        "scripts/validate_sectors_live.py",
+        "scripts/yfinance_harness.py"
       ]
     },
     {
       "id": "pipeline",
       "path": "src/idx_leadership/pipeline.py",
-      "role": "End-to-end orchestrator: provider \u2192 features \u2192 group snapshots \u2192 transitions \u2192 snapshot persistence. Source-neutral (does not import vendor SDKs).",
+      "role": "End-to-end orchestrator: provider \u2192 features \u2192 group snapshots \u2192 persistence/analytics \u2192 transitions \u2192 intelligence readout \u2192 snapshot persistence. Source-neutral (does not import vendor SDKs).",
       "entrypoints": [
         "src/idx_leadership/pipeline.py:build_snapshot"
       ],
@@ -267,15 +474,20 @@
         "Source-neutral",
         "No look-ahead"
       ],
-      "evidence": "src/idx_leadership/pipeline.py:35 build_snapshot",
+      "evidence": "src/idx_leadership/pipeline.py:115 build_snapshot",
       "files": [
-        "src/idx_leadership/pipeline.py"
+        "src/idx_leadership/pipeline.py",
+        "src/idx_leadership/utils/__init__.py",
+        "src/idx_leadership/utils/config.py",
+        "src/idx_leadership/utils/dates.py",
+        "src/idx_leadership/utils/errors.py",
+        "src/idx_leadership/utils/logging.py"
       ]
     },
     {
       "id": "providers",
       "path": "src/idx_leadership/providers/base.py",
-      "role": "Provider abstraction: MarketDataProvider + 8 capability protocols. Concrete: YFinanceProvider, FixtureProvider, SectorsProvider. Capability-discovery via SectorsProvider.get_* and ledger-aware.",
+      "role": "Provider abstraction: MarketDataProvider + capability protocols. Concrete: YFinanceProvider, FixtureProvider, SectorsProvider (+sectors fixture). Search/parser clients live in sibling nodes.",
       "entrypoints": [
         "src/idx_leadership/providers/base.py:MarketDataProvider",
         "src/idx_leadership/providers/capabilities.py:PriceCrossSectionProvider",
@@ -291,7 +503,7 @@
         "Analytical layer never imports vendor SDKs",
         "Live HTTP gated by allow_live=True"
       ],
-      "evidence": "src/idx_leadership/providers/base.py:16 MarketDataProvider",
+      "evidence": "src/idx_leadership/providers/base.py:30 MarketDataProvider",
       "files": [
         "src/idx_leadership/providers/__init__.py",
         "src/idx_leadership/providers/base.py",
@@ -300,6 +512,8 @@
         "src/idx_leadership/providers/fixture.py",
         "src/idx_leadership/providers/public.py",
         "src/idx_leadership/providers/sectors.py",
+        "src/idx_leadership/providers/sectors_contracts.py",
+        "src/idx_leadership/providers/sectors_fixture.py",
         "src/idx_leadership/providers/sectors_normalizers.py"
       ]
     },
@@ -318,9 +532,62 @@
         "Refuses live calls unless allow_live=True",
         "Secret redaction in ledger"
       ],
-      "evidence": "src/idx_leadership/providers/sectors_client.py:71 SectorsClient",
+      "evidence": "src/idx_leadership/providers/sectors_client.py:121 SectorsClient",
       "files": [
         "src/idx_leadership/providers/sectors_client.py"
+      ]
+    },
+    {
+      "id": "search-agents",
+      "path": "src/idx_leadership/providers/idx_discovery.py",
+      "role": "Bounded discovery agents: Tavily + You.com search/contents clients and first-party IDX PDF discovery (select_daily_statistics_pdf, retrieve_idx_pdf, verify_local_idx_pdf). Discovery evidence only \u2014 never numeric.",
+      "entrypoints": [
+        "src/idx_leadership/providers/idx_discovery.py:select_daily_statistics_pdf",
+        "src/idx_leadership/providers/idx_discovery.py:retrieve_idx_pdf",
+        "src/idx_leadership/providers/tavily_client.py:TavilyClient",
+        "src/idx_leadership/providers/you_client.py:YouClient"
+      ],
+      "tests": [
+        "tests/test_tavily_client.py",
+        "tests/test_you_client.py",
+        "tests/test_idx_discovery.py"
+      ],
+      "constraints": [
+        "Bounded runs only (<=5 results, <=5 crawl candidates)",
+        "quantitative_use=false",
+        "First-party domains preferred"
+      ],
+      "evidence": "src/idx_leadership/providers/idx_discovery.py:170 select_daily_statistics_pdf",
+      "files": [
+        "src/idx_leadership/providers/idx_discovery.py",
+        "src/idx_leadership/providers/tavily_client.py",
+        "src/idx_leadership/providers/you_client.py"
+      ]
+    },
+    {
+      "id": "idx-parser",
+      "path": "src/idx_leadership/providers/idx_statistics.py",
+      "role": "First-party parser lane: IDX monthly investor HTML tables (parse_idx_monthly_investor_html, reconciled net foreign), LlamaParse daily-statistics reduction, OJK market-context reduction. Rejects numerics with missing labels/units.",
+      "entrypoints": [
+        "src/idx_leadership/providers/idx_statistics.py:parse_idx_monthly_investor_html",
+        "src/idx_leadership/providers/llama_parse.py:build_parse_request",
+        "src/idx_leadership/providers/official_market_context.py:build_official_market_context_payload"
+      ],
+      "tests": [
+        "tests/test_idx_statistics.py",
+        "tests/test_llama_parse.py",
+        "tests/test_official_market_context.py"
+      ],
+      "constraints": [
+        "Bounded target pages only",
+        "Market-level flow kept separate from per-security flow",
+        "Fail closed on incomplete tables"
+      ],
+      "evidence": "src/idx_leadership/providers/idx_statistics.py:843 parse_idx_monthly_investor_html",
+      "files": [
+        "src/idx_leadership/providers/idx_statistics.py",
+        "src/idx_leadership/providers/llama_parse.py",
+        "src/idx_leadership/providers/official_market_context.py"
       ]
     },
     {
@@ -337,7 +604,7 @@
       "constraints": [
         "Pure (no network)"
       ],
-      "evidence": "src/idx_leadership/providers/market_universe.py:42 build_market_universe",
+      "evidence": "src/idx_leadership/providers/market_universe.py:43 build_market_universe",
       "files": [
         "src/idx_leadership/providers/market_universe.py"
       ]
@@ -402,7 +669,7 @@
         "Invalid prices rejected",
         "top1_abs_share \u2264 1.0 always"
       ],
-      "evidence": "src/idx_leadership/features/relative_strength.py:95 compute_excess_returns",
+      "evidence": "src/idx_leadership/features/relative_strength.py:100 compute_excess_returns",
       "files": [
         "src/idx_leadership/features/__init__.py",
         "src/idx_leadership/features/breadth.py",
@@ -427,71 +694,38 @@
       "constraints": [
         "Uses DiffusionStateV2 (group-size-aware)"
       ],
-      "evidence": "src/idx_leadership/aggregation/groups.py:31 build_group_snapshots",
+      "evidence": "src/idx_leadership/aggregation/groups.py:40 build_group_snapshots",
       "files": [
         "src/idx_leadership/aggregation/groups.py"
       ]
     },
     {
-      "id": "signals-leadership",
-      "path": "src/idx_leadership/signals/leadership.py",
-      "role": "2D leadership classifier: 4 states (LEADING/IMPROVING/LAGGING/WEAKENING) + UNCONFIRMED based on (excess_20d, acceleration).",
-      "entrypoints": [
-        "src/idx_leadership/signals/leadership.py:classify_leadership"
-      ],
-      "tests": [
-        "tests/test_states.py"
-      ],
-      "constraints": [
-        "Threshold in config/methodology.yaml"
-      ],
-      "evidence": "src/idx_leadership/signals/leadership.py:24 classify_leadership",
-      "files": [
-        "src/idx_leadership/signals/leadership.py"
-      ]
-    },
-    {
-      "id": "signals-diffusion",
-      "path": "src/idx_leadership/signals/diffusion_v2.py",
-      "role": "Group-size-aware diffusion: BROADENING_FIRM / BROADENING_FRAGILE / STABLE / NARROWING_FRAGILE / NARROWING_FIRM / UNCONFIRMED. Backward-compat v1 enum via to_v1_state.",
-      "entrypoints": [
-        "src/idx_leadership/signals/diffusion_v2.py:classify_diffusion_v2",
-        "src/idx_leadership/signals/diffusion_v2.py:constituent_floor",
-        "src/idx_leadership/signals/diffusion_v2.py:to_v1_state"
-      ],
-      "tests": [
-        "tests/test_diffusion_group_size.py",
-        "tests/test_states.py"
-      ],
-      "constraints": [
-        "backward compat: to_v1_state maps v2 \u2192 v1 enum"
-      ],
-      "evidence": "src/idx_leadership/signals/diffusion_v2.py:46 classify_diffusion_v2",
-      "files": [
-        "src/idx_leadership/signals/diffusion.py",
-        "src/idx_leadership/signals/diffusion_v2.py"
-      ]
-    },
-    {
-      "id": "signals-transitions",
+      "id": "signals",
       "path": "src/idx_leadership/signals/transitions.py",
-      "role": "TransitionEvent builder; explicit categorical diff + priority-ordered materiality classifier; change-digest bucketing (7 categories: new_leaders, lost_leadership, upgrades, downgrades, broadening, narrowing, stable).",
+      "role": "Signal engine: 2D leadership classifier (LEADING/IMPROVING/LAGGING/WEAKENING + UNCONFIRMED), group-size-aware diffusion v2 (firm/fragile broadening/narrowing), transition events + priority-ordered materiality + change-digest buckets.",
       "entrypoints": [
+        "src/idx_leadership/signals/leadership.py:classify_leadership",
+        "src/idx_leadership/signals/diffusion_v2.py:classify_diffusion_v2",
         "src/idx_leadership/signals/transitions.py:compute_transition",
-        "src/idx_leadership/signals/transitions.py:build_transition_events",
         "src/idx_leadership/signals/change_digest.py:build_change_digest"
       ],
       "tests": [
-        "tests/test_transitions.py",
-        "tests/test_transitions.py::test_change_digest_buckets_unique"
+        "tests/test_states.py",
+        "tests/test_diffusion_group_size.py",
+        "tests/test_transitions.py"
       ],
       "constraints": [
-        "Materiality priority is hand-tuned and documented",
-        "Each group appears in at most one bucket"
+        "Thresholds in config/methodology.yaml",
+        "Materiality priority hand-tuned and documented",
+        "v1 diffusion kept as compat projection"
       ],
       "evidence": "src/idx_leadership/signals/transitions.py:31 compute_transition",
       "files": [
+        "src/idx_leadership/signals/__init__.py",
         "src/idx_leadership/signals/change_digest.py",
+        "src/idx_leadership/signals/diffusion.py",
+        "src/idx_leadership/signals/diffusion_v2.py",
+        "src/idx_leadership/signals/leadership.py",
         "src/idx_leadership/signals/transitions.py"
       ]
     },
@@ -511,9 +745,10 @@
         "No LLM",
         "Descriptive, not prescriptive"
       ],
-      "evidence": "src/idx_leadership/analytics/persistence.py:39 compute_persistence",
+      "evidence": "src/idx_leadership/analytics/persistence.py:25 compute_persistence",
       "files": [
         "src/idx_leadership/analytics/__init__.py",
+        "src/idx_leadership/analytics/claim_gates.py",
         "src/idx_leadership/analytics/contradictions.py",
         "src/idx_leadership/analytics/data_gaps.py",
         "src/idx_leadership/analytics/invalidation.py",
@@ -523,22 +758,31 @@
       ]
     },
     {
-      "id": "evidence-builder",
+      "id": "evidence",
       "path": "src/idx_leadership/evidence/builder.py",
-      "role": "GroupEvidence builder: structured per-group evidence + contradictions + data_gaps. Source-neutral (no provider imports).",
+      "role": "Evidence + readout bundle: GroupEvidence builder, brief/intelligence contract (frozen sections), market-read/story-mode readout, research-event normalization. Source-neutral.",
       "entrypoints": [
         "src/idx_leadership/evidence/builder.py:build_group_evidence",
-        "src/idx_leadership/evidence/builder.py:build_evidence_table"
+        "src/idx_leadership/intelligence/contract.py:contract_summary",
+        "src/idx_leadership/intelligence/readout.py:build_market_read",
+        "src/idx_leadership/events/__init__.py:normalize_event"
       ],
       "tests": [
-        "tests/test_evidence.py"
+        "tests/test_evidence.py",
+        "tests/test_brief_contract.py",
+        "tests/test_research_events.py"
       ],
       "constraints": [
-        "Source-neutral (no provider imports)"
+        "Source-neutral (no provider imports)",
+        "Brief sections frozen (brief-v1)"
       ],
-      "evidence": "src/idx_leadership/evidence/builder.py:21 build_group_evidence",
+      "evidence": "src/idx_leadership/evidence/builder.py:48 build_group_evidence",
       "files": [
-        "src/idx_leadership/evidence/builder.py"
+        "src/idx_leadership/events/__init__.py",
+        "src/idx_leadership/evidence/builder.py",
+        "src/idx_leadership/intelligence/__init__.py",
+        "src/idx_leadership/intelligence/contract.py",
+        "src/idx_leadership/intelligence/readout.py"
       ]
     },
     {
@@ -563,7 +807,7 @@
         "Severe issues are reported, not silently fixed",
         "UNKNOWN-only rollup \u2192 FAILED"
       ],
-      "evidence": "src/idx_leadership/data/snapshots.py:30 SnapshotWriter",
+      "evidence": "src/idx_leadership/data/snapshots.py:119 SnapshotWriter",
       "files": [
         "src/idx_leadership/data/__init__.py",
         "src/idx_leadership/data/comparability.py",
@@ -571,6 +815,30 @@
         "src/idx_leadership/data/manifests.py",
         "src/idx_leadership/data/quality.py",
         "src/idx_leadership/data/snapshots.py"
+      ]
+    },
+    {
+      "id": "taxonomy",
+      "path": "src/idx_leadership/taxonomy/registry.py",
+      "role": "Analyst-defined taxonomy registry (Konglo/Themes) + group aggregation over snapshot features (equal-weight excess, breadth, leadership/diffusion, map coordinates). Membership only from explicit config rows.",
+      "entrypoints": [
+        "src/idx_leadership/taxonomy/registry.py:load_registry_from_yaml",
+        "src/idx_leadership/taxonomy/aggregation.py:aggregate_taxonomy",
+        "src/idx_leadership/taxonomy/aggregation.py:build_taxonomy_payload"
+      ],
+      "tests": [
+        "tests/test_taxonomy.py"
+      ],
+      "constraints": [
+        "Membership empty when no explicit row exists",
+        "Never aggregated cross-theme"
+      ],
+      "evidence": "src/idx_leadership/taxonomy/registry.py:134 load_registry_from_yaml",
+      "files": [
+        "src/idx_leadership/taxonomy/__init__.py",
+        "src/idx_leadership/taxonomy/aggregation.py",
+        "src/idx_leadership/taxonomy/models.py",
+        "src/idx_leadership/taxonomy/registry.py"
       ]
     },
     {
@@ -588,7 +856,7 @@
       "constraints": [
         "Redacts api_key/token/secret/password/authorization"
       ],
-      "evidence": "src/idx_leadership/providers/ledger.py:25 RequestLedger",
+      "evidence": "src/idx_leadership/providers/ledger.py:80 RequestLedger",
       "files": [
         "src/idx_leadership/providers/ledger.py"
       ]
@@ -596,7 +864,7 @@
     {
       "id": "tests",
       "path": "tests/conftest.py",
-      "role": "Pytest fixtures (prices_df, benchmark_df, taxonomy_df, fixtures_dir, fixture_provider) + the entire offline test suite (202 tests).",
+      "role": "Offline pytest suite (729 tests): fixtures, synthetic-market harness (scenarios A\u2013G), contract/drift/no-lookahead/secret-redaction tests. No network, no credentials.",
       "entrypoints": [
         "tests/conftest.py:fixtures_dir"
       ],
@@ -606,17 +874,98 @@
       "constraints": [
         "Offline-only; no network"
       ],
-      "evidence": "tests/conftest.py:9 fixtures_dir",
-      "files": []
+      "evidence": "tests/conftest.py:17 fixtures_dir",
+      "files": [
+        "tests/__init__.py",
+        "tests/conftest.py",
+        "tests/conftest_app.py",
+        "tests/synthetic_market.py",
+        "tests/test_429_blocked_path.py",
+        "tests/test_a_closure.py",
+        "tests/test_adv_concurrency.py",
+        "tests/test_adv_drift.py",
+        "tests/test_adv_hygiene.py",
+        "tests/test_adv_injection.py",
+        "tests/test_adv_secret.py",
+        "tests/test_adv_spend.py",
+        "tests/test_adv_ssrf.py",
+        "tests/test_adv_traversal.py",
+        "tests/test_adv_trust.py",
+        "tests/test_aggregation.py",
+        "tests/test_analytics.py",
+        "tests/test_breadth.py",
+        "tests/test_brief_contract.py",
+        "tests/test_capability_provider.py",
+        "tests/test_comparability_and_adapter.py",
+        "tests/test_concentration.py",
+        "tests/test_concentration_v2.py",
+        "tests/test_config.py",
+        "tests/test_denominator_contract.py",
+        "tests/test_diffusion_group_size.py",
+        "tests/test_e2e_demo.py",
+        "tests/test_e2e_snapshot_export.py",
+        "tests/test_endpoint_status.py",
+        "tests/test_evidence.py",
+        "tests/test_export_url_normalization.py",
+        "tests/test_foreign_flow_sample.py",
+        "tests/test_golden_financials.py",
+        "tests/test_group_size_diffusion.py",
+        "tests/test_idx_discovery.py",
+        "tests/test_idx_statistics.py",
+        "tests/test_intelligence_contract_v3.py",
+        "tests/test_live_preflight.py",
+        "tests/test_llama_parse.py",
+        "tests/test_market_universe.py",
+        "tests/test_methodology_sensitivity.py",
+        "tests/test_methodology_versioning.py",
+        "tests/test_no_lookahead.py",
+        "tests/test_no_lookahead_synthetic.py",
+        "tests/test_official_market_context.py",
+        "tests/test_parity_public_sectors.py",
+        "tests/test_pipeline.py",
+        "tests/test_prodpass_stress.py",
+        "tests/test_provider_contracts.py",
+        "tests/test_provider_modes_and_readiness.py",
+        "tests/test_providers.py",
+        "tests/test_refresh_and_export.py",
+        "tests/test_relative_strength.py",
+        "tests/test_research_context.py",
+        "tests/test_research_events.py",
+        "tests/test_research_pass_driver.py",
+        "tests/test_returns.py",
+        "tests/test_schema.py",
+        "tests/test_sectors_client.py",
+        "tests/test_sectors_provider.py",
+        "tests/test_sentinel_and_429.py",
+        "tests/test_snapshot_adapter.py",
+        "tests/test_snapshot_comparability.py",
+        "tests/test_snapshot_enrichment.py",
+        "tests/test_snapshots.py",
+        "tests/test_state_turnover.py",
+        "tests/test_states.py",
+        "tests/test_synthetic_scenarios.py",
+        "tests/test_tavily_client.py",
+        "tests/test_taxonomy.py",
+        "tests/test_transitions.py",
+        "tests/test_ui_productization.py",
+        "tests/test_ui_story_mode.py",
+        "tests/test_yfinance_harness.py",
+        "tests/test_you_client.py",
+        "tests/test_you_context.py"
+      ]
     },
     {
-      "id": "config",
+      "id": "config-docs",
       "path": "config/methodology.yaml",
-      "role": "Methodology parameters: horizons, breadth thresholds, leadership acceleration, min group size, materiality. method_version=methodology-v2. All thresholds live here \u2014 no magic numbers in code.",
+      "role": "Methodology + provider + universe + Konglo/Themes config and methodology/architecture/runbook/audit prose. All thresholds live here \u2014 no magic numbers in code.",
       "entrypoints": [
         "config/methodology.yaml:method_version",
         "config/universe.yaml",
-        "config/providers.yaml"
+        "config/providers.yaml",
+        "config/konglo.yaml",
+        "config/themes.yaml",
+        "docs/METHODOLOGY.md",
+        "docs/ARCHITECTURE.md"
       ],
       "tests": [
         "tests/test_methodology_versioning.py",
@@ -625,49 +974,54 @@
       "constraints": [
         "No magic numbers in code; all thresholds in config"
       ],
-      "evidence": "config/methodology.yaml:8 method_version",
-      "files": []
-    },
-    {
-      "id": "docs",
-      "path": "docs/METHODOLOGY.md",
-      "role": "Methodology + architecture + audit + decision + gaps documentation (single source of truth for prose).",
-      "entrypoints": [
-        "docs/METHODOLOGY.md",
-        "docs/ARCHITECTURE.md",
-        "docs/DECISION_LOG.md",
-        "docs/KNOWN_GAPS.md",
-        "FRONTIER_PASS_2_AUDIT.md"
-      ],
-      "tests": [],
-      "constraints": [
-        "Single source of truth for methodology prose"
-      ],
-      "evidence": "docs/METHODOLOGY.md:1 # IDX Leadership Diffusion",
+      "evidence": "config/methodology.yaml:12 method_version",
       "files": [
+        "CODEX_HANDOFF.md",
         "FRONTIER_PASS_1_AUDIT.md",
         "FRONTIER_PASS_2_AUDIT.md",
         "GROUNDWORK_AUDIT.md",
+        "HANDOFF.md",
+        "IMPLEMENTATION_REPORT.md",
+        "OFFLINE_REFINEMENT_AUDIT.md",
         "README.md",
+        "TEST_REPORT.md",
+        "config/konglo.yaml",
+        "config/methodology.yaml",
+        "config/providers.yaml",
+        "config/themes.yaml",
+        "config/universe.yaml",
         "docs/ARCHITECTURE.md",
+        "docs/ARCHITECTURE_BASELINE.md",
+        "docs/ARCHITECTURE_DECISIONS.md",
         "docs/CHANGE_SUMMARY.md",
         "docs/DATA_CONTRACTS.md",
         "docs/DECISION_LOG.md",
         "docs/ENRICHMENT_RESEARCH.md",
+        "docs/FEATURE_ARCHITECTURE.md",
+        "docs/FINAL_AUDIT.md",
+        "docs/FULL_LIVE_RUNBOOK.md",
+        "docs/HYBRID_PRODUCT_MODEL.md",
+        "docs/IDX_STATISTICS_SOURCE.md",
         "docs/KNOWN_GAPS.md",
         "docs/LIVE_METHODOLOGY_AUDIT.md",
         "docs/LIVE_SECTORS_RUNBOOK.md",
         "docs/METHODOLOGY.md",
         "docs/METHODOLOGY_SENSITIVITY.md",
         "docs/NEXT_ITERATION.md",
+        "docs/PRODUCT_ARCHITECTURE_PLAN.md",
         "docs/PROVIDER_PARITY_REPORT.md",
+        "docs/REFACTOR_EXECUTION_PLAN.md",
+        "docs/RESEARCH_AUDIT.md",
         "docs/SECTORS_API_AUDIT.md",
         "docs/SECTORS_BLOCKERS.md",
         "docs/SECTORS_CREDIT_AUDIT.md",
         "docs/SECTORS_INTEGRATION_PLAN.md",
+        "docs/SECTORS_MIGRATION_CONTRACT.md",
+        "docs/SECTORS_MIGRATION_READINESS.md",
         "docs/SECTORS_PRICE_BASIS.md",
         "docs/SECTORS_REFRESH_BUDGET.md",
         "docs/TAXONOMY_AUDIT.md",
+        "docs/TAXONOMY_ROTATION_RUNBOOK.md",
         "docs/UNIVERSE_ELIGIBILITY.md",
         "docs/codemap/_build.py"
       ]
@@ -677,200 +1031,284 @@
     {
       "from": "app",
       "to": "data-snapshots",
-      "type": "imports",
-      "evidence": "app/streamlit_app.py:27 from idx_leadership.data.snapshots import SnapshotReader"
+      "type": "reads",
+      "evidence": "app/data_sources.py:70 load_source"
+    },
+    {
+      "from": "app",
+      "to": "evidence",
+      "type": "calls",
+      "evidence": "app/view_models.py:13 build_group_evidence"
     },
     {
       "from": "app",
       "to": "models",
       "type": "imports",
-      "evidence": "app/streamlit_app.py:118 from idx_leadership.models import \u2026"
-    },
-    {
-      "from": "app",
-      "to": "evidence-builder",
-      "type": "imports",
-      "evidence": "app/streamlit_app.py:122 from idx_leadership.evidence.builder import build_evidence_table"
-    },
-    {
-      "from": "app",
-      "to": "config",
-      "type": "imports",
-      "evidence": "app/streamlit_app.py:29 from idx_leadership.utils.config import load_yaml"
+      "evidence": "app/view_models.py:14 from idx_leadership.models import"
     },
     {
       "from": "scripts",
       "to": "pipeline",
       "type": "calls",
-      "evidence": "scripts/build_market_snapshot.py:23 from idx_leadership.aggregation.groups import build_group_snapshots, rank_groups"
+      "evidence": "scripts/build_snapshot.py:12 from idx_leadership.pipeline import build_snapshot"
     },
     {
       "from": "scripts",
       "to": "providers",
       "type": "calls",
-      "evidence": "scripts/build_market_snapshot.py:253 provider.ledger.flush()"
+      "evidence": "scripts/build_market_snapshot.py:47 build_provider_from_config"
     },
     {
       "from": "scripts",
       "to": "market-universe",
       "type": "calls",
-      "evidence": "scripts/build_market_snapshot.py:30 from idx_leadership.providers.market_universe import EligibilityConfig, build_market_universe"
+      "evidence": "scripts/build_market_snapshot.py:49 build_market_universe"
     },
     {
       "from": "scripts",
       "to": "features",
       "type": "calls",
-      "evidence": "scripts/build_market_snapshot.py:28 from idx_leadership.features.relative_strength import compute_excess_returns"
+      "evidence": "scripts/build_market_snapshot.py:37 compute_excess_returns"
     },
     {
       "from": "scripts",
       "to": "aggregation",
       "type": "calls",
-      "evidence": "scripts/build_market_snapshot.py:23 from idx_leadership.aggregation.groups import build_group_snapshots, rank_groups"
+      "evidence": "scripts/build_market_snapshot.py:32 build_group_snapshots"
     },
     {
       "from": "scripts",
-      "to": "signals-transitions",
+      "to": "signals",
       "type": "calls",
-      "evidence": "scripts/build_market_snapshot.py:32 from idx_leadership.signals.transitions import build_transition_events"
+      "evidence": "scripts/build_market_snapshot.py:59 build_transition_events"
     },
     {
       "from": "scripts",
-      "to": "evidence-builder",
+      "to": "evidence",
       "type": "calls",
-      "evidence": "scripts/build_market_snapshot.py:27 from idx_leadership.evidence.builder import build_evidence_table"
+      "evidence": "scripts/build_research_events.py:21 from idx_leadership.events import"
     },
     {
       "from": "scripts",
       "to": "data-snapshots",
       "type": "calls",
-      "evidence": "scripts/build_market_snapshot.py:26 from idx_leadership.data.snapshots import SnapshotReader, SnapshotWriter"
+      "evidence": "scripts/build_taxonomy_views.py:21 SnapshotReader"
     },
     {
       "from": "scripts",
       "to": "ledger",
       "type": "calls",
-      "evidence": "scripts/refresh_sectors_core.py:29 from idx_leadership.providers.ledger import RequestLedger"
+      "evidence": "scripts/validate_sectors_live.py:21 RequestLedger"
     },
     {
       "from": "scripts",
-      "to": "config",
+      "to": "search-agents",
+      "type": "calls",
+      "evidence": "scripts/enrich_tavily_context.py:29 TavilyClient"
+    },
+    {
+      "from": "scripts",
+      "to": "idx-parser",
+      "type": "calls",
+      "evidence": "scripts/refresh_idx_statistics.py:21 idx_statistics"
+    },
+    {
+      "from": "scripts",
+      "to": "taxonomy",
+      "type": "calls",
+      "evidence": "scripts/build_taxonomy_views.py:22 taxonomy"
+    },
+    {
+      "from": "scripts",
+      "to": "config-docs",
       "type": "reads",
-      "evidence": "scripts/build_market_snapshot.py:50 from idx_leadership.utils.config import data_root, load_yaml"
+      "evidence": "scripts/build_market_snapshot.py:60 load_yaml"
     },
     {
       "from": "pipeline",
       "to": "providers",
       "type": "calls",
-      "evidence": "src/idx_leadership/pipeline.py:67 provider.get_price_history(...)"
+      "evidence": "src/idx_leadership/pipeline.py:188 get_group_taxonomy"
     },
     {
       "from": "pipeline",
       "to": "features",
       "type": "calls",
-      "evidence": "src/idx_leadership/pipeline.py:115 compute_excess_returns(...)"
+      "evidence": "src/idx_leadership/pipeline.py:33 compute_excess_returns"
     },
     {
       "from": "pipeline",
       "to": "aggregation",
       "type": "calls",
-      "evidence": "src/idx_leadership/pipeline.py:125 build_group_snapshots(...)"
+      "evidence": "src/idx_leadership/pipeline.py:28 build_group_snapshots"
     },
     {
       "from": "pipeline",
-      "to": "signals-transitions",
+      "to": "signals",
       "type": "calls",
-      "evidence": "src/idx_leadership/pipeline.py:148 build_transition_events(...)"
+      "evidence": "src/idx_leadership/pipeline.py:40 build_transition_events"
+    },
+    {
+      "from": "pipeline",
+      "to": "analytics",
+      "type": "calls",
+      "evidence": "src/idx_leadership/pipeline.py:34 compute_persistence"
+    },
+    {
+      "from": "pipeline",
+      "to": "evidence",
+      "type": "calls",
+      "evidence": "src/idx_leadership/pipeline.py:35 build_group_evidence"
     },
     {
       "from": "pipeline",
       "to": "data-snapshots",
       "type": "calls",
-      "evidence": "src/idx_leadership/pipeline.py:160 SnapshotWriter(...).write(...)"
+      "evidence": "src/idx_leadership/pipeline.py:32 SnapshotWriter"
     },
     {
       "from": "pipeline",
       "to": "models",
       "type": "imports",
-      "evidence": "src/idx_leadership/pipeline.py:16 from .models import \u2026"
+      "evidence": "src/idx_leadership/pipeline.py:37 ProviderMode"
+    },
+    {
+      "from": "pipeline",
+      "to": "config-docs",
+      "type": "reads",
+      "evidence": "src/idx_leadership/pipeline.py:41 load_yaml"
     },
     {
       "from": "providers",
       "to": "sectors-client",
       "type": "calls",
-      "evidence": "src/idx_leadership/providers/sectors.py:105 rows = self.client.paginate(...)"
+      "evidence": "src/idx_leadership/providers/sectors.py:221 paginate"
     },
     {
       "from": "providers",
       "to": "ledger",
       "type": "calls",
-      "evidence": "src/idx_leadership/providers/sectors.py:95 self.ledger = ledger or RequestLedger()"
-    },
-    {
-      "from": "providers",
-      "to": "market-universe",
-      "type": "imports",
-      "evidence": "src/idx_leadership/providers/market_universe.py:18 from .capabilities import EventProvider, PriceCrossSectionProvider, SecurityMasterProvider"
+      "evidence": "src/idx_leadership/providers/sectors.py:36 RequestLedger"
     },
     {
       "from": "providers",
       "to": "models",
       "type": "imports",
-      "evidence": "src/idx_leadership/providers/sectors.py:50 from ..models import SecurityMasterEntry"
+      "evidence": "src/idx_leadership/providers/sectors.py:23 SecurityMasterEntry"
     },
     {
       "from": "sectors-client",
       "to": "ledger",
       "type": "calls",
-      "evidence": "src/idx_leadership/providers/sectors_client.py:191 self.ledger.record(...)"
+      "evidence": "src/idx_leadership/providers/sectors_client.py:25 RequestLedger"
     },
     {
       "from": "market-universe",
-      "to": "models",
+      "to": "providers",
       "type": "imports",
-      "evidence": "src/idx_leadership/providers/market_universe.py:17 from ..models import SecurityMasterEntry"
+      "evidence": "src/idx_leadership/providers/market_universe.py:23 capabilities"
     },
     {
-      "from": "features",
-      "to": "models",
+      "from": "search-agents",
+      "to": "idx-parser",
       "type": "imports",
-      "evidence": "src/idx_leadership/features/returns.py:7 from ..utils import get_logger"
+      "evidence": "src/idx_leadership/providers/idx_discovery.py:22 IDX_STATISTICS_INDEX_URL"
+    },
+    {
+      "from": "search-agents",
+      "to": "ledger",
+      "type": "calls",
+      "evidence": "src/idx_leadership/providers/tavily_client.py:24 RequestLedger"
     },
     {
       "from": "aggregation",
       "to": "features",
       "type": "calls",
-      "evidence": "src/idx_leadership/aggregation/groups.py:18 from ..features.relative_strength import compute_excess_returns"
+      "evidence": "src/idx_leadership/aggregation/groups.py:15 compute_breadth"
     },
     {
       "from": "aggregation",
       "to": "models",
       "type": "imports",
-      "evidence": "src/idx_leadership/aggregation/groups.py:17 from ..models import ConcentrationMetrics, DiffusionState, EligibilityStatus, GroupSnapshot, LeadershipState"
+      "evidence": "src/idx_leadership/aggregation/groups.py:18 GroupSnapshot"
     },
     {
-      "from": "tests",
-      "to": "app",
+      "from": "signals",
+      "to": "models",
       "type": "imports",
-      "evidence": "tests/test_ui_story_mode.py:14 from app.story_mode import build_story_card"
+      "evidence": "src/idx_leadership/signals/leadership.py:18 LeadershipState"
+    },
+    {
+      "from": "analytics",
+      "to": "models",
+      "type": "imports",
+      "evidence": "src/idx_leadership/analytics/persistence.py:12 GroupSnapshot"
+    },
+    {
+      "from": "evidence",
+      "to": "models",
+      "type": "imports",
+      "evidence": "src/idx_leadership/evidence/builder.py:12 GroupEvidence"
+    },
+    {
+      "from": "evidence",
+      "to": "analytics",
+      "type": "calls",
+      "evidence": "src/idx_leadership/evidence/builder.py:29 build_contradictions"
+    },
+    {
+      "from": "evidence",
+      "to": "signals",
+      "type": "imports",
+      "evidence": "src/idx_leadership/intelligence/readout.py:12 ChangeDigest"
+    },
+    {
+      "from": "taxonomy",
+      "to": "features",
+      "type": "calls",
+      "evidence": "src/idx_leadership/taxonomy/aggregation.py:43 relative_strength"
+    },
+    {
+      "from": "taxonomy",
+      "to": "signals",
+      "type": "calls",
+      "evidence": "src/idx_leadership/taxonomy/aggregation.py:48 classify_diffusion_v2"
+    },
+    {
+      "from": "taxonomy",
+      "to": "models",
+      "type": "imports",
+      "evidence": "src/idx_leadership/taxonomy/registry.py:33 Taxonomy"
+    },
+    {
+      "from": "data-snapshots",
+      "to": "models",
+      "type": "imports",
+      "evidence": "src/idx_leadership/data/snapshots.py:34 SnapshotManifest"
     },
     {
       "from": "scripts",
       "to": "web-app",
       "type": "writes",
-      "evidence": "scripts/export_snapshot_json.py:75 PUBLIC_DIR = project_root() / 'app' / 'web' / 'public' / 'snapshots'"
-    },
-    {
-      "from": "scripts",
-      "to": "web-app",
-      "type": "writes",
-      "evidence": "scripts/build_snapshot_index.py:42 out_path = ... app/web/public/snapshots/index.json"
+      "evidence": "scripts/export_snapshot_json.py:30 PUBLIC_DIR"
     },
     {
       "from": "web-app",
       "to": "data-snapshots",
       "type": "reads",
-      "evidence": "app/web/src/data/SnapshotProvider.tsx:35 res = await fetch('/snapshots/${id}.json') -- payload is the JSON dump of a data/snapshots/<id>/ bundle"
+      "evidence": "app/web/src/data/SnapshotProvider.tsx:21 fetch"
+    },
+    {
+      "from": "web-app",
+      "to": "taxonomy",
+      "type": "reads",
+      "evidence": "app/web/src/data/adapter.ts:34 TaxonomyView"
+    },
+    {
+      "from": "web-app",
+      "to": "evidence",
+      "type": "reads",
+      "evidence": "app/web/src/data/adapter.ts:17 ListingRegistryRecord"
     },
     {
       "from": "web-app",
@@ -879,94 +1317,46 @@
       "evidence": "unknown \u2014 JSON shape is documented in app/web/src/data/snapshot.ts but no Python import exists at runtime (boundary is the JSON file)"
     },
     {
-      "from": "signals-transitions",
-      "to": "signals-leadership",
+      "from": "tests",
+      "to": "app",
       "type": "imports",
-      "evidence": "src/idx_leadership/signals/transitions.py:14 from ..models import DiffusionState, GroupSnapshot, LeadershipState, MaterialityLabel, TransitionEvent"
-    },
-    {
-      "from": "signals-transitions",
-      "to": "signals-diffusion",
-      "type": "imports",
-      "evidence": "src/idx_leadership/signals/transitions.py:14 from ..models import DiffusionState, GroupSnapshot, LeadershipState, MaterialityLabel, TransitionEvent"
-    },
-    {
-      "from": "signals-transitions",
-      "to": "models",
-      "type": "imports",
-      "evidence": "src/idx_leadership/signals/transitions.py:14 from ..models import DiffusionState, GroupSnapshot, LeadershipState, MaterialityLabel, TransitionEvent"
-    },
-    {
-      "from": "signals-leadership",
-      "to": "models",
-      "type": "imports",
-      "evidence": "src/idx_leadership/signals/leadership.py:13 from ..models import LeadershipState, MaterialityLabel"
-    },
-    {
-      "from": "signals-diffusion",
-      "to": "models",
-      "type": "imports",
-      "evidence": "src/idx_leadership/signals/diffusion_v2.py:14 from ..models import DiffusionState, EligibilityStatus"
-    },
-    {
-      "from": "analytics",
-      "to": "models",
-      "type": "imports",
-      "evidence": "src/idx_leadership/analytics/persistence.py:23 from ..models import DiffusionState, GroupSnapshot, LeadershipState"
-    },
-    {
-      "from": "evidence-builder",
-      "to": "models",
-      "type": "imports",
-      "evidence": "src/idx_leadership/evidence/builder.py:14 from ..models import DiffusionState, EvidenceRecord, GroupEvidence, GroupSnapshot, LeadershipState"
-    },
-    {
-      "from": "evidence-builder",
-      "to": "analytics",
-      "type": "calls",
-      "evidence": "app/story_mode.py:18 from idx_leadership.analytics import build_contradictions, build_invalidation_conditions, compute_persistence"
-    },
-    {
-      "from": "data-snapshots",
-      "to": "models",
-      "type": "imports",
-      "evidence": "src/idx_leadership/data/snapshots.py:14 from ..models import GroupSnapshot, ManifestEntry, ProviderName, SnapshotManifest"
+      "evidence": "tests/test_ui_story_mode.py:16 build_story_card"
     },
     {
       "from": "tests",
       "to": "providers",
       "type": "imports",
-      "evidence": "tests/test_providers.py:13 from idx_leadership.providers.fixture import FixtureProvider"
+      "evidence": "tests/test_providers.py:14 FixtureProvider"
     },
     {
       "from": "tests",
       "to": "sectors-client",
       "type": "imports",
-      "evidence": "tests/test_sectors_client.py:10 from idx_leadership.providers.sectors_client import SectorsClient"
+      "evidence": "tests/test_sectors_client.py:14 SectorsClient"
     },
     {
       "from": "tests",
       "to": "analytics",
       "type": "imports",
-      "evidence": "tests/test_analytics.py:9 from idx_leadership.analytics import compute_persistence"
+      "evidence": "tests/test_analytics.py:8 analytics"
     },
     {
       "from": "tests",
       "to": "data-snapshots",
       "type": "imports",
-      "evidence": "tests/test_endpoint_status.py:8 from idx_leadership.data.endpoint_status import assess_endpoint_quality"
+      "evidence": "tests/test_endpoint_status.py:8 assess_endpoint_quality"
     },
     {
       "from": "tests",
-      "to": "app",
+      "to": "idx-parser",
       "type": "imports",
-      "evidence": "tests/test_ui_story_mode.py:14 from app.story_mode import build_story_card"
+      "evidence": "tests/test_idx_statistics.py:9 idx_statistics"
     }
   ],
   "flows": [
     {
       "id": "flow-build-snapshot",
-      "trigger": "Operator runs `python -m scripts.build_market_snapshot --as-of 2026-08-20 --allow-live`",
+      "trigger": "Operator runs `python -m scripts.build_market_snapshot --allow-live --allow-credit-spend --max-symbols 250 --max-http-requests 400`",
       "steps": [
         "scripts",
         "providers",
@@ -975,80 +1365,62 @@
         "market-universe",
         "features",
         "aggregation",
-        "signals-leadership",
-        "signals-diffusion",
-        "signals-transitions",
-        "evidence-builder",
-        "data-snapshots",
-        "models"
-      ],
-      "outcome": "data/snapshots/sectors/sectors_<asof>/{manifest,change_digest,quality,evidence,groups.parquet,transitions.parquet,prices.csv,benchmark.csv,security_master.json,report.md}"
-    },
-    {
-      "id": "flow-refresh-sectors",
-      "trigger": "Operator runs `python -m scripts.refresh_sectors_core --as-of 2026-08-20 --allow-live`",
-      "steps": [
-        "scripts",
-        "providers",
-        "sectors-client",
-        "ledger",
-        "data-snapshots",
-        "models"
-      ],
-      "outcome": "data/normalized/sectors/<asof>/{security_master.json,taxonomy.csv,close.csv,ihsg.csv,free_float.csv,suspensions.csv,refresh_summary.json}"
-    },
-    {
-      "id": "flow-story-render",
-      "trigger": "Streamlit rerun or user opens What Changed tab",
-      "steps": [
-        "app",
-        "data-snapshots",
-        "evidence-builder",
+        "signals",
         "analytics",
+        "evidence",
+        "data-snapshots",
         "models"
       ],
-      "outcome": "Up to 5 StoryCards rendered + Markdown export of selected cards"
+      "outcome": "data/snapshots/<id>/{manifest,groups,transitions,features,security_master,coverage,quality} with listing_registry (962-row full accessible listing) + bounded history sample"
     },
     {
-      "id": "flow-parity-harness",
-      "trigger": "Operator runs `python -m scripts.compare_providers --as-of 2026-08-20`",
+      "id": "flow-search-parse-publish",
+      "trigger": "Operator runs bounded discovery + `python -m scripts.refresh_idx_daily_statistics --discover-latest --target-pages 1-9 --allow-cloud-upload`",
       "steps": [
         "scripts",
-        "providers",
-        "features",
-        "models"
+        "search-agents",
+        "idx-parser",
+        "evidence",
+        "data-snapshots",
+        "web-app"
       ],
-      "outcome": "data/normalized/parity_<asof>.csv with per-ticker/per-horizon classification"
-    },
-    {
-      "id": "flow-credit-audit",
-      "trigger": "Operator runs `python -m scripts.credit_audit`",
-      "steps": [
-        "scripts",
-        "ledger",
-        "data-snapshots"
-      ],
-      "outcome": "data/normalized/credit_audit.json with by_endpoint and by_refresh_kind buckets"
+      "outcome": "app/web/public/idx/idx_daily_statistics_latest.json + official_market_context (OJK IHSG/flow/RNTH/ownership/cap cards, market-level only)"
     },
     {
       "id": "flow-export-snapshot",
-      "trigger": "Operator runs `python -m scripts.export_snapshot_json --latest && python -m scripts.build_snapshot_index`",
+      "trigger": "Operator runs `python -m scripts.export_snapshot_json --snapshot-id <id> && python -m scripts.build_snapshot_index`",
       "steps": [
         "scripts",
         "data-snapshots",
+        "taxonomy",
+        "evidence",
         "models",
         "web-app"
       ],
-      "outcome": "app/web/public/snapshots/{index.json, snap_<asof>.json} -- SPA fetches them as static assets"
+      "outcome": "app/web/public/snapshots/{index.json, <id>.json} \u2014 SPA fetches them as static assets; UI reload never invokes a provider"
     },
     {
       "id": "flow-web-render",
-      "trigger": "Browser opens http://127.0.0.1:4173/overview (or any workspace route)",
+      "trigger": "Browser opens /overview, /map, /explorer, /ticker/:ticker, /methodology",
       "steps": [
         "web-app",
-        "data-snapshots"
+        "data-snapshots",
+        "taxonomy",
+        "evidence"
       ],
-      "outcome": "5 routes (PublicHome / WhatChanged / LeadershipMap / GroupExplorer / Methodology) rendered with explicit EmptyStates where the prototype universe does not yet emit data"
+      "outcome": "Market heatmap, leadership map, group explorer, ticker analysis, methodology + listing registry rendered with coverage language (Not available / Ready partial / Outside scope)"
+    },
+    {
+      "id": "flow-story-render",
+      "trigger": "Streamlit rerun or user opens What Changed tab / exports the market brief",
+      "steps": [
+        "app",
+        "data-snapshots",
+        "evidence",
+        "analytics",
+        "models"
+      ],
+      "outcome": "StoryCards + `## Coverage Notes` brief block rendered from persisted snapshot rows only"
     }
   ]
 }
