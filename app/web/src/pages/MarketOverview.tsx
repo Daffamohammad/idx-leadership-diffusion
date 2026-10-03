@@ -74,8 +74,12 @@ export default function MarketOverview() {
         padding: "32px var(--page-gutter) 56px",
         display: "grid",
         gap: "var(--card-gap)",
+        gridTemplateColumns: "minmax(0, 1fr)",
         maxWidth: "var(--content-max)",
+        width: "100%",
+        boxSizing: "border-box",
         margin: "0 auto",
+        minWidth: 0,
       }}
     >
       <header
@@ -87,9 +91,11 @@ export default function MarketOverview() {
           alignItems: "flex-end",
           justifyContent: "space-between",
           gap: 16,
+          minWidth: 0,
+          maxWidth: "100%",
         }}
       >
-        <div>
+        <div style={{ minWidth: 0, maxWidth: "100%", overflowWrap: "anywhere" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
             <div className="eyebrow-muted">Market overview</div>
             <EvidenceBadge kind="SNAPSHOT" compact />

@@ -205,7 +205,7 @@ export default function MasterGroupTable() {
   });
 
   return (
-    <section className="content-shell" style={{ padding: "0 var(--page-gutter) 80px" }}>
+    <section className="content-shell" style={{ padding: "28px var(--page-gutter) 80px" }}>
       <header style={{ marginBottom: 24 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
           <div

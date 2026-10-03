@@ -50,6 +50,8 @@ export default function IDXStatisticsRelease({ release }: IDXStatisticsReleasePr
         padding: 22,
         background: "#f8fcfb",
         display: "grid",
+        gridTemplateColumns: "minmax(0, 1fr)",
+        minWidth: 0,
         gap: 18,
       }}
     >
@@ -120,6 +122,7 @@ export default function IDXStatisticsRelease({ release }: IDXStatisticsReleasePr
           style={{
             display: "grid",
             gridTemplateColumns: `repeat(${release.daily.length}, minmax(12px, 1fr))`,
+            overflowX: "auto",
             alignItems: "end",
             gap: 5,
             minHeight: 138,

@@ -11,6 +11,7 @@
 // `foreign_flow_sample` envelope. The component never recomputes.
 
 import type { ForeignFlowAdapted } from "../data/adapter";
+import { Link } from "react-router";
 import { formatCountLabel, formatDateLabel, formatEnumLabel, formatIdrCompact } from "../data/format";
 import { EvidenceBadge } from "./EvidenceModel";
 
@@ -52,8 +53,12 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
   ] as const;
 
   const signalThreshold = [
-    ["Market days ≥ 5", sample.coverageGateMet ? "Met" : "Review"],
-    [`${formatPercent(sample.mappedCompanyObservationPct, 100)} mapped coverage`, sample.coverageGateMet ? "Met" : "Review"],
+    ["Market days ≥ 5", sample.marketDaysMeetsThreshold ? "Met" : "Review"],
+    [
+      `${formatPercent(sample.mappedCompanyObservationPct, 100)} mapped coverage`,
+      sample.mappedPctMeetsThreshold ? "Met" : "Review",
+    ],
+    ["Company rows ≥ 30", sample.companyRowsMeetsThreshold ? "Met" : "Review"],
     ["Regime diversity", sample.regimeDiversity ? "Yes" : "No"],
   ];
 
@@ -421,7 +426,7 @@ function TopList({
               }}
             >
               <span>
-                <strong>{row.ticker}</strong>
+                <Link to={`/ticker/${encodeURIComponent(row.ticker)}`} style={{ color: "#202325", fontWeight: 600, textUnderlineOffset: 3 }}>{row.ticker}</Link>
                 <span
                   style={{
                     fontFamily: "Geist Mono, monospace",

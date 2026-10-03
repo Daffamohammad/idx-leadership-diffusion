@@ -1,6 +1,8 @@
 import { Link, NavLink } from "react-router";
 import { useState } from "react";
 import ThemeToggle from "./ThemeToggle";
+import LocalProfile from "./LocalProfile";
+import TickerSearch from "./TickerSearch";
 import { BrandLockup } from "./BrandMark";
 import { BundleNotices } from "./SnapshotNotices";
 import type { SnapshotContextValue } from "../data/SnapshotContext";
@@ -17,6 +19,7 @@ const navItems = [
   { path: "/explorer", label: "Groups", index: "07" },
   { path: "/groups", label: "Groups Table", index: "08" },
   { path: "/methodology", label: "Methodology", index: "09" },
+  { path: "/tickers", label: "Ticker Explorer", index: "10" },
 ];
 
 interface Props {
@@ -47,6 +50,7 @@ function formatProviderMode(mode: string | undefined): string {
 
 export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }: Props) {
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const asOf = formatAsOf(snap.data?.payload.as_of);
   const providerMode = snap.data?.payload.manifest?.entries?.[0]?.provider_mode;
   const providerLabel = formatProviderMode(providerMode);
@@ -93,9 +97,11 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
             borderBottom: "1px solid #dfe2e1",
           }}
         >
-          <BrandLockup compact={!sidebarExpanded} />
+          <Link to="/" aria-label="Back to landing page" title="Back to landing page" style={{ color: "inherit", textDecoration: "none" }}>
+            <BrandLockup compact={!sidebarExpanded} />
+          </Link>
         </div>
-        <nav style={{ padding: "12px 0", flex: 1 }}>
+        <nav style={{ padding: "12px 0", flex: 1, minHeight: 0, overflowY: "auto" }}>
           {navItems.map((item) => (
             <NavLink
               key={item.path}
@@ -179,6 +185,7 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
             )}
           </div>
           {sidebarExpanded && <div className="eyebrow-muted">{asOf}</div>}
+          <LocalProfile compact={!sidebarExpanded} />
         </div>
       </aside>
       <div
@@ -193,10 +200,11 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
           className="workspace-header"
           style={{
             minHeight: 45,
-            padding: "0 22px",
+            padding: "8px 22px",
             background: "#ffffff",
             borderBottom: "1px solid #dfe2e1",
             display: "flex",
+            flexWrap: "wrap",
             gap: 12,
             alignItems: "center",
           }}
@@ -217,6 +225,31 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
           >
             {sidebarExpanded ? "‹" : "›"}
           </button>
+          <button
+            type="button"
+            onClick={() => setMobileNavOpen((value) => !value)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") setMobileNavOpen(false);
+            }}
+            className="mobile-only"
+            aria-label={mobileNavOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={mobileNavOpen}
+            aria-controls="mobile-nav"
+            title={mobileNavOpen ? "Close navigation menu" : "Open navigation menu"}
+            style={{
+              border: "1px solid #dfe2e1",
+              background: "transparent",
+              minWidth: 32,
+              height: 28,
+              cursor: "pointer",
+              fontSize: 14,
+              padding: "0 8px",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {mobileNavOpen ? "✕" : "☰"}
+          </button>
           <Link
             to="/"
             title="Back to homepage"
@@ -232,6 +265,7 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
           >
             ⌂ Home
           </Link>
+          <TickerSearch registry={snap.data?.listingRegistry ?? null} />
           <span className="eyebrow-muted tabnum workspace-asof">{asOf}</span>
           <span className="workspace-separator" style={{ color: "#dfe2e1" }}>|</span>
           <button
@@ -263,7 +297,7 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
           >
             {displayedTaxonomy}{canToggleTaxonomy ? " ▾" : ""}
           </button>
-          <span className="eyebrow-muted desktop-only">
+          <span className="eyebrow-muted desktop-only workspace-group-meta">
             | {snap.data?.sectors.length ?? "—"} {displayedTaxonomy.toLowerCase()} groups | EOD
           </span>
           <span
@@ -291,6 +325,7 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
             : providerLabel + " · " + (statusLabel ?? "Ready") + " · Snapshot " + formatSnapshotId(snap.snapshotId, snap.payload?.as_of)}
           </span>
           <ThemeToggle />
+          <div className="mobile-only"><LocalProfile compact /></div>
           <button
             className="btn-sheen"
             style={{
@@ -305,6 +340,63 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
             Refresh
           </button>
         </header>
+        {mobileNavOpen && (
+          <nav
+            id="mobile-nav"
+            aria-label="Primary"
+            className="mobile-nav-panel"
+            style={{
+              borderBottom: "1px solid #dfe2e1",
+              background: "#ffffff",
+              padding: "8px 12px 12px",
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") setMobileNavOpen(false);
+            }}
+          >
+            <div
+              style={{
+                display: "grid",
+                gap: 4,
+              }}
+            >
+              {navItems.map((item) => (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  onClick={() => setMobileNavOpen(false)}
+                  style={({ isActive }) => ({
+                    display: "flex",
+                    gap: 10,
+                    alignItems: "center",
+                    padding: "10px 12px",
+                    borderLeft: isActive
+                      ? "2px solid #f26a3d"
+                      : "2px solid transparent",
+                    background: isActive ? "#f1eeea" : "transparent",
+                    color: isActive ? "#16191c" : "#202325",
+                    textDecoration: "none",
+                    fontSize: 14,
+                    fontWeight: isActive ? 600 : 400,
+                  })}
+                >
+                  <span
+                    style={{
+                      fontFamily: "Geist Mono, ui-monospace, monospace",
+                      fontSize: 10,
+                      letterSpacing: "0.075em",
+                      width: 20,
+                      color: "#686e73",
+                    }}
+                  >
+                    {item.index}
+                  </span>
+                  {item.label}
+                </NavLink>
+              ))}
+            </div>
+          </nav>
+        )}
         <main className="scroll-thin workspace-main" style={{ flex: 1, overflowY: "auto" }}>
           {!snap.loading && !snap.error && snap.data && <BundleNotices data={snap.data} />}
           {snap.error ? (

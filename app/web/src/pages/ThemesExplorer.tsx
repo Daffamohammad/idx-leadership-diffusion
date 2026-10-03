@@ -322,7 +322,11 @@ export default function ThemesExplorer() {
                     color: "#202325",
                   }}
                 >
-                  {selected.concentration_top3 === null ? "—" : `${(selected.concentration_top3 * 100).toFixed(0)}%`}
+                  {selected.concentration_top3 === null ||
+                  selected.concentration_top3 === undefined ||
+                  !Number.isFinite(selected.concentration_top3)
+                    ? "—"
+                    : `${selected.concentration_top3.toFixed(0)}%`}
                 </span>
               </div>
 

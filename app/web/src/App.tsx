@@ -20,6 +20,7 @@ import MarketOverview from "./pages/MarketOverview";
 import TaxonomyMapPage from "./pages/TaxonomyMapPage";
 import MasterGroupTable from "./pages/MasterGroupTable";
 import ThemesExplorer from "./pages/ThemesExplorer";
+import TickerExplorer from "./pages/TickerExplorer";
 import { SnapshotProvider, useSnapshot } from "./data/SnapshotProvider";
 function WorkspaceLayout() {
   const [taxonomy, setTaxonomy] = useState<"Sector" | "Industry">("Sector");
@@ -115,6 +116,7 @@ const router = createBrowserRouter([
       { path: "/maps/konglo", Component: TaxonomyMapPage },
       { path: "/maps/themes", Component: TaxonomyMapPage },
       { path: "/themes", Component: ThemesExplorer },
+      { path: "/tickers", Component: TickerExplorer },
       { path: "/explorer", Component: GroupExplorer },
       { path: "/groups", Component: MasterGroupTable },
       { path: "/methodology", Component: Methodology },

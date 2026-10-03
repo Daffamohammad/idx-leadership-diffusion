@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router";
 import type { ListingRegistryAdapted } from "../data/adapter";
 import type { ListingRegistryRecord } from "../data/snapshot";
 import { formatCountLabel, formatEnumLabel } from "../data/format";
@@ -89,7 +90,7 @@ export default function ListingRegistryPanel({ registry }: ListingRegistryPanelP
           <tbody>
             {records.map((record: ListingRegistryRecord) => (
               <tr key={record.ticker} style={{ borderBottom: "1px solid #f0f0f0" }}>
-                <td style={{ padding: "8px 12px", fontFamily: "Geist Mono, monospace", fontWeight: 600 }}>{record.ticker}</td>
+                <td style={{ padding: "8px 12px", fontFamily: "Geist Mono, monospace", fontWeight: 600 }}><Link to={`/ticker/${encodeURIComponent(record.ticker)}`} style={{ color: "#202325", textUnderlineOffset: 3 }}>{record.ticker}</Link></td>
                 <td style={{ padding: "8px 12px", maxWidth: 240 }}>{record.company_name}</td>
                 <td style={{ padding: "8px 12px" }}>{clean(record.taxonomy.sector)} · {clean(record.taxonomy.subsector)}</td>
                 <td style={{ padding: "8px 12px" }}>{clean(record.taxonomy.industry)}</td>

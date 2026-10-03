@@ -36,13 +36,13 @@ function formatQualityIssues(issues: string[] | undefined): string | undefined {
     if (listIssue) {
       const symbols = listIssue[2].split(/,\s*/).filter(Boolean);
       const label = listIssue[1] === "failed_securities" ? "failed history requests" : "insufficient history";
-      return `${label}: ${formatCountLabel(symbols.length, "security", "securities")} (full list remains in snapshot diagnostics)`;
+      return `${formatCountLabel(symbols.length, "security", "securities")} with ${label}`;
     }
     return issue.replace(/\b[A-Za-z0-9]+(?:_[A-Za-z0-9]+)+\b/g, (token) =>
       token.split("_").join(" "),
     );
   });
-  return `Data-quality flags: ${readable.join("; ")}`;
+  return readable.join("; ");
 }
 
 function formatCoreDataNote(quality: SnapshotPayload["quality"] | undefined): string | undefined {
@@ -71,10 +71,7 @@ function researchCategoryNote(
   const youCount = you.records.length;
   const total = tavilyCount + youCount;
   if (total > 0) {
-    const parts: string[] = [];
-    if (tavilyCount > 0) parts.push(formatCountLabel(tavilyCount, "Tavily source"));
-    if (youCount > 0) parts.push(formatCountLabel(youCount, "You.com source"));
-    return `${parts.join(" + ")} attached; qualitative context only, not normalized into a confirmation metric.`;
+    return `${formatCountLabel(total, "research source")} available for context. Quantitative confirmation is not assessed.`;
   }
   const tavilyFailed = getTavilyCategoryStatus(payload, category) === "FAILED";
   const youFailed = getYouCategoryStatus(payload, category) === "FAILED";
@@ -131,8 +128,8 @@ function buildDataRows(
       status: taxonomyStatus,
       asOf,
       note: liveSectors
-        ? `Sectors structured taxonomy; ${taxonomyCoverage ?? "—"}% coverage in the persisted report.`
-        : `Prototype taxonomy coverage: ${taxonomyCoverage ?? "—"}%; mapping is provider-specific and not authoritative.`,
+        ? `Sectors classification covers ${taxonomyCoverage ?? "—"}% of the recorded universe.`
+        : `Research classification covers ${taxonomyCoverage ?? "—"}%. It is not an official taxonomy.`,
     },
     { label: "Benchmark (IHSG)", status: benchmarkStatus, asOf, note: q?.benchmark_latest_date ? `Latest benchmark: ${formatDateLabel(q.benchmark_latest_date)}` : "Benchmark date not present in the snapshot." },
     {
@@ -148,10 +145,10 @@ function buildDataRows(
       status: normalizeDataStatus(officialContext?.status) ?? "UNAVAILABLE",
       asOf: formatDateLabel(officialContext?.period_end ?? payload?.as_of),
       note: officialContext
-        ? "Bounded LlamaCloud parse of an official OJK release; market-level context only, not a per-ticker or group metric."
+        ? "Official OJK release. Market context only; not company or group evidence."
         : "No validated official OJK market context is attached to this snapshot.",
     },
-    { label: "Diffusion Comparison", status: diffusionReadiness.status, asOf, note: diffusionReadiness.note },
+    { label: "Diffusion Comparison", status: diffusionReadiness.status, asOf, note: payload?.comparability?.status === "COMPATIBLE" ? diffusionReadiness.note : "No comparable earlier observation is available. Changes in participation cannot yet be confirmed." },
     ...researchRows,
   ];
 }
@@ -715,7 +712,7 @@ export default function Methodology() {
 
       <EvidenceModel
         lanes={evidenceLanes}
-        intro="This hackathon product is intentionally hybrid: the quantitative market lane is snapshot-backed, while bounded samples and static research lenses remain clearly separated."
+        intro="Market analysis uses recorded observations. Research themes, published samples and market context are identified separately so you can assess their coverage."
       />
 
       {/* Bounded Analysis Notice */}
@@ -736,18 +733,18 @@ export default function Methodology() {
           {fullAccessibleListing
             ? `The full accessible listing contains ${listingRegistry?.listedCount ?? coverage?.security_master_total ?? discoveredCount} securities.`
             : `The persisted listing contains ${listingRegistry?.persistedCount ?? coverage?.security_master_total ?? usedCount} of ${discoveredCount} discovered securities.`}{" "}
-          Daily history and group metrics use {usedCount} selected securities so
-          the live request budget stays bounded.
+          Daily history and group metrics cover {usedCount} selected securities
+          within the available history sample.
         </div>
       )}
 
       {/* Data Status */}
       <SectionHead label="Data Status" />
       <div className="table-scroll methodology-status-table" style={{ ...card }}>
-        <table style={{ width: '100%', minWidth: 900, borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+        <table style={{ width: '100%', minWidth: 940, borderCollapse: 'collapse', tableLayout: 'fixed' }}>
           <colgroup>
             <col style={{ width: 170 }} />
-            <col style={{ width: 150 }} />
+            <col style={{ width: 225 }} />
             <col style={{ width: 130 }} />
             <col />
           </colgroup>
@@ -766,7 +763,7 @@ export default function Methodology() {
                 <td style={{ padding: '10px 16px', fontSize: 13, fontWeight: 500, color: '#171717' }}>{row.label}</td>
                 <td style={{ padding: '10px 16px' }}><DataStatusChip status={row.status} /></td>
                 <td style={{ padding: '10px 16px', fontFamily: 'Geist Mono, monospace', fontSize: 11, color: '#666666', whiteSpace: 'nowrap' }}>{row.asOf}</td>
-                <td style={{ padding: '10px 16px', fontSize: 12, color: '#666666', fontStyle: row.note ? 'italic' : 'normal' }}>{row.note || '—'}</td>
+                <td style={{ padding: '12px 16px', fontSize: 12, color: '#666666', lineHeight: 1.6, overflowWrap: 'anywhere' }}>{row.note || '—'}</td>
               </tr>
             ))}
           </tbody>

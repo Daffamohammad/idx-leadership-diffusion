@@ -10,6 +10,7 @@
 
 import type { AdaptedSnapshot } from "../data/adapter";
 import { EvidenceBadge } from "./EvidenceModel";
+import { formatDateLabel } from "../data/format";
 
 const bannerBase: React.CSSProperties = {
   borderRadius: 6,
@@ -33,10 +34,8 @@ export function BundleNotices({ data }: { data: AdaptedSnapshot | null }) {
           color: "#7a3a1a",
         }}
       >
-        <strong>Stale partial bundle.</strong> This snapshot was written before
-        bundle-completeness tracking, so partial writes cannot be ruled out.
-        Treat levels as provisional until a re-exported snapshot clears this
-        notice. Snapshot: {data.payload.snapshot_id} · as of {data.payload.as_of}.
+        <strong>Snapshot needs verification.</strong> Data as of {formatDateLabel(data.payload.as_of)}.
+        {" "}Bundle completeness has not been verified. Treat these results as provisional.
       </div>,
     );
   }
@@ -63,9 +62,9 @@ export function BundleNotices({ data }: { data: AdaptedSnapshot | null }) {
     coverage?.analysis_scope === "BOUNDED_DEMO" ||
     (coverage?.analysis_scope === undefined && coverage?.is_prefix_sample === true);
   if (boundedAnalysis) {
-    const listed = coverage?.security_master_total ?? coverage?.discovered_count;
+    const listed = data.listingRegistry?.listedCount ?? coverage?.security_master_total ?? coverage?.discovered_count;
     const analyzed = coverage?.analysis_universe_count ?? coverage?.used_count;
-    const fullListing = coverage?.full_accessible_universe_listed === true;
+    const fullListing = data.listingRegistry?.fullAccessibleUniverseListed ?? (coverage?.full_accessible_universe_listed === true);
     items.push(
       <div
         key="analysis-scope"
@@ -83,7 +82,7 @@ export function BundleNotices({ data }: { data: AdaptedSnapshot | null }) {
           : `This snapshot retains a bounded listing${listed !== undefined ? ` (${listed} securities)` : ""};`}{" "}
         daily history and group metrics use
         {analyzed !== undefined ? ` ${analyzed} selected securities` : " a selected sample"}
-        to keep live requests within the run cap.
+        {" "}within the available history sample.
       </div>,
     );
   }

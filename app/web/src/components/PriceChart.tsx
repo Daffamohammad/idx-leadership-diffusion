@@ -403,7 +403,25 @@ export default function PriceChart({
   );
   const hasVolume = series.some((p) => p.volume != null);
 
-  const isDataGap = dataStatus === "DATA_GAP" || dataStatus === "PARTIAL" || dataStatus === "STALE" || dataStatus === "READY_WITH_GAPS";
+  const qualityBadgeLabel = (() => {
+    switch (dataStatus) {
+      case "DATA_GAP":
+        return "Data gap";
+      case "PARTIAL":
+        return "Partial data";
+      case "STALE":
+        return "Stale";
+      case "READY_WITH_GAPS":
+        return "Partial coverage";
+      case "FAILED":
+        return "Failed";
+      case "UNAVAILABLE":
+        return "Unavailable";
+      default:
+        return null;
+    }
+  })();
+  const isDataGap = qualityBadgeLabel !== null;
   const isEmpty = series.length === 0;
   const chartHeight = typeof height === "number" ? height - (isEmpty ? 0 : 48) : "calc(100% - 48px)";
 
@@ -454,10 +472,13 @@ export default function PriceChart({
     <div
       style={{
         width: "100%",
+        maxWidth: "100%",
+        minWidth: 0,
         border: "1px solid #e1e2de",
         borderRadius: 10,
         background: "#faf9f6",
         overflow: "hidden",
+        boxSizing: "border-box",
       }}
       role="figure"
       aria-label={`Price chart for ${label} as of ${formatDateLabel(asOf)}`}
@@ -487,13 +508,13 @@ export default function PriceChart({
               {formatEnumLabel(priceBasis)} basis
             </span>
           )}
-          {isDataGap && (
+          {qualityBadgeLabel && (
             <span style={{ fontSize: 9, fontFamily: "Geist Mono", color: "#8f2424", background: "#fdeaea", padding: "2px 6px", borderRadius: 4 }}>
-              Not available
+              {qualityBadgeLabel}
             </span>
           )}
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 10, color: "#747a7d", fontFamily: "Geist Mono" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", minWidth: 0, fontSize: 10, color: "#747a7d", fontFamily: "Geist Mono" }}>
           <span>As of {formatDateLabel(asOf)}</span>
           <span>Source: {source}</span>
           {hasOHLC && <span>OHLC (index) available</span>}
@@ -506,10 +527,14 @@ export default function PriceChart({
         <div
           style={{
             display: "flex",
+            flexWrap: "wrap",
             gap: 0,
             borderBottom: "1px solid #e1e2de",
             background: "#fff",
             padding: "0 14px",
+            maxWidth: "100%",
+            minWidth: 0,
+            overflowX: "auto",
           }}
           role="tablist"
           aria-label="Chart range selector"
@@ -545,6 +570,9 @@ export default function PriceChart({
           height: chartHeight,
           position: "relative",
           background: "#fff",
+          minWidth: 0,
+          maxWidth: "100%",
+          overflow: "hidden",
         }}
       >
         <ResponsiveContainer width="100%" height="100%">

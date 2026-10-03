@@ -206,6 +206,9 @@ export interface ForeignFlowAdapted {
   unmappedTickers: string[];
   signalEligible: boolean;
   coverageGateMet: boolean;
+  marketDaysMeetsThreshold: boolean;
+  companyRowsMeetsThreshold: boolean;
+  mappedPctMeetsThreshold: boolean;
   regimeDiversity: boolean;
   lastSampleDirection: ForeignFlowDirection;
   lastMarketDirection: ForeignFlowDirection;
@@ -1264,6 +1267,9 @@ function adaptForeignFlow(
     unmappedTickers: coverage.unmapped_tickers,
     signalEligible: signal.signal_eligible,
     coverageGateMet: signal.coverage_gate_met,
+    marketDaysMeetsThreshold: signal.market_days_meets_threshold === true,
+    companyRowsMeetsThreshold: signal.company_rows_meets_threshold === true,
+    mappedPctMeetsThreshold: signal.mapped_pct_meets_threshold === true,
     regimeDiversity: signal.regime_diversity,
     lastSampleDirection: normalizeForeignDirection(breadth.last_sample_direction),
     lastMarketDirection: normalizeForeignDirection(breadth.last_market_direction),

@@ -11,7 +11,7 @@
 //   https://www.tradingview.com/widget-docs/widgets/charts/advanced-chart/
 //   https://www.tradingview.com/widget-docs/widgets/symbol-info/
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface TradingViewWidgetProps {
   ticker: string;
@@ -20,11 +20,10 @@ interface TradingViewWidgetProps {
   onUnavailable?: (reason: TradingViewUnavailableReason) => void;
 }
 
-export type TradingViewUnavailableReason = "network" | "unsupported" | "error" | "timeout";
+export type TradingViewUnavailableReason = "network" | "unsupported" | "error";
 
 const SCRIPT_ID = "tradingview-advanced-chart-script";
 const SCRIPT_SRC = "https://s3.tradingview.com/tv.js";
-const WIDGET_RENDER_TIMEOUT_MS = 8000;
 
 function sanitizeTicker(ticker: string, exchange: string): string | null {
   const cleaned = ticker.toUpperCase().trim();
@@ -32,33 +31,20 @@ function sanitizeTicker(ticker: string, exchange: string): string | null {
   return `${exchange}:${cleaned.replace(".JK", "")}`;
 }
 
+let scriptPromise: Promise<boolean> | null = null;
 function loadScript(): Promise<boolean> {
-  return new Promise((resolve) => {
-    if (typeof document === "undefined") return resolve(false);
-    const tvAvailable = (): boolean =>
-      typeof (window as { TradingView?: unknown }).TradingView !== "undefined";
-    if (tvAvailable()) return resolve(true);
-    if (document.getElementById(SCRIPT_ID)) {
-      const handle = window.setInterval(() => {
-        if (tvAvailable()) {
-          window.clearInterval(handle);
-          resolve(true);
-        }
-      }, 50);
-      window.setTimeout(() => {
-        window.clearInterval(handle);
-        resolve(tvAvailable());
-      }, 4000);
-      return;
-    }
+  if (window.TradingView) return Promise.resolve(true);
+  if (scriptPromise) return scriptPromise;
+  scriptPromise = new Promise((resolve) => {
     const script = document.createElement("script");
     script.id = SCRIPT_ID;
     script.src = SCRIPT_SRC;
     script.async = true;
-    script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
+    script.onload = () => resolve(Boolean(window.TradingView));
+    script.onerror = () => { script.remove(); scriptPromise = null; resolve(false); };
     document.head.appendChild(script);
   });
+  return scriptPromise;
 }
 
 interface EmbeddedWidget {
@@ -83,32 +69,19 @@ export default function TradingViewWidget({
   const idRef = useRef<string>(
     containerId ?? `tv-widget-${Math.random().toString(36).slice(2, 10)}`,
   );
-  const [status, setStatus] = useState<"loading" | "ready" | "blocked" | "unsupported">(
+  const [status, setStatus] = useState<"loading" | "embedded" | "blocked" | "unsupported">(
     "loading",
   );
-  const [healthCheckFailed, setHealthCheckFailed] = useState(false);
   const widgetRef = useRef<EmbeddedWidget | null>(null);
-  const renderTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const widgetReadyRef = useRef(false);
   const onUnavailableRef = useRef(onUnavailable);
 
   useEffect(() => {
     onUnavailableRef.current = onUnavailable;
   }, [onUnavailable]);
 
-  const clearRenderTimeout = useCallback(() => {
-    if (renderTimeoutRef.current) {
-      clearTimeout(renderTimeoutRef.current);
-      renderTimeoutRef.current = null;
-    }
-  }, []);
-
   useEffect(() => {
     let cancelled = false;
     setStatus("loading");
-    setHealthCheckFailed(false);
-    widgetReadyRef.current = false;
-    clearRenderTimeout();
     const symbol = sanitizeTicker(ticker, exchange);
     if (!symbol) {
       setStatus("unsupported");
@@ -126,18 +99,13 @@ export default function TradingViewWidget({
       containerRef.current.replaceChildren();
       const inner = document.createElement("div");
       inner.id = idRef.current;
-      inner.style.height = "420px";
+      inner.style.height = "100%";
       inner.style.width = "100%";
       containerRef.current.appendChild(inner);
       try {
-        const markReady = () => {
-          if (cancelled) return;
-          widgetReadyRef.current = true;
-          clearRenderTimeout();
-          setStatus("ready");
-        };
         widgetRef.current = new window.TradingView.widget({
           symbol,
+          autosize: true,
           interval: "D",
           timezone: "Asia/Jakarta",
           theme: "light",
@@ -150,19 +118,8 @@ export default function TradingViewWidget({
           hide_legend: false,
           save_image: false,
           container_id: idRef.current,
-          onChartReady: markReady,
         });
-        if (widgetReadyRef.current) {
-          clearRenderTimeout();
-        } else {
-          renderTimeoutRef.current = setTimeout(() => {
-            if (!cancelled && widgetRef.current && !widgetReadyRef.current) {
-              setHealthCheckFailed(true);
-              setStatus("blocked");
-              onUnavailableRef.current?.("timeout");
-            }
-          }, WIDGET_RENDER_TIMEOUT_MS);
-        }
+        setStatus("embedded");
       } catch (err) {
         console.warn("TradingView widget failed", err);
         setStatus("blocked");
@@ -171,7 +128,6 @@ export default function TradingViewWidget({
     });
     return () => {
       cancelled = true;
-      clearRenderTimeout();
       try {
         widgetRef.current?.remove?.();
       } catch {
@@ -179,7 +135,7 @@ export default function TradingViewWidget({
       }
       widgetRef.current = null;
     };
-  }, [ticker, exchange, clearRenderTimeout]);
+  }, [ticker, exchange]);
 
   return (
     <div
@@ -187,6 +143,9 @@ export default function TradingViewWidget({
         border: "1px solid #dfe2e1",
         background: "#fff",
         padding: 12,
+        minWidth: 0,
+        maxWidth: "100%",
+        boxSizing: "border-box",
       }}
       data-tradingview-status={status}
     >
@@ -210,38 +169,22 @@ export default function TradingViewWidget({
           style={{
             fontSize: 11,
             fontFamily: "Geist Mono, monospace",
-            color:
-              status === "ready"
-                ? "#178477"
-                : status === "blocked"
-                  ? "#8f2424"
-                  : status === "unsupported"
-                    ? "#7c858c"
-                    : "#7a5010",
+            color: status === "blocked" ? "#8f2424" : "#686e73",
           }}
         >
-          {status === "ready"
-            ? "Live widget loaded"
-            : status === "blocked"
-              ? healthCheckFailed
-                ? "Widget render timed out"
-                : "Network blocked / offline"
-              : status === "unsupported"
-                ? "Ticker not IDX-formatted"
-                : "Loading widget…"}
+          {status === "loading" ? "Loading chart…" : status === "embedded" ? "External chart" : "External chart unavailable"}
         </span>
       </header>
-      {status === "blocked" && (
-        <p style={{ margin: "0 0 12px", fontSize: 12, color: "#686e73" }}>
-          {healthCheckFailed
-            ? "The widget did not become ready within 8 seconds. The methodology chart (PriceChart) remains the source of truth; this widget is contextual only."
-            : "TradingView's CDN is not reachable from this browser. The methodology chart (PriceChart) remains the source of truth; this widget is contextual only."}
+      {(status === "blocked" || status === "unsupported") && (
+        <p style={{ margin: 0, fontSize: 12, color: "#686e73" }}>
+          The external chart could not be loaded. Use the snapshot chart above for the recorded observation.
         </p>
       )}
       <div
         ref={containerRef}
         data-tradingview-ticker={ticker}
-        style={{ minHeight: 420, background: "#faf9f6" }}
+        className="tradingview-frame"
+        hidden={status === "blocked" || status === "unsupported"}
       />
     </div>
   );

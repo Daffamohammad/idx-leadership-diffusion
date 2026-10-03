@@ -5,12 +5,12 @@
 // The snapshot-backed yfinance chart (PriceChart) remains the source of
 // truth for the persisted price series. TradingView is contextual.
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Link, useParams } from "react-router";
 import { useSnapshot } from "../data/SnapshotProvider";
 import PriceChart from "../components/PriceChart";
 import { EvidenceBadge } from "../components/EvidenceModel";
-import TradingViewWidget, { type TradingViewUnavailableReason } from "../components/TradingViewWidget";
+import TradingViewWidget from "../components/TradingViewWidget";
 import { formatDateLabel, formatEnumLabel, formatIdrCompact } from "../data/format";
 
 export default function TickerAnalysis() {
@@ -18,12 +18,6 @@ export default function TickerAnalysis() {
   const ticker = (rawTicker ?? "").toUpperCase();
   const snap = useSnapshot();
   const adapted = snap.data;
-  const [tradingViewFailure, setTradingViewFailure] = useState<TradingViewUnavailableReason | null>(null);
-
-  useEffect(() => {
-    setTradingViewFailure(null);
-  }, [ticker]);
-
   const feature = useMemo(() => {
     if (!adapted || !ticker) return null;
     return adapted.featureLookup[ticker] ?? null;
@@ -31,7 +25,10 @@ export default function TickerAnalysis() {
 
   const security = useMemo(() => {
     if (!adapted || !ticker) return null;
-    return adapted.securityLookup[ticker] ?? null;
+    const observed = adapted.securityLookup[ticker];
+    if (observed) return observed;
+    const listed = adapted.listingRegistry?.records.find(row => row.ticker === ticker);
+    return listed ? { name: listed.company_name, sector: listed.taxonomy.sector } : null;
   }, [adapted, ticker]);
 
   const priceHistory = useMemo(() => {
@@ -89,11 +86,15 @@ export default function TickerAnalysis() {
   return (
     <main
       style={{
-        padding: "32px 36px 56px",
+        padding: "32px clamp(16px, 4vw, 36px) 56px",
         display: "grid",
         gap: 24,
+        gridTemplateColumns: "minmax(0, 1fr)",
         maxWidth: 1180,
+        width: "100%",
+        boxSizing: "border-box",
         margin: "0 auto",
+        minWidth: 0,
       }}
     >
       <header
@@ -104,23 +105,29 @@ export default function TickerAnalysis() {
           flexWrap: "wrap",
           justifyContent: "space-between",
           gap: 16,
+          minWidth: 0,
+          maxWidth: "100%",
         }}
       >
-        <div>
+        <div style={{ minWidth: 0, maxWidth: "100%" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
             <div className="eyebrow-muted">Ticker analysis</div>
             <EvidenceBadge kind="SNAPSHOT" compact />
           </div>
-          <h1 style={{ margin: "6px 0 4px", fontSize: 32, letterSpacing: "-.02em" }}>
+          <h1 style={{ margin: "6px 0 4px", fontSize: 32, letterSpacing: "-.02em", overflowWrap: "anywhere", minWidth: 0 }}>
             {security?.name ?? ticker}
           </h1>
           <div
             style={{
               display: "flex",
+              flexWrap: "wrap",
               gap: 12,
               fontSize: 12,
               fontFamily: "Geist Mono, monospace",
               color: "#686e73",
+              minWidth: 0,
+              maxWidth: "100%",
+              overflowWrap: "anywhere",
             }}
           >
             <span>{ticker}</span>
@@ -153,7 +160,7 @@ export default function TickerAnalysis() {
 
       <section
         aria-label="Methodology price chart"
-        style={{ display: "grid", gap: 12 }}
+        style={{ display: "grid", gap: 12, gridTemplateColumns: "minmax(0, 1fr)", minWidth: 0, maxWidth: "100%" }}
       >
         <PriceChart
           ticker={ticker}
@@ -174,43 +181,9 @@ export default function TickerAnalysis() {
       </section>
       <section
         aria-label="TradingView context chart"
-        style={{ display: "grid", gap: 12 }}
+        style={{ display: "grid", gap: 12, gridTemplateColumns: "minmax(0, 1fr)", minWidth: 0, maxWidth: "100%" }}
       >
-        {!tradingViewFailure && (
-          <TradingViewWidget
-            ticker={ticker}
-            onUnavailable={(reason) => {
-              if (reason === "timeout" || reason === "unsupported" || reason === "error") {
-                setTradingViewFailure(reason);
-              } else if (navigator.onLine === false) {
-                setTradingViewFailure("network");
-              } else {
-                setTradingViewFailure(reason);
-              }
-            }}
-          />
-        )}
-        {tradingViewFailure && (
-          <div
-            style={{
-              border: "1px solid #dfe2e1",
-              background: "#fff",
-              padding: 16,
-            }}
-          >
-            <div className="eyebrow-muted">TradingView (context only)</div>
-            <h3 style={{ margin: "6px 0 8px", fontSize: 16 }}>
-              {tradingViewFailure === "timeout" ? "Widget render timed out" : "Live widget unavailable"}
-            </h3>
-            <p style={{ margin: 0, color: "#686e73", fontSize: 13 }}>
-              {tradingViewFailure === "timeout"
-                ? "The widget did not become ready within 8 seconds; the methodology chart remains the source of truth."
-                : tradingViewFailure === "network"
-                ? "The TradingView CDN is not reachable from this browser; the methodology chart remains the source of truth."
-                : "The widget failed to initialise. The snapshot-backed chart above is the methodology series."}
-            </p>
-          </div>
-        )}
+        <TradingViewWidget ticker={ticker} />
       </section>
 
       <section

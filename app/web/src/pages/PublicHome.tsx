@@ -566,13 +566,15 @@ export default function PublicHome() {
           className="public-grid public-hero"
           style={{
             display: "grid",
-            gridTemplateColumns: "minmax(320px, .72fr) minmax(500px, 1.28fr)",
+            gridTemplateColumns: "minmax(0, .72fr) minmax(0, 1.28fr)",
             gap: 50,
             padding: "90px 0 110px",
             alignItems: "center",
+            minWidth: 0,
+            maxWidth: "100%",
           }}
         >
-          <div>
+          <div style={{ minWidth: 0, maxWidth: "100%", overflowWrap: "anywhere" }}>
             <div className="eyebrow-muted reveal" style={{ marginBottom: 24 }}>
               Indonesian equity market intelligence
             </div>
@@ -609,7 +611,7 @@ export default function PublicHome() {
               performance.
             </p>
 
-            <div className="reveal public-cta-row" style={{ display: "flex", gap: 18, alignItems: "center" }}>
+            <div className="reveal public-cta-row" style={{ display: "flex", gap: 18, alignItems: "center", flexWrap: "wrap", minWidth: 0, maxWidth: "100%" }}>
               <ShimmerCTAButton to="/overview">Explore the market →</ShimmerCTAButton>
               <Link
                 to="/methodology"
@@ -643,7 +645,7 @@ export default function PublicHome() {
           </div>
 
           {/* ── Hero image column ── */}
-          <div style={{ position: "relative" }}>
+          <div style={{ position: "relative", minWidth: 0, maxWidth: "100%" }}>
             <div className="eyebrow-muted" style={{ marginBottom: 8, color: "#7a5010" }}>
               Illustrative product view · sample values
             </div>
@@ -653,6 +655,8 @@ export default function PublicHome() {
                 border: "1px solid #dfe2e1",
                 overflow: "hidden",
                 aspectRatio: "835 / 454",
+                minWidth: 0,
+                maxWidth: "100%",
               }}
             >
               <ImageWithFallback
@@ -670,10 +674,12 @@ export default function PublicHome() {
                 border: "1px solid #dfe2e1",
                 padding: 16,
                 position: "absolute",
-                right: -18,
+                right: 0,
                 top: 36,
                 width: 205,
+                maxWidth: "calc(100% - 20px)",
                 boxShadow: "0 12px 28px #12161918",
+                boxSizing: "border-box",
               }}
             >
               <div className="eyebrow-muted">Oil & Gas</div>
@@ -764,11 +770,13 @@ export default function PublicHome() {
             className="public-grid reveal"
             style={{
               display: "grid",
-              gridTemplateColumns: "1fr 1fr",
+              gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
               gap: 1,
               background: "#dfe2e1",
               border: "1px solid #dfe2e1",
               marginTop: 40,
+              minWidth: 0,
+              maxWidth: "100%",
             }}
           >
             <div style={{ background: "#fafaf8", padding: 28 }}>
@@ -830,18 +838,20 @@ export default function PublicHome() {
           ].map(([n, t, d], idx) => (
             <div
               key={n}
-              className="reveal"
+              className="reveal lenses-grid"
               style={{
                 display: "grid",
-                gridTemplateColumns: "80px 1fr 1fr",
+                gridTemplateColumns: "80px minmax(0, 1fr) minmax(0, 1fr)",
                 gap: 24,
                 padding: "24px 0",
                 borderBottom: "1px solid #dfe2e1",
                 transitionDelay: `${idx * 80}ms`,
+                minWidth: 0,
+                maxWidth: "100%",
               }}
             >
               <span className="eyebrow-muted">{n}</span>
-              <div>
+              <div style={{ minWidth: 0, maxWidth: "100%", overflowWrap: "anywhere" }}>
                 <h3 style={{ fontSize: 22, margin: 0 }}>{t}</h3>
                 <p style={{ color: "#686e73", margin: "6px 0" }}>{d}</p>
               </div>
@@ -852,6 +862,9 @@ export default function PublicHome() {
                   fontSize: 11,
                   color: "#686e73",
                   whiteSpace: "pre-line",
+                  minWidth: 0,
+                  maxWidth: "100%",
+                  overflowWrap: "anywhere",
                 }}
               >
                 {t === "Confirmation"
@@ -864,12 +877,15 @@ export default function PublicHome() {
 
         {/* ── Dark CTA band with grain ── */}
         <section
-          className="grain-bg"
+          className="grain-bg dark-cta-band"
           style={{
             background: "#121619",
             color: "white",
             margin: "0 -40px",
             padding: "82px 40px",
+            minWidth: 0,
+            maxWidth: "none",
+            boxSizing: "border-box",
           }}
         >
           <div className="reveal" style={{ maxWidth: 1360, margin: "auto" }}>
