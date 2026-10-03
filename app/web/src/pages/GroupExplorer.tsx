@@ -312,7 +312,7 @@ function TaxonomyGroupDetail({
   group: TaxonomyGroupData;
   data: AdaptedSnapshot;
 }) {
-  const backPath = group.taxonomyKind === "KONGLO" ? "/maps/konglo" : "/maps/themes";
+  const catalogPath = `/groups?taxonomy=${group.taxonomyKind}`;
   const members = group.memberships;
   const quantitativeMembers = members.filter((member) => member.membership_type !== "EXCLUDED");
   const groupKey = `${group.taxonomyId}::${group.id}`;
@@ -331,8 +331,8 @@ function TaxonomyGroupDetail({
     <div className="taxonomy-detail-page content-shell" style={{ padding: "36px var(--page-gutter)", maxWidth: "var(--content-max)" }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 20, marginBottom: 24, flexWrap: "wrap" }}>
         <div>
-          <Link to={backPath} style={{ color: "#686e73", fontSize: 12, textDecoration: "none" }}>
-            ← Back to {group.taxonomyKind === "KONGLO" ? "Konglo" : "Themes"} map
+          <Link to={catalogPath} style={{ color: "#686e73", fontSize: 12, textDecoration: "none" }} onClick={() => { sessionStorage.setItem("catalog-focus", group.id); }}>
+            ← Back to {group.taxonomyKind === "KONGLO" ? "Konglo" : "Themes"} catalog
           </Link>
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginTop: 16, marginBottom: 8 }}>
             <div className="eyebrow-muted">
@@ -599,8 +599,11 @@ export default function GroupExplorer() {
     <div className="content-shell" style={{ padding: "36px var(--page-gutter)", maxWidth: "var(--content-max)" }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 24 }}>
         <div>
-          <div className="eyebrow-muted" style={{ marginBottom: 8 }}>
-            IDX → Group → {sector.name}
+          <Link to="/groups?taxonomy=SECTOR" style={{ color: "#686e73", fontSize: 12, textDecoration: "none" }}>
+            ← Back to All Groups catalog
+          </Link>
+          <div className="eyebrow-muted" style={{ marginBottom: 8, marginTop: 12 }}>
+            IDX → Group → {sector.name} · {sector.id} · {sector.eligibleConstituents}/{sector.constituents} eligible
           </div>
           <h1
             style={{

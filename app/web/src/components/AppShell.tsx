@@ -1,5 +1,18 @@
 import { Link, NavLink } from "react-router";
 import { useState } from "react";
+import * as Tooltip from "@radix-ui/react-tooltip";
+import {
+  ActivityLogIcon,
+  ArchiveIcon,
+  BarChartIcon,
+  CubeIcon,
+  DashboardIcon,
+  FileTextIcon,
+  GridIcon,
+  LayersIcon,
+  MagnifyingGlassIcon,
+  TableIcon,
+} from "@radix-ui/react-icons";
 import ThemeToggle from "./ThemeToggle";
 import LocalProfile from "./LocalProfile";
 import TickerSearch from "./TickerSearch";
@@ -10,16 +23,16 @@ import { normalizeDataStatus } from "../data/snapshot";
 import { formatDateLabel, formatEnumLabel, formatSnapshotId } from "../data/format";
 
 const navItems = [
-  { path: "/what-changed", label: "What Changed", index: "01" },
-  { path: "/overview", label: "Overview", index: "02" },
-  { path: "/map", label: "Leadership Map", index: "03" },
-  { path: "/maps/konglo", label: "Konglo Map", index: "04" },
-  { path: "/maps/themes", label: "Themes Map", index: "05" },
-  { path: "/themes", label: "Themes Explorer", index: "06" },
-  { path: "/explorer", label: "Groups", index: "07" },
-  { path: "/groups", label: "Groups Table", index: "08" },
-  { path: "/methodology", label: "Methodology", index: "09" },
-  { path: "/tickers", label: "Ticker Explorer", index: "10" },
+  { path: "/what-changed", label: "What Changed", Icon: ActivityLogIcon },
+  { path: "/overview", label: "Overview", Icon: DashboardIcon },
+  { path: "/map", label: "Leadership Map", Icon: LayersIcon },
+  { path: "/maps/konglo", label: "Konglo Map", Icon: CubeIcon },
+  { path: "/maps/themes", label: "Themes Map", Icon: GridIcon },
+  { path: "/themes", label: "Themes Catalog", Icon: ArchiveIcon },
+  { path: "/explorer", label: "Group Explorer", Icon: BarChartIcon },
+  { path: "/groups", label: "All Groups", Icon: TableIcon },
+  { path: "/methodology", label: "Methodology", Icon: FileTextIcon },
+  { path: "/tickers", label: "Ticker Explorer", Icon: MagnifyingGlassIcon },
 ];
 
 interface Props {
@@ -77,14 +90,16 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
               : "#7c858c";
 
   return (
-    <div style={{ display: "flex", height: "100%", background: "#ffffff" }}>
+    <Tooltip.Provider delayDuration={150}>
+    <div style={{ display: "flex", height: "100%", background: "var(--bg)" }}>
       <aside
         className="desktop-only"
+        aria-label="Primary"
         style={{
-          width: sidebarExpanded ? 188 : 54,
+          width: sidebarExpanded ? 208 : 60,
           flexShrink: 0,
-          background: "#ffffff",
-          borderRight: "1px solid #dfe2e1",
+          background: "var(--surface)",
+          borderRight: "1px solid var(--line)",
           display: "flex",
           flexDirection: "column",
           transition: "width 180ms ease",
@@ -94,50 +109,43 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
         <div
           style={{
             padding: sidebarExpanded ? "18px 18px 16px" : "16px 14px",
-            borderBottom: "1px solid #dfe2e1",
+            borderBottom: "1px solid var(--line)",
           }}
         >
-          <Link to="/" aria-label="Back to landing page" title="Back to landing page" style={{ color: "inherit", textDecoration: "none" }}>
+          <Link to="/" aria-label="Back to landing page" title="Back to landing page (Home)" style={{ color: "inherit", textDecoration: "none" }}>
             <BrandLockup compact={!sidebarExpanded} />
           </Link>
         </div>
-        <nav style={{ padding: "12px 0", flex: 1, minHeight: 0, overflowY: "auto" }}>
+        <nav style={{ padding: "12px 6px", flex: 1, minHeight: 0, overflowY: "auto", display: "grid", gap: 2, alignContent: "start" }}>
           {navItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              title={item.label}
-              style={({ isActive }) => ({
-                display: "flex",
-                gap: 10,
-                padding: "9px 15px",
-                borderLeft: isActive
-                  ? "2px solid #f26a3d"
-                  : "2px solid transparent",
-                background: isActive ? "#f1eeea" : "transparent",
-                color: isActive ? "#16191c" : "#686e73",
-                textDecoration: "none",
-                fontSize: 13,
-                fontWeight: isActive ? 600 : 400,
-                transition: "background 0.2s ease, color 0.2s ease",
-              })}
-            >
-              {({ isActive }) => (
-                <>
-                  <span
-                    className="eyebrow-muted"
-                    style={{
-                      width: 16,
-                      color: isActive ? "#f26a3d" : undefined,
-                      transition: "color 0.2s ease",
-                    }}
-                  >
-                    {item.index}
-                  </span>
-                  {sidebarExpanded && item.label}
-                </>
+            <Tooltip.Root key={item.path}>
+              <Tooltip.Trigger asChild>
+                <NavLink
+                  to={item.path}
+                  title={sidebarExpanded ? undefined : item.label}
+                  aria-label={item.label}
+                  className="rail-link"
+                >
+                  {({ isActive }) => (
+                    <>
+                      <span className="rail-icon" aria-hidden="true">
+                        <item.Icon width={16} height={16} />
+                      </span>
+                      {sidebarExpanded && <span>{item.label}</span>}
+                      {isActive && <span className="sr-only">(current)</span>}
+                    </>
+                  )}
+                </NavLink>
+              </Tooltip.Trigger>
+              {!sidebarExpanded && (
+                <Tooltip.Portal>
+                  <Tooltip.Content side="right" sideOffset={8} style={{ background: "#202325", color: "#fff", fontSize: 12, padding: "6px 10px", borderRadius: 6, zIndex: 100 }}>
+                    {item.label}
+                    <Tooltip.Arrow style={{ fill: "#202325" }} />
+                  </Tooltip.Content>
+                </Tooltip.Portal>
               )}
-            </NavLink>
+            </Tooltip.Root>
           ))}
         </nav>
         <div
@@ -365,31 +373,12 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
                   key={item.path}
                   to={item.path}
                   onClick={() => setMobileNavOpen(false)}
-                  style={({ isActive }) => ({
-                    display: "flex",
-                    gap: 10,
-                    alignItems: "center",
-                    padding: "10px 12px",
-                    borderLeft: isActive
-                      ? "2px solid #f26a3d"
-                      : "2px solid transparent",
-                    background: isActive ? "#f1eeea" : "transparent",
-                    color: isActive ? "#16191c" : "#202325",
-                    textDecoration: "none",
-                    fontSize: 14,
-                    fontWeight: isActive ? 600 : 400,
-                  })}
+                  aria-label={item.label}
+                  className="rail-link"
+                  style={{ minHeight: 44 }}
                 >
-                  <span
-                    style={{
-                      fontFamily: "Geist Mono, ui-monospace, monospace",
-                      fontSize: 10,
-                      letterSpacing: "0.075em",
-                      width: 20,
-                      color: "#686e73",
-                    }}
-                  >
-                    {item.index}
+                  <span className="rail-icon" aria-hidden="true">
+                    <item.Icon width={16} height={16} />
                   </span>
                   {item.label}
                 </NavLink>
@@ -461,5 +450,6 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
         </main>
       </div>
     </div>
+    </Tooltip.Provider>
   );
 }

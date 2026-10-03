@@ -1,12 +1,14 @@
-import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useSnapshot } from "../data/SnapshotProvider";
-import type { SectorData } from "../data/adapter";
+import type { SectorData, TaxonomyGroupData } from "../data/adapter";
+import type { TaxonomyKind } from "../data/snapshot";
 import { LeadershipChip, DiffusionChip, DataStatusChip } from "../components/StatusChips";
 import { EmptyState } from "../components/EmptyState";
 import { EvidenceBadge } from "../components/EvidenceModel";
 import { WindowCapNotice } from "../components/SnapshotNotices";
-import { formatEnumLabel, formatPercent } from "../data/format";
+import MarketHeatmap from "../components/MarketHeatmap";
+import { formatCountLabel, formatEnumLabel, formatPercent } from "../data/format";
 
 type SortKey =
   | "name"
@@ -146,18 +148,80 @@ function compare(a: SectorData, b: SectorData, key: SortKey, dir: SortDir): numb
 
 export default function MasterGroupTable() {
   const { data } = useSnapshot();
+  const navigate = useNavigate();
+  const [params, setParams] = useSearchParams();
+  const taxonomy = ((params.get("taxonomy") ?? "SECTOR").toUpperCase() as TaxonomyKind);
+  const activeTaxonomy: TaxonomyKind = taxonomy === "KONGLO" || taxonomy === "THEMES" ? taxonomy : "SECTOR";
+  const view = params.get("view") === "heatmap" ? "heatmap" : "table";
+  const filter = params.get("filter") ?? "";
   const sectors: SectorData[] = data?.sectors ?? [];
-  const [sortKey, setSortKey] = useState<SortKey>("excessYtd");
+  const taxonomyGroups: TaxonomyGroupData[] = useMemo(() => {
+    if (!data) return [];
+    return Object.values(data.taxonomyGroups).filter((g) => g.taxonomyKind === activeTaxonomy)
+      .sort((a, b) => b.constituents - a.constituents || a.id.localeCompare(b.id));
+  }, [data, activeTaxonomy]);
+  const [sortKey, setSortKey] = useState<SortKey>("excess20d");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
-  const [filter, setFilter] = useState("");
+  const [taxSort, setTaxSort] = useState<"name" | "members" | "excess20d" | "excess60d" | "breadth">("members");
+  const [taxDir, setTaxDir] = useState<SortDir>("desc");
+  const setFilter = (v: string) => {
+    const next = new URLSearchParams(params);
+    if (v) next.set("filter", v); else next.delete("filter");
+    setParams(next, { replace: true });
+  };
+  const setTaxonomy = (k: TaxonomyKind) => {
+    const next = new URLSearchParams(params);
+    next.set("taxonomy", k);
+    setParams(next, { replace: true });
+  };
+  const setView = (v: "table" | "heatmap") => {
+    const next = new URLSearchParams(params);
+    next.set("view", v);
+    setParams(next, { replace: true });
+  };
   const rows = useMemo(() => {
-    const filtered = filter
-      ? sectors.filter((s) => s.name.toLowerCase().includes(filter.toLowerCase()))
+    const q = filter.trim().toLowerCase();
+    const filtered = q
+      ? sectors.filter((s) => s.name.toLowerCase().includes(q) || s.id.toLowerCase().includes(q))
       : sectors;
     return [...filtered].sort((a, b) => compare(a, b, sortKey, sortDir));
   }, [sectors, sortKey, sortDir, filter]);
+  const taxRows = useMemo(() => {
+    const q = filter.trim().toLowerCase();
+    const filtered = q
+      ? taxonomyGroups.filter((g) =>
+          g.name.toLowerCase().includes(q) || g.id.toLowerCase().includes(q) ||
+          g.memberships?.some((m) => m.ticker.toLowerCase().includes(q)),
+        )
+      : taxonomyGroups;
+    const mult = taxDir === "asc" ? 1 : -1;
+    return [...filtered].sort((a, b) => {
+      switch (taxSort) {
+        case "name": return mult * a.name.localeCompare(b.name);
+        case "members": return mult * (a.constituents - b.constituents);
+        case "excess20d": return mult * ((a.excess20d ?? Number.NEGATIVE_INFINITY) - (b.excess20d ?? Number.NEGATIVE_INFINITY));
+        case "excess60d": return mult * ((a.excess60d ?? Number.NEGATIVE_INFINITY) - (b.excess60d ?? Number.NEGATIVE_INFINITY));
+        case "breadth": return mult * ((a.breadth ?? Number.NEGATIVE_INFINITY) - (b.breadth ?? Number.NEGATIVE_INFINITY));
+      }
+    });
+  }, [taxonomyGroups, filter, taxSort, taxDir]);
+  const uniqueTickers = useMemo(() => {
+    const set = new Set<string>();
+    for (const g of taxonomyGroups) for (const m of g.memberships ?? []) set.add(m.ticker);
+    return set.size;
+  }, [taxonomyGroups]);
+  const searchRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const pending = sessionStorage.getItem("catalog-focus");
+    if (pending && searchRef.current) {
+      searchRef.current.focus();
+      sessionStorage.removeItem("catalog-focus");
+    }
+  }, []);
+  const totalMemberships = useMemo(() => taxonomyGroups.reduce((s, g) => s + g.constituents, 0), [taxonomyGroups]);
+  const eligibleTotal = useMemo(() => taxonomyGroups.reduce((s, g) => s + (g.eligible ?? 0), 0), [taxonomyGroups]);
 
-  if (!sectors.length) {
+  if (!sectors.length && !taxonomyGroups.length) {
     return (
       <EmptyState
         label="Master Group Table"
@@ -242,13 +306,27 @@ export default function MasterGroupTable() {
         <WindowCapNotice data={data} compact />
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
+      <div className="tabs" role="tablist" aria-label="Catalog taxonomy" style={{ marginBottom: 12 }}>
+        {(["SECTOR", "KONGLO", "THEMES"] as TaxonomyKind[]).map((k) => (
+          <button key={k} role="tab" aria-selected={activeTaxonomy === k} className="tab" onClick={() => setTaxonomy(k)}>
+            {k === "SECTOR" ? "Sectors" : k === "KONGLO" ? "Konglo" : "Themes"}
+          </button>
+        ))}
+        <span style={{ marginLeft: "auto", display: "flex", gap: 6 }} role="group" aria-label="Catalog view">
+          <button type="button" aria-pressed={view === "table"} onClick={() => setView("table")} className="btn btn-outline" style={{ minHeight: 32, padding: "4px 10px", fontSize: 12 }}>Table</button>
+          <button type="button" aria-pressed={view === "heatmap"} onClick={() => setView("heatmap")} className="btn btn-outline" style={{ minHeight: 32, padding: "4px 10px", fontSize: 12 }}>Heatmap</button>
+        </span>
+      </div>
+
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14, flexWrap: "wrap" }}>
         <input
+          ref={searchRef}
+          id="catalog-search"
           type="search"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          placeholder="Filter groups…"
-          aria-label="Filter groups by name"
+          placeholder="Search group or ticker…"
+          aria-label="Search groups or tickers"
           style={{
             padding: "7px 10px",
             border: "1px solid #dfe2e1",
@@ -256,15 +334,64 @@ export default function MasterGroupTable() {
             background: "#fff",
             fontFamily: "Geist Mono, ui-monospace, monospace",
             fontSize: 12,
-            width: 240,
+            width: 260,
           }}
         />
         <span style={{ color: "#8f8f8f", fontSize: 11 }}>
-          {rows.length} of {sectors.length} groups · sorted by {sortLabel(sortKey)}
-          {arrow(sortKey)}
+          {activeTaxonomy === "SECTOR"
+            ? `${rows.length} of ${sectors.length} groups · sorted by ${sortLabel(sortKey)}${arrow(sortKey)}`
+            : `${taxRows.length} of ${taxonomyGroups.length} groups · ${totalMemberships} memberships · ${uniqueTickers} unique tickers · ${eligibleTotal} eligible`}
         </span>
+        <Link to={`/map?taxonomy=${activeTaxonomy}`} style={{ marginLeft: "auto", fontSize: 12 }}>Open rotation →</Link>
       </div>
 
+      {view === "heatmap" && data && (
+        <MarketHeatmap
+          taxonomyGroups={data.taxonomyGroups}
+          taxonomyNames={{ SECTOR: "Sector", KONGLO: "Konglo", THEMES: "Themes" }}
+          taxonomyKindsById={Object.fromEntries(Object.entries(data.taxonomyViews).map(([id, v]) => [id, v.taxonomy_kind]))}
+          foreignFlow={data.foreignFlow}
+          asOf={data.payload.as_of}
+          onSelectGroup={(kind, taxonomyId, groupId) => {
+            void taxonomyId;
+            navigate(`/explorer?taxonomy=${kind}&group=${encodeURIComponent(groupId)}`);
+          }}
+        />
+      )}
+
+      {view === "table" && activeTaxonomy !== "SECTOR" && (
+        <div className="table-scroll" style={{ border: "1px solid #dfe2e1", borderRadius: 6, background: "#fff" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 860 }} aria-label={`${activeTaxonomy} catalog`}>
+            <thead>
+              <tr>
+                <th style={headerCell}><button type="button" onClick={() => { setTaxSort("name"); setTaxDir(taxDir === "asc" ? "desc" : "asc"); }} style={{ all: "unset", cursor: "pointer" }}>Group · code{taxSort === "name" ? (taxDir === "asc" ? " ▲" : " ▼") : ""}</button></th>
+                <th style={{ ...headerCell, textAlign: "right" }}><button type="button" onClick={() => { setTaxSort("members"); setTaxDir(taxDir === "asc" ? "desc" : "asc"); }} style={{ all: "unset", cursor: "pointer" }}>Members{taxSort === "members" ? (taxDir === "asc" ? " ▲" : " ▼") : ""}</button></th>
+                <th style={{ ...headerCell, textAlign: "right" }}>20D excess</th>
+                <th style={{ ...headerCell, textAlign: "right" }}>60D excess</th>
+                <th style={{ ...headerCell, textAlign: "right" }}>Breadth</th>
+                <th style={headerCell}>Rotation</th>
+                <th style={headerCell}>Detail</th>
+              </tr>
+            </thead>
+            <tbody>
+              {taxRows.map((g) => (
+                <tr key={g.id}>
+                  <td style={{ ...bodyCell, fontWeight: 600 }}>{g.name}<span style={{ display: "block", fontWeight: 400, fontSize: 11, color: "#686e73" }}>{g.id} · {g.taxonomyVersion}</span></td>
+                  <td style={{ ...bodyCell, textAlign: "right" }} className="tabnum">{g.eligible}/{g.constituents}</td>
+                  <td style={{ ...bodyCell, textAlign: "right", color: signColor(g.excess20d) }} className="tabnum">{formatPercent(g.excess20d)}</td>
+                  <td style={{ ...bodyCell, textAlign: "right", color: signColor(g.excess60d) }} className="tabnum">{formatPercent(g.excess60d)}</td>
+                  <td style={{ ...bodyCell, textAlign: "right" }} className="tabnum">{g.breadth === null ? "—" : `${g.breadth.toFixed(1)}%`}</td>
+                  <td style={bodyCell}><Link to={`/map?taxonomy=${g.taxonomyKind}`}>Rotation →</Link></td>
+                  <td style={bodyCell}><Link to={`/explorer?taxonomy=${g.taxonomyKind}&group=${encodeURIComponent(g.id)}`}>Open →</Link></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p style={{ padding: "8px 12px", color: "#8f8f8f", fontSize: 11 }}>Overlapping themes do not represent unique market share. Missing metrics show — (neutral), never red or zero. Areas sized by member count where market cap is unavailable.</p>
+        </div>
+      )}
+
+      {view === "table" && activeTaxonomy === "SECTOR" && (
       <div
         style={{
           overflowX: "auto",
@@ -420,6 +547,7 @@ export default function MasterGroupTable() {
           </tbody>
         </table>
       </div>
+      )}
 
       <p style={{ marginTop: 12, color: "#8f8f8f", fontSize: 11, lineHeight: 1.5 }}>
         Concentration column reflects absolute-move top-3 share (equal-weighted group return).

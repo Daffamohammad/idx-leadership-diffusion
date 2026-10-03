@@ -8,7 +8,6 @@ import {
 } from "react-router";
 import { useState } from "react";
 import AppShell from "./components/AppShell";
-import CustomCursor from "./components/CustomCursor";
 import PublicHome from "./pages/PublicHome";
 import LeadershipMap from "./pages/LeadershipMap";
 import GroupExplorer from "./pages/GroupExplorer";
@@ -129,7 +128,6 @@ const router = createBrowserRouter([
 export default function App() {
   return (
     <SnapshotProvider>
-      <CustomCursor />
       <RouterProvider router={router} />
     </SnapshotProvider>
   );

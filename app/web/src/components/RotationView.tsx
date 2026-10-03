@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { useNavigate } from "react-router";
+import { useMemo, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router";
 import { EvidenceBadge } from "./EvidenceModel";
 import { useSnapshot } from "../data/SnapshotProvider";
 import type { SectorData, TaxonomyGroupData } from "../data/adapter";
@@ -113,18 +113,76 @@ function phaseColor(phase: RotationPhase): string {
   return QUADRANTS.find((quadrant) => quadrant.phase === phase)?.color ?? "#7c858c";
 }
 
-function openGroup(navigate: ReturnType<typeof useNavigate>, row: RotationGroupInput): void {
+function openGroup(navigate: ReturnType<typeof useNavigate>, row: RotationGroupInput, mode: "groups" | "stocks"): void {
+  if (mode === "stocks") {
+    navigate(`/ticker/${encodeURIComponent(row.id)}`);
+    return;
+  }
   navigate(`/explorer?taxonomy=${row.taxonomyKind}&group=${encodeURIComponent(row.id)}`);
 }
 
 export default function RotationView() {
   const navigate = useNavigate();
   const { data } = useSnapshot();
-  const [taxonomyKind, setTaxonomyKind] = useState<TaxonomyKind>("SECTOR");
-  const [search, setSearch] = useState("");
+  const [params, setParams] = useSearchParams();
+  const urlTaxonomy = (params.get("taxonomy") ?? "SECTOR").toUpperCase() as TaxonomyKind;
+  const taxonomyKind: TaxonomyKind = urlTaxonomy === "KONGLO" || urlTaxonomy === "THEMES" ? urlTaxonomy : "SECTOR";
+  const search = params.get("q") ?? "";
+  const mode = params.get("mode") === "stocks" ? "stocks" : "groups";
+  const setTaxonomyKind = (k: TaxonomyKind) => {
+    const next = new URLSearchParams(params);
+    next.set("taxonomy", k);
+    setParams(next, { replace: true });
+  };
+  const setSearch = (v: string) => {
+    const next = new URLSearchParams(params);
+    if (v) next.set("q", v); else next.delete("q");
+    setParams(next, { replace: true });
+  };
+  const setMode = (m: "groups" | "stocks") => {
+    const next = new URLSearchParams(params);
+    next.set("mode", m);
+    setParams(next, { replace: true });
+  };
+  const [hidden, setHidden] = useState<Set<string>>(new Set());
+  const [zoom, setZoom] = useState(1);
+  const frameRef = useRef<HTMLDivElement>(null);
 
   const groups = useMemo<RotationGroupInput[]>(() => {
     if (!data) return [];
+    if (mode === "stocks") {
+      const seen = new Map<string, RotationGroupInput>();
+      const pushTicker = (ticker: string, name: string, excess20d: number | null, excess60d: number | null, ytd: number | null) => {
+        if (seen.has(ticker)) return;
+        const mom = relativeMomentum(excess20d, excess60d);
+        seen.set(ticker, {
+          id: ticker, name: name || ticker, taxonomyId: "", taxonomyKind,
+          constituents: 1, excess20d, excess60d,
+          relativeStrength: ytd, relativeMomentum: mom,
+          ytdExcess: ytd, ytdStartDate: null, ytdEligible: ytd !== null ? 1 : 0,
+          dataQuality: ytd === null ? "READY_WITH_GAPS" : "READY",
+        });
+      };
+      if (taxonomyKind === "SECTOR") {
+        for (const [gid, list] of Object.entries(data.constituentsByGroup ?? {})) {
+          void gid;
+          for (const c of list) pushTicker(c.ticker, c.name, c.excess20d, c.excess60d, c.excessYtd);
+        }
+      } else {
+        for (const [key, list] of Object.entries(data.constituentsByTaxonomyGroup ?? {})) {
+          const g = data.taxonomyGroups[key];
+          if (!g || g.taxonomyKind !== taxonomyKind) continue;
+          for (const c of list) pushTicker(c.ticker, c.name, c.excess20d, c.excess60d, c.excessYtd);
+        }
+        if (seen.size === 0) {
+          for (const g of Object.values(data.taxonomyGroups).filter((x) => x.taxonomyKind === taxonomyKind)) {
+            for (const m of []) pushTicker((m as { ticker: string }).ticker, "", null, null, null);
+            void g;
+          }
+        }
+      }
+      return [...seen.values()].sort((a, b) => a.id.localeCompare(b.id));
+    }
     if (taxonomyKind === "SECTOR") {
       return data.sectors.map((sector) => sectorToRotationGroup(sector, data.activeTaxonomyId ?? "sector"));
     }
@@ -132,7 +190,7 @@ export default function RotationView() {
       .filter((group) => group.taxonomyKind === taxonomyKind)
       .map(taxonomyToRotationGroup)
       .sort((left, right) => right.constituents - left.constituents || left.id.localeCompare(right.id));
-  }, [data, taxonomyKind]);
+  }, [data, taxonomyKind, mode]);
 
   const rows = useMemo<RotationRow[]>(() => {
     const normalizedSearch = search.trim().toLowerCase();
@@ -148,7 +206,15 @@ export default function RotationView() {
   // diagnostic view until the YTD baseline is persisted.
   const diagnosticPlottable = rows.filter((row) => row.excess20d !== null && row.relativeMomentum !== null);
   const isDiagnostic = plottable.length === 0 && diagnosticPlottable.length > 0;
-  const plottedRows = isDiagnostic ? diagnosticPlottable : plottable;
+  const basePlotted = isDiagnostic ? diagnosticPlottable : plottable;
+  const plottedRows = basePlotted.filter((r) => !hidden.has(isDiagnostic ? `diag-${r.id}` : r.phase));
+  const togglePhase = (key: string) => {
+    setHidden((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  };
   const labelPositions = useMemo(() => {
     const candidates = plottedRows.map((row) => {
       const xValue = isDiagnostic ? row.excess20d : row.relativeStrength;
@@ -194,7 +260,7 @@ export default function RotationView() {
         </div>
         <div style={{ color: "#686e73", fontFamily: "Geist Mono, monospace", fontSize: 11, textAlign: "right" }}>
           <div>Snapshot as of {snapshotAsOf}</div>
-          <div style={{ marginTop: 5 }}>{currentTaxonomyLabel} · {formatCountLabel(rows.length, "group")}</div>
+          <div style={{ marginTop: 5 }}>{currentTaxonomyLabel} · {mode} · {formatCountLabel(plottedRows.length, "plotted")} of {formatCountLabel(rows.length, mode === "stocks" ? "ticker" : "group")}</div>
         </div>
       </header>
 
@@ -217,26 +283,61 @@ export default function RotationView() {
             );
           })}
         </div>
+        <div role="group" aria-label="Rotation mode" style={{ display: "flex", gap: 6 }}>
+          <button type="button" aria-pressed={mode === "groups"} onClick={() => setMode("groups")} style={{ border: `1px solid ${mode === "groups" ? "#438b82" : "#dfe2e1"}`, background: mode === "groups" ? "#e8f3f0" : "#fff", padding: "6px 11px", fontSize: 11, cursor: "pointer" }}>Groups</button>
+          <button type="button" aria-pressed={mode === "stocks"} onClick={() => setMode("stocks")} style={{ border: `1px solid ${mode === "stocks" ? "#438b82" : "#dfe2e1"}`, background: mode === "stocks" ? "#e8f3f0" : "#fff", padding: "6px 11px", fontSize: 11, cursor: "pointer" }}>Stocks</button>
+        </div>
         <input
           type="search"
           aria-label="Search rotation groups"
-          placeholder="Search group…"
+          placeholder={mode === "stocks" ? "Search ticker…" : "Search group…"}
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           style={{ marginLeft: "auto", minWidth: 220, border: "1px solid #dfe2e1", padding: "7px 10px", fontSize: 12 }}
         />
       </div>
 
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginBottom: 12, fontSize: 11 }}>
+        <span className="eyebrow-muted">Show:</span>
+        {(isDiagnostic ? ["visible"] : ["LEADING", "IMPROVING", "WEAKENING", "LAGGING", "DATA_GAP"]).map((p) => {
+          const key = isDiagnostic ? `diag-all` : p;
+          const isHidden = hidden.has(p) || (isDiagnostic && hidden.has(`diag-${p}`));
+          void key;
+          if (isDiagnostic) return null;
+          return (
+            <label key={p} style={{ display: "inline-flex", gap: 4, alignItems: "center", border: "1px solid #dfe2e1", padding: "4px 8px", cursor: "pointer" }}>
+              <input type="checkbox" checked={!isHidden} onChange={() => togglePhase(p)} aria-label={`Toggle ${p}`} />
+              {p === "DATA_GAP" ? "Not available" : p.charAt(0) + p.slice(1).toLowerCase()}
+            </label>
+          );
+        })}
+        <span style={{ marginLeft: "auto", display: "inline-flex", gap: 6 }}>
+          <button type="button" onClick={() => setZoom((z) => Math.min(3, +(z + 0.5).toFixed(2)))} aria-label="Zoom in" style={{ border: "1px solid #dfe2e1", background: "#fff", padding: "4px 10px", cursor: "pointer" }}>+</button>
+          <button type="button" onClick={() => setZoom(1)} aria-label="Reset zoom" style={{ border: "1px solid #dfe2e1", background: "#fff", padding: "4px 10px", cursor: "pointer" }}>Reset</button>
+          <button type="button" onClick={() => frameRef.current?.requestFullscreen?.()} aria-label="Fullscreen rotation map" style={{ border: "1px solid #dfe2e1", background: "#fff", padding: "4px 10px", cursor: "pointer" }}>Fullscreen</button>
+        </span>
+      </div>
+
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginBottom: 12, fontSize: 11, color: "#686e73" }}>
+        <span className="eyebrow-muted">History:</span>
+        <button type="button" disabled title="Daily intervals require dated observation series with consistent snapshot/provider/price-basis/membership versions — not persisted in this bundle" style={{ border: "1px solid #dfe2e1", padding: "4px 10px", opacity: 0.5, cursor: "not-allowed" }}>Daily</button>
+        <button type="button" disabled title="Weekly sampling does not change the return formula into a weekly formula; weekly series not persisted in this bundle" style={{ border: "1px solid #dfe2e1", padding: "4px 10px", opacity: 0.5, cursor: "not-allowed" }}>Weekly</button>
+        <label style={{ display: "inline-flex", gap: 6, alignItems: "center", opacity: 0.6 }} title="Tails require real dated trails; trails are not drawn from repeated points, random coordinates, or forced phases">
+          Tail <input type="range" disabled value={0} aria-label="Rotation tail length (unavailable)" />
+        </label>
+        <span>Plotted {plottedRows.length} of {rows.length} {mode === "stocks" ? "tickers" : "groups"} · table and plot share the same data, method, and period.</span>
+      </div>
+
       <div className="rotation-note" style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center", padding: "9px 12px", border: "1px solid #dfe2e1", background: "#faf9f6", color: "#686e73", fontSize: 11, marginBottom: 12 }}>
         <strong style={{ color: "#202325" }}>{isDiagnostic ? "YTD signal" : "Current phase"}</strong>
         <span>{isDiagnostic
-          ? `Baseline unavailable; ${formatCountLabel(diagnosticPlottable.length, "group")} remain visible in the diagnostic map and table.`
+          ? `Baseline unavailable; ${formatCountLabel(diagnosticPlottable.length, mode === "stocks" ? "ticker" : "group")} remain visible in the diagnostic map and table.`
           : comparable ? "Comparable prior exists; this view still shows the current rotation classification." : "No compatible prior snapshot; no historical phase trail is shown."}</span>
         {taxonomyKind !== "SECTOR" && <span style={{ color: "#315d87" }}>Analyst-defined taxonomy</span>}
       </div>
 
-      <div className="rotation-map-frame" style={{ border: "1px solid #dfe2e1", background: "#fff", overflow: "hidden" }}>
-        <svg viewBox="0 0 1000 450" role="img" aria-label={isDiagnostic ? "Market rotation diagnostic map" : "Market rotation map"} style={{ display: "block", width: "100%", height: "auto" }}>
+      <div ref={frameRef} className="rotation-map-frame" style={{ border: "1px solid #dfe2e1", background: "#fff", overflow: "hidden" }}>
+        <svg viewBox={(() => { const w = 1000 / zoom; const h = 450 / zoom; return `${(1000 - w) / 2} ${(450 - h) / 2} ${w} ${h}`; })()} role="img" aria-label={isDiagnostic ? "Market rotation diagnostic map" : "Market rotation map"} style={{ display: "block", width: "100%", height: "auto" }}>
           <rect x={PLOT.left} y={PLOT.top} width={PLOT.width / 2} height={PLOT.height / 2} fill="#edf3f7" />
           <rect x={PLOT.left + PLOT.width / 2} y={PLOT.top} width={PLOT.width / 2} height={PLOT.height / 2} fill="#e8f3f0" />
           <rect x={PLOT.left} y={PLOT.top + PLOT.height / 2} width={PLOT.width / 2} height={PLOT.height / 2} fill="#f8eaea" />
@@ -276,11 +377,11 @@ export default function RotationView() {
                 aria-label={isDiagnostic
                   ? `${row.name}: YTD not available, diagnostic 20D excess ${formatPercent(row.excess20d)} and momentum ${formatPercent(row.relativeMomentum)}`
                   : `${row.name}: ${formatEnumLabel(row.phase)}, ${formatPercent(row.relativeStrength)} relative strength, ${formatPercent(row.relativeMomentum)} relative momentum`}
-                onClick={() => openGroup(navigate, row)}
+                onClick={() => openGroup(navigate, row, mode)}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" || event.key === " ") {
                     event.preventDefault();
-                    openGroup(navigate, row);
+                    openGroup(navigate, row, mode);
                   }
                 }}
                 style={{ cursor: "pointer" }}
@@ -318,20 +419,23 @@ export default function RotationView() {
         </div>
       ) : (
         <div className="rotation-summary-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 10, marginTop: 12 }}>
-          {QUADRANTS.map((quadrant) => (
+          {QUADRANTS.map((quadrant) => {
+            const count = plottedRows.filter((row) => row.phase === quadrant.phase).length;
+            return (
             <div key={quadrant.phase} style={{ padding: "11px 13px", border: `1px solid ${quadrant.color}44`, background: quadrant.fill, minWidth: 0 }}>
               <div style={{ color: quadrant.color, fontSize: 11, fontWeight: 600 }}>{formatEnumLabel(quadrant.phase)}</div>
-              <strong style={{ display: "block", marginTop: 6, fontSize: 21 }}>{rows.filter((row) => row.phase === quadrant.phase).length}</strong>
-              <div style={{ color: "#686e73", fontSize: 10 }}>{formatCountLabel(rows.filter((row) => row.phase === quadrant.phase).length, "group")}</div>
+              <strong style={{ display: "block", marginTop: 6, fontSize: 21 }}>{count}</strong>
+              <div style={{ color: "#686e73", fontSize: 10 }}>{formatCountLabel(count, mode === "stocks" ? "ticker" : "group")}</div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
       <section style={{ marginTop: 22 }} aria-labelledby="rotation-table-title">
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "baseline", flexWrap: "wrap", marginBottom: 9 }}>
           <h2 id="rotation-table-title" style={{ margin: 0, fontSize: 18, fontWeight: 500 }}>Rotation table</h2>
-          <span style={{ color: "#686e73", fontSize: 11 }}>Click a group to open its detail</span>
+          <span style={{ color: "#686e73", fontSize: 11 }}>Click a {mode === "stocks" ? "ticker" : "group"} to open its detail · {formatCountLabel(plottedRows.length, "plotted")} of {formatCountLabel(rows.length, "total")}</span>
         </div>
         <div className="table-scroll" style={{ border: "1px solid #dfe2e1" }}>
           <table style={{ width: "100%", minWidth: 920, borderCollapse: "collapse" }} aria-label="Rotation mapping table">
@@ -352,7 +456,7 @@ export default function RotationView() {
               {rows.map((row) => (
                 <tr key={`table-${row.id}`} style={{ borderBottom: "1px solid #ececec", background: row.phase === "DATA_GAP" ? "#fafaf8" : "#fff" }}>
                   <td style={{ padding: "9px 10px", fontSize: 12, fontWeight: 600, whiteSpace: "nowrap" }}>
-                    <button type="button" onClick={() => openGroup(navigate, row)} style={{ border: 0, borderBottom: "1px dotted #9aa19f", background: "none", padding: 0, color: "#202325", cursor: "pointer", fontWeight: 600 }}>{row.name}</button>
+                    <button type="button" onClick={() => openGroup(navigate, row, mode)} style={{ border: 0, borderBottom: "1px dotted #9aa19f", background: "none", padding: 0, color: "#202325", cursor: "pointer", fontWeight: 600 }}>{row.name}</button>
                   </td>
                   <td style={{ padding: "9px 10px", fontFamily: "Geist Mono, monospace", fontSize: 11 }}>{formatEnumLabel(row.phase)}</td>
                   <td style={{ padding: "9px 10px", textAlign: "right", fontFamily: "Geist Mono, monospace", fontSize: 11, color: phaseColor(row.phase) }}>{formatPercent(row.relativeStrength)}</td>
@@ -370,7 +474,7 @@ export default function RotationView() {
       <div className="rotation-accessible-list" style={{ marginTop: 18, display: "grid", gap: 7 }} aria-label={`${currentTaxonomyLabel} rotation groups`}>
         <div className="eyebrow-muted">Accessible group list</div>
         {rows.map((row) => (
-          <button key={`list-${row.id}`} type="button" onClick={() => openGroup(navigate, row)} style={{ display: "flex", justifyContent: "space-between", gap: 12, minWidth: 0, padding: "8px 10px", border: "1px solid #dfe2e1", background: row.phase === "DATA_GAP" ? "#f4f4f1" : "#fff", color: "#202325", textAlign: "left", cursor: "pointer" }}>
+          <button key={`list-${row.id}`} type="button" onClick={() => openGroup(navigate, row, mode)} style={{ display: "flex", justifyContent: "space-between", gap: 12, minWidth: 0, padding: "8px 10px", border: "1px solid #dfe2e1", background: row.phase === "DATA_GAP" ? "#f4f4f1" : "#fff", color: "#202325", textAlign: "left", cursor: "pointer" }}>
             <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: 12 }}>{row.name}</span>
             <span style={{ flexShrink: 0, fontFamily: "Geist Mono, monospace", fontSize: 10, color: phaseColor(row.phase) }}>{formatEnumLabel(row.phase)} · {formatCountLabel(row.constituents, "ticker")}</span>
           </button>
