@@ -682,6 +682,12 @@ export interface TaxonomyMembershipData {
   confidence: number;
   source: string;
   source_as_of?: string | null;
+  // Relationship subtype (control / subsidiary / affiliate / cross-shareholding /
+  // founder-director / ecosystem) when a source-backed value is stored. Optional:
+  // absent means unresolved, never inferred from a job title or similar name.
+  relationship?: string | null;
+  relationship_as_of?: string | null;
+  relationship_source?: string | null;
 }
 
 export interface TaxonomyGroupAggregate {

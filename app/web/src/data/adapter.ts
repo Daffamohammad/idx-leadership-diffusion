@@ -572,6 +572,15 @@ function normalizeTaxonomyView(value: unknown): TaxonomyView | null {
               : 1,
           source: typeof item.source === "string" ? item.source : "",
           source_as_of: typeof item.source_as_of === "string" ? item.source_as_of : null,
+          relationship: typeof item.relationship === "string" && item.relationship.trim()
+            ? item.relationship
+            : null,
+          relationship_as_of: typeof item.relationship_as_of === "string"
+            ? item.relationship_as_of
+            : null,
+          relationship_source: typeof item.relationship_source === "string" && item.relationship_source.trim()
+            ? item.relationship_source
+            : null,
         }];
       })
     : [];

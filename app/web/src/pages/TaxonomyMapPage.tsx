@@ -102,7 +102,31 @@ export default function TaxonomyMapPage() {
             </span>
           </div>
         </div>
-        <div style={{ display: "flex", gap: 12 }}>
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+          <Link
+            to={taxonomyKind === "KONGLO" ? "/konglo" : "/themes"}
+            style={{
+              padding: "10px 14px",
+              border: "1px solid #dfe2e1",
+              color: "#202325",
+              textDecoration: "none",
+              fontSize: 12,
+            }}
+          >
+            {taxonomyKind === "KONGLO" ? "Konglo" : "Themes"} catalog
+          </Link>
+          <Link
+            to={`/map?taxonomy=${taxonomyKind}&mode=groups`}
+            style={{
+              padding: "10px 14px",
+              border: "1px solid #dfe2e1",
+              color: "#202325",
+              textDecoration: "none",
+              fontSize: 12,
+            }}
+          >
+            Rotation
+          </Link>
           <Link
             to={taxonomyKind === "KONGLO" ? "/maps/themes" : "/maps/konglo"}
             style={{

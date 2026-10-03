@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 
 import { useSnapshot } from "../data/SnapshotProvider";
 import type {
@@ -9,7 +9,7 @@ import type {
   SectorData,
   TaxonomyGroupData,
 } from "../data/adapter";
-import type { TaxonomyKind } from "../data/snapshot";
+import type { TaxonomyKind, TaxonomyMembershipData } from "../data/snapshot";
 import { DataStatusChip, LeadershipChip, DiffusionChip } from "../components/StatusChips";
 import { EmptyState } from "../components/EmptyState";
 import {
@@ -29,10 +29,11 @@ import {
   ReferenceLine,
 } from "recharts";
 import { leadershipColor } from "../components/StatusChips";
-import PriceChart from "../components/PriceChart";
+import PriceChart, { CHART_PERIODS, type ChartRange } from "../components/PriceChart";
 import { formatCountLabel, formatDateLabel, formatEnumLabel, formatPercent, formatSnapshotId } from "../data/format";
 import { EvidenceBadge } from "../components/EvidenceModel";
 import { WindowCapNotice } from "../components/SnapshotNotices";
+import { catalogHref, rememberCatalogFocus } from "../data/catalogFocus";
 
 const card: React.CSSProperties = {
   background: "#ffffff",
@@ -305,6 +306,455 @@ function normalizeTaxonomyKind(value: string | null): TaxonomyKind | null {
     : null;
 }
 
+function CatalogBackLink({ taxonomyKind, groupId, label }: {
+  taxonomyKind: TaxonomyKind;
+  groupId: string;
+  label: string;
+}) {
+  return (
+    <Link
+      to={catalogHref(taxonomyKind)}
+      onClick={() => rememberCatalogFocus(groupId)}
+      style={{ color: "#686e73", fontSize: 12, textDecoration: "none" }}
+    >
+      ← Back to {label}
+    </Link>
+  );
+}
+
+type MemberSortKey = "ticker" | "membership" | "confidence" | "sourceDate";
+
+// A relationship subtype is only shown when the snapshot stored one. Absent
+// evidence stays "Unresolved" — never inferred from a job title or name.
+function relationshipLabel(member: TaxonomyMembershipData): string {
+  return member.relationship?.trim() ? formatEnumLabel(member.relationship) : "Unresolved";
+}
+
+const th: React.CSSProperties = {
+  padding: "10px 12px",
+  fontFamily: "Geist Mono, monospace",
+  fontSize: 10,
+  fontWeight: 400,
+  letterSpacing: "0.06em",
+  textTransform: "uppercase",
+  color: "#666666",
+  textAlign: "left",
+  background: "#fafafa",
+  whiteSpace: "nowrap",
+};
+
+const thRight: React.CSSProperties = { ...th, textAlign: "right" };
+
+const td: React.CSSProperties = { padding: "10px 12px", fontSize: 12, color: "#333333" };
+const tdMono: React.CSSProperties = { ...td, fontFamily: "Geist Mono, monospace", fontVariantNumeric: "tabular-nums" };
+const tdRight: React.CSSProperties = { ...tdMono, textAlign: "right" };
+
+const sortButtonStyle: React.CSSProperties = {
+  background: "none",
+  border: "none",
+  padding: 0,
+  font: "inherit",
+  letterSpacing: "inherit",
+  textTransform: "inherit",
+  color: "inherit",
+  cursor: "pointer",
+};
+
+function MembershipTable({ members, compact }: { members: TaxonomyMembershipData[]; compact?: boolean }) {
+  const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<MemberSortKey>("ticker");
+  const [asc, setAsc] = useState(true);
+
+  const rows = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    const filtered = needle
+      ? members.filter((m) =>
+          m.ticker.toLowerCase().includes(needle) ||
+          m.taxonomy_group_name.toLowerCase().includes(needle) ||
+          relationshipLabel(m).toLowerCase().includes(needle),
+        )
+      : members;
+    const direction = asc ? 1 : -1;
+    return [...filtered].sort((a, b) => {
+      switch (sort) {
+        case "membership":
+          return direction * (a.membership_type.localeCompare(b.membership_type) || a.ticker.localeCompare(b.ticker));
+        case "confidence":
+          return direction * (a.confidence - b.confidence) || a.ticker.localeCompare(b.ticker);
+        case "sourceDate":
+          return direction * String(a.source_as_of ?? "").localeCompare(String(b.source_as_of ?? "")) || a.ticker.localeCompare(b.ticker);
+        default:
+          return direction * a.ticker.localeCompare(b.ticker);
+      }
+    });
+  }, [members, query, sort, asc]);
+
+  const toggleSort = (key: MemberSortKey) => {
+    if (sort === key) setAsc((v) => !v);
+    else {
+      setSort(key);
+      setAsc(true);
+    }
+  };
+
+  const arrow = (key: MemberSortKey) => (sort === key ? (asc ? " ↑" : " ↓") : "");
+
+  if (members.length === 0) {
+    return (
+      <EmptyState
+        label="NO MEMBERSHIPS"
+        title="Membership list unavailable"
+        body="The aggregate is preserved without inventing constituent records."
+        height={140}
+      />
+    );
+  }
+
+  return (
+    <div>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search ticker, group or relationship…"
+          aria-label="Search memberships by ticker, group or relationship"
+          style={{
+            padding: "7px 10px",
+            border: "1px solid #dfe2e1",
+            borderRadius: 4,
+            fontFamily: "Geist Mono, monospace",
+            fontSize: 12,
+            background: "#fff",
+            minWidth: 220,
+            boxSizing: "border-box",
+          }}
+        />
+        <span className="eyebrow-muted" aria-live="polite">
+          {rows.length} of {members.length} memberships
+        </span>
+      </div>
+
+      <div className="table-scroll" style={card}>
+        <table style={{ width: "100%", minWidth: compact ? 720 : 860, borderCollapse: "collapse" }}>
+          <thead>
+            <tr style={{ borderBottom: "1px solid #ebebeb" }}>
+              <th style={th}>
+                <button type="button" style={sortButtonStyle} onClick={() => toggleSort("ticker")}>
+                  Ticker{arrow("ticker")}
+                </button>
+              </th>
+              <th style={thRight}>
+                <button type="button" style={sortButtonStyle} onClick={() => toggleSort("membership")}>
+                  Membership{arrow("membership")}
+                </button>
+              </th>
+              <th style={thRight}>Relationship</th>
+              <th style={thRight}>
+                <button type="button" style={sortButtonStyle} onClick={() => toggleSort("confidence")}>
+                  Confidence{arrow("confidence")}
+                </button>
+              </th>
+              <th style={th}>Source</th>
+              <th style={thRight}>
+                <button type="button" style={sortButtonStyle} onClick={() => toggleSort("sourceDate")}>
+                  Source date{arrow("sourceDate")}
+                </button>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((member, index) => (
+              <tr
+                key={`${member.ticker}-${member.membership_type}-${member.taxonomy_group_id}`}
+                style={{
+                  borderBottom: index < rows.length - 1 ? "1px solid #ebebeb" : "none",
+                  opacity: member.membership_type === "EXCLUDED" ? 0.6 : 1,
+                }}
+              >
+                <td style={{ ...tdMono, fontWeight: 600, color: "#171717" }}>
+                  <Link
+                    to={`/ticker/${encodeURIComponent(member.ticker)}`}
+                    style={{ color: "#171717", textDecoration: "underline" }}
+                  >
+                    {member.ticker}
+                  </Link>
+                </td>
+                <td style={{ ...td, textAlign: "right" }}>{formatEnumLabel(member.membership_type)}</td>
+                <td style={{ ...td, textAlign: "right", color: member.relationship ? "#333333" : "#8f8f8f" }}>
+                  {relationshipLabel(member)}
+                </td>
+                <td style={tdRight}>{Math.round(member.confidence * 100)}%</td>
+                <td style={{ ...td, maxWidth: 360 }}>
+                  {member.source?.startsWith("http") ? (
+                    <a href={member.source} target="_blank" rel="noreferrer" style={{ color: "#245b76" }}>
+                      Official source
+                    </a>
+                  ) : (
+                    member.source || "—"
+                  )}
+                </td>
+                <td style={{ ...tdRight, color: "#666" }}>{formatDateLabel(member.source_as_of)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// Leaders and laggards use the primary period where it exists (YTD excess)
+// and fall back to the 20D diagnostic only when every YTD value is missing.
+function LeadersLaggards({ constituents }: { constituents: ConstituentData[] }) {
+  const useYtd = constituents.length > 0 && constituents.some((c) => c.excessYtd !== null);
+  const scored = constituents
+    .map((c) => ({ c, score: useYtd ? c.excessYtd : c.excess20d }))
+    .filter((row): row is { c: ConstituentData; score: number } => row.score !== null && Number.isFinite(row.score))
+    .sort((a, b) => b.score - a.score);
+
+  if (scored.length === 0) {
+    return (
+      <EmptyState
+        label="NO PERIOD DATA"
+        title="Leaders and laggards cannot be ranked"
+        body="Neither YTD nor 20D excess is available for enough members on this snapshot."
+        height={120}
+      />
+    );
+  }
+
+  const leaders = scored.slice(0, 5);
+  const laggards = scored.slice(-5).reverse();
+  const periodLabel = useYtd ? "YTD excess vs IHSG" : "20D excess vs IHSG (YTD unavailable)";
+
+  const column = (title: string, rows: typeof leaders, tone: "up" | "down") => (
+    <div style={{ flex: 1, minWidth: 240 }}>
+      <div className="eyebrow-muted" style={{ marginBottom: 8 }}>{title}</div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        {rows.map(({ c, score }) => (
+          <div
+            key={c.ticker}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 12,
+              padding: "7px 10px",
+              borderRadius: 4,
+              background: "#fafafa",
+              border: "1px solid #efefef",
+            }}
+          >
+            <span style={{ minWidth: 0 }}>
+              <Link
+                to={`/ticker/${encodeURIComponent(c.ticker)}`}
+                style={{ fontFamily: "Geist Mono, monospace", fontSize: 12, fontWeight: 600, color: "#171717" }}
+              >
+                {c.ticker}
+              </Link>
+              <span style={{ fontSize: 11, color: "#8f8f8f", marginLeft: 8 }}>
+                {c.name || "—"}
+              </span>
+            </span>
+            <span
+              style={{
+                fontFamily: "Geist Mono, monospace",
+                fontSize: 12,
+                fontVariantNumeric: "tabular-nums",
+                color: tone === "up" ? "#1a6e62" : "#8f2424",
+              }}
+            >
+              {score >= 0 ? "+" : ""}{score.toFixed(1)}%
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  return (
+    <div>
+      <div className="eyebrow-muted" style={{ marginBottom: 10 }}>
+        Ranked on {periodLabel} · {scored.length} of {constituents.length} members with a value
+      </div>
+      <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
+        {column("Leaders", leaders, "up")}
+        {column("Laggards", laggards, "down")}
+      </div>
+    </div>
+  );
+}
+
+// One comparison model for both detail paths (sector and taxonomy groups) so
+// the selector, labels and cell formatting cannot drift between views.
+interface ComparableGroup {
+  id: string;
+  name: string;
+  leadership: string;
+  diffusion: string;
+  dataQuality: string;
+  excessYtd: number | null;
+  returnYtd: number | null;
+  excess20d: number | null;
+  excess60d: number | null;
+  breadth: number | null;
+  breadthDelta: number | null;
+  concentration: number | null;
+  eligible: number;
+  constituents: number;
+  ytdEligible: number;
+}
+
+function fromSector(sector: SectorData): ComparableGroup {
+  return {
+    id: sector.id,
+    name: sector.name,
+    leadership: sector.leadership,
+    diffusion: sector.diffusion,
+    dataQuality: sector.dataQuality ?? "DATA_GAP",
+    excessYtd: sector.excessYtd,
+    returnYtd: sector.returnYtd,
+    excess20d: sector.excess20d,
+    excess60d: sector.excess60d,
+    breadth: sector.breadth,
+    breadthDelta:
+      sector.breadth !== null && sector.prevBreadth !== undefined
+        ? sector.breadth - sector.prevBreadth
+        : null,
+    concentration: sector.concentration,
+    eligible: sector.eligibleConstituents,
+    constituents: sector.constituents,
+    ytdEligible: sector.ytdEligible,
+  };
+}
+
+function fromTaxonomy(group: TaxonomyGroupData): ComparableGroup {
+  return {
+    id: group.id,
+    name: group.name,
+    leadership: group.leadership,
+    diffusion: group.diffusion,
+    dataQuality: group.dataQuality,
+    excessYtd: group.excessYtd,
+    returnYtd: group.returnYtd,
+    excess20d: group.excess20d,
+    excess60d: group.excess60d,
+    breadth: group.breadth,
+    breadthDelta: group.breadthDelta,
+    concentration: group.concentration,
+    eligible: group.eligible,
+    constituents: group.constituents,
+    ytdEligible: group.ytdEligible,
+  };
+}
+
+function compareValue(value: number | null | undefined, suffix = "%"): string {
+  if (value === null || value === undefined || !Number.isFinite(value)) return "—";
+  if (suffix === "%") return `${value >= 0 ? "+" : ""}${value.toFixed(1)}%`;
+  return `${value >= 0 ? "+" : ""}${value.toFixed(1)}${suffix}`;
+}
+
+function peerCoverage(group: ComparableGroup): string {
+  return group.constituents > 0 ? `${group.ytdEligible}/${group.constituents}` : "—";
+}
+
+function ComparisonPanel({ current, peers }: {
+  current: ComparableGroup;
+  peers: ComparableGroup[];
+}) {
+  const [params, setParams] = useSearchParams();
+  const compareId = params.get("compare");
+  const peer = compareId ? peers.find((candidate) => candidate.id === compareId) : undefined;
+
+  const updateCompare = (value: string) => {
+    const next = new URLSearchParams(params);
+    if (value) next.set("compare", value);
+    else next.delete("compare");
+    setParams(next, { replace: true });
+  };
+
+  const rows: Array<{ label: string; left: string; right: string }> = [
+    { label: "YTD excess", left: compareValue(current.excessYtd), right: peer ? compareValue(peer.excessYtd) : "—" },
+    { label: "YTD group return", left: compareValue(current.returnYtd), right: peer ? compareValue(peer.returnYtd) : "—" },
+    { label: "20D excess", left: compareValue(current.excess20d), right: peer ? compareValue(peer.excess20d) : "—" },
+    { label: "60D excess", left: compareValue(current.excess60d), right: peer ? compareValue(peer.excess60d) : "—" },
+    { label: "Breadth", left: compareValue(current.breadth), right: peer ? compareValue(peer.breadth) : "—" },
+    { label: "Δ Breadth", left: compareValue(current.breadthDelta), right: peer ? compareValue(peer.breadthDelta) : "—" },
+    { label: "Top-3 concentration", left: compareValue(current.concentration), right: peer ? compareValue(peer.concentration) : "—" },
+    { label: "Eligible / total (20D)", left: `${current.eligible}/${current.constituents}`, right: peer ? `${peer.eligible}/${peer.constituents}` : "—" },
+    { label: "YTD eligible / total", left: peerCoverage(current), right: peer ? peerCoverage(peer) : "—" },
+    { label: "Leadership", left: formatEnumLabel(current.leadership), right: peer ? formatEnumLabel(peer.leadership) : "—" },
+    { label: "Diffusion", left: formatEnumLabel(current.diffusion), right: peer ? formatEnumLabel(peer.diffusion) : "—" },
+    { label: "Data quality", left: formatEnumLabel(current.dataQuality), right: peer ? formatEnumLabel(peer.dataQuality) : "—" },
+  ];
+
+  return (
+    <div style={{ ...card, padding: "16px 18px", marginBottom: 12 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", marginBottom: 12 }}>
+        <label htmlFor="compare-group" style={{ fontSize: 13, fontWeight: 500, color: "#171717" }}>
+          Compare with
+        </label>
+        <select
+          id="compare-group"
+          aria-label="Comparison group"
+          value={peer?.id ?? ""}
+          onChange={(e) => updateCompare(e.target.value)}
+          style={{
+            padding: "7px 11px",
+            fontSize: 12,
+            borderRadius: 4,
+            border: "1px solid #dfe2e1",
+            background: "#fff",
+            color: "#171717",
+            fontFamily: "Geist, sans-serif",
+            cursor: "pointer",
+            maxWidth: 320,
+          }}
+        >
+          <option value="">No peer — this group only</option>
+          {peers.map((candidate) => (
+            <option key={candidate.id} value={candidate.id}>
+              {candidate.name}
+            </option>
+          ))}
+        </select>
+        <span className="eyebrow-muted">{peers.length} peer groups available</span>
+      </div>
+
+      {peer ? (
+        <div className="table-scroll">
+          <table style={{ width: "100%", minWidth: 460, borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ borderBottom: "1px solid #ebebeb" }}>
+                <th style={th}>Metric</th>
+                <th style={thRight}>{current.name}</th>
+                <th style={thRight}>{peer.name}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row, index) => (
+                <tr key={row.label} style={{ borderBottom: index < rows.length - 1 ? "1px solid #ebebeb" : "none" }}>
+                  <td style={td}>{row.label}</td>
+                  <td style={{ ...tdRight, color: "#171717" }}>{row.left}</td>
+                  <td style={{ ...tdRight, color: "#4d4d4d" }}>{row.right}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p style={{ margin: 0, fontSize: 12, color: "#686e73", lineHeight: 1.6 }}>
+          Pick a peer group to place its stored aggregates beside this one. Values are shown
+          exactly as the snapshot records them — no difference or percentage change is derived
+          between two groups, because they do not share a documented weighting history. IHSG
+          appears as the shared benchmark on each chart instead of as a third column.
+        </p>
+      )}
+    </div>
+  );
+}
+
 function TaxonomyGroupDetail({
   group,
   data,
@@ -312,7 +762,7 @@ function TaxonomyGroupDetail({
   group: TaxonomyGroupData;
   data: AdaptedSnapshot;
 }) {
-  const catalogPath = `/groups?taxonomy=${group.taxonomyKind}`;
+  const [params, setParams] = useSearchParams();
   const members = group.memberships;
   const quantitativeMembers = members.filter((member) => member.membership_type !== "EXCLUDED");
   const groupKey = `${group.taxonomyId}::${group.id}`;
@@ -327,13 +777,52 @@ function TaxonomyGroupDetail({
     ? `${group.ytdEligible}/${group.constituents}`
     : "—";
 
+  // Shareable URL state: ?period=1M|3M|6M|1Y|ALL. The comparison selector keeps
+  // its own ?compare=<groupId> in ComparisonPanel.
+  const peers = useMemo(
+    () =>
+      Object.values(data.taxonomyGroups)
+        .filter((candidate) => candidate.taxonomyKind === group.taxonomyKind && candidate.id !== group.id)
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    [data.taxonomyGroups, group.taxonomyKind, group.id],
+  );
+  const periodParam = (params.get("period") ?? "").toUpperCase();
+  const period: ChartRange = (CHART_PERIODS as string[]).includes(periodParam)
+    ? (periodParam as ChartRange)
+    : "ALL";
+
+  const updateParam = (key: string, value: string | null) => {
+    const next = new URLSearchParams(params);
+    if (value === null || value === "") next.delete(key);
+    else next.set(key, value);
+    setParams(next, { replace: true });
+  };
+
+  const catalogLabel =
+    group.taxonomyKind === "KONGLO" ? "Konglo catalog" : group.taxonomyKind === "THEMES" ? "Themes catalog" : "All Groups catalog";
+
+  const coverageNotes = [
+    group.constituents > 0
+      ? `${group.eligible} of ${group.constituents} members have the 20D history required for the diagnostic metric (${group.coveragePct.toFixed(0)}% coverage).`
+      : "No member counts are recorded for this group in the current snapshot.",
+    `${ytdCoverage} members carry YTD history${group.ytdStartDate ? `, measured from ${formatDateLabel(group.ytdStartDate)} against IHSG on the same dates` : "; the YTD baseline is unavailable, so YTD is a rotation diagnostic only"}.`,
+    group.offScale
+      ? "This group is off-scale — its value sits outside the standard map axis."
+      : null,
+    constituents.length === 0
+      ? "Constituent rows are not present in this snapshot; membership definitions are preserved and no synthetic rows are shown."
+      : null,
+    pricePoints.length === 0
+      ? "No persisted equal-weight price history for this group, so the benchmark chart stays hidden rather than backfilled."
+      : null,
+    "Membership is an analyst-defined research lens, not an official IDX classification, and groups overlap so their members are never summed into a market share.",
+  ].filter((note): note is string => note !== null);
+
   return (
     <div className="taxonomy-detail-page content-shell" style={{ padding: "36px var(--page-gutter)", maxWidth: "var(--content-max)" }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 20, marginBottom: 24, flexWrap: "wrap" }}>
         <div>
-          <Link to={catalogPath} style={{ color: "#686e73", fontSize: 12, textDecoration: "none" }} onClick={() => { sessionStorage.setItem("catalog-focus", group.id); }}>
-            ← Back to {group.taxonomyKind === "KONGLO" ? "Konglo" : "Themes"} catalog
-          </Link>
+          <CatalogBackLink taxonomyKind={group.taxonomyKind} groupId={group.id} label={catalogLabel} />
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginTop: 16, marginBottom: 8 }}>
             <div className="eyebrow-muted">
               {group.taxonomyName} · group detail
@@ -343,13 +832,40 @@ function TaxonomyGroupDetail({
           <h1 style={{ margin: 0, fontSize: 30, fontWeight: 400, letterSpacing: "-1.5px" }}>
             {group.name}
           </h1>
-          <p style={{ margin: "8px 0 0", color: "#686e73", fontSize: 13, lineHeight: 1.5 }}>
-            Aggregate metrics use the current snapshot. Membership is an analyst-defined research lens and is not an official IDX classification.
+          <div
+            style={{
+              marginTop: 8,
+              fontFamily: "Geist Mono, monospace",
+              fontSize: 11,
+              letterSpacing: "0.06em",
+              textTransform: "uppercase",
+              color: "#8f8f8f",
+            }}
+          >
+            Code · {group.id} · {formatSnapshotId(data.payload.snapshot_id, data.payload.as_of)}
+          </div>
+          <p style={{ margin: "8px 0 0", color: "#686e73", fontSize: 13, lineHeight: 1.5, maxWidth: 640 }}>
+            Aggregate metrics use the current snapshot. Membership is an analyst-defined research
+            lens and is not an official IDX classification.
           </p>
         </div>
-        <Link to="/overview" style={{ padding: "9px 13px", border: "1px solid #202325", color: "#202325", textDecoration: "none", fontSize: 12 }}>
-          Overview
-        </Link>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+          <Link
+            to={`/map?taxonomy=${group.taxonomyKind}&mode=groups`}
+            style={{ padding: "9px 13px", border: "1px solid #dfe2e1", color: "#202325", textDecoration: "none", fontSize: 12, borderRadius: 4 }}
+          >
+            Rotation →
+          </Link>
+          <Link
+            to={`/groups?taxonomy=${group.taxonomyKind}&view=table`}
+            style={{ padding: "9px 13px", border: "1px solid #dfe2e1", color: "#202325", textDecoration: "none", fontSize: 12, borderRadius: 4 }}
+          >
+            Table →
+          </Link>
+          <Link to="/overview" style={{ padding: "9px 13px", border: "1px solid #202325", color: "#202325", textDecoration: "none", fontSize: 12 }}>
+            Overview
+          </Link>
+        </div>
       </div>
 
       <div style={{ ...card, padding: "18px 22px", marginBottom: 20 }}>
@@ -362,9 +878,15 @@ function TaxonomyGroupDetail({
           <span style={{ fontFamily: "Geist Mono, monospace", fontSize: 11, color: "#666" }}>
             {formatCountLabel(group.constituents, "ticker")} · {group.eligible} with 20D history
           </span>
+          {group.sampleForeignFlowIdr !== null && group.sampleForeignFlowDirection && (
+            <span style={{ fontFamily: "Geist Mono, monospace", fontSize: 11, color: "#7a5010" }}>
+              Flow sample {formatEnumLabel(group.sampleForeignFlowDirection)}
+            </span>
+          )}
         </div>
         <div className="explorer-metrics" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginTop: 16 }}>
-          <MetricCard label="YTD excess" value={metric(group.excessYtd)} sub={group.ytdStartDate ? `from ${formatDateLabel(group.ytdStartDate)} vs IHSG` : "baseline unavailable"} />          <MetricCard label="YTD group return" value={metric(group.returnYtd)} sub={`${ytdCoverage} with YTD history`} />
+          <MetricCard label="YTD excess" value={metric(group.excessYtd)} sub={group.ytdStartDate ? `from ${formatDateLabel(group.ytdStartDate)} vs IHSG` : "baseline unavailable"} />
+          <MetricCard label="YTD group return" value={metric(group.returnYtd)} sub={`${ytdCoverage} with YTD history`} />
           <MetricCard label="IHSG YTD" value={metric(group.benchmarkYtd)} sub="same dates and price basis" />
           <MetricCard label="20D excess" value={metric(group.excess20d)} sub="diagnostic vs IHSG" />
           <MetricCard label="Breadth" value={metric(group.breadth, "%")} sub={group.breadthDelta === null ? "change unavailable" : `${metric(group.breadthDelta)} vs prior`} />
@@ -374,6 +896,15 @@ function TaxonomyGroupDetail({
 
       <div style={{ marginBottom: 20 }}>
         <WindowCapNotice data={data} compact />
+      </div>
+
+      <SectionHead label="Coverage notes" />
+      <div style={{ ...card, padding: "16px 18px" }}>
+        <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: "#4d4d4d", lineHeight: 1.7 }}>
+          {coverageNotes.map((note) => (
+            <li key={note}>{note}</li>
+          ))}
+        </ul>
       </div>
 
       <SectionHead label="Performance and membership" />
@@ -392,6 +923,13 @@ function TaxonomyGroupDetail({
       </div>
 
       <div style={{ ...card, padding: "16px 18px", marginBottom: 12 }}>
+        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 12 }}>
+          <div style={{ fontSize: 13, fontWeight: 500, color: "#171717" }}>Leaders and laggards</div>
+        </div>
+        <LeadersLaggards constituents={constituents} />
+      </div>
+
+      <div style={{ ...card, padding: "16px 18px", marginBottom: 12 }}>
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 8 }}>
           <div style={{ fontSize: 13, fontWeight: 500, color: "#171717" }}>Contribution and price context</div>
           <span className="eyebrow-muted">Persisted price history only</span>
@@ -399,6 +937,10 @@ function TaxonomyGroupDetail({
         {constituents.length > 0 && <ContribBars constituents={constituents} />}
         {pricePoints.length > 0 ? (
           <div style={{ marginTop: 16 }}>
+            <div className="eyebrow-muted" style={{ marginBottom: 6 }}>
+              Period tabs live on the chart. Unavailable periods stay visible with the reason
+              they are disabled; the choice is kept in the URL so the view is shareable.
+            </div>
             <PriceChart
               groupName={group.name}
               points={pricePoints.map((point) => ({ date: point.date, value: point.value }))}
@@ -411,6 +953,8 @@ function TaxonomyGroupDetail({
               providerMode={manifestEntry?.provider_mode}
               priceBasis={manifestEntry?.price_basis}
               dataStatus={data.payload.quality?.status}
+              initialRange={period}
+              onRangeChange={(next) => updateParam("period", next === "ALL" ? null : next)}
               height={260}
             />
           </div>
@@ -421,38 +965,18 @@ function TaxonomyGroupDetail({
         )}
       </div>
 
+      <SectionHead label="Comparison" />
+      <ComparisonPanel current={fromTaxonomy(group)} peers={peers.map(fromTaxonomy)} />
+
       <SectionHead label="Membership evidence" />
-      <div style={{ ...card, overflowX: "auto" }}>
-        {members.length > 0 ? (
-          <table style={{ width: "100%", minWidth: 720, borderCollapse: "collapse" }}>
-            <thead>
-              <tr style={{ borderBottom: "1px solid #ebebeb" }}>
-                {["Ticker", "Membership", "Confidence", "Source", "Source date"].map((label) => (
-                  <th key={label} style={{ padding: "10px 12px", textAlign: label === "Ticker" || label === "Source" ? "left" : "right", fontFamily: "Geist Mono, monospace", fontSize: 10, fontWeight: 400, color: "#666", textTransform: "uppercase", whiteSpace: "nowrap" }}>{label}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {members.map((member, index) => (
-                <tr key={`${member.ticker}-${member.membership_type}`} style={{ borderBottom: index < members.length - 1 ? "1px solid #ebebeb" : "none", opacity: member.membership_type === "EXCLUDED" ? 0.6 : 1 }}>
-                  <td style={{ padding: "10px 12px", fontFamily: "Geist Mono, monospace", fontSize: 12, fontWeight: 600 }}>
-                    <Link to={`/ticker/${encodeURIComponent(member.ticker)}`} style={{ color: "#171717" }}>{member.ticker}</Link>
-                  </td>
-                  <td style={{ padding: "10px 12px", textAlign: "right", fontSize: 12 }}>{formatEnumLabel(member.membership_type)}</td>
-                  <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "Geist Mono, monospace", fontSize: 12 }}>{Math.round(member.confidence * 100)}%</td>
-                  <td style={{ padding: "10px 12px", fontSize: 12, maxWidth: 360 }}>
-                    {member.source?.startsWith("http") ? <a href={member.source} target="_blank" rel="noreferrer">Official source</a> : member.source || "—"}
-                  </td>
-                  <td style={{ padding: "10px 12px", textAlign: "right", fontFamily: "Geist Mono, monospace", fontSize: 11, color: "#666", whiteSpace: "nowrap" }}>{formatDateLabel(member.source_as_of)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <div style={{ padding: 22, color: "#686e73", fontSize: 13 }}>
-            Membership list unavailable in this snapshot. The aggregate is preserved without inventing constituent records.
-          </div>
-        )}
+      <div style={{ ...card, padding: "16px 18px" }}>
+        <MembershipTable members={members} />
+        <div style={{ marginTop: 12, fontSize: 11, color: "#8f8f8f", lineHeight: 1.55 }}>
+          Relationship subtype (control / subsidiary / affiliate / cross-shareholding /
+          founder-director / ecosystem) is shown only where a source-backed value is stored;
+          otherwise the row stays <strong>Unresolved</strong>. Confidence and source date are
+          reproduced exactly as recorded and are never upgraded to fit a narrative.
+        </div>
       </div>
 
       <div style={{ marginTop: 12, color: "#686e73", fontSize: 11, lineHeight: 1.5 }}>
@@ -540,6 +1064,7 @@ function ResearchEvidencePanel({
 export default function GroupExplorer() {
   const { data } = useSnapshot();
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [selected, setSelected] = useState<string>("");
   const sectors = data?.sectors ?? [];
   const constituentsByGroup = data?.constituentsByGroup ?? {};
@@ -599,9 +1124,7 @@ export default function GroupExplorer() {
     <div className="content-shell" style={{ padding: "36px var(--page-gutter)", maxWidth: "var(--content-max)" }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 24 }}>
         <div>
-          <Link to="/groups?taxonomy=SECTOR" style={{ color: "#686e73", fontSize: 12, textDecoration: "none" }}>
-            ← Back to All Groups catalog
-          </Link>
+          <CatalogBackLink taxonomyKind="SECTOR" groupId={sector.id} label="All Groups catalog" />
           <div className="eyebrow-muted" style={{ marginBottom: 8, marginTop: 12 }}>
             IDX → Group → {sector.name} · {sector.id} · {sector.eligibleConstituents}/{sector.constituents} eligible
           </div>
@@ -621,7 +1144,13 @@ export default function GroupExplorer() {
         <select
           aria-label="Select group"
           value={sector.id}
-          onChange={(e) => setSelected(e.target.value)}
+          onChange={(e) => {
+            setSelected(e.target.value);
+            const next = new URLSearchParams(searchParams);
+            next.set("taxonomy", "SECTOR");
+            next.set("group", e.target.value);
+            setSearchParams(next, { replace: true });
+          }}
           style={{
             padding: "8px 14px",
             fontSize: 13,
@@ -847,6 +1376,43 @@ export default function GroupExplorer() {
           height={140}
         />
       )}
+
+      <SectionHead label="Coverage notes" />
+      <div style={{ ...card, padding: "16px 18px", marginBottom: 12 }}>
+        <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: "#4d4d4d", lineHeight: 1.7 }}>
+          <li>
+            {sector.eligibleConstituents} of {sector.constituents} members carry the 20D history
+            required for the diagnostic metric.
+          </li>
+          <li>
+            {sector.ytdEligible} of {sector.constituents} members carry YTD history
+            {sector.ytdStartDate
+              ? `, measured from ${formatDateLabel(sector.ytdStartDate)} against IHSG on the same dates`
+              : "; the YTD baseline is unavailable, so YTD stays a rotation diagnostic only"}
+            .
+          </li>
+          {sector.missingConstituents > 0 && (
+            <li style={{ color: "#7a5010" }}>
+              {sector.missingConstituents} member{sector.missingConstituents !== 1 ? "s are" : " is"} missing from the 20D metric.
+            </li>
+          )}
+          <li>
+            Sectors are mutually exclusive in this snapshot, so their member counts can be summed;
+            Theme and Konglo groups overlap and must not be.
+          </li>
+        </ul>
+      </div>
+
+      <SectionHead label="Leaders and laggards" />
+      <div style={{ ...card, padding: "16px 18px", marginBottom: 12 }}>
+        <LeadersLaggards constituents={constituents} />
+      </div>
+
+      <SectionHead label="Comparison" />
+      <ComparisonPanel
+        current={fromSector(sector)}
+        peers={sectors.filter((candidate) => candidate.id !== sector.id).map(fromSector)}
+      />
 
       <SectionHead label="Confirmation" />
       <div className="explorer-confirmation-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 12 }}>

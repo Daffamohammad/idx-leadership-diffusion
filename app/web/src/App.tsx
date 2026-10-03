@@ -115,6 +115,7 @@ const router = createBrowserRouter([
       { path: "/maps/konglo", Component: TaxonomyMapPage },
       { path: "/maps/themes", Component: TaxonomyMapPage },
       { path: "/themes", Component: ThemesExplorer },
+      { path: "/konglo", Component: ThemesExplorer },
       { path: "/tickers", Component: TickerExplorer },
       { path: "/explorer", Component: GroupExplorer },
       { path: "/groups", Component: MasterGroupTable },

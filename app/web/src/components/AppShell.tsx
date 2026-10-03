@@ -11,6 +11,7 @@ import {
   GridIcon,
   LayersIcon,
   MagnifyingGlassIcon,
+  MixIcon,
   TableIcon,
 } from "@radix-ui/react-icons";
 import ThemeToggle from "./ThemeToggle";
@@ -29,6 +30,7 @@ const navItems = [
   { path: "/maps/konglo", label: "Konglo Map", Icon: CubeIcon },
   { path: "/maps/themes", label: "Themes Map", Icon: GridIcon },
   { path: "/themes", label: "Themes Catalog", Icon: ArchiveIcon },
+  { path: "/konglo", label: "Konglo Catalog", Icon: MixIcon },
   { path: "/explorer", label: "Group Explorer", Icon: BarChartIcon },
   { path: "/groups", label: "All Groups", Icon: TableIcon },
   { path: "/methodology", label: "Methodology", Icon: FileTextIcon },

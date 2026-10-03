@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useSnapshot } from "../data/SnapshotProvider";
 import type { SectorData, TaxonomyGroupData } from "../data/adapter";
 import type { TaxonomyKind } from "../data/snapshot";
@@ -9,6 +9,12 @@ import { EvidenceBadge } from "../components/EvidenceModel";
 import { WindowCapNotice } from "../components/SnapshotNotices";
 import MarketHeatmap from "../components/MarketHeatmap";
 import { formatCountLabel, formatEnumLabel, formatPercent } from "../data/format";
+import {
+  clearCatalogFocus,
+  peekCatalogFocus,
+  rememberCatalogFocus,
+  rememberCatalogUrl,
+} from "../data/catalogFocus";
 
 type SortKey =
   | "name"
@@ -149,6 +155,7 @@ function compare(a: SectorData, b: SectorData, key: SortKey, dir: SortDir): numb
 export default function MasterGroupTable() {
   const { data } = useSnapshot();
   const navigate = useNavigate();
+  const location = useLocation();
   const [params, setParams] = useSearchParams();
   const taxonomy = ((params.get("taxonomy") ?? "SECTOR").toUpperCase() as TaxonomyKind);
   const activeTaxonomy: TaxonomyKind = taxonomy === "KONGLO" || taxonomy === "THEMES" ? taxonomy : "SECTOR";
@@ -211,13 +218,37 @@ export default function MasterGroupTable() {
     return set.size;
   }, [taxonomyGroups]);
   const searchRef = useRef<HTMLInputElement>(null);
+  const focusHandledRef = useRef(false);
+  // Remember this catalog's own URL so a detail view can come straight back to
+  // the same tab, filter, view and sort.
   useEffect(() => {
-    const pending = sessionStorage.getItem("catalog-focus");
-    if (pending && searchRef.current) {
-      searchRef.current.focus();
-      sessionStorage.removeItem("catalog-focus");
+    rememberCatalogUrl(location.pathname, location.search);
+  }, [location.pathname, location.search]);
+  // Closing a detail view restores focus to the row that opened it. Rows may
+  // appear a render after mount (snapshot still loading), so this retries until
+  // the row exists or the data has settled; then it falls back to search.
+  useEffect(() => {
+    if (focusHandledRef.current) return;
+    const pending = peekCatalogFocus();
+    if (!pending) {
+      focusHandledRef.current = true;
+      return;
     }
-  }, []);
+    const target = Array.from(document.querySelectorAll<HTMLElement>("[data-group-id]"))
+      .find((el) => el.getAttribute("data-group-id") === pending);
+    if (target) {
+      focusHandledRef.current = true;
+      clearCatalogFocus();
+      target.focus({ preventScroll: false });
+      target.scrollIntoView({ block: "center", behavior: "auto" });
+      return;
+    }
+    // Snapshot still loading: keep the pending id and try again next render.
+    if (!data) return;
+    focusHandledRef.current = true;
+    clearCatalogFocus();
+    searchRef.current?.focus();
+  }, [data]);
   const totalMemberships = useMemo(() => taxonomyGroups.reduce((s, g) => s + g.constituents, 0), [taxonomyGroups]);
   const eligibleTotal = useMemo(() => taxonomyGroups.reduce((s, g) => s + (g.eligible ?? 0), 0), [taxonomyGroups]);
 
@@ -342,7 +373,11 @@ export default function MasterGroupTable() {
             ? `${rows.length} of ${sectors.length} groups · sorted by ${sortLabel(sortKey)}${arrow(sortKey)}`
             : `${taxRows.length} of ${taxonomyGroups.length} groups · ${totalMemberships} memberships · ${uniqueTickers} unique tickers · ${eligibleTotal} eligible`}
         </span>
-        <Link to={`/map?taxonomy=${activeTaxonomy}`} style={{ marginLeft: "auto", fontSize: 12 }}>Open rotation →</Link>
+        <span style={{ marginLeft: "auto", display: "flex", gap: 14 }}>
+          {activeTaxonomy === "KONGLO" && <Link to="/konglo" style={{ fontSize: 12 }}>Browse catalog →</Link>}
+          {activeTaxonomy === "THEMES" && <Link to="/themes" style={{ fontSize: 12 }}>Browse catalog →</Link>}
+          <Link to={`/map?taxonomy=${activeTaxonomy}`} style={{ fontSize: 12 }}>Open rotation →</Link>
+        </span>
       </div>
 
       {view === "heatmap" && data && (
@@ -354,6 +389,7 @@ export default function MasterGroupTable() {
           asOf={data.payload.as_of}
           onSelectGroup={(kind, taxonomyId, groupId) => {
             void taxonomyId;
+            rememberCatalogFocus(groupId);
             navigate(`/explorer?taxonomy=${kind}&group=${encodeURIComponent(groupId)}`);
           }}
         />
@@ -382,7 +418,15 @@ export default function MasterGroupTable() {
                   <td style={{ ...bodyCell, textAlign: "right", color: signColor(g.excess60d) }} className="tabnum">{formatPercent(g.excess60d)}</td>
                   <td style={{ ...bodyCell, textAlign: "right" }} className="tabnum">{g.breadth === null ? "—" : `${g.breadth.toFixed(1)}%`}</td>
                   <td style={bodyCell}><Link to={`/map?taxonomy=${g.taxonomyKind}`}>Rotation →</Link></td>
-                  <td style={bodyCell}><Link to={`/explorer?taxonomy=${g.taxonomyKind}&group=${encodeURIComponent(g.id)}`}>Open →</Link></td>
+                  <td style={bodyCell}>
+                    <Link
+                      data-group-id={g.id}
+                      to={`/explorer?taxonomy=${g.taxonomyKind}&group=${encodeURIComponent(g.id)}`}
+                      onClick={() => rememberCatalogFocus(g.id)}
+                    >
+                      Open →
+                    </Link>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -495,7 +539,9 @@ export default function MasterGroupTable() {
                 <tr key={s.id}>
                   <td style={{ ...bodyCell, fontWeight: 500 }}>
                     <Link
+                      data-group-id={s.id}
                       to={`/explorer?taxonomy=SECTOR&group=${encodeURIComponent(s.id)}`}
+                      onClick={() => rememberCatalogFocus(s.id)}
                       style={{ color: "#202325", textDecoration: "none", borderBottom: "1px dotted #b9c0be" }}
                     >
                       {s.name}

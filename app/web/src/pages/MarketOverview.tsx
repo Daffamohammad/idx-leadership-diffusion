@@ -190,7 +190,7 @@ export default function MarketOverview() {
           <div style={{ display: "grid", gap: 8, fontSize: 13, color: "#40474d" }}>
             <div>Data as of <strong className="tabnum">{asOf}</strong> · {formatEnumLabel(providerMode)}</div>
             <div>{sectorCount} sectors · {registryTotal !== null ? `${registryTotal} listed records` : "registry unavailable"}</div>
-            <div className="meta">Sector history covers 20D/60D excess vs IHSG. YTD is null in this bundle (no prior-year baseline); no intraday chart is shown and no IHSG level is invented.</div>
+            <div className="meta">Sector history covers 20D/60D excess vs IHSG. YTD is not available in this bundle (no prior-year baseline); no intraday chart is shown and no IHSG level is invented.</div>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 4 }}>
               <Link to="/map" className="btn btn-outline">Open rotation</Link>
               <Link to="/methodology" className="btn btn-ghost">Methodology</Link>

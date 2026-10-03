@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Line,
   XAxis,
@@ -37,7 +37,21 @@ export interface GroupPricePoint {
 }
 
 export type PriceBasis = "close" | "adjusted_close" | "open" | "high" | "low";
-export type ChartRange = "1M" | "3M" | "6M" | "1Y" | "ALL";
+export type ChartRange = "1M" | "3M" | "6M" | "1Y" | "YTD" | "2Y" | "5Y" | "ALL";
+
+// Every period the product offers. Availability is decided from the persisted
+// series; anything the snapshot cannot support renders disabled with a reason
+// instead of silently disappearing.
+export const CHART_PERIODS: ChartRange[] = ["1M", "3M", "6M", "1Y", "YTD", "2Y", "5Y", "ALL"];
+
+const PERIOD_MIN_DAYS: Record<Exclude<ChartRange, "YTD" | "ALL">, number> = {
+  "1M": 30,
+  "3M": 90,
+  "6M": 180,
+  "1Y": 365,
+  "2Y": 730,
+  "5Y": 1825,
+};
 
 export interface PriceChartProps {
   ticker?: string;
@@ -55,6 +69,10 @@ export interface PriceChartProps {
   priceBasis?: string;
   dataStatus?: string;
   showVolume?: boolean;
+  // Optional deep-link support so a group/period URL stays shareable. The chart
+  // stays uncontrolled when these are omitted (existing call sites unchanged).
+  initialRange?: ChartRange;
+  onRangeChange?: (range: ChartRange) => void;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────
@@ -81,32 +99,65 @@ function formatCompactDate(date: string): string {
   return `${months[d.getMonth()]} ${d.getDate()}`;
 }
 
-function getAvailableRanges(dates: string[]): ChartRange[] {
-  if (dates.length === 0) return [];
+// Source context shared by every disabled-period explanation: this app reads
+// persisted snapshot history only, and Sectors API refreshes stay on hold.
+const PERIOD_SOURCE_NOTE =
+  "Only persisted snapshot prices are used here — Sectors API refreshes are on hold and were not attempted to extend the window.";
+
+function spanDays(dates: string[]): number {
+  if (dates.length === 0) return 0;
   const sorted = [...dates].sort();
-  const first = new Date(sorted[0] + "T00:00:00");
-  const last = new Date(sorted[sorted.length - 1] + "T00:00:00");
-  const totalDays = Math.max(1, (last.getTime() - first.getTime()) / (86400000));
-  const ranges: ChartRange[] = [];
-  if (totalDays >= 30) ranges.push("1M");
-  if (totalDays >= 90) ranges.push("3M");
-  if (totalDays >= 180) ranges.push("6M");
-  if (totalDays >= 365) ranges.push("1Y");
-  ranges.push("ALL");
-  return ranges;
+  const first = new Date(sorted[0] + "T00:00:00").getTime();
+  const last = new Date(sorted[sorted.length - 1] + "T00:00:00").getTime();
+  if (!Number.isFinite(first) || !Number.isFinite(last)) return 0;
+  return Math.max(0, (last - first) / 86400000);
+}
+
+function crossesYearBoundary(dates: string[]): boolean {
+  if (dates.length === 0) return false;
+  const sorted = [...dates].sort();
+  const firstYear = Number(sorted[0].slice(0, 4));
+  const lastYear = Number(sorted[sorted.length - 1].slice(0, 4));
+  return Number.isFinite(firstYear) && Number.isFinite(lastYear) && firstYear < lastYear;
+}
+
+// Returns null when the period is usable, otherwise the reason it is disabled.
+export function periodDisabledReason(period: ChartRange, dates: string[]): string | null {
+  if (period === "ALL") return null;
+  const days = spanDays(dates);
+  if (days === 0) {
+    return `No persisted price history is available for this series. ${PERIOD_SOURCE_NOTE}`;
+  }
+  if (period === "YTD") {
+    return crossesYearBoundary(dates)
+      ? null
+      : `The persisted series does not cross a year boundary, so a YTD slice would equal the full window. ${PERIOD_SOURCE_NOTE}`;
+  }
+  const minDays = PERIOD_MIN_DAYS[period];
+  if (days >= minDays) return null;
+  const actual = days < 1 ? "under a day" : `${Math.floor(days)} days`;
+  return `Needs at least ${minDays} days of history; this snapshot holds ${actual}. ${PERIOD_SOURCE_NOTE}`;
+}
+
+function getAvailableRanges(dates: string[]): ChartRange[] {
+  return CHART_PERIODS.filter((period) => periodDisabledReason(period, dates) === null);
 }
 
 function filterByRange(dates: string[], range: ChartRange): Set<string> {
   const sorted = [...dates].sort();
   if (range === "ALL") return new Set(dates);
   if (sorted.length === 0) return new Set();
-  const last = new Date(sorted[sorted.length - 1] + "T00:00:00");
+  const lastDate = sorted[sorted.length - 1];
+  const last = new Date(lastDate + "T00:00:00");
   let first: Date;
   switch (range) {
     case "1M": first = new Date(last.getTime() - 30 * 86400000); break;
     case "3M": first = new Date(last.getTime() - 90 * 86400000); break;
     case "6M": first = new Date(last.getTime() - 180 * 86400000); break;
     case "1Y": first = new Date(last.getTime() - 365 * 86400000); break;
+    case "2Y": first = new Date(last.getTime() - 730 * 86400000); break;
+    case "5Y": first = new Date(last.getTime() - 1825 * 86400000); break;
+    case "YTD": first = new Date(`${lastDate.slice(0, 4)}-01-01T00:00:00`); break;
     default: first = new Date(0);
   }
   return new Set(dates.filter((d) => new Date(d + "T00:00:00") >= first));
@@ -327,8 +378,17 @@ export default function PriceChart({
   priceBasis,
   dataStatus,
   showVolume = true,
+  initialRange,
+  onRangeChange,
 }: PriceChartProps) {
-  const [activeRange, setActiveRange] = useState<ChartRange>("ALL");
+  const [activeRange, setActiveRange] = useState<ChartRange>(initialRange ?? "ALL");
+  useEffect(() => {
+    if (initialRange) setActiveRange(initialRange);
+  }, [initialRange]);
+  const selectRange = (range: ChartRange) => {
+    setActiveRange(range);
+    onRangeChange?.(range);
+  };
 
   // Build series from PricePoint[] (legacy path) or GroupPricePoint[]
   const series = useMemo(() => {
@@ -523,44 +583,67 @@ export default function PriceChart({
       </div>
 
       {/* ── Range Tabs ── */}
-      {availableRanges.length > 0 && (
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 0,
-            borderBottom: "1px solid #e1e2de",
-            background: "#fff",
-            padding: "0 14px",
-            maxWidth: "100%",
-            minWidth: 0,
-            overflowX: "auto",
-          }}
-          role="tablist"
-          aria-label="Chart range selector"
-        >
-          {availableRanges.map((range) => (
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 0,
+          borderBottom: "1px solid #e1e2de",
+          background: "#fff",
+          padding: "0 14px",
+          maxWidth: "100%",
+          minWidth: 0,
+          overflowX: "auto",
+        }}
+        role="tablist"
+        aria-label="Chart range selector"
+      >
+        {CHART_PERIODS.map((range) => {
+          const disabledReason = periodDisabledReason(range, dates);
+          const disabled = disabledReason !== null;
+          const selected = effectiveRange === range;
+          return (
             <button
               key={range}
+              type="button"
               role="tab"
-              aria-selected={effectiveRange === range}
-              onClick={() => setActiveRange(range)}
+              aria-selected={selected}
+              aria-disabled={disabled}
+              title={disabled ? disabledReason ?? undefined : undefined}
+              onClick={() => { if (!disabled) selectRange(range); }}
               style={{
                 background: "none",
                 border: "none",
-                borderBottom: effectiveRange === range ? "2px solid #d97956" : "2px solid transparent",
-                color: effectiveRange === range ? "#202325" : "#747a7d",
+                borderBottom: selected ? "2px solid #d97956" : "2px solid transparent",
+                color: disabled ? "#b6b6b6" : selected ? "#202325" : "#747a7d",
                 fontFamily: "Geist Mono, monospace",
                 fontSize: 11,
-                fontWeight: effectiveRange === range ? 600 : 400,
+                fontWeight: selected ? 600 : 400,
                 padding: "8px 12px",
-                cursor: "pointer",
+                cursor: disabled ? "not-allowed" : "pointer",
+                textDecoration: disabled ? "line-through" : "none",
                 transition: "border-color 0.15s ease, color 0.15s ease",
               }}
             >
               {range}
             </button>
-          ))}
+          );
+        })}
+      </div>
+      {activeRange !== effectiveRange && (
+        <div
+          role="status"
+          style={{
+            padding: "7px 14px",
+            borderBottom: "1px solid #e1e2de",
+            background: "#faf9f6",
+            fontSize: 11,
+            lineHeight: 1.5,
+            color: "#7a5010",
+          }}
+        >
+          Requested period <strong>{activeRange}</strong> is unavailable for this series —
+          showing <strong>{effectiveRange}</strong> instead. {periodDisabledReason(activeRange, dates)}
         </div>
       )}
 
