@@ -1,0 +1,102 @@
+{
+  "captured_at": "2026-10-04",
+  "retrieval": "local filesystem (user-supplied downloads from idx.co.id, cached unmodified)",
+  "units": {
+    "stock_summary_price": "IDR per share (unadjusted official close, regular market)",
+    "composite_index": "IDX Composite (IHSG) index points",
+    "daily_statistics_ihsg": "IDX Composite (IHSG) index points"
+  },
+  "files": [
+    {
+      "path": "data/raw/idx_daily_statistics/ds_260828.pdf",
+      "kind": "IDX_DAILY_STATISTICS_PDF",
+      "session": "2026-08-28",
+      "bytes": 1974999,
+      "sha256": "701eceed297f5853f89b6653c43651bc9f0be22bd88092d88038bb8a0cf59f43"
+    },
+    {
+      "path": "data/raw/idx_daily_statistics/ds_260921.pdf",
+      "kind": "IDX_DAILY_STATISTICS_PDF",
+      "session": "2026-09-21",
+      "bytes": 1975215,
+      "sha256": "04f1b7df0bd870fd17982517c264952a0947cc45db53ef7a5a1a1dfd9cbf73ff"
+    },
+    {
+      "path": "data/raw/idx_daily_statistics/ds_260922.pdf",
+      "kind": "IDX_DAILY_STATISTICS_PDF",
+      "session": "2026-09-22",
+      "bytes": 1976209,
+      "sha256": "aad7f0ccf7b92e46057338fcb8d1ebb5ae44b34da175050567d9d7f9d095acab"
+    },
+    {
+      "path": "data/raw/idx_daily_statistics/ds_260923.pdf",
+      "kind": "IDX_DAILY_STATISTICS_PDF",
+      "session": "2026-09-23",
+      "bytes": 1980971,
+      "sha256": "bb3052c31fe2b6bc04f125596513ba09db274fbcc3bd58ca1657e4d9fc526c52"
+    },
+    {
+      "path": "data/raw/idx_daily_statistics/ds_260924.pdf",
+      "kind": "IDX_DAILY_STATISTICS_PDF",
+      "session": "2026-09-24",
+      "bytes": 1983782,
+      "sha256": "46a0a130e3c050d06eaa6b0cf37e51c4c67bf45ba02b331eeea15ac2b36dece3"
+    },
+    {
+      "path": "data/raw/idx_daily_statistics/ds_260925.pdf",
+      "kind": "IDX_DAILY_STATISTICS_PDF",
+      "session": "2026-09-25",
+      "bytes": 1977061,
+      "sha256": "e50880863ab8ea7309e6d8610e33799d4642ab1a822f687776944c74a7d880b0"
+    },
+    {
+      "path": "data/raw/idx_daily_statistics/ds_260928.pdf",
+      "kind": "IDX_DAILY_STATISTICS_PDF",
+      "session": "2026-09-28",
+      "bytes": 1974132,
+      "sha256": "ae26ed5bc8e31fe8ead7849d8008601f928de0fb7f102247d6681deee8c10076"
+    },
+    {
+      "path": "data/raw/idx_daily_statistics/ds_260929.pdf",
+      "kind": "IDX_DAILY_STATISTICS_PDF",
+      "session": "2026-09-29",
+      "bytes": 1981254,
+      "sha256": "43da2b0b2b5c273bc31393a73160c85cbcdd0963c32755d9bcb8ef0e1616a99d"
+    },
+    {
+      "path": "data/raw/idx_daily_statistics/ds_260930.pdf",
+      "kind": "IDX_DAILY_STATISTICS_PDF",
+      "session": "2026-09-30",
+      "bytes": 1982480,
+      "sha256": "181055a4d96a9defee11ce0afd006df6b7150234460bc5874dcf04c769f71c34"
+    },
+    {
+      "path": "data/raw/idx_daily_statistics/ds_261001.pdf",
+      "kind": "IDX_DAILY_STATISTICS_PDF",
+      "session": "2026-10-01",
+      "bytes": 1974858,
+      "sha256": "d7f531c178f1a261a9a63cfdb9efc70d275c22ac9772a3ee917ee28a6092c90b"
+    },
+    {
+      "path": "data/raw/idx_daily_statistics/ds_261002.pdf",
+      "kind": "IDX_DAILY_STATISTICS_PDF",
+      "session": "2026-10-02",
+      "bytes": 1987188,
+      "sha256": "8809cf9d71c8474eff2d25962e36558c388d77f484c2716d1b40462b6779efa7"
+    },
+    {
+      "path": "data/raw/idx_stock_summary/Stock Summary-20261002.xlsx",
+      "kind": "IDX_STOCK_SUMMARY_XLSX",
+      "session": "2026-10-02",
+      "bytes": 847658,
+      "sha256": "c845909f0e80d667c38291918834d49208478d284e81f3967ef9e445792a9aa4"
+    },
+    {
+      "path": "data/raw/idx_composite_index/Composite Stock Price Index & Stock Trading Volume - Sep 2026.xlsx",
+      "kind": "IDX_COMPOSITE_INDEX_XLSX",
+      "session": "2026-08-31",
+      "bytes": 25378,
+      "sha256": "1d9c03a3e4676f819aaf07b4fb7803873badfc9187942dbded560b25cf83f4a7"
+    }
+  ]
+}

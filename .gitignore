@@ -73,3 +73,6 @@ app/web/public/snapshots/*.json
 !app/web/public/snapshots/index.json
 !app/web/public/snapshots/snap_sectors_2026-08-27.json
 !app/web/public/snapshots/yf_harness_2026-08-28_adj.json
+# Latest validated public-prototype refresh (2026-10-02): the active bundle
+# rendered by the preview and asserted by the SPA contract tests.
+!app/web/public/snapshots/snap_public_2026-10-02.json

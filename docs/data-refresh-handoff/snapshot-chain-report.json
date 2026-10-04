@@ -1,0 +1,125 @@
+{
+  "kind": "PUBLIC_SNAPSHOT_CHAIN",
+  "panel_dir": "data/raw/public/panel_2025-12-15_2026-10-04",
+  "chain_hash": "5ee90b3d073b02ec",
+  "connects_to_august_priors": false,
+  "legacy_august_hash": "a08b5e598af9551c",
+  "snapshots": [
+    {
+      "snapshot_id": "snap_public_2026-09-04",
+      "as_of": "2026-09-04",
+      "provider_mode": "PUBLIC_PROTOTYPE",
+      "price_basis": "adjusted_close",
+      "eligible_ticker_set_hash": "5ee90b3d073b02ec",
+      "eligible_ticker_count": 54,
+      "coverage_status": "READY_WITH_GAPS",
+      "coverage_pct": 98.15,
+      "notes": "failed_securities=['WSKT.JK']",
+      "ytd_baseline_dates": [
+        "2025-12-30"
+      ],
+      "diffusion_states": {
+        "UNCONFIRMED": 10
+      },
+      "breadth_delta_nonnull": 0,
+      "comparability_status": "NO_COMPARABLE_HISTORY",
+      "selected_previous": null,
+      "selected_previous_as_of": null
+    },
+    {
+      "snapshot_id": "snap_public_2026-09-11",
+      "as_of": "2026-09-11",
+      "provider_mode": "PUBLIC_PROTOTYPE",
+      "price_basis": "adjusted_close",
+      "eligible_ticker_set_hash": "5ee90b3d073b02ec",
+      "eligible_ticker_count": 54,
+      "coverage_status": "READY_WITH_GAPS",
+      "coverage_pct": 98.15,
+      "notes": "failed_securities=['WSKT.JK']",
+      "ytd_baseline_dates": [
+        "2025-12-30"
+      ],
+      "diffusion_states": {
+        "UNCONFIRMED": 6,
+        "BROADENING_FIRM": 2,
+        "NARROWING_FRAGILE": 1,
+        "STABLE": 1
+      },
+      "breadth_delta_nonnull": 10,
+      "comparability_status": "COMPATIBLE",
+      "selected_previous": "snap_public_2026-09-04",
+      "selected_previous_as_of": "2026-09-04"
+    },
+    {
+      "snapshot_id": "snap_public_2026-09-18",
+      "as_of": "2026-09-18",
+      "provider_mode": "PUBLIC_PROTOTYPE",
+      "price_basis": "adjusted_close",
+      "eligible_ticker_set_hash": "5ee90b3d073b02ec",
+      "eligible_ticker_count": 54,
+      "coverage_status": "READY_WITH_GAPS",
+      "coverage_pct": 98.15,
+      "notes": "failed_securities=['WSKT.JK']",
+      "ytd_baseline_dates": [
+        "2025-12-30"
+      ],
+      "diffusion_states": {
+        "UNCONFIRMED": 6,
+        "BROADENING_FIRM": 2,
+        "NARROWING_FIRM": 1,
+        "NARROWING_FRAGILE": 1
+      },
+      "breadth_delta_nonnull": 10,
+      "comparability_status": "COMPATIBLE",
+      "selected_previous": "snap_public_2026-09-11",
+      "selected_previous_as_of": "2026-09-11"
+    },
+    {
+      "snapshot_id": "snap_public_2026-09-25",
+      "as_of": "2026-09-25",
+      "provider_mode": "PUBLIC_PROTOTYPE",
+      "price_basis": "adjusted_close",
+      "eligible_ticker_set_hash": "5ee90b3d073b02ec",
+      "eligible_ticker_count": 54,
+      "coverage_status": "READY_WITH_GAPS",
+      "coverage_pct": 98.15,
+      "notes": "failed_securities=['WSKT.JK']",
+      "ytd_baseline_dates": [
+        "2025-12-30"
+      ],
+      "diffusion_states": {
+        "UNCONFIRMED": 6,
+        "BROADENING_FRAGILE": 3,
+        "STABLE": 1
+      },
+      "breadth_delta_nonnull": 10,
+      "comparability_status": "COMPATIBLE",
+      "selected_previous": "snap_public_2026-09-18",
+      "selected_previous_as_of": "2026-09-18"
+    },
+    {
+      "snapshot_id": "snap_public_2026-10-02",
+      "as_of": "2026-10-02",
+      "provider_mode": "PUBLIC_PROTOTYPE",
+      "price_basis": "adjusted_close",
+      "eligible_ticker_set_hash": "5ee90b3d073b02ec",
+      "eligible_ticker_count": 54,
+      "coverage_status": "READY_WITH_GAPS",
+      "coverage_pct": 98.15,
+      "notes": "failed_securities=['WSKT.JK']",
+      "ytd_baseline_dates": [
+        "2025-12-30"
+      ],
+      "diffusion_states": {
+        "UNCONFIRMED": 6,
+        "STABLE": 2,
+        "BROADENING_FIRM": 1,
+        "NARROWING_FIRM": 1
+      },
+      "breadth_delta_nonnull": 10,
+      "comparability_status": "COMPATIBLE",
+      "selected_previous": "snap_public_2026-09-25",
+      "selected_previous_as_of": "2026-09-25"
+    }
+  ]
+}

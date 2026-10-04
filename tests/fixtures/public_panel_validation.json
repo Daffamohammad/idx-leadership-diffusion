@@ -1,0 +1,316 @@
+{
+  "kind": "PUBLIC_PANEL_VALIDATION",
+  "panel_window": {
+    "start": "2025-12-15",
+    "end": "2026-10-04"
+  },
+  "status": "PASS",
+  "checks": {
+    "benchmark_vs_official_workbook": {
+      "source": "Composite Stock Price Index & Stock Trading Volume - Sep 2026.xlsx",
+      "official_sessions": 218,
+      "official_range": [
+        "2025-09-30",
+        "2026-08-31"
+      ],
+      "dates_matched": 164,
+      "tolerance_index_points": 0.01,
+      "max_abs_diff": 0.0053,
+      "mismatches": [],
+      "representative": {
+        "ytd_baseline_2025-12-30": {
+          "date": "2025-12-30",
+          "official": 8646.94,
+          "panel": 8646.938,
+          "abs_diff": 0.0015
+        },
+        "last_official_2026-08-31": {
+          "date": "2026-08-31",
+          "official": 6525.48,
+          "panel": 6525.478,
+          "abs_diff": 0.002
+        }
+      },
+      "status": "PASS"
+    },
+    "benchmark_vs_daily_statistics_pdfs": {
+      "source": "idx_daily_statistics/ds_*.pdf",
+      "dates_checked": 11,
+      "tolerance_index_points": 0.01,
+      "rows": [
+        {
+          "session": "2026-08-28",
+          "official_prev": 6521.75,
+          "official_change": -3.629,
+          "official_close_computed": 6518.121,
+          "official_close_printed": 6518.121,
+          "panel_close": 6518.121,
+          "abs_diff": 0.0001,
+          "computed_vs_printed": 0.0
+        },
+        {
+          "session": "2026-09-21",
+          "official_prev": 6441.159,
+          "official_change": -56.433,
+          "official_close_computed": 6384.726,
+          "official_close_printed": 6384.726,
+          "panel_close": 6384.726,
+          "abs_diff": 0.0001,
+          "computed_vs_printed": 0.0
+        },
+        {
+          "session": "2026-09-22",
+          "official_prev": 6384.726,
+          "official_change": -107.682,
+          "official_close_computed": 6277.044,
+          "official_close_printed": 6277.044,
+          "panel_close": 6277.044,
+          "abs_diff": 0.0001,
+          "computed_vs_printed": 0.0
+        },
+        {
+          "session": "2026-09-23",
+          "official_prev": 6277.044,
+          "official_change": 97.868,
+          "official_close_computed": 6374.912,
+          "official_close_printed": 6374.912,
+          "panel_close": 6374.912,
+          "abs_diff": 0.0001,
+          "computed_vs_printed": 0.0
+        },
+        {
+          "session": "2026-09-24",
+          "official_prev": 6374.912,
+          "official_change": -76.305,
+          "official_close_computed": 6298.607,
+          "official_close_printed": 6298.607,
+          "panel_close": 6298.607,
+          "abs_diff": 0.0001,
+          "computed_vs_printed": 0.0
+        },
+        {
+          "session": "2026-09-25",
+          "official_prev": 6298.607,
+          "official_change": -56.715,
+          "official_close_computed": 6241.892,
+          "official_close_printed": 6241.892,
+          "panel_close": 6241.892,
+          "abs_diff": 0.0001,
+          "computed_vs_printed": 0.0
+        },
+        {
+          "session": "2026-09-28",
+          "official_prev": 6241.892,
+          "official_change": -94.033,
+          "official_close_computed": 6147.859,
+          "official_close_printed": 6147.859,
+          "panel_close": 6147.859,
+          "abs_diff": 0.0001,
+          "computed_vs_printed": 0.0
+        },
+        {
+          "session": "2026-09-29",
+          "official_prev": 6147.859,
+          "official_change": -26.159,
+          "official_close_computed": 6121.7,
+          "official_close_printed": 6121.7,
+          "panel_close": 6121.7,
+          "abs_diff": 0.0002,
+          "computed_vs_printed": 0.0
+        },
+        {
+          "session": "2026-09-30",
+          "official_prev": 6121.7,
+          "official_change": -50.562,
+          "official_close_computed": 6071.138,
+          "official_close_printed": 6071.138,
+          "panel_close": 6071.138,
+          "abs_diff": 0.0002,
+          "computed_vs_printed": 0.0
+        },
+        {
+          "session": "2026-10-01",
+          "official_prev": 6071.138,
+          "official_change": -61.636,
+          "official_close_computed": 6009.502,
+          "official_close_printed": 6009.502,
+          "panel_close": 6009.502,
+          "abs_diff": 0.0,
+          "computed_vs_printed": 0.0
+        },
+        {
+          "session": "2026-10-02",
+          "official_prev": 6009.502,
+          "official_change": 27.386,
+          "official_close_computed": 6036.888,
+          "official_close_printed": 6036.888,
+          "panel_close": 6036.888,
+          "abs_diff": 0.0002,
+          "computed_vs_printed": 0.0
+        }
+      ],
+      "parse_errors": [],
+      "status": "PASS"
+    },
+    "stocks_vs_official_stock_summary": {
+      "source": "Stock Summary-20261002.xlsx",
+      "official_date": "2026-10-02",
+      "official_date_matches_panel": true,
+      "panel_latest_session": "2026-10-02",
+      "universe_intersection": 53,
+      "official_codes": 963,
+      "matched": 53,
+      "mismatched": [],
+      "not_in_official": [],
+      "match_rate": 1.0,
+      "tolerance_idr": 1.0,
+      "max_abs_diff_idr": 0.0,
+      "representative": {
+        "BBCA.JK": {
+          "ticker": "BBCA.JK",
+          "official": 6100.0,
+          "panel_raw_close": 6100.0,
+          "abs_diff_idr": 0.0,
+          "status": "MATCH"
+        },
+        "BBRI.JK": {
+          "ticker": "BBRI.JK",
+          "official": 3080.0,
+          "panel_raw_close": 3080.0,
+          "abs_diff_idr": 0.0,
+          "status": "MATCH"
+        }
+      },
+      "status": "PASS"
+    },
+    "coverage_reconciliation": {
+      "official_stock_summary_codes": 963,
+      "sectors_snapshot_registry_codes": 962,
+      "sectors_registry_source": "data/raw/sectors_validation/2026-08-28_20260829T004326Z/validation_report.json",
+      "universe_requested": 54,
+      "downloaded": 53,
+      "failed_symbols": [
+        "WSKT.JK"
+      ],
+      "usable_ge_60_sessions": 53,
+      "ytd_baseline_present": 53,
+      "note": "official registry (all listed codes), sectors snapshot registry, and prototype universe are three distinct populations; no count is forced to match another",
+      "status": "PASS"
+    },
+    "panel_integrity": {
+      "rows": 10205,
+      "benchmark_rows": 188,
+      "duplicate_ticker_date_rows": 0,
+      "nonpositive_price_rows": 0,
+      "units": {
+        "price": "IDR per share",
+        "volume": "shares",
+        "benchmark": "IDX Composite (IHSG) index points"
+      },
+      "price_basis": {
+        "stocks": "close (raw) and adjusted_close both persisted; methodology return series use adjusted_close",
+        "benchmark": "close"
+      },
+      "ytd_baseline_date": "2025-12-30",
+      "ytd_baseline_tickers": 53,
+      "ytd_baseline_benchmark_close": 8646.9384765625,
+      "latest_session": "2026-10-02",
+      "benchmark_latest_session": "2026-10-02",
+      "status": "PASS"
+    },
+    "corporate_actions": {
+      "tickers_with_adjusted_close_divergence": [
+        "ACES.JK",
+        "ADRO.JK",
+        "AMRT.JK",
+        "ANTM.JK",
+        "ASII.JK",
+        "BBCA.JK",
+        "BBHI.JK",
+        "BBNI.JK",
+        "BBRI.JK",
+        "BJBR.JK",
+        "BMRI.JK",
+        "BNGA.JK",
+        "BRIS.JK",
+        "BRPT.JK",
+        "BTPS.JK",
+        "CTRA.JK",
+        "EMTK.JK",
+        "ERAA.JK",
+        "ESSA.JK",
+        "HEAL.JK",
+        "ICBP.JK",
+        "INCO.JK",
+        "INDF.JK",
+        "INTP.JK",
+        "ISAT.JK",
+        "ITMG.JK",
+        "JSMR.JK",
+        "KLBF.JK",
+        "MAPI.JK",
+        "MDKA.JK",
+        "MEDC.JK",
+        "MIKA.JK",
+        "MYOR.JK",
+        "PGAS.JK",
+        "PTBA.JK",
+        "PWON.JK",
+        "SIDO.JK",
+        "SMGR.JK",
+        "SMRA.JK",
+        "TLKM.JK",
+        "TPIA.JK",
+        "UNTR.JK",
+        "UNVR.JK"
+      ],
+      "divergent_row_counts": {
+        "BMRI.JK": 180,
+        "BBCA.JK": 167,
+        "ERAA.JK": 131,
+        "CTRA.JK": 130,
+        "ICBP.JK": 130,
+        "INDF.JK": 130,
+        "BBHI.JK": 129,
+        "BRPT.JK": 129,
+        "MAPI.JK": 128,
+        "MDKA.JK": 127,
+        "ESSA.JK": 124,
+        "PTBA.JK": 120,
+        "PWON.JK": 120,
+        "SMRA.JK": 120,
+        "ACES.JK": 119,
+        "ANTM.JK": 119,
+        "MIKA.JK": 118,
+        "TLKM.JK": 117,
+        "AMRT.JK": 115,
+        "MEDC.JK": 115,
+        "MYOR.JK": 115,
+        "UNVR.JK": 115,
+        "INCO.JK": 113,
+        "PGAS.JK": 109,
+        "EMTK.JK": 108,
+        "INTP.JK": 108,
+        "KLBF.JK": 108,
+        "JSMR.JK": 107,
+        "TPIA.JK": 102,
+        "SMGR.JK": 99,
+        "BRIS.JK": 96,
+        "ISAT.JK": 96,
+        "BJBR.JK": 90,
+        "ASII.JK": 87,
+        "HEAL.JK": 87,
+        "ADRO.JK": 83,
+        "BNGA.JK": 83,
+        "ITMG.JK": 83,
+        "BTPS.JK": 82,
+        "UNTR.JK": 82,
+        "BBRI.JK": 78,
+        "SIDO.JK": 77,
+        "BBNI.JK": 60
+      },
+      "note": "adjusted_close diverges from close where Yahoo applied dividends/splits in the window; raw close remains available for official-price comparison",
+      "status": "DISCLOSURE"
+    }
+  }
+}

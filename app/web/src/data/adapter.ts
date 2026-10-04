@@ -26,6 +26,7 @@ import type {
   HistoryDiagnostics,
   SnapshotPayload,
   SnapshotBreadthHistoryPoint,
+  SnapshotRotationHistoryPoint,
   GroupPriceHistoryPoint,
   TaxonomyGroupAggregate,
   TaxonomyMembershipData,
@@ -108,6 +109,7 @@ export interface ConstituentData {
 }
 
 export type BreadthHistoryPoint = SnapshotBreadthHistoryPoint;
+export type RotationHistoryPoint = SnapshotRotationHistoryPoint;
 export type GroupPricePoint = GroupPriceHistoryPoint;
 
 export interface DataSources {
@@ -362,6 +364,7 @@ export interface AdaptedSnapshot {
   };
   materialChanges: SectorData[];
   breadthHistory: BreadthHistoryPoint[];
+  rotationHistory: RotationHistoryPoint[];
   groupPriceHistory: Record<string, GroupPricePoint[]>;
   tickerPriceHistory: Record<string, GroupPricePoint[]>;
   trajectoryData: Record<string, Array<{ x: number; y: number; label?: string }>>;
@@ -418,6 +421,43 @@ function normalizeBreadthHistory(value: unknown): BreadthHistoryPoint[] {
         as_of: asOf,
         breadth,
         group_excess_return_20d: excess ?? null,
+      },
+    ];
+  });
+}
+function normalizeRotationHistory(value: unknown): RotationHistoryPoint[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item) => {
+    if (!item || typeof item !== "object") return [];
+    const candidate = item as Record<string, unknown>;
+    const groupId = candidate.group_id;
+    const asOf = candidate.as_of;
+    const ytd = candidate.group_excess_return_ytd;
+    if (
+      typeof groupId !== "string" ||
+      groupId.length === 0 ||
+      typeof asOf !== "string" ||
+      asOf.length === 0 ||
+      typeof ytd !== "number" ||
+      !Number.isFinite(ytd)
+    ) {
+      return [];
+    }
+    const excess20d = safeNullableNumber(candidate.group_excess_return_20d);
+    const excess60d = safeNullableNumber(candidate.group_excess_return_60d);
+    const momentum =
+      excess20d !== null && excess60d !== null ? excess20d - excess60d : null;
+    const ytdStart =
+      typeof candidate.ytd_start_date === "string" ? candidate.ytd_start_date : null;
+    return [
+      {
+        group_id: groupId,
+        as_of: asOf.slice(0, 10),
+        group_excess_return_ytd: ytd,
+        ytd_start_date: ytdStart,
+        group_excess_return_20d: excess20d,
+        group_excess_return_60d: excess60d,
+        relative_momentum: momentum,
       },
     ];
   });
@@ -1721,6 +1761,7 @@ export function adaptSnapshot(
   // A transition delta is not an absolute breadth level. Only consume the
   // exporter-owned history array, which is built from persisted group rows.
   const breadthHistory = normalizeBreadthHistory(payload.breadth_history);
+  const rotationHistory = normalizeRotationHistory(payload.rotation_history);
   const groupPriceHistory = normalizeGroupPriceHistory(payload.group_price_history);
 
   // New sections: taxonomy views, foreign flow, research events.
@@ -1840,6 +1881,7 @@ export function adaptSnapshot(
         : null,
     acquisitionDiagnostics: adaptAcquisitionDiagnostics(payload.history_diagnostics),
     breadthHistory,
+    rotationHistory,
     groupPriceHistory,
     tickerPriceHistory,
     trajectoryData: {},

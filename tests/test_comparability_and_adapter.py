@@ -515,26 +515,52 @@ def test_credit_usage_is_accurate():
         )
 
 
-def test_canonical_index_is_sectors_only():
-    """The public snapshot index must contain only SECTORS_LIVE entries,
-    never prototype artifacts."""
+def test_canonical_index_keeps_sectors_evidence_and_validated_latest():
+    """The public index must keep the SECTORS_LIVE capture as historical
+    evidence and list the latest validated snapshot, so the SPA can select
+    the newest as-of deterministically."""
     import json
     index_path = REPO_ROOT / "app" / "web" / "public" / "snapshots" / "index.json"
     with open(index_path, "r", encoding="utf-8") as fh:
         index = json.load(fh)
     assert isinstance(index, list), "index.json must be a list"
+    by_id = {entry.get("snapshot_id"): entry for entry in index}
+
+    # Historical Sectors evidence is retained, never dropped.
+    sectors = by_id.get("snap_sectors_2026-08-27")
+    assert sectors is not None, "SECTORS_LIVE evidence entry must remain in the index"
+    assert sectors.get("provider_mode") == "SECTORS_LIVE"
+    assert sectors.get("as_of") == "2026-08-27"
+
+    # The validated public-prototype refresh is present and dated later.
+    latest = by_id.get("snap_public_2026-10-02")
+    assert latest is not None, "validated public snapshot must be in the index"
+    assert latest.get("provider_mode") == "PUBLIC_PROTOTYPE"
+    assert latest.get("as_of") > sectors.get("as_of"), (
+        "the refreshed bundle must be dated after the Sectors capture"
+    )
+    assert latest.get("provider") == "yfinance"
+
+    # Exactly the two curated entries, and the newest as-of is the public one.
+    assert len(index) == 2, f"Expected 2 curated entries, got {sorted(by_id)}"
+    newest = max(index, key=lambda e: (str(e.get("as_of")), str(e.get("snapshot_id"))))
+    assert newest["snapshot_id"] == "snap_public_2026-10-02"
+
+    # Every advertised entry must have a fetchable payload with matching identity.
     for entry in index:
-        assert entry.get("provider_mode") == "SECTORS_LIVE", (
-            f"Index entry {entry.get('snapshot_id')} has provider_mode={entry.get('provider_mode')}, expected SECTORS_LIVE"
+        payload_path = (
+            REPO_ROOT / "app" / "web" / "public" / "snapshots" / f"{entry['snapshot_id']}.json"
         )
-    # Exactly one entry: the SECTORS_LIVE canonical snapshot
-    assert len(index) == 1, f"Expected 1 canonical entry, got {len(index)}"
-    assert index[0]["snapshot_id"] == "snap_sectors_2026-08-27"
+        assert payload_path.exists(), f"indexed snapshot {entry['snapshot_id']} has no payload"
+        with open(payload_path, "r", encoding="utf-8") as fh:
+            payload = json.load(fh)
+        assert payload.get("snapshot_id") == entry["snapshot_id"]
+        assert payload.get("as_of") == entry.get("as_of")
 
 
 def test_prototype_snapshot_explicitly_configured():
-    """The prototype snapshot must be available but not silently
-    canonical. It requires explicit VITE_SNAPSHOT_ID configuration."""
+    """The prototype harness payload must stay available but unindexed.
+    Explicit selection remains the VITE_SNAPSHOT_ID path."""
     import json
     harness_path = REPO_ROOT / "app" / "web" / "public" / "snapshots" / "yf_harness_2026-08-28_adj.json"
     assert harness_path.exists(), "Prototype snapshot must be exported"
@@ -543,14 +569,28 @@ def test_prototype_snapshot_explicitly_configured():
     assert payload.get("snapshot_id") == "yf_harness_2026-08-28_adj"
     # provider_mode lives in the manifest
     assert payload.get("manifest", {}).get("provider_mode") == "PUBLIC_PROTOTYPE"
-    # Must not appear in the canonical SECTORS_LIVE index
+    # Must not appear in the curated index
     index_path = REPO_ROOT / "app" / "web" / "public" / "snapshots" / "index.json"
     with open(index_path, "r", encoding="utf-8") as fh:
         index = json.load(fh)
     harness_ids = [e["snapshot_id"] for e in index if e.get("snapshot_id") == "yf_harness_2026-08-28_adj"]
     assert len(harness_ids) == 0, (
-        "Prototype snapshot must not appear in the canonical SECTORS_LIVE index"
+        "Prototype harness snapshot must not appear in the curated index"
     )
+
+
+def test_snapshot_provider_selection_contract():
+    """The SPA resolves the active snapshot by newest as-of, never by
+    provider brand, and keeps the explicit VITE_SNAPSHOT_ID override."""
+    source = (
+        REPO_ROOT / "app" / "web" / "src" / "data" / "SnapshotProvider.tsx"
+    ).read_text(encoding="utf-8")
+    assert "VITE_SNAPSHOT_ID" in source, "explicit snapshot selection must be preserved"
+    # The Sectors-preference branch must be gone.
+    assert "const live = list.filter(" not in source, (
+        "provider-mode preference must not override the newest as_of"
+    )
+    assert "pickLatestEntry" in source
 
 
 # ── coverage and history metadata ────────────────────────────────

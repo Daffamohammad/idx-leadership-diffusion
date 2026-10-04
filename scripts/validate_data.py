@@ -29,12 +29,31 @@ def main() -> int:
     if not snaps:
         print("no_snapshots", file=sys.stderr)
         return 1
-    latest = reader.load(snaps[-1].name)
+    latest = None
+    latest_as_of = None
+    for snap_dir in snaps:
+        try:
+            loaded = reader.load(snap_dir.name)
+            raw_manifest = loaded.get("manifest") or {}
+            raw_entries = raw_manifest.get("entries") or []
+            if isinstance(raw_entries, dict):
+                raw_entries = list(raw_entries.values())
+            first_entry = raw_entries[0] if raw_entries else {}
+            as_of = str(first_entry.get("as_of") or "")
+            __import__("datetime").date.fromisoformat(as_of)
+        except (FileNotFoundError, json.JSONDecodeError, ValueError, KeyError, TypeError, IndexError):
+            continue
+        if latest_as_of is None or as_of > latest_as_of:
+            latest = loaded
+            latest_as_of = as_of
+    if latest is None:
+        print("no_loadable_snapshots", file=sys.stderr)
+        return 1
     quality = assess_quality(
         requested_tickers=requested,
         prices=latest["prices"],
         benchmark=latest["benchmark"],
-        today=snaps[-1].name.split("_")[-1] and __import__("datetime").date.fromisoformat(snaps[-1].name.split("_")[-1]),
+        today=__import__("datetime").date.fromisoformat(latest_as_of),
     )
     print(json.dumps(quality.to_dict(), indent=2, default=str))
     return 0 if quality.status.value in ("READY", "READY_WITH_GAPS") else 2

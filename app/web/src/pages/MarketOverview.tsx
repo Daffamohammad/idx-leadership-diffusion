@@ -49,6 +49,21 @@ export default function MarketOverview() {
     });
   }, [location.hash, navigate]);
 
+  // Data-driven YTD disclosure: report the baseline only when the bundle
+  // actually carries YTD excess values. Never assume a prior-year baseline.
+  const ytdSummary = useMemo(() => {
+    if (!adapted) return null;
+    const dated = adapted.sectors.filter((s) => s.ytdStartDate);
+    if (!dated.length) return null;
+    const baselines = new Set(dated.map((s) => (s.ytdStartDate ?? "").slice(0, 10)));
+    if (baselines.size !== 1) return null;
+    return {
+      baseline: [...baselines][0],
+      covered: dated.length,
+      total: adapted.sectors.length,
+    };
+  }, [adapted]);
+
   const movers = useMemo(() => {
     if (!adapted) return { leaders: [], laggards: [], eligible: 0 };
     const rows = adapted.sectors.map((s) => ({
@@ -190,7 +205,21 @@ export default function MarketOverview() {
           <div style={{ display: "grid", gap: 8, fontSize: 13, color: "var(--ink)" }}>
             <div>Data as of <strong className="tabnum">{asOf}</strong> · {formatEnumLabel(providerMode)}</div>
             <div>{sectorCount} sectors · {registryTotal !== null ? `${registryTotal} listed records` : "registry unavailable"}</div>
-            <div className="meta">Sector history covers 20D/60D excess vs IHSG. YTD is not available in this bundle (no prior-year baseline); no intraday chart is shown and no IHSG level is invented.</div>
+            <div className="meta">
+              {ytdSummary ? (
+                <>
+                  Sector history covers 20D/60D/YTD excess vs IHSG, with the YTD
+                  baseline at <strong className="tabnum">{ytdSummary.baseline}</strong>.{" "}
+                  No intraday chart is shown and no IHSG level is invented.
+                </>
+              ) : (
+                <>
+                  Sector history covers 20D/60D excess vs IHSG. YTD is not available in
+                  this bundle (no prior-year baseline); no intraday chart is shown and
+                  no IHSG level is invented.
+                </>
+              )}
+            </div>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 4 }}>
               <Link to="/map" className="btn btn-outline">Open rotation</Link>
               <Link to="/methodology" className="btn btn-ghost">Methodology</Link>

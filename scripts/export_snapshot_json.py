@@ -400,6 +400,90 @@ def _build_breadth_history(
     )
 
 
+def _build_rotation_history(
+    reader: SnapshotReader,
+    snapshot_id: str,
+    current_snapshot: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """Build real dated rotation axes from compatible persisted observations.
+
+    Mirrors ``_build_breadth_history``: only contract-compatible snapshots at
+    or before the current as-of contribute, and every emitted point carries
+    the values the rotation contract actually uses -- YTD excess (relative
+    strength) and 20D/60D excess (momentum). Points without a YTD excess are
+    omitted rather than interpolated, so a trail can never be drawn through a
+    value the pipeline did not compute.
+    """
+    current_entries = (current_snapshot.get("manifest") or {}).get("entries") or []
+    if not current_entries or not isinstance(current_entries[0], dict):
+        return []
+    current_entry = current_entries[0]
+    current_as_of = _iso_date(current_entry.get("as_of"))
+    if current_as_of is None:
+        return []
+
+    points: dict[tuple[str, str], dict[str, Any]] = {}
+    for snapshot_path in reader.list_snapshots():
+        if snapshot_path.name == snapshot_id:
+            loaded = current_snapshot
+        else:
+            try:
+                loaded = reader.load(snapshot_path.name)
+            except (FileNotFoundError, json.JSONDecodeError, OSError):
+                continue
+
+        entries = (loaded.get("manifest") or {}).get("entries") or []
+        if not entries or not isinstance(entries[0], dict):
+            continue
+        entry = entries[0]
+        as_of = _iso_date(entry.get("as_of"))
+        if as_of is None or as_of > current_as_of:
+            continue
+        if snapshot_path.name != snapshot_id:
+            if as_of >= current_as_of:
+                continue
+            if not check_snapshot_compatibility(current_entry, entry).comparable:
+                continue
+
+        for row in _records(loaded.get("groups")):
+            group_id = row.get("group_id")
+            if not isinstance(group_id, str) or not group_id:
+                continue
+            ytd = _finite_number(row.get("group_excess_return_ytd"))
+            excess_20d = _finite_number(row.get("group_excess_return_20d"))
+            excess_60d = _finite_number(row.get("group_excess_return_60d"))
+            # The YTD axis is mandatory: a trail without it would plot a
+            # position the rotation contract never computed.
+            if ytd is None:
+                continue
+            momentum = (
+                excess_20d - excess_60d
+                if excess_20d is not None and excess_60d is not None
+                else None
+            )
+            points[(group_id, as_of)] = {
+                "group_id": group_id,
+                "as_of": as_of,
+                "group_excess_return_ytd": ytd,
+                "ytd_start_date": row.get("ytd_start_date"),
+                "group_excess_return_20d": excess_20d,
+                "group_excess_return_60d": excess_60d,
+                "relative_momentum": momentum,
+            }
+
+    counts: dict[str, int] = {}
+    for point in points.values():
+        counts[point["group_id"]] = counts.get(point["group_id"], 0) + 1
+    return sorted(
+        (
+            point
+            for point in points.values()
+            if counts.get(point["group_id"], 0) >= 3
+        ),
+        key=lambda point: (point["group_id"], point["as_of"]),
+    )
+
+
 def _load_optional_json(path: Path) -> dict[str, Any] | None:
     if not path.exists():
         return None
@@ -1093,6 +1177,7 @@ def export(
             },
         ),
         "breadth_history": _build_breadth_history(reader, snapshot_id, snap),
+        "rotation_history": _build_rotation_history(reader, snapshot_id, snap),
         "security_master": snap.get("security_master"),
         "listing_registry": _build_listing_registry(
             snapshot_dir=reader.root / snapshot_id,

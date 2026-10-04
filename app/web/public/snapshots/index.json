@@ -4,5 +4,11 @@
     "as_of": "2026-08-27",
     "provider": "sectors",
     "provider_mode": "SECTORS_LIVE"
+  },
+  {
+    "snapshot_id": "snap_public_2026-10-02",
+    "as_of": "2026-10-02",
+    "provider": "yfinance",
+    "provider_mode": "PUBLIC_PROTOTYPE"
   }
 ]

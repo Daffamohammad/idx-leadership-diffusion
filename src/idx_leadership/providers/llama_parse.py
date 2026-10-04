@@ -413,6 +413,15 @@ def _extract_ihsg(markdown: str) -> tuple[dict[str, Any], list[str], dict[str, b
             section,
         )
     if not match:
+        # Some layouts keep close, change and percentage on a single line
+        # (e.g. "6,036.888 +27.386 (0.46%)"); accept only that exact shape.
+        match = re.search(
+            r"(?im)^\s*(?P<close>[-+−]?\d[\d,]*(?:\.\d+)?)\s+"
+            r"(?P<change>[-+−]?\d[\d,]*(?:\.\d+)?)\s+"
+            r"\((?P<pct>[-+−]?\d[\d,]*(?:\.\d+)?)%\)",
+            section,
+        )
+    if not match:
         raise LlamaParseError("IHSG close/change line was not found")
     close_token = match.group("close")
     change_token = match.group("change")

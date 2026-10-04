@@ -7,9 +7,11 @@ import type { TaxonomyKind } from "../data/snapshot";
 import { formatCountLabel, formatDateLabel, formatEnumLabel, formatPercent } from "../data/format";
 import { placeMapLabels } from "../data/mapLabels";
 import {
+  buildRotationTrail,
   classifyRotation,
   relativeMomentum,
   withRotationPhase,
+  MIN_ROTATION_TRAIL_POINTS,
   type RotationGroupInput,
   type RotationPhase,
   type RotationRow,
@@ -146,6 +148,7 @@ export default function RotationView() {
   };
   const [hidden, setHidden] = useState<Set<string>>(new Set());
   const [zoom, setZoom] = useState(1);
+  const [tailLength, setTailLength] = useState(0);
   const frameRef = useRef<HTMLDivElement>(null);
 
   const groups = useMemo<RotationGroupInput[]>(() => {
@@ -224,6 +227,43 @@ export default function RotationView() {
       return next;
     });
   };
+
+  // Real dated trails. The exporter emits `rotation_history` only from
+  // contract-compatible snapshots at or before this as-of, and only for
+  // observations where the pipeline computed both axes, so a trail can be
+  // drawn through nothing but persisted values. Analyst taxonomies and the
+  // per-ticker view have no comparable history, so they stay trail-free.
+  const historyByGroup = useMemo(() => {
+    const out = new Map<string, NonNullable<typeof data>["rotationHistory"]>();
+    if (!data || isDiagnostic || mode !== "groups" || taxonomyKind !== "SECTOR") return out;
+    for (const point of data.rotationHistory ?? []) {
+      const list = out.get(point.group_id) ?? [];
+      list.push(point);
+      out.set(point.group_id, list);
+    }
+    return out;
+  }, [data, isDiagnostic, mode, taxonomyKind]);
+  const maxTrailLength = useMemo(() => {
+    let max = 0;
+    for (const list of historyByGroup.values()) {
+      max = Math.max(max, list.length - 1);
+    }
+    return Math.min(max, 5);
+  }, [historyByGroup]);
+  const tailAvailable = !isDiagnostic && mode === "groups" && taxonomyKind === "SECTOR" && maxTrailLength >= MIN_ROTATION_TRAIL_POINTS - 1;
+  const effectiveTailLength = tailAvailable ? Math.min(tailLength, maxTrailLength) : 0;
+  const trails = useMemo(() => {
+    if (!tailAvailable || effectiveTailLength <= 0) return [];
+    return plottedRows
+      .map((row) => {
+        const history = historyByGroup.get(row.id);
+        if (!history) return null;
+        const points = buildRotationTrail(history, effectiveTailLength);
+        if (points.length < 2) return null;
+        return { id: row.id, name: row.name, phase: row.phase, points };
+      })
+      .filter((entry): entry is NonNullable<typeof entry> => entry !== null);
+  }, [historyByGroup, plottedRows, tailAvailable, effectiveTailLength]);
   const labelPositions = useMemo(() => {
     const candidates = plottedRows.map((row) => {
       const xValue = isDiagnostic ? row.excess20d : row.relativeStrength;
@@ -238,6 +278,13 @@ export default function RotationView() {
     });
     return placeMapLabels(candidates, PLOT_BOUNDS, Math.min(candidates.length, 10));
   }, [isDiagnostic, plottedRows]);
+  const historyDatesLabel = useMemo(() => {
+    const dates = new Set<string>();
+    for (const list of historyByGroup.values()) {
+      for (const point of list.slice(-(effectiveTailLength + 1))) dates.add(point.as_of);
+    }
+    return [...dates].sort().join(", ");
+  }, [historyByGroup, effectiveTailLength]);
 
   if (!data) return null;
   const snapshotAsOf = formatDateLabel(data.payload.as_of);
@@ -329,10 +376,31 @@ export default function RotationView() {
 
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginBottom: 12, fontSize: 11, color: "var(--muted)" }}>
         <span className="eyebrow-muted">History:</span>
-        <button type="button" disabled title="Daily intervals require dated observation series with consistent snapshot/provider/price-basis/membership versions — not persisted in this bundle" style={{ border: "1px solid var(--line)", padding: "4px 10px", opacity: 0.5, cursor: "not-allowed" }}>Daily</button>
-        <button type="button" disabled title="Weekly sampling does not change the return formula into a weekly formula; weekly series not persisted in this bundle" style={{ border: "1px solid var(--line)", padding: "4px 10px", opacity: 0.5, cursor: "not-allowed" }}>Weekly</button>
-        <label style={{ display: "inline-flex", gap: 6, alignItems: "center", opacity: 0.6 }} title="Tails require real dated trails; trails are not drawn from repeated points, random coordinates, or forced phases">
-          Tail <input type="range" disabled value={0} aria-label="Rotation tail length (unavailable)" />
+        <button type="button" disabled title="Daily intervals require dated observation series with consistent snapshot/provider/price-basis/membership versions — only dated snapshots are persisted, so no daily series exists" style={{ border: "1px solid var(--line)", padding: "4px 10px", opacity: 0.5, cursor: "not-allowed" }}>Daily</button>
+        <button type="button" disabled title="Weekly sampling does not change the return formula into a weekly formula; only dated snapshot observations are persisted, so no weekly series exists" style={{ border: "1px solid var(--line)", padding: "4px 10px", opacity: 0.5, cursor: "not-allowed" }}>Weekly</button>
+        <label
+          style={{ display: "inline-flex", gap: 6, alignItems: "center", opacity: tailAvailable ? 1 : 0.6 }}
+          title={tailAvailable
+            ? `Trail through up to ${maxTrailLength} real dated observations per group (oldest to newest)`
+            : `Trails require at least ${MIN_ROTATION_TRAIL_POINTS} real dated observations per group from comparable snapshots — not available for this selection`}
+        >
+          Tail{" "}
+          <input
+            type="range"
+            min={0}
+            max={Math.max(1, maxTrailLength)}
+            step={1}
+            disabled={!tailAvailable}
+            value={effectiveTailLength}
+            onChange={(event) => setTailLength(Number(event.target.value))}
+            aria-label={tailAvailable ? "Rotation trail length in dated observations" : "Rotation trail length (unavailable)"}
+            aria-valuetext={tailAvailable ? `${effectiveTailLength} dated observations` : "unavailable"}
+          />
+          {tailAvailable && (
+            <span className="tabnum" style={{ color: "var(--muted)", fontFamily: "Geist Mono, monospace", fontSize: 11 }}>
+              {effectiveTailLength === 0 ? "off" : `${effectiveTailLength} obs`}
+            </span>
+          )}
         </label>
         <span>Plotted {plottedRows.length} of {rows.length} {mode === "stocks" ? "tickers" : "groups"} · table and plot share the same data, method, and period.</span>
       </div>
@@ -341,7 +409,11 @@ export default function RotationView() {
         <strong style={{ color: "var(--ink)" }}>{isDiagnostic ? "YTD signal" : "Current phase"}</strong>
         <span>{isDiagnostic
           ? `Baseline unavailable; ${formatCountLabel(diagnosticPlottable.length, mode === "stocks" ? "ticker" : "group")} remain visible in the diagnostic map and table.`
-          : comparable ? "Comparable prior exists; this view still shows the current rotation classification." : "No compatible prior snapshot; no historical phase trail is shown."}</span>
+          : comparable
+            ? effectiveTailLength > 0
+              ? `Comparable prior exists; the trail connects ${effectiveTailLength + 1} real dated observations per group (${historyDatesLabel}).`
+              : "Comparable prior exists; enable Tail to connect real dated observations per group."
+            : "No compatible prior snapshot; no historical phase trail is shown."}</span>
         {taxonomyKind !== "SECTOR" && <span style={{ color: "var(--link)" }}>Analyst-defined taxonomy</span>}
       </div>
 
@@ -372,6 +444,30 @@ export default function RotationView() {
           <text x={PLOT.left - 10} y={PLOT.top + 4} textAnchor="end" fontFamily="Geist Mono, monospace" fontSize="10" fill="var(--muted)">+30%</text>
           <text x={PLOT.left - 10} y={scaleY(0) + 4} textAnchor="end" fontFamily="Geist Mono, monospace" fontSize="10" fill="var(--muted)">0%</text>
           <text x={PLOT.left - 10} y={PLOT.top + PLOT.height} textAnchor="end" fontFamily="Geist Mono, monospace" fontSize="10" fill="var(--muted)">−30%</text>
+          {trails.map((trail) => (
+            <g key={`trail-${trail.id}`} pointerEvents="none">
+              <polyline
+                points={trail.points.map((p) => `${clamp(scaleX(p.x), PLOT.left, PLOT.left + PLOT.width)},${clamp(scaleY(p.y), PLOT.top, PLOT.top + PLOT.height)}`).join(" ")}
+                fill="none"
+                stroke={phaseColor(trail.phase)}
+                strokeWidth="1.75"
+                strokeOpacity=".55"
+                strokeDasharray="4 3"
+                strokeLinejoin="round"
+              />
+              {trail.points.slice(0, -1).map((p) => (
+                <circle
+                  key={`trail-point-${trail.id}-${p.asOf}`}
+                  cx={clamp(scaleX(p.x), PLOT.left, PLOT.left + PLOT.width)}
+                  cy={clamp(scaleY(p.y), PLOT.top, PLOT.top + PLOT.height)}
+                  r="2.75"
+                  fill={phaseColor(trail.phase)}
+                  fillOpacity=".7"
+                />
+              ))}
+              <title>{`${trail.name}: trail through ${trail.points.length} dated observations (${trail.points.map((p) => p.asOf).join(" → ")})`}</title>
+            </g>
+          ))}
           {plottedRows.map((row) => {
             const xValue = isDiagnostic ? row.excess20d : row.relativeStrength;
             const x = clamp(scaleX(xValue ?? 0), PLOT.left, PLOT.left + PLOT.width);

@@ -40,6 +40,18 @@ def main() -> int:
         help="Opt into a mixed-provider index; the browser otherwise defaults to live Sectors snapshots.",
     )
     parser.add_argument(
+        "--ids",
+        nargs="+",
+        default=None,
+        metavar="SNAPSHOT_ID",
+        help=(
+            "Curated allowlist of snapshot ids (overrides the provider-mode "
+            "filter). Each id must have an exported payload and pass "
+            "payload/manifest parity checks. Use this to pin the historical "
+            "evidence snapshot together with the latest validated snapshot."
+        ),
+    )
+    parser.add_argument(
         "--allow-outside-root",
         action="store_true",
         help="Acknowledge writing outputs outside the project root.",
@@ -79,7 +91,15 @@ def main() -> int:
     reader = SnapshotReader()
     out_path = Path(args.out) if args.out else PUBLIC_DIR / "index.json"
     entries: list[dict[str, str | None]] = []
-    for snap_dir in sorted(reader.list_snapshots(), key=lambda p: p.name):
+    snap_dirs = sorted(reader.list_snapshots(), key=lambda p: p.name)
+    if args.ids:
+        wanted = set(args.ids)
+        snap_dirs = [p for p in snap_dirs if p.name in wanted]
+        missing = wanted - {p.name for p in snap_dirs}
+        if missing:
+            print(f"ERROR: unknown snapshot ids: {sorted(missing)}", file=sys.stderr)
+            return 2
+    for snap_dir in snap_dirs:
         # Only advertise payloads that the SPA can actually fetch. This keeps
         # the index safe when an operator exports one snapshot from a larger
         # on-disk history.
@@ -112,7 +132,7 @@ def main() -> int:
             or first.get("provider_mode")
             or manifest.get("provider_mode")
         )
-        if not args.include_all and mode != requested_provider_mode:
+        if not args.include_all and not args.ids and mode != requested_provider_mode:
             continue
         entries.append(
             {

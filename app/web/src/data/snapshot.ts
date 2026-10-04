@@ -285,6 +285,22 @@ export interface SnapshotBreadthHistoryPoint {
   group_excess_return_20d: number | null;
 }
 
+/**
+ * One dated rotation observation (2026-10-02 refresh). Both axes are the
+ * values the rotation contract uses: YTD excess vs the benchmark
+ * (relative strength) and 20D/60D excess (momentum). A point is only present
+ * when the pipeline actually computed the YTD excess for that date.
+ */
+export interface SnapshotRotationHistoryPoint {
+  group_id: string;
+  as_of: string;
+  group_excess_return_ytd: number;
+  ytd_start_date?: string | null;
+  group_excess_return_20d: number | null;
+  group_excess_return_60d: number | null;
+  relative_momentum: number | null;
+}
+
 export interface GroupPriceHistoryPoint {
   date: string;
   value: number;
@@ -820,6 +836,7 @@ export interface SnapshotPayload {
   // New exports use an array of persisted absolute breadth observations.
   // Legacy payloads may still carry an empty object.
   breadth_history: SnapshotBreadthHistoryPoint[] | Record<string, unknown>;
+  rotation_history?: SnapshotRotationHistoryPoint[] | Record<string, unknown>;
   // Descriptive equal-weight group index, rebased to 100. This is chart-only
   // data and is never consumed by the analytical signal pipeline.
   group_price_history?: Record<string, GroupPriceHistoryPoint[]>;
