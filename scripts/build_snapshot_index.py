@@ -91,6 +91,7 @@ def main() -> int:
     reader = SnapshotReader()
     out_path = Path(args.out) if args.out else PUBLIC_DIR / "index.json"
     entries: list[dict[str, str | None]] = []
+    rejected: dict[str, str] = {}
     snap_dirs = sorted(reader.list_snapshots(), key=lambda p: p.name)
     if args.ids:
         wanted = set(args.ids)
@@ -105,27 +106,40 @@ def main() -> int:
         # on-disk history.
         payload_path = out_path.parent / f"{snap_dir.name}.json"
         if not payload_path.exists():
+            rejected[snap_dir.name] = f"no exported payload at {payload_path.name}"
             continue
         manifest_path = snap_dir / "manifest.json"
         if not manifest_path.exists():
+            rejected[snap_dir.name] = "snapshot directory has no manifest.json"
             continue
         try:
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
             payload = json.loads(payload_path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
+        except (OSError, json.JSONDecodeError) as exc:
+            rejected[snap_dir.name] = f"unreadable manifest or payload: {exc}"
             continue
         manifest_entries = manifest.get("entries") or []
         payload_manifest_entries = (payload.get("manifest") or {}).get("entries") or []
         if not manifest_entries or not payload_manifest_entries:
+            rejected[snap_dir.name] = "manifest or payload has no entries"
             continue
         first = manifest_entries[0]
         payload_entry = payload_manifest_entries[0]
         # Do not let an index point at a stale or mismatched JSON export.
         if payload.get("snapshot_id") != snap_dir.name:
+            rejected[snap_dir.name] = (
+                f"payload snapshot_id={payload.get('snapshot_id')!r} does not match "
+                f"directory {snap_dir.name!r}"
+            )
             continue
         if payload_entry.get("snapshot_id") != first.get("snapshot_id"):
+            rejected[snap_dir.name] = "payload manifest entry id differs from snapshot manifest"
             continue
         if payload.get("as_of") != first.get("as_of"):
+            rejected[snap_dir.name] = (
+                f"payload as_of={payload.get('as_of')!r} differs from snapshot manifest "
+                f"as_of={first.get('as_of')!r}"
+            )
             continue
         mode = (
             payload_entry.get("provider_mode")
@@ -142,6 +156,25 @@ def main() -> int:
                 "provider_mode": mode,
             }
         )
+
+    # An explicitly requested snapshot must appear in the published index. If
+    # any requested id was dropped (missing export, unreadable file, identity
+    # mismatch), stop before replacing the index: silently publishing a subset
+    # would hide the omission and downgrade the active bundle.
+    if args.ids:
+        requested_but_rejected = sorted(set(args.ids) & set(rejected))
+        if requested_but_rejected:
+            for snapshot_id in requested_but_rejected:
+                print(
+                    f"ERROR: requested snapshot {snapshot_id} was rejected: "
+                    f"{rejected[snapshot_id]}",
+                    file=sys.stderr,
+                )
+            print(
+                "ERROR: refusing to write index.json with a missing requested entry",
+                file=sys.stderr,
+            )
+            return 2
 
     entries.sort(key=lambda item: (str(item.get("as_of") or ""), str(item["snapshot_id"])))
 

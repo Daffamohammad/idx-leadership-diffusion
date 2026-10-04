@@ -25,7 +25,9 @@ CLI::
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import math
 import re
 import sys
 import warnings
@@ -147,6 +149,99 @@ def _parse_ds_pdf(path: Path) -> tuple[date, float, float, float]:
     return session, prev, change, printed if printed is not None else float("nan")
 
 
+def _display_path(path: Path) -> str:
+    """Repo-relative when possible, absolute otherwise (temp panels, etc.)."""
+    try:
+        return str(path.relative_to(PROJECT_ROOT))
+    except ValueError:
+        return str(path)
+
+
+def _check_panel_integrity(
+    prices: "pd.DataFrame",
+    benchmark: "pd.DataFrame",
+    panel_manifest: dict[str, Any],
+    panel_dir: Path,
+) -> dict[str, Any]:
+    """Structural, finiteness and provenance checks for the panel itself.
+
+    Used twice: once as an early gate (so a corrupt panel never reaches the
+    official comparisons) and once inside the full report.
+    """
+    import pandas as pd
+
+    counts = panel_manifest.get("counts", {})
+    dupes = int(prices.duplicated(subset=["ticker", "date"]).sum())
+    price_matrix = prices[["close", "adjusted_close"]].to_numpy(dtype=float)
+    nonfinite = int(sum(1 for value in price_matrix.ravel() if not math.isfinite(value)))
+    nonpositive = int((prices[["close", "adjusted_close"]] <= 0).any(axis=1).sum())
+    bench_values = benchmark["close"].to_numpy(dtype=float)
+    bench_nonfinite = int(sum(1 for value in bench_values if not math.isfinite(value)))
+    bench_nonpositive = int((benchmark["close"] <= 0).sum())
+
+    # The panel must still be the artifact that was fetched: verify the file
+    # hashes recorded in source_manifest.json before trusting any of its values.
+    recorded_files = panel_manifest.get("files") or {}
+    hash_mismatches = []
+    missing_hash_records = []
+    for name in ("prices.csv", "benchmark.csv"):
+        recorded = (recorded_files.get(name) or {}).get("sha256")
+        if not recorded:
+            missing_hash_records.append(name)
+            continue
+        actual = hashlib.sha256((panel_dir / name).read_bytes()).hexdigest()
+        if actual != recorded:
+            hash_mismatches.append(
+                {"file": name, "recorded_sha256": recorded, "actual_sha256": actual}
+            )
+
+    latest_session = max(prices["date"])
+    baseline_rows = prices[prices["date"] == YTD_BASELINE]
+    baseline_invalid = int(
+        (
+            ~baseline_rows["close"].map(math.isfinite)
+            | ~baseline_rows["adjusted_close"].map(math.isfinite)
+            | (baseline_rows["close"] <= 0)
+            | (baseline_rows["adjusted_close"] <= 0)
+        ).sum()
+    )
+    bench = dict(zip(benchmark["date"], benchmark["close"]))
+    expected_latest = ((panel_manifest.get("sessions") or {}).get("latest_session")) or ""
+    ok = (
+        dupes == 0
+        and nonpositive == 0
+        and nonfinite == 0
+        and bench_nonfinite == 0
+        and bench_nonpositive == 0
+        and baseline_invalid == 0
+        and not hash_mismatches
+        and not missing_hash_records
+        and len(baseline_rows) == counts.get("ytd_baseline_present")
+        and expected_latest == latest_session.isoformat()
+    )
+    return {
+        "rows": int(len(prices)),
+        "benchmark_rows": int(len(benchmark)),
+        "duplicate_ticker_date_rows": dupes,
+        "nonpositive_price_rows": nonpositive,
+        "nonfinite_price_rows": nonfinite,
+        "benchmark_nonfinite_rows": bench_nonfinite,
+        "benchmark_nonpositive_rows": bench_nonpositive,
+        "ytd_baseline_invalid_rows": baseline_invalid,
+        "panel_file_hashes_verified": not hash_mismatches and not missing_hash_records,
+        "panel_file_hash_mismatches": hash_mismatches,
+        "panel_files_without_recorded_hash": missing_hash_records,
+        "units": panel_manifest.get("units"),
+        "price_basis": panel_manifest.get("price_basis"),
+        "ytd_baseline_date": YTD_BASELINE.isoformat(),
+        "ytd_baseline_tickers": int(len(baseline_rows)),
+        "ytd_baseline_benchmark_close": bench.get(YTD_BASELINE),
+        "latest_session": latest_session.isoformat(),
+        "benchmark_latest_session": max(benchmark["date"]).isoformat(),
+        "status": "PASS" if ok else "FAIL",
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="validate_public_panel")
     parser.add_argument("--panel-dir", default=None)
@@ -167,6 +262,32 @@ def main() -> int:
     benchmark["date"] = benchmark["date"].dt.date
 
     checks: dict[str, Any] = {}
+
+    # Integrity and provenance gate first: a panel that does not match the
+    # hashes recorded at fetch time, or that carries a non-finite price, must
+    # not be compared against official sources — every downstream number would
+    # inherit the defect while still looking validated.
+    integrity_early = _check_panel_integrity(prices, benchmark, panel_manifest, panel_dir)
+    if integrity_early["status"] != "PASS":
+        report = {
+            "kind": "PUBLIC_PANEL_VALIDATION",
+            "validated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "panel_dir": _display_path(panel_dir),
+            "panel_window": panel_manifest.get("window"),
+            "status": "FAIL",
+            "checks": {"panel_integrity": integrity_early},
+        }
+        out_path = Path(args.out)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+        print(
+            "status=FAIL (panel integrity/provenance gate): "
+            f"nonfinite={integrity_early['nonfinite_price_rows']} "
+            f"hash_mismatches={len(integrity_early['panel_file_hash_mismatches'])} "
+            f"baseline_invalid={integrity_early['ytd_baseline_invalid_rows']}",
+            file=sys.stderr,
+        )
+        return 1
 
     # --- 1. benchmark vs official composite workbook ---------------------
     workbook_path = (
@@ -349,32 +470,11 @@ def main() -> int:
     }
 
     # --- 5. panel integrity ------------------------------------------------
-    dupes = int(prices.duplicated(subset=["ticker", "date"]).sum())
-    nonpositive = int((prices[["close", "adjusted_close"]] <= 0).any(axis=1).sum())
-    baseline_rows = prices[prices["date"] == YTD_BASELINE]
-    bench_baseline = bench.get(YTD_BASELINE)
-    integrity_ok = (
-        dupes == 0
-        and nonpositive == 0
-        and len(baseline_rows) == counts.get("ytd_baseline_present")
-        and latest_session == date.fromisoformat(
-            panel_manifest["sessions"]["latest_session"]
-        )
+    # Shared with the early gate: finiteness, positivity and panel-file
+    # provenance are checked before any official comparison runs.
+    checks["panel_integrity"] = _check_panel_integrity(
+        prices, benchmark, panel_manifest, panel_dir
     )
-    checks["panel_integrity"] = {
-        "rows": int(len(prices)),
-        "benchmark_rows": int(len(benchmark)),
-        "duplicate_ticker_date_rows": dupes,
-        "nonpositive_price_rows": nonpositive,
-        "units": panel_manifest.get("units"),
-        "price_basis": panel_manifest.get("price_basis"),
-        "ytd_baseline_date": YTD_BASELINE.isoformat(),
-        "ytd_baseline_tickers": int(len(baseline_rows)),
-        "ytd_baseline_benchmark_close": bench_baseline,
-        "latest_session": latest_session.isoformat(),
-        "benchmark_latest_session": max(benchmark["date"]).isoformat(),
-        "status": "PASS" if integrity_ok else "FAIL",
-    }
 
     # --- 6. corporate actions disclosure -----------------------------------
     checks["corporate_actions"] = {
@@ -399,7 +499,7 @@ def main() -> int:
     report = {
         "kind": "PUBLIC_PANEL_VALIDATION",
         "validated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "panel_dir": str(panel_dir.relative_to(PROJECT_ROOT)),
+        "panel_dir": _display_path(panel_dir),
         "panel_window": panel_manifest.get("window"),
         "status": status,
         "checks": checks,

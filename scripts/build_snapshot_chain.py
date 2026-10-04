@@ -25,9 +25,11 @@ CLI::
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import shutil
 import sys
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -160,16 +162,102 @@ def _summarize(snapshot_dir: Path) -> dict[str, Any]:
     }
 
 
+PROVENANCE_FILENAME = "panel_provenance.json"
+
+
+def _panel_fingerprints(panel_dir: Path) -> dict[str, str]:
+    """Content hashes of the panel files a snapshot is derived from."""
+    return {
+        name: hashlib.sha256((panel_dir / name).read_bytes()).hexdigest()
+        for name in ("prices.csv", "benchmark.csv")
+    }
+
+
+def _write_provenance(out_dir: Path, *, as_of: str, panel_dir: Path, fingerprints: dict[str, str]) -> None:
+    payload = {
+        "kind": "PUBLIC_PANEL_PROVENANCE",
+        "as_of": as_of,
+        "panel_dir": str(panel_dir),
+        "panel_files": fingerprints,
+        "bound_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    }
+    (out_dir / PROVENANCE_FILENAME).write_text(
+        json.dumps(payload, indent=2), encoding="utf-8"
+    )
+
+
+def _verify_existing(
+    out_dir: Path,
+    *,
+    snapshot_id: str,
+    panel_dir: Path,
+    fingerprints: dict[str, str],
+    force_rebuild: bool,
+) -> bool:
+    """Decide whether an existing snapshot may be reused as-is.
+
+    A snapshot is only reusable when it was built from exactly these panel
+    files. Otherwise the bundle on disk silently describes different inputs
+    while the chain report would still credit the current panel, so the run
+    must stop instead of "skipping" a stale bundle.
+    """
+    if force_rebuild:
+        return False
+    path = out_dir / PROVENANCE_FILENAME
+    if not path.is_file():
+        print(
+            f"ERROR: {snapshot_id} exists without panel provenance; it cannot be "
+            f"verified against panel {panel_dir}. Re-run with --force-rebuild to "
+            f"rebuild it from the current panel.",
+            file=sys.stderr,
+        )
+        raise SystemExit(2)
+    try:
+        recorded = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        print(
+            f"ERROR: {snapshot_id} panel provenance is unreadable ({exc}); "
+            f"re-run with --force-rebuild",
+            file=sys.stderr,
+        )
+        raise SystemExit(2)
+    recorded_files = recorded.get("panel_files") or {}
+    mismatched = sorted(
+        name
+        for name, digest in fingerprints.items()
+        if recorded_files.get(name) != digest
+    )
+    if mismatched:
+        print(
+            f"ERROR: {snapshot_id} was built from a different price panel "
+            f"(differing files: {mismatched}). Refusing to reuse it with panel "
+            f"{panel_dir}. Re-run with --force-rebuild to rebuild the whole chain.",
+            file=sys.stderr,
+        )
+        raise SystemExit(2)
+    return True
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="build_snapshot_chain")
     parser.add_argument("--panel-dir", default=None)
     parser.add_argument("--asofs", nargs="*", default=DEFAULT_ASOFS)
     parser.add_argument("--snapshots-root", default=str(SNAPSHOTS_ROOT))
+    parser.add_argument("--report", default=None)
+    parser.add_argument(
+        "--force-rebuild",
+        action="store_true",
+        help=(
+            "Rebuild snapshots that already exist. Use this when the price panel "
+            "changed; reuse is refused automatically on any provenance mismatch."
+        ),
+    )
     args = parser.parse_args()
 
     panel_dir = Path(args.panel_dir) if args.panel_dir else _latest_panel()
     snapshots_root = Path(args.snapshots_root)
     snapshots_root.mkdir(parents=True, exist_ok=True)
+    fingerprints = _panel_fingerprints(panel_dir)
 
     records: list[dict[str, Any]] = []
     hashes: set[str] = set()
@@ -177,9 +265,20 @@ def main() -> int:
         as_of_str, as_of = _resolve_asof(requested, panel_dir)
         snapshot_id = f"snap_public_{as_of_str}"
         out_dir = snapshots_root / snapshot_id
-        if (out_dir / "manifest.json").is_file():
-            print(f"skip existing {snapshot_id}", file=sys.stderr)
+        if (out_dir / "manifest.json").is_file() and _verify_existing(
+            out_dir,
+            snapshot_id=snapshot_id,
+            panel_dir=panel_dir,
+            fingerprints=fingerprints,
+            force_rebuild=args.force_rebuild,
+        ):
+            print(f"reuse verified {snapshot_id}", file=sys.stderr)
         else:
+            if args.force_rebuild and out_dir.exists():
+                # Remove the previous bundle first: a leftover manifest.json
+                # would make the rebuild treat its own directory as an earlier
+                # snapshot, and stale files could survive into the new bundle.
+                shutil.rmtree(out_dir)
             provider = PanelCacheProvider(panel_dir, as_of=as_of)
             provider.set_as_of(as_of)
             print(f"building {snapshot_id} ...", file=sys.stderr)
@@ -191,7 +290,11 @@ def main() -> int:
                 provider_mode="PUBLIC_PROTOTYPE",
                 price_basis="adjusted_close",
             )
+            _write_provenance(
+                out_dir, as_of=as_of_str, panel_dir=panel_dir, fingerprints=fingerprints
+            )
         summary = _summarize(out_dir)
+        summary["panel_files"] = fingerprints
         records.append(summary)
         hashes.add(summary["eligible_ticker_set_hash"])
 
@@ -202,13 +305,17 @@ def main() -> int:
     chain_hash = next(iter(hashes), None)
     report = {
         "kind": "PUBLIC_SNAPSHOT_CHAIN",
-        "panel_dir": str(panel_dir.relative_to(project_root())),
+        "panel_dir": str(panel_dir.relative_to(project_root())) if str(panel_dir).startswith(str(project_root())) else str(panel_dir),
+        "panel_files": fingerprints,
         "chain_hash": chain_hash,
         "connects_to_august_priors": chain_hash == LEGACY_HASH,
         "legacy_august_hash": LEGACY_HASH,
         "snapshots": records,
     }
-    out_path = project_root() / "data" / "normalized" / "public_chain_report.json"
+    out_path = (
+        Path(args.report) if args.report
+        else project_root() / "data" / "normalized" / "public_chain_report.json"
+    )
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
 

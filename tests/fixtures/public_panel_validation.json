@@ -202,6 +202,13 @@
       "benchmark_rows": 188,
       "duplicate_ticker_date_rows": 0,
       "nonpositive_price_rows": 0,
+      "nonfinite_price_rows": 0,
+      "benchmark_nonfinite_rows": 0,
+      "benchmark_nonpositive_rows": 0,
+      "ytd_baseline_invalid_rows": 0,
+      "panel_file_hashes_verified": true,
+      "panel_file_hash_mismatches": [],
+      "panel_files_without_recorded_hash": [],
       "units": {
         "price": "IDR per share",
         "volume": "shares",

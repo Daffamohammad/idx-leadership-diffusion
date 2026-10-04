@@ -1,6 +1,10 @@
 {
   "kind": "PUBLIC_SNAPSHOT_CHAIN",
   "panel_dir": "data/raw/public/panel_2025-12-15_2026-10-04",
+  "panel_files": {
+    "prices.csv": "3c824e7bed129727342f8ba8491416817c2279a108f808e2dd5806d75556a58f",
+    "benchmark.csv": "c5d242d24a0cb3a4cf9fce6c2da500163c191fac05f2540047ec8370302e0e00"
+  },
   "chain_hash": "5ee90b3d073b02ec",
   "connects_to_august_priors": false,
   "legacy_august_hash": "a08b5e598af9551c",
@@ -24,7 +28,11 @@
       "breadth_delta_nonnull": 0,
       "comparability_status": "NO_COMPARABLE_HISTORY",
       "selected_previous": null,
-      "selected_previous_as_of": null
+      "selected_previous_as_of": null,
+      "panel_files": {
+        "prices.csv": "3c824e7bed129727342f8ba8491416817c2279a108f808e2dd5806d75556a58f",
+        "benchmark.csv": "c5d242d24a0cb3a4cf9fce6c2da500163c191fac05f2540047ec8370302e0e00"
+      }
     },
     {
       "snapshot_id": "snap_public_2026-09-11",
@@ -48,7 +56,11 @@
       "breadth_delta_nonnull": 10,
       "comparability_status": "COMPATIBLE",
       "selected_previous": "snap_public_2026-09-04",
-      "selected_previous_as_of": "2026-09-04"
+      "selected_previous_as_of": "2026-09-04",
+      "panel_files": {
+        "prices.csv": "3c824e7bed129727342f8ba8491416817c2279a108f808e2dd5806d75556a58f",
+        "benchmark.csv": "c5d242d24a0cb3a4cf9fce6c2da500163c191fac05f2540047ec8370302e0e00"
+      }
     },
     {
       "snapshot_id": "snap_public_2026-09-18",
@@ -72,7 +84,11 @@
       "breadth_delta_nonnull": 10,
       "comparability_status": "COMPATIBLE",
       "selected_previous": "snap_public_2026-09-11",
-      "selected_previous_as_of": "2026-09-11"
+      "selected_previous_as_of": "2026-09-11",
+      "panel_files": {
+        "prices.csv": "3c824e7bed129727342f8ba8491416817c2279a108f808e2dd5806d75556a58f",
+        "benchmark.csv": "c5d242d24a0cb3a4cf9fce6c2da500163c191fac05f2540047ec8370302e0e00"
+      }
     },
     {
       "snapshot_id": "snap_public_2026-09-25",
@@ -95,7 +111,11 @@
       "breadth_delta_nonnull": 10,
       "comparability_status": "COMPATIBLE",
       "selected_previous": "snap_public_2026-09-18",
-      "selected_previous_as_of": "2026-09-18"
+      "selected_previous_as_of": "2026-09-18",
+      "panel_files": {
+        "prices.csv": "3c824e7bed129727342f8ba8491416817c2279a108f808e2dd5806d75556a58f",
+        "benchmark.csv": "c5d242d24a0cb3a4cf9fce6c2da500163c191fac05f2540047ec8370302e0e00"
+      }
     },
     {
       "snapshot_id": "snap_public_2026-10-02",
@@ -119,7 +139,11 @@
       "breadth_delta_nonnull": 10,
       "comparability_status": "COMPATIBLE",
       "selected_previous": "snap_public_2026-09-25",
-      "selected_previous_as_of": "2026-09-25"
+      "selected_previous_as_of": "2026-09-25",
+      "panel_files": {
+        "prices.csv": "3c824e7bed129727342f8ba8491416817c2279a108f808e2dd5806d75556a58f",
+        "benchmark.csv": "c5d242d24a0cb3a4cf9fce6c2da500163c191fac05f2540047ec8370302e0e00"
+      }
     }
   ]
 }

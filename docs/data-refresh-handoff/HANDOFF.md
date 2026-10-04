@@ -241,12 +241,12 @@ endpoint (WAF 403), IDX statistics index page direct fetch (403).
 
 | Command | Result |
 |---|---|
-| `.venv/bin/python -m pytest -q` | **755 passed**, 2 warnings (both pre-existing `SectorsProvider.get_full_universe_close` deprecations in `tests/test_sectors_provider.py`) |
+| `.venv/bin/python -m pytest -q` | **763 passed**, 2 warnings (both pre-existing `SectorsProvider.get_full_universe_close` deprecations in `tests/test_sectors_provider.py`) |
 | `npm run typecheck --prefix app/web` | clean |
 | `npm run build --prefix app/web` | built; chunk-size advisory only (pre-existing) |
 | `git diff --check` | clean |
 
-Baseline before this work was 729 passed with the same 2 warnings; +26 tests.
+Baseline before this work was 729 passed with the same 2 warnings; +34 tests.
 New coverage in `tests/test_public_refresh_chain.py` (25 tests): export completeness, manifest
 parity, disclosed WSKT gap, YTD baseline and per-feature YTD, benchmark-YTD reconciliation against
 official closes, comparability (COMPATIBLE with 4 real priors, Sectors INCOMPARABLE), transitions
@@ -254,6 +254,9 @@ carrying previous values, supported/under-minimum diffusion states, breadth-hist
 history (5 dates/group, axis consistency, endpoint equality with the group row, no future or
 incompatible leakage), all panel-validation invariants, plus four `bun x tsx` contracts for
 `pickLatestEntry` and `buildRotationTrail` (including the <3-point refusal and axis-drop rules).
+
+`tests/test_refresh_tool_safety.py` (8 tests) locks the three post-review tooling fixes
+described in §9, each reproducing the reported failure in a temporary directory.
 
 Updated contracts in `tests/test_comparability_and_adapter.py`: the index is now the curated pair
 (Sectors evidence + validated latest, both with fetchable payloads and matching identity), the
@@ -316,9 +319,17 @@ git diff --check
 
 Notes for the next operator:
 - `--ids` curates the index; without it the builder keeps its historical SECTORS_LIVE default.
+  Under `--ids` a missing or invalid requested entry **fails the command** instead of publishing
+  a partial index, so re-run `export_snapshot_json` first if a payload is missing.
 - Re-running `build_snapshot_index` without `--ids` would drop the public entry — always pass it.
 - If a new session lands, add it to `--asofs`; the chain enforces cohort parity and will refuse
   to continue if the eligible set changes (rebuild the whole chain, never one snapshot).
+- **After re-fetching the panel**, every existing chain snapshot becomes stale by definition: the
+  build will exit 2 with a panel-provenance error. That is intended — rerun with
+  `--force-rebuild` to rebuild the entire chain from the new panel, then re-export and re-index.
+  Never delete snapshots by hand to get past the check.
+- `validate_public_panel` exits 1 on an integrity/provenance failure and writes only the
+  `panel_integrity` check; official comparisons are skipped entirely in that case.
 - `data/raw/*`, `data/snapshots/*`, `data/normalized/*` are gitignored by design; the active
   payload is explicitly whitelisted so the SPA contract tests work on a clean checkout.
 
@@ -355,3 +366,37 @@ Notes for the next operator:
    unchanged by this refresh.
 7. **Breadth deltas render as `%` in the UI** (e.g. `+40.0%`) while the transition evidence text
    uses `pp`. Pre-existing display convention; the underlying unit is percentage points.
+
+---
+
+## 9. Post-handoff review fixes (three P2 tooling defects)
+
+An independent review reproduced three defects in the new refresh tools. All three are fixed and
+pinned by `tests/test_refresh_tool_safety.py`.
+
+**9.1 Chain builder reused bundles regardless of the panel that produced them.**
+`build_snapshot_chain` skipped any existing snapshot directory, so an edited panel left stale
+values in place while the report still credited the new panel. Snapshots are now bound to their
+inputs: each build writes `panel_provenance.json` (sha256 of `prices.csv` and `benchmark.csv`),
+and reuse requires an exact match. A mismatch — or a bundle with no provenance record — aborts
+with exit 2 and an actionable message instead of reporting success. `--force-rebuild` is the
+explicit override; it deletes the previous bundle before rebuilding so no stale artifact (or the
+bundle's own leftover manifest) can leak into the new one. After the fix, a clean rebuild of all
+five chain dates reproduced a **byte-identical** exported payload, and a subsequent no-op run
+reported `reuse verified` for all five.
+
+**9.2 Validator accepted NaN prices and never verified panel hashes.**
+`close <= 0` is False for NaN, so a corrupted baseline passed, and baseline coverage counted rows
+rather than valid prices. The validator now requires finite positive prices everywhere
+(`nonfinite_price_rows`, `benchmark_nonfinite_rows`, `ytd_baseline_invalid_rows`) and verifies the
+panel files against the sha256 values recorded in `source_manifest.json`
+(`panel_file_hashes_verified`, `panel_file_hash_mismatches`). Integrity and provenance are checked
+in an **early gate** before any official comparison runs: a corrupt or unverified panel now exits
+1 with a report containing only `panel_integrity`, so no downstream number can inherit the defect
+while still looking validated.
+
+**9.3 Index builder silently dropped a requested snapshot.**
+With `--ids`, a requested id whose exported payload was missing (or unreadable, or failing an
+identity check) was skipped and the index was still replaced — publishing a subset that omitted
+the newest bundle. Every skip now records a reason, and under `--ids` any rejected requested id
+fails with exit 2 **before** `index.json` is touched. The happy path is unchanged.
