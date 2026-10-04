@@ -200,4 +200,30 @@ No WAF bypass, paid provider call or Sectors request is part of this runbook.
   toggles and the dated control graph were exercised, beyond screenshot checks.
 - Screenshots are saved in the task's visualization directory: overview,
   heatmap, foreign flow, ownership and the mobile ownership graph.
-- Clean-clone verification is recorded after the final local commit below.
+- Actual clone of local implementation commit `6752b4b`: **811 passed, zero
+  skipped**, exit 0, two existing warnings, 25.22 seconds. Its Git tree remained
+  clean afterward. The raw directory contained only tracked `.gitkeep`; no
+  ignored source cache, built snapshot input, or frontend `node_modules` was
+  present. Package import and `project_root()` both resolved inside the clone,
+  preventing contamination by the original editable installation.
+
+The implementation is committed locally as `6752b4b`, following the source
+foundation `6cb2e11`. This verification record is a documentation-only follow-up.
+
+To reproduce from the repository root, choose a fresh temporary directory and
+use the existing test environment with the clone's source path explicitly:
+
+```sh
+verification_python="$PWD/.venv/bin/python"
+git clone --no-hardlinks . /tmp/idx-market-verification
+cd /tmp/idx-market-verification
+PYTHONPATH="$PWD/src:$PWD" "$verification_python" -c \
+  'from idx_leadership.utils import project_root; print(project_root())'
+PYTHONPATH="$PWD/src:$PWD" "$verification_python" -m pytest -q
+git status --porcelain
+```
+
+The printed project root must be the new clone, and the final status must be
+empty. Do not claim a clean-clone pass if imports point back to the original
+checkout. Source ingestion is a separate check requiring the official caches
+and optional parsers; UI playback and regression tests use tracked artifacts.
