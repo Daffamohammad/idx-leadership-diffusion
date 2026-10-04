@@ -63,6 +63,13 @@ def _weekdays(start: date, end: date) -> list[date]:
     return days
 
 
+def _fixture_digest() -> str | None:
+    """Digest of the tracked validation fixture, or None when absent."""
+    if not VALIDATION_FIXTURE.exists():
+        return None
+    return hashlib.sha256(VALIDATION_FIXTURE.read_bytes()).hexdigest()
+
+
 def _universe_tickers() -> list[str]:
     """Tickers from the committed universe config (tracked, always present)."""
     import yaml
@@ -360,7 +367,13 @@ def test_validator_rejects_nan_baseline_price(tmp_path: Path) -> None:
     )
     assert patched == 1
 
-    result = _run("scripts.validate_public_panel", "--panel-dir", str(panel), "--out", str(out))
+    result = _run(
+        "scripts.validate_public_panel",
+        "--panel-dir", str(panel),
+        "--sources-root", str(tmp_path / "no_official_sources"),
+        "--out", str(out),
+        "--no-publish-fixture",
+    )
     assert result.returncode == 1, result.stderr
     report = json.loads(out.read_text(encoding="utf-8"))
     assert report["status"] == "FAIL"
@@ -386,7 +399,13 @@ def test_validator_verifies_panel_file_hashes(tmp_path: Path) -> None:
     )
     assert patched == 1
 
-    result = _run("scripts.validate_public_panel", "--panel-dir", str(panel), "--out", str(out))
+    result = _run(
+        "scripts.validate_public_panel",
+        "--panel-dir", str(panel),
+        "--sources-root", str(tmp_path / "no_official_sources"),
+        "--out", str(out),
+        "--no-publish-fixture",
+    )
     assert result.returncode == 1, result.stderr
     integrity = json.loads(out.read_text(encoding="utf-8"))["checks"]["panel_integrity"]
     assert integrity["panel_file_hashes_verified"] is False
@@ -397,28 +416,45 @@ def test_validator_verifies_panel_file_hashes(tmp_path: Path) -> None:
 def test_validator_accepts_untouched_generated_panel_structure(tmp_path: Path) -> None:
     """An intact generated panel clears integrity and provenance.
 
-    The overall verdict still depends on the official source files, which are
-    not part of a committed checkout, so only the structural evidence is
-    asserted here.
+    Official comparison is isolated with an empty ``--sources-root`` so this
+    stays a purely structural test: the synthetic prices are never compared
+    against real IDX prices, and the verdict is the same whether or not the
+    official files and parsers happen to exist on the machine. Fixture
+    publication is disabled so the tracked evidence cannot be touched.
     """
     panel = _panel_fixture(tmp_path)
     out = tmp_path / "validation.json"
-    _run("scripts.validate_public_panel", "--panel-dir", str(panel), "--out", str(out))
+    fixture_before = _fixture_digest()
+
+    result = _run(
+        "scripts.validate_public_panel",
+        "--panel-dir", str(panel),
+        "--sources-root", str(tmp_path / "no_official_sources"),
+        "--out", str(out),
+        "--no-publish-fixture",
+    )
+    assert result.returncode == 1, result.stderr
     report = json.loads(out.read_text(encoding="utf-8"))
+
     integrity = report["checks"]["panel_integrity"]
-    assert integrity["status"] == "PASS"
+    assert integrity["status"] == "PASS", "an intact panel must pass the gate"
     assert integrity["nonfinite_price_rows"] == 0
     assert integrity["ytd_baseline_invalid_rows"] == 0
     assert integrity["ytd_baseline_tickers"] == len(_universe_tickers())
     assert integrity["panel_file_hashes_verified"] is True
-    if report["status"] != "PASS":
-        # Official comparisons need the cached IDX files; report why.
-        unavailable = [
-            name
-            for name, check in report["checks"].items()
-            if check.get("status") == "SOURCE_UNAVAILABLE"
-        ]
-        assert unavailable, f"unexpected failure: {sorted(report['checks'])}"
+
+    # Official comparisons must be reported as unavailable, not failed.
+    for name in (
+        "benchmark_vs_official_workbook",
+        "benchmark_vs_daily_statistics_pdfs",
+        "stocks_vs_official_stock_summary",
+    ):
+        assert report["checks"][name]["status"] == "SOURCE_UNAVAILABLE", (
+            f"{name} should be unavailable, not failed, when no sources are given"
+        )
+    assert _fixture_digest() == fixture_before, (
+        "the tracked validation fixture must never be rewritten by this test"
+    )
 
 
 def test_validator_records_new_integrity_fields() -> None:
@@ -432,6 +468,37 @@ def test_validator_records_new_integrity_fields() -> None:
     assert integrity["ytd_baseline_invalid_rows"] == 0
     assert integrity["panel_file_hashes_verified"] is True
     assert integrity["panel_file_hash_mismatches"] == []
+
+
+def test_fixture_publication_refuses_non_passing_reports(tmp_path: Path) -> None:
+    """Committed evidence must never be overwritten by a failing run.
+
+    This is the guard that keeps a synthetic-panel run (or any future failure)
+    from republishing ``tests/fixtures/public_panel_validation.json`` as if the
+    defect were the expected state.
+    """
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "validate_public_panel", REPO_ROOT / "scripts" / "validate_public_panel.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    target = tmp_path / "fixture.json"
+    passing = {"kind": "PUBLIC_PANEL_VALIDATION", "panel_window": {}, "status": "PASS", "checks": {}}
+    assert module._publish_fixture(passing, target) is True
+    published = target.read_bytes()
+
+    for status in ("FAIL", "SOURCE_UNAVAILABLE"):
+        assert module._publish_fixture(dict(passing, status=status), target) is False, status
+        assert target.read_bytes() == published, (
+            f"a {status} report must leave the published fixture untouched"
+        )
+        # A path that was never published must stay absent.
+        fresh = tmp_path / f"fresh-{status}.json"
+        assert module._publish_fixture(dict(passing, status=status), fresh) is False
+        assert not fresh.exists()
 
 
 # ── 3. index builder must fail on a rejected requested id ──────────

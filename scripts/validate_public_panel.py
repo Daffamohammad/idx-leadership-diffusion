@@ -295,18 +295,74 @@ def _fail_official_comparisons_unavailable(
     return 1
 
 
+def _publish_fixture(report: dict[str, Any], fixture_path: Path) -> bool:
+    """Publish the tracked test fixture, but only for a passing validation.
+
+    The fixture is committed evidence that the real panel validated cleanly.
+    A failing run -- including one against a synthetic or partial panel --
+    must never overwrite it with a report that would document a defect as
+    the expected state.
+    """
+    if report.get("status") != "PASS":
+        print(
+            f"refusing to publish validation fixture from a {report.get('status')} report",
+            file=sys.stderr,
+        )
+        return False
+    fixture_path.parent.mkdir(parents=True, exist_ok=True)
+    # The report carries no bulk series (mismatch lists and 11 PDF rows only),
+    # so the trimmed copy keeps every check for assertions while dropping the
+    # timestamp so a re-run does not churn the tracked file.
+    trimmed = {
+        "kind": report["kind"],
+        "panel_window": report["panel_window"],
+        "status": report["status"],
+        "checks": report["checks"],
+    }
+    fixture_path.write_text(json.dumps(trimmed, indent=2), encoding="utf-8")
+    return True
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="validate_public_panel")
     parser.add_argument("--panel-dir", default=None)
     parser.add_argument(
         "--out", default=str(PROJECT_ROOT / "data" / "normalized" / "public_panel_validation.json")
     )
+    parser.add_argument(
+        "--sources-root",
+        default=str(PROJECT_ROOT / "data" / "raw"),
+        help=(
+            "Root of the cached official IDX sources (default data/raw). Point "
+            "this at an empty directory to run the structural/provenance checks "
+            "without any official comparison."
+        ),
+    )
+    parser.add_argument(
+        "--fixture-output",
+        default=str(PROJECT_ROOT / "tests" / "fixtures" / "public_panel_validation.json"),
+        help="Where to publish the trimmed validation fixture for the test suite.",
+    )
+    parser.add_argument(
+        "--publish-fixture",
+        dest="publish_fixture",
+        action="store_true",
+        default=True,
+        help="Publish the test fixture (default). Only a PASS report is published.",
+    )
+    parser.add_argument(
+        "--no-publish-fixture",
+        dest="publish_fixture",
+        action="store_false",
+        help="Do not touch the test fixture (use for synthetic or partial panels).",
+    )
     args = parser.parse_args()
+    sources_root = Path(args.sources_root)
 
     import pandas as pd
 
     panel_dir = Path(args.panel_dir) if args.panel_dir else _latest_panel(
-        PROJECT_ROOT / "data" / "raw" / "public"
+        sources_root / "public"
     )
     prices = pd.read_csv(panel_dir / "prices.csv", parse_dates=["date"])
     benchmark = pd.read_csv(panel_dir / "benchmark.csv", parse_dates=["date"])
@@ -344,12 +400,12 @@ def main() -> int:
 
     # --- 1. benchmark vs official composite workbook ---------------------
     workbook_path = (
-        PROJECT_ROOT
-        / "data" / "raw" / "idx_composite_index"
+        sources_root
+        / "idx_composite_index"
         / "Composite Stock Price Index & Stock Trading Volume - Sep 2026.xlsx"
     )
-    summary_path = PROJECT_ROOT / "data" / "raw" / "idx_stock_summary" / "Stock Summary-20261002.xlsx"
-    ds_dir = PROJECT_ROOT / "data" / "raw" / "idx_daily_statistics"
+    summary_path = sources_root / "idx_stock_summary" / "Stock Summary-20261002.xlsx"
+    ds_dir = sources_root / "idx_daily_statistics"
     # Official sources are cached artifacts, not committed files. When one is
     # absent the run must say so and fail; it must never crash, and it must
     # never quietly reduce the verdict to the panel's internal checks.
@@ -406,7 +462,7 @@ def main() -> int:
     # --- 2. benchmark vs IDX daily statistics PDFs ------------------------
     pdf_rows = []
     pdf_errors = []
-    ds_dir = PROJECT_ROOT / "data" / "raw" / "idx_daily_statistics"
+    ds_dir = sources_root / "idx_daily_statistics"
     for pdf_path in sorted(ds_dir.glob("ds_*.pdf")):
         try:
             session, prev, change, printed = _parse_ds_pdf(pdf_path)
@@ -443,7 +499,7 @@ def main() -> int:
     }
 
     # --- 3. stocks vs official stock summary ------------------------------
-    summary_path = PROJECT_ROOT / "data" / "raw" / "idx_stock_summary" / "Stock Summary-20261002.xlsx"
+    summary_path = sources_root / "idx_stock_summary" / "Stock Summary-20261002.xlsx"
     summary = _load_stock_summary(summary_path)
     trade_dates = summary.pop("_trade_dates")  # type: ignore[misc]
     official_date = None
@@ -507,7 +563,7 @@ def main() -> int:
     # --- 4. coverage reconciliation (distinct counts, never merged) -------
     sectors_registry = None
     sectors_registry_source = None
-    validation_root = PROJECT_ROOT / "data" / "raw" / "sectors_validation"
+    validation_root = sources_root / "sectors_validation"
     if validation_root.is_dir():
         reports = sorted(
             validation_root.glob("*/validation_report.json"), reverse=True
@@ -583,18 +639,8 @@ def main() -> int:
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
 
-    fixture_path = PROJECT_ROOT / "tests" / "fixtures" / "public_panel_validation.json"
-    fixture_path.parent.mkdir(parents=True, exist_ok=True)
-    # The report carries no bulk series (mismatch lists and 11 PDF rows only),
-    # so the trimmed copy keeps every check for assertions while dropping the
-    # timestamp so a re-run does not churn the tracked file.
-    trimmed = {
-        "kind": report["kind"],
-        "panel_window": report["panel_window"],
-        "status": status,
-        "checks": checks,
-    }
-    fixture_path.write_text(json.dumps(trimmed, indent=2), encoding="utf-8")
+    if args.publish_fixture:
+        _publish_fixture(report, Path(args.fixture_output))
 
     print(f"status={status} -> {out_path}", file=sys.stderr)
     for name, check in checks.items():

@@ -241,12 +241,12 @@ endpoint (WAF 403), IDX statistics index page direct fetch (403).
 
 | Command | Result |
 |---|---|
-| `.venv/bin/python -m pytest -q` | **766 passed**, 2 warnings (both pre-existing `SectorsProvider.get_full_universe_close` deprecations in `tests/test_sectors_provider.py`) |
+| `.venv/bin/python -m pytest -q` | **767 passed**, 2 warnings (both pre-existing `SectorsProvider.get_full_universe_close` deprecations in `tests/test_sectors_provider.py`) |
 | `npm run typecheck --prefix app/web` | clean |
 | `npm run build --prefix app/web` | built; chunk-size advisory only (pre-existing) |
 | `git diff --check` | clean |
 
-Baseline before this work was 729 passed with the same 2 warnings; +37 tests.
+Baseline before this work was 729 passed with the same 2 warnings; +38 tests.
 New coverage in `tests/test_public_refresh_chain.py` (25 tests): export completeness, manifest
 parity, disclosed WSKT gap, YTD baseline and per-feature YTD, benchmark-YTD reconciliation against
 official closes, comparability (COMPATIBLE with 4 real priors, Sectors INCOMPARABLE), transitions
@@ -255,12 +255,13 @@ history (5 dates/group, axis consistency, endpoint equality with the group row, 
 incompatible leakage), all panel-validation invariants, plus four `bun x tsx` contracts for
 `pickLatestEntry` and `buildRotationTrail` (including the <3-point refusal and axis-drop rules).
 
-`tests/test_refresh_tool_safety.py` (11 tests) locks the three post-review tooling fixes
-described in §9. It is fully self-contained: the panel and snapshot fixtures are generated inside
-`tmp_path`, so the regressions stay covered on a checkout that contains only committed files (the
-fetched panel, `data/snapshots/`, and the official IDX files are all gitignored). Verified by
-hiding those directories: the file runs **11 passed, 0 skipped**, and the full suite is **766
-passed** in that state.
+`tests/test_refresh_tool_safety.py` (12 tests) locks the three post-review tooling fixes
+described in §9 plus the fixture-publication guard. It is fully self-contained: the panel and
+snapshot fixtures are generated inside `tmp_path`, official comparison is isolated with an empty
+`--sources-root`, and `--no-publish-fixture` keeps it away from the tracked evidence. Verified by
+hiding `data/raw/public`, `data/raw/idx_composite_index`, `data/raw/idx_stock_summary` and
+`data/snapshots/`: the file runs **12 passed, 0 skipped**, and the full suite is **767 passed**
+in that state.
 
 Updated contracts in `tests/test_comparability_and_adapter.py`: the index is now the curated pair
 (Sectors evidence + validated latest, both with fetchable payloads and matching identity), the
@@ -297,6 +298,7 @@ Screenshots were written outside the repository (`/tmp/qc/`) per existing practi
 # 1. panel fetch (public provider only; no Sectors)
 .venv/bin/python -m scripts.refresh_public_panel --start 2025-12-15
 python3 -m scripts.validate_public_panel          # needs openpyxl + pdfplumber (system python3)
+                                                  # --sources-root / --no-publish-fixture for isolated runs
 
 # 2. offline chain (one pass, point-in-time, hash parity enforced)
 .venv/bin/python -m scripts.build_snapshot_chain --asofs 2026-09-04 2026-09-11 2026-09-18 2026-09-25 2026-10-02
@@ -334,6 +336,10 @@ Notes for the next operator:
   Never delete snapshots by hand to get past the check.
 - `validate_public_panel` exits 1 on an integrity/provenance failure and writes only the
   `panel_integrity` check; official comparisons are skipped entirely in that case.
+- **The tracked fixture is committed evidence of a clean run.** It is republished only when
+  the report status is `PASS`; any `FAIL`/`SOURCE_UNAVAILABLE` run refuses to write it. Use
+  `--no-publish-fixture` for synthetic or partial panels, and `--sources-root <dir>` to run
+  the structural checks with no official comparison at all.
 - It also exits 1 (never a traceback) when the official files or the `openpyxl`/`pdfplumber`
   parsers are unavailable, recording those checks as `SOURCE_UNAVAILABLE` while keeping the
   panel's own integrity verdict. Run it with an interpreter that has both parsers (the repo
