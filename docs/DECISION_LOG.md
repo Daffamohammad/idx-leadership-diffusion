@@ -624,3 +624,24 @@
   regression green.
 - **Revisit trigger:** never; if a section is added, both the
   contract test and the e2e test must be updated together.
+
+## D041 — Quad macroeconomic regimes retired, not deferred
+
+- **Decision:** Retire the standalone Quad macroeconomic feature
+  entirely. This includes any rendered UI, but as of the retirement
+  commit there was none — no route, sidebar entry, component, fixture,
+  or consumer of `macroContract.ts` rendered Quad content. What existed
+  were two future-work promises listing "Quad regimes" (in
+  `app/web/src/data/macroContract.ts` and
+  `docs/uiux-handoff/MASTER_PROMPT.md`). Both are removed; the shared
+  BI/BPS macro contract itself is intentionally *kept* because it is not
+  Quad-specific. Equity rotation quadrants and their `--quad-*` styling
+  tokens are separate functionality and are unchanged.
+- **Reason:** the Quad regime framing had no validated methods, no
+  source contract, and no rendered destination; keeping it in active
+  plans as "future work" promised something the product owner does not
+  intend to build.
+- **Consequence:** "Quad" now means only the equity rotation quadrant
+  terminology everywhere outside historical handoff records.
+- **Revisit trigger:** a concrete, methodology-backed macro module
+  proposal reviewed and approved as new work.

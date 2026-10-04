@@ -55,7 +55,7 @@ export function emptyMacroBoard(): MacroBoard {
     limitations: [
       "No BI/BPS pilot landed in this cycle; dashboard shows no macro cards rather than fake live values.",
       "Quarterly GDP must not carry a monthly CPI date; quarterly and monthly frequencies stay distinct with no forward-fill.",
-      "Quad regimes, consensus/surprise, and nowcasts remain future analytical work without validated methods.",
+      "Consensus/surprise and nowcasts remain future analytical work without validated methods.",
     ],
   };
 }
