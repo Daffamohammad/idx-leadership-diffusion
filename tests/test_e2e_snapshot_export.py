@@ -315,6 +315,9 @@ def test_e2e_actual_exporter_to_browser_payload():
     This test calls the ACTUAL export_snapshot_json.export() function
     by calling the CLI via subprocess, then validates the exported JSON.
     No manual browser JSON construction.
+
+    Fully hermetic: the CLI reads from ``--snapshot-root`` and writes to
+    ``--out``, both inside tmp_path, so no repo location is touched.
     """
     import subprocess
     import json as json_mod
@@ -355,50 +358,36 @@ def test_e2e_actual_exporter_to_browser_payload():
             transitions=_transitions_to_df([]),
             notes=None,
         )
-        # Call the ACTUAL export CLI via subprocess. The CLI reads from
-        # the default data root, so we copy the temp snapshot there
-        # first, then clean up in finally. Use repo-relative paths
-        # derived from __file__ so the test is portable.
-        import shutil
+        # Call the ACTUAL export CLI via subprocess, fully isolated: the
+        # snapshot root and the output both point into tmp_path, so the run
+        # never writes into data/snapshots/ or the served app/web/public
+        # directory and needs no cleanup of repo state to stay tidy.
         repo_root = PathLib(__file__).resolve().parents[1]
-        default_root = repo_root / "data" / "snapshots"
-        target_dir = default_root / snapshot_id
-        out_path = repo_root / "app" / "web" / "public" / "snapshots" / f"{snapshot_id}.json"
-        cleanup_dirs: list[PathLib] = []
-        cleanup_files: list[PathLib] = []
-        try:
-            if target_dir.exists():
-                shutil.rmtree(target_dir)
-            shutil.copytree(snapshot_root / snapshot_id, target_dir)
-            cleanup_dirs.append(target_dir)
-            result = subprocess.run(
-                [
-                    sys.executable, "-m", "scripts.export_snapshot_json",
-                    "--snapshot-id", snapshot_id,
-                ],
-                capture_output=True, text=True,
-                cwd=str(repo_root),
-            )
-            assert result.returncode == 0, f"Export failed: {result.stderr}"
-            assert out_path.exists()
-            cleanup_files.append(out_path)
-            with open(out_path) as fh:
-                payload = json_mod.load(fh)
-            # Validate the exported JSON (no manual construction)
-            assert payload["snapshot_id"] == snapshot_id
-            assert payload["as_of"] == as_of.isoformat()
-            for group in payload["groups"]:
-                assert "raw_candidate_count" in group
-                assert "policy_eligible_count" in group
-                assert "coverage_pct" in group
-            assert "coverage" in payload
-        finally:
-            for f in cleanup_files:
-                if f.exists():
-                    f.unlink()
-            for d in cleanup_dirs:
-                if d.exists():
-                    shutil.rmtree(d)
+        out_path = snapshot_root.parent / "exported" / f"{snapshot_id}.json"
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        result = subprocess.run(
+            [
+                sys.executable, "-m", "scripts.export_snapshot_json",
+                "--snapshot-id", snapshot_id,
+                "--snapshot-root", str(snapshot_root),
+                "--out", str(out_path),
+                "--allow-outside-root",
+            ],
+            capture_output=True, text=True,
+            cwd=str(repo_root),
+        )
+        assert result.returncode == 0, f"Export failed: {result.stderr}"
+        assert out_path.exists()
+        with open(out_path) as fh:
+            payload = json_mod.load(fh)
+        # Validate the exported JSON (no manual construction)
+        assert payload["snapshot_id"] == snapshot_id
+        assert payload["as_of"] == as_of.isoformat()
+        for group in payload["groups"]:
+            assert "raw_candidate_count" in group
+            assert "policy_eligible_count" in group
+            assert "coverage_pct" in group
+        assert "coverage" in payload
 
 
 def test_exporter_does_not_derive_absolute_breadth_from_transition_delta():

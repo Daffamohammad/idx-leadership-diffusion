@@ -326,7 +326,7 @@ def _run_tsx(script: str) -> str:
 
 def test_pick_latest_entry_prefers_newest_as_of_over_provider_brand() -> None:
     out = _run_tsx(
-        'import {pickLatestEntry} from "./app/web/src/data/SnapshotProvider.tsx"; '
+        'import {pickLatestEntry} from "./app/web/src/data/snapshotSelection.ts"; '
         'const entries = ['
         '  {snapshot_id: "snap_sectors_2026-08-27", as_of: "2026-08-27", provider_mode: "SECTORS_LIVE"},'
         '  {snapshot_id: "snap_public_2026-10-02", as_of: "2026-10-02", provider_mode: "PUBLIC_PROTOTYPE"},'
@@ -340,7 +340,7 @@ def test_pick_latest_entry_prefers_newest_as_of_over_provider_brand() -> None:
 
 def test_pick_latest_entry_tie_breaks_deterministically_and_handles_empty() -> None:
     out = _run_tsx(
-        'import {pickLatestEntry} from "./app/web/src/data/SnapshotProvider.tsx"; '
+        'import {pickLatestEntry} from "./app/web/src/data/snapshotSelection.ts"; '
         'const tie = ['
         '  {snapshot_id: "snap_b", as_of: "2026-10-02"},'
         '  {snapshot_id: "snap_a", as_of: "2026-10-02"},'

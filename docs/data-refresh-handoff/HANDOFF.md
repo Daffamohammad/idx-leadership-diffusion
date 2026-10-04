@@ -241,12 +241,13 @@ endpoint (WAF 403), IDX statistics index page direct fetch (403).
 
 | Command | Result |
 |---|---|
-| `.venv/bin/python -m pytest -q` | **767 passed**, 2 warnings (both pre-existing `SectorsProvider.get_full_universe_close` deprecations in `tests/test_sectors_provider.py`) |
+| `.venv/bin/python -m pytest -q` | **770 passed**, 2 warnings (both pre-existing `SectorsProvider.get_full_universe_close` deprecations in `tests/test_sectors_provider.py`) |
+| `.venv/bin/python -m pytest -q` in a **fresh `git clone`** | **770 passed, 0 skipped** — identical, see §6.1.1 |
 | `npm run typecheck --prefix app/web` | clean |
 | `npm run build --prefix app/web` | built; chunk-size advisory only (pre-existing) |
 | `git diff --check` | clean |
 
-Baseline before this work was 729 passed with the same 2 warnings; +38 tests.
+Baseline before this work was 729 passed with the same 2 warnings; +41 tests.
 New coverage in `tests/test_public_refresh_chain.py` (25 tests): export completeness, manifest
 parity, disclosed WSKT gap, YTD baseline and per-feature YTD, benchmark-YTD reconciliation against
 official closes, comparability (COMPATIBLE with 4 real priors, Sectors INCOMPARABLE), transitions
@@ -255,12 +256,12 @@ history (5 dates/group, axis consistency, endpoint equality with the group row, 
 incompatible leakage), all panel-validation invariants, plus four `bun x tsx` contracts for
 `pickLatestEntry` and `buildRotationTrail` (including the <3-point refusal and axis-drop rules).
 
-`tests/test_refresh_tool_safety.py` (12 tests) locks the three post-review tooling fixes
+`tests/test_refresh_tool_safety.py` (15 tests) locks the three post-review tooling fixes
 described in §9 plus the fixture-publication guard. It is fully self-contained: the panel and
 snapshot fixtures are generated inside `tmp_path`, official comparison is isolated with an empty
 `--sources-root`, and `--no-publish-fixture` keeps it away from the tracked evidence. Verified by
 hiding `data/raw/public`, `data/raw/idx_composite_index`, `data/raw/idx_stock_summary` and
-`data/snapshots/`: the file runs **12 passed, 0 skipped**, and the full suite is **767 passed**
+`data/snapshots/`: the file runs **15 passed, 0 skipped**, and the full suite is **770 passed**
 in that state.
 
 Updated contracts in `tests/test_comparability_and_adapter.py`: the index is now the curated pair
@@ -271,6 +272,56 @@ than provider brand while keeping `VITE_SNAPSHOT_ID`.
 Also fixed while refreshing: `scripts/validate_data.py` crashed on the harness directory
 (`yfinance_harness` has no `security_master.json`) — it now validates the newest **loadable**
 snapshot by manifest `as_of`.
+
+### 6.1.1 Hermeticity contract
+
+The suite is now expected to produce **the same result in every checkout**, with no skipped tests and
+no dependence on local artifacts, the official IDX caches, or an installed `node_modules`. Verified
+both ways:
+
+| Environment | Result |
+|---|---|
+| Full working tree (panel, `data/snapshots/`, official IDX caches, `node_modules` all present) | 770 passed, 0 skipped |
+| Fresh `git clone` (committed files only; no `data/raw`, no `data/snapshots`, no `node_modules`) | 770 passed, 0 skipped |
+
+To reproduce the fresh-clone run, note that an editable install of this package makes
+`project_root()` (`src/idx_leadership/utils/config.py`, file-based) resolve to the *original*
+checkout, so a clone must put its own `src` first on the path:
+
+```bash
+git clone <repo> /tmp/clone-matrix
+cd /tmp/clone-matrix
+PYTHONPATH=/tmp/clone-matrix/src /path/to/.venv/bin/python -m pytest -q
+```
+
+Three defects made the clone result diverge from the local result; all are fixed:
+
+- **`tests/test_snapshot_enrichment.py` skipped 5 tests** because they asserted embedded sections
+  against `snap_2026-08-28.json`, a gitignored legacy export absent from a clone. They now assert
+  the same sections on the **tracked active bundle** (`ACTIVE_ID = "snap_public_2026-10-02"`), which
+  is the artifact that actually matters; every pre-existing assertion holds unchanged (breadth 3+3,
+  60 company observations, 9 themes, 6 konglo groups, `signal_eligible: False`, research events
+  `published_at` ≤ `as_of`). Update `ACTIVE_ID` on each refresh.
+- **`tests/test_e2e_snapshot_export.py` wrote into the repository.** The end-to-end exporter test
+  copied a snapshot into the real `data/snapshots/` and exported into the served
+  `app/web/public/snapshots/`, relying on `finally` cleanup (an interrupted run left stale served
+  files). It now passes `--snapshot-root` / `--out` / `--allow-outside-root`, all inside `tmp_path`,
+  so no repo location is touched.
+- **Two `bun x tsx` contract tests failed in a clone** with `Cannot find module 'react'`: they
+  imported `pickLatestEntry` from `SnapshotProvider.tsx`, which needs `app/web/node_modules`. The
+  pure selection logic now lives in `app/web/src/data/snapshotSelection.ts` (React-free) and is
+  re-exported by `SnapshotProvider`, so the contract is testable without installing frontend
+  dependencies. Typecheck and build are clean, and the served-index selection path was re-verified
+  against `dist` (`pickLatestEntry` over the live index selects `snap_public_2026-10-02`).
+
+**New guard — the suite may not dirty the working tree.** `tests/conftest.py` records
+`git status --porcelain` at session start and compares it at session end; if the run introduced,
+removed, or changed the status of any path, the run prints the offending paths and exits non-zero.
+Pre-existing local modifications are tolerated (only *changes in status* count), and the guard stays
+silent when git is unavailable or the run is outside a work tree. This makes the "a run rewrote
+committed evidence" class of defect impossible to reintroduce silently — the failure mode behind both
+P2 findings in §9. Verified to fire: a probe test that creates an untracked file makes the suite
+exit 1 and name the file; a clean run exits 0.
 
 ### 6.2 Browser (headless Chrome via playwright-core, served from `app/web/dist`)
 
@@ -286,6 +337,12 @@ snapshot by manifest `as_of`.
 | Regression | overview, map, explorer (Consumer group), what-changed, methodology all render; group/ticker navigation and tables intact |
 
 Screenshots were written outside the repository (`/tmp/qc/`) per existing practice.
+
+After the `pickLatestEntry` extraction (§6.1.1) the same behaviour was re-confirmed on a fresh
+`dist`: typecheck and build clean, `dist/snapshots/` reduced to the tracked set, and the real
+selection path exercised against the served index picks `snap_public_2026-10-02` (2 entries,
+newest `as_of` wins). The four removed stale exports now resolve to the SPA shell instead of a
+payload. No visual layout changed in this round — the refactor moved a pure function only.
 
 ---
 
@@ -318,9 +375,10 @@ python3 -m scripts.validate_public_panel          # needs openpyxl + pdfplumber 
   --ids snap_sectors_2026-08-27 snap_public_2026-10-02
 
 # 5. gates
-.venv/bin/python -m pytest -q
+.venv/bin/python -m pytest -q          # 770 passed / 0 skipped; also asserts a clean tree
 npm run typecheck --prefix app/web && npm run build --prefix app/web
 git diff --check
+git status --porcelain                 # must be empty (the suite enforces this itself)
 ```
 
 Notes for the next operator:
@@ -346,6 +404,15 @@ Notes for the next operator:
   `.venv` does not; `python3` does).
 - `data/raw/*`, `data/snapshots/*`, `data/normalized/*` are gitignored by design; the active
   payload is explicitly whitelisted so the SPA contract tests work on a clean checkout.
+- **The test run is a gate on repo state, not just on code.** `tests/conftest.py` fails the run if
+  any test left the working tree dirty, so a green suite also means "no committed file was
+  rewritten and nothing was left behind". If it ever fires, the named paths are the culprit — do
+  not delete the evidence to silence it; fix the test to use `tmp_path`.
+- The frontend contract tests run through `bun x tsx` and need only `bun`; they deliberately no
+  longer require `app/web/node_modules`. Pure logic used by those tests belongs in a React-free
+  module under `app/web/src/data/` (see `snapshotSelection.ts`).
+- When a refresh changes the active bundle, update `ACTIVE_ID` in
+  `tests/test_public_refresh_chain.py` and `tests/test_snapshot_enrichment.py`.
 
 ---
 
@@ -383,9 +450,9 @@ Notes for the next operator:
 
 ---
 
-## 9. Post-handoff review fixes (three P2 tooling defects)
+## 9. Post-handoff review fixes (four P2 tooling defects)
 
-An independent review reproduced three defects in the new refresh tools. All three are fixed and
+Independent reviews reproduced four defects in the new refresh tools. All four are fixed and
 pinned by `tests/test_refresh_tool_safety.py`.
 
 **9.1 Chain builder reused bundles regardless of the panel that produced them.**
@@ -414,3 +481,48 @@ With `--ids`, a requested id whose exported payload was missing (or unreadable, 
 identity check) was skipped and the index was still replaced — publishing a subset that omitted
 the newest bundle. Every skip now records a reason, and under `--ids` any rejected requested id
 fails with exit 2 **before** `index.json` is touched. The happy path is unchanged.
+**9.4 A validator run could overwrite the tracked validation fixture.**
+The structural panel test invoked `validate_public_panel` with the default sources root, so on a
+machine that has the official IDX files and the `openpyxl`/`pdfplumber` parsers it compared
+*synthetic* panel prices against *real* IDX closes and then failed on those comparisons. Because
+fixture publication was unconditional, that same failing run rewrote
+`tests/fixtures/public_panel_validation.json` with a synthetic failure report — committing a defect
+as the expected state. Two fixes: `--sources-root` makes the official-source cache injectable (the
+test passes an empty directory, whose correct verdict is `SOURCE_UNAVAILABLE`, identical whether or
+not parsers exist locally), and publication is gated on a **passing** report — `_publish_fixture`
+refuses any `FAIL`/`SOURCE_UNAVAILABLE` verdict, leaving an existing fixture untouched and never
+creating a new one, with `--no-publish-fixture` / `--fixture-output` for explicit control. The
+guard is unit-tested directly: a failing report must neither replace a published fixture nor create
+one. Verified against the reviewer's exact scenario (parsers + official sources present, synthetic
+panel, publication enabled): comparisons fail, the tracked fixture stays byte-identical, and the
+real panel still validates `PASS`.
+
+---
+
+## 10. Test-suite hermeticity and hygiene (second review round)
+
+A second review round hardened the suite itself. See §6.1.1 for the full contract and the
+fresh-clone reproduction command.
+
+- **The suite may not dirty the working tree.** `tests/conftest.py` snapshots
+  `git status --porcelain` at session start and diffs it at session end; any path that appeared,
+  disappeared, or changed status is reported and fails the run (exit 1). Pre-existing local edits
+  are tolerated, and the guard no-ops outside a work tree. This closes the whole family of defects
+  that §9.4 was an instance of.
+- **The end-to-end exporter test no longer writes into the repo.** It uses
+  `--snapshot-root`/`--out`/`--allow-outside-root` inside `tmp_path` instead of copying into
+  `data/snapshots/` and exporting into the served directory.
+- **No test depends on a gitignored artifact.** The 5 `test_snapshot_enrichment` assertions moved
+  from the legacy `snap_2026-08-28.json` export to the tracked active bundle; two `bun x tsx`
+  contract tests no longer need `app/web/node_modules` because `pickLatestEntry` moved to the
+  React-free `app/web/src/data/snapshotSelection.ts` (re-exported by `SnapshotProvider`).
+- **Served-directory hygiene.** Four stale gitignored exports were removed from
+  `app/web/public/snapshots/` (`snap_2026-08-20.json`, `snap_2026-08-28.json`,
+  `snap_public_2026-08-20.json`, `yf_harness_2026-08-28_raw.json`) and their stale `app/web/dist/`
+  copies; a rebuild regenerates `dist/` clean. The directory now holds exactly the tracked set:
+  `index.json`, `snap_public_2026-10-02.json`, `snap_sectors_2026-08-27.json`,
+  `yf_harness_2026-08-28_adj.json`. Nothing referenced them (`SnapshotProvider` selects strictly
+  through `index.json`), and the raw `data/snapshots/` chain evidence is untouched. They are
+  recoverable from git history only if ever needed again, since they were never tracked.
+
+**Result: 770 passed / 0 skipped in both the full working tree and a fresh clone.**

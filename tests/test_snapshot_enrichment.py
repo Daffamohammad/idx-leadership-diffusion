@@ -12,6 +12,12 @@ from idx_leadership.events import normalize_events
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PUBLIC_DIR = REPO_ROOT / "app" / "web" / "public" / "snapshots"
 
+# The active bundle is tracked, so these assertions run in every checkout.
+# Point them at the active deliverable rather than a gitignored legacy export:
+# these tests exist to prove the exporter embeds these sections, and the
+# active bundle is the artifact that matters. Update with each refresh.
+ACTIVE_ID = "snap_public_2026-10-02"
+
 
 def _load_snapshot(snapshot_id: str) -> dict:
     candidates = [
@@ -25,7 +31,7 @@ def _load_snapshot(snapshot_id: str) -> dict:
 
 
 def test_embedded_taxonomy_views_present():
-    snapshot = _load_snapshot("snap_2026-08-28")
+    snapshot = _load_snapshot(ACTIVE_ID)
     views = snapshot.get("taxonomy_views", {})
     assert "sector" in views
     assert "konglo" in views
@@ -39,7 +45,7 @@ def test_embedded_taxonomy_views_present():
 
 
 def test_konglo_view_carries_required_metadata():
-    snapshot = _load_snapshot("snap_2026-08-28")
+    snapshot = _load_snapshot(ACTIVE_ID)
     konglo = snapshot["taxonomy_views"]["konglo"]
     assert konglo["taxonomy_kind"] == "KONGLO"
     assert konglo["source_kind"] == "ANALYST_DEFINED"
@@ -50,7 +56,7 @@ def test_konglo_view_carries_required_metadata():
 
 
 def test_themes_view_has_multi_theme_groups():
-    snapshot = _load_snapshot("snap_2026-08-28")
+    snapshot = _load_snapshot(ACTIVE_ID)
     themes = snapshot["taxonomy_views"]["themes"]
     assert themes["taxonomy_kind"] == "THEMES"
     group_ids = {group["taxonomy_group_id"] for group in themes["groups"]}
@@ -60,7 +66,7 @@ def test_themes_view_has_multi_theme_groups():
 
 
 def test_foreign_flow_sample_is_embedded_with_coverage_signals():
-    snapshot = _load_snapshot("snap_2026-08-28")
+    snapshot = _load_snapshot(ACTIVE_ID)
     sample = snapshot.get("foreign_flow_sample")
     assert sample is not None
     assert sample["schema_version"] == "foreign-flow-sample-v2"
@@ -79,7 +85,7 @@ def test_foreign_flow_sample_is_embedded_with_coverage_signals():
 
 
 def test_research_events_payload_normalises():
-    snapshot = _load_snapshot("snap_2026-08-28")
+    snapshot = _load_snapshot(ACTIVE_ID)
     bundle = snapshot.get("research_events")
     assert bundle is not None
     assert bundle["schema_version"] == "research-events-v1"

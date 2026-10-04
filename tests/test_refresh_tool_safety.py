@@ -597,3 +597,37 @@ def test_index_default_mode_filter_is_unchanged(tmp_path: Path) -> None:
     assert result.returncode == 0, result.stderr
     entries = json.loads(out_path.read_text(encoding="utf-8"))
     assert [e["snapshot_id"] for e in entries] == ["snap_sectors_2026-08-27"]
+
+# ── working-tree guard (tests/conftest.py) ──────────────────────────────
+
+
+def test_tree_drift_reports_changes_in_status() -> None:
+    """The guard must catch every way a test can dirty the working tree."""
+    from tests.conftest import tree_drift
+
+    # A new untracked file appearing.
+    assert tree_drift("", "?? scratch.json\n") == ["scratch.json"]
+    # A tracked file becoming modified.
+    assert tree_drift(" M a.txt\n", " M a.txt\nM  b.txt\n") == ["b.txt"]
+    # A file going away (was untracked, now deleted).
+    assert tree_drift("?? gone.txt\n", "") == ["gone.txt"]
+    # A file that transitions untracked -> staged (status letter changes).
+    assert tree_drift("?? c.txt\n", "A  c.txt\n") == ["c.txt"]
+
+    # Pre-existing dirt that the suite leaves alone is tolerated.
+    assert tree_drift(" M existing.txt\n?? other.txt\n", " M existing.txt\n?? other.txt\n") == []
+
+
+def test_tree_drift_handles_unknown_baseline() -> None:
+    """When git status can't be determined, the guard must stay silent."""
+    from tests.conftest import tree_drift
+
+    assert tree_drift(None, "?? new.txt\n") == []
+    assert tree_drift("", None) == []
+
+
+def test_git_status_returns_none_outside_a_work_tree(tmp_path: Path) -> None:
+    from tests.conftest import git_status
+
+    # tmp_path is not inside a git work tree.
+    assert git_status(tmp_path) is None
