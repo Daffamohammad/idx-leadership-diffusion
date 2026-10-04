@@ -2,9 +2,11 @@
 
 Date: 2026-10-04. Window: **2026-09-01 → 2026-10-02**, 24 trading sessions,
 served against the active whole-market bundle `snap_public_market_2026-10-02`.
-Daily and Weekly rotation trails are published for every taxonomy for which
-evidence supports them, and are explicitly withheld everywhere else. No push,
-no deployment, no Sectors API calls, no paid calls.
+The rotation implementation covers all three maps, with evidence-limited
+historical coverage: Daily and Weekly trails are available for 8 of 11 sectors
+and 95 of 102 Themes (99 plotted). Konglo history remains unavailable for all
+22 portfolios pending publication evidence. No push, no deployment, no Sectors
+API calls, no paid calls.
 
 ## What is published
 
@@ -20,7 +22,7 @@ chain, and the active bundle are untouched.
 |---|---|---|---|---|---|
 | SECTOR | 11 | **8 of 11** | **8 of 11** | 264 | 196 |
 | KONGLO | 22 | **0 of 22** | **0 of 22** | 0 | 0 |
-| THEMES | 102 (99 plotted) | **95 of 99 plotted** | **95 of 99 plotted** | 2,376 | 2,286 |
+| THEMES | 102 (99 plotted) | **95 of 102** (95 of 99 plotted) | **95 of 102** (95 of 99 plotted) | 2,376 | 2,286 |
 
 Replay window: sessions 2026-09-01 … 2026-10-02. Weekly endpoints sample the
 last actual session of each Monday–Sunday week: 2026-09-04, 09-11, 09-18,
@@ -115,8 +117,8 @@ group rows and the endpoint eligible-cohort hash (`240b98cb52d5a2d3`, 760
 tickers), validates the whole asset, publishes the immutable artifact, and only
 then rewrites `market/index.json` atomically. Omit `--publish-root` to build
 the report without publishing. Rerunning this command reproduced the served
-asset with zero content differences (formatting-only difference from the CLI's
-indented `--out` writer).
+asset with identical parsed JSON content. The indented CLI `--out` report and
+compact served asset are **not byte-identical**; their formatting differs.
 
 ## Verification evidence
 
@@ -125,7 +127,7 @@ indented `--out` writer).
 | Rotation regressions | `.venv/bin/python -m pytest tests/test_point_in_time_rotation.py -q` | **21 passed** — future/unknown publication never backdated; publication bound starts history on the availability date; membership change splits segments without touching other taxonomies; eligibility change is a new contract; unrelated eligibility change does not disable a stable group; capture-upper-bound distinct from unknown; ledger backdating refused; duplicate rows, NaN prices, quarantined tickers, missing sessions and endpoint mismatches all refused; missing security session breaks history and never fills; no YTD baseline means no rotation point; stale ledger hash refused; tampered report cannot replace a published asset or the index; frontend cadence/endpoint/per-group gates exercised via `tsx` |
 | Full suite | `.venv/bin/python -m pytest -q` | **832 passed**, 2 pre-existing deprecation warnings; tree guard confirms no tracked file was modified by the run |
 | Typecheck / build | `npm run typecheck --prefix app/web` / `npm run build` | clean (chunk-size advisory pre-existing) |
-| Independent recalculation | offline script over the raw panel | **7,926 axis comparisons** — every point of every published SECTOR and THEMES segment recomputed with plain arithmetic from `prices.csv`/`benchmark.csv` (own-sequence horizon returns, common-calendar YTD), every contributor checked against the 20/60-session warm-up contract; eligibility re-derived from the documented policy reproduces the endpoint cohort hash exactly (240b98cb52d5a2d3, 760 tickers); Konglo endpoint values reconciled against the snapshot within its published 4-decimal rounding; weekly points verified coordinate-identical subsets of daily points; segment contiguity and boundary non-bridging verified; memberships cross-checked against the dated registry and themes configuration. **PASS** |
+| Independent recalculation | offline script over the raw panel | **7,920 historical axis comparisons** (`INDEPENDENT_CHECKS.json`), plus six separate current Konglo endpoint comparisons in the earlier audit — every point of every published SECTOR and THEMES segment recomputed with plain arithmetic from `prices.csv`/`benchmark.csv` (own-sequence horizon returns, common-calendar YTD), every contributor checked against the 20/60-session warm-up contract; eligibility re-derived from the documented policy reproduces the endpoint cohort hash exactly (240b98cb52d5a2d3, 760 tickers); Konglo endpoint values reconciled against the snapshot within its published 4-decimal rounding; weekly points verified coordinate-identical subsets of daily points; segment contiguity and boundary non-bridging verified; memberships cross-checked against the dated registry and themes configuration. **PASS** |
 | Browser QC | production build on `vite preview`, Chrome headless | **37/37 passed** (`BROWSER_QA.json` in this directory) — all three maps render; Daily/Weekly switch and persist `?interval=`; tail draws 8 sector and 95 theme trails; phase filters and search reduce the plotted set; Konglo cadence disabled with 22 current points, zero invented polylines, reason and unavailable note surfaced; stocks mode renders without offering group history; no horizontal overflow at 1440/768/390; mobile nav opens; **0 console errors, 0 page errors, 0 Sectors API requests** |
 
 The independent recalculation deliberately does not import
@@ -171,3 +173,15 @@ trail availability. Sectors remains HOLD; no live or paid provider was called.
   No calculations, source assets or snapshot bundles changed in this completion
   pass. Implementation remains in local commits `9353632`, `2e2a702`, `17cc5d2`;
   no push or deployment was performed.
+
+## Local delivery commits
+
+- `9353632`: dated replay engine and source ledger.
+- `2e2a702`: published rotation asset and map controls.
+- `17cc5d2`: hermetic regression coverage.
+- `4cfd9cc`: coverage, replay instructions and browser QC handoff.
+- `32fa4b8`: clean-clone verification and independent arithmetic report.
+
+These identify the implementation and verification milestones; later
+documentation corrections are recorded in Git history. This is a local
+delivery, with no push or deployment.
