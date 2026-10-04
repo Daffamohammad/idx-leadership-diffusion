@@ -241,12 +241,12 @@ endpoint (WAF 403), IDX statistics index page direct fetch (403).
 
 | Command | Result |
 |---|---|
-| `.venv/bin/python -m pytest -q` | **763 passed**, 2 warnings (both pre-existing `SectorsProvider.get_full_universe_close` deprecations in `tests/test_sectors_provider.py`) |
+| `.venv/bin/python -m pytest -q` | **766 passed**, 2 warnings (both pre-existing `SectorsProvider.get_full_universe_close` deprecations in `tests/test_sectors_provider.py`) |
 | `npm run typecheck --prefix app/web` | clean |
 | `npm run build --prefix app/web` | built; chunk-size advisory only (pre-existing) |
 | `git diff --check` | clean |
 
-Baseline before this work was 729 passed with the same 2 warnings; +34 tests.
+Baseline before this work was 729 passed with the same 2 warnings; +37 tests.
 New coverage in `tests/test_public_refresh_chain.py` (25 tests): export completeness, manifest
 parity, disclosed WSKT gap, YTD baseline and per-feature YTD, benchmark-YTD reconciliation against
 official closes, comparability (COMPATIBLE with 4 real priors, Sectors INCOMPARABLE), transitions
@@ -255,8 +255,12 @@ history (5 dates/group, axis consistency, endpoint equality with the group row, 
 incompatible leakage), all panel-validation invariants, plus four `bun x tsx` contracts for
 `pickLatestEntry` and `buildRotationTrail` (including the <3-point refusal and axis-drop rules).
 
-`tests/test_refresh_tool_safety.py` (8 tests) locks the three post-review tooling fixes
-described in §9, each reproducing the reported failure in a temporary directory.
+`tests/test_refresh_tool_safety.py` (11 tests) locks the three post-review tooling fixes
+described in §9. It is fully self-contained: the panel and snapshot fixtures are generated inside
+`tmp_path`, so the regressions stay covered on a checkout that contains only committed files (the
+fetched panel, `data/snapshots/`, and the official IDX files are all gitignored). Verified by
+hiding those directories: the file runs **11 passed, 0 skipped**, and the full suite is **766
+passed** in that state.
 
 Updated contracts in `tests/test_comparability_and_adapter.py`: the index is now the curated pair
 (Sectors evidence + validated latest, both with fetchable payloads and matching identity), the
@@ -330,6 +334,10 @@ Notes for the next operator:
   Never delete snapshots by hand to get past the check.
 - `validate_public_panel` exits 1 on an integrity/provenance failure and writes only the
   `panel_integrity` check; official comparisons are skipped entirely in that case.
+- It also exits 1 (never a traceback) when the official files or the `openpyxl`/`pdfplumber`
+  parsers are unavailable, recording those checks as `SOURCE_UNAVAILABLE` while keeping the
+  panel's own integrity verdict. Run it with an interpreter that has both parsers (the repo
+  `.venv` does not; `python3` does).
 - `data/raw/*`, `data/snapshots/*`, `data/normalized/*` are gitignored by design; the active
   payload is explicitly whitelisted so the SPA contract tests work on a clean checkout.
 
