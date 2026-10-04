@@ -445,6 +445,10 @@ Notes for the next operator:
 5. **Daily/Weekly rotation is available for sectors only**, from the separate 21-session replay
    (§11). Stock/Konglo/Theme cadence stays unavailable because comparable daily observations
    for those views are not persisted. Sparse legacy bundles retain their dated snapshot tails.
+   *Superseded 2026-10-04: the whole-market point-in-time replay adds daily/weekly trails for
+   all sectors and 95 themes against `snap_public_market_2026-10-02`; Konglo history remains
+   withheld for lack of publication evidence. See
+   `docs/rotation-history-handoff/HANDOFF.md` for the current coverage and evidence.*
 6. **`Confirmation` on What Changed reads "Not available"** for all groups: confirmation requires
    a persistence/confirmation series that the current payload does not carry. Pre-existing,
    unchanged by this refresh.

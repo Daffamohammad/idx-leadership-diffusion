@@ -1,0 +1,136 @@
+taxonomy,group_id,group_name,segment_id,first_session,last_session,daily_observations,weekly_endpoints,daily_available,weekly_available,historical_segments,reason
+KONGLO,KONGLO_ADARO,Adaro Strategic Investments holdings,,,,0,0,no,no,0,Dated membership or eligibility publication evidence unavailable
+KONGLO,KONGLO_APP,APP Purinusa disclosed holdings,,,,0,0,no,no,0,Dated membership or eligibility publication evidence unavailable
+KONGLO,KONGLO_ASTRA,Astra corporate holdings,,,,0,0,no,no,0,Dated membership or eligibility publication evidence unavailable
+KONGLO,KONGLO_BARITO,Barito Pacific corporate holdings,,,,0,0,no,no,0,Dated membership or eligibility publication evidence unavailable
+KONGLO,KONGLO_BSDE,Paraga / Ekacentra disclosed holdings,,,,0,0,no,no,0,Dated membership or eligibility publication evidence unavailable
+KONGLO,KONGLO_BUDI,Sungai Budi / Budi Delta holdings,,,,0,0,no,no,0,Dated membership or eligibility publication evidence unavailable
+KONGLO,KONGLO_EMTEK,EMTEK corporate holdings,,,,0,0,no,no,0,Dated membership or eligibility publication evidence unavailable
+KONGLO,KONGLO_HARITA,Harita Jayaraya disclosed holdings,,,,0,0,no,no,0,Dated membership or eligibility publication evidence unavailable
+KONGLO,KONGLO_HARTONO,Hartono / Dwimuria holdings,,,,0,0,no,no,0,Dated membership or eligibility publication evidence unavailable
+KONGLO,KONGLO_INDOFOOD,Indofood corporate holdings,,,,0,0,no,no,0,Dated membership or eligibility publication evidence unavailable
+KONGLO,KONGLO_KALBE,Kalbe Farma corporate holdings,,,,0,0,no,no,0,Dated membership or eligibility publication evidence unavailable
+KONGLO,KONGLO_MEGA,Mega Corpora disclosed holdings,,,,0,0,no,no,0,Dated membership or eligibility publication evidence unavailable
+KONGLO,KONGLO_MNC,MNC Asia corporate holdings,,,,0,0,no,no,0,Dated membership or eligibility publication evidence unavailable
+KONGLO,KONGLO_MULTIPOLAR,Multipolar / Inti Anugerah holdings,,,,0,0,no,no,0,Dated membership or eligibility publication evidence unavailable
+KONGLO,KONGLO_PANIN,Panin corporate holdings,,,,0,0,no,no,0,Dated membership or eligibility publication evidence unavailable
+KONGLO,KONGLO_PRAJOGO,Prajogo Pangestu disclosed holdings,,,,0,0,no,no,0,Dated membership or eligibility publication evidence unavailable
+KONGLO,KONGLO_PROTELINDO,Protelindo disclosed holdings,,,,0,0,no,no,0,Dated membership or eligibility publication evidence unavailable
+KONGLO,KONGLO_SARATOGA,Saratoga corporate holdings,,,,0,0,no,no,0,Dated membership or eligibility publication evidence unavailable
+KONGLO,KONGLO_SINARMAS,Sinar Mas corporate holdings,,,,0,0,no,no,0,Dated membership or eligibility publication evidence unavailable
+KONGLO,KONGLO_TANCORP,Tancorp Global disclosed holdings,,,,0,0,no,no,0,Dated membership or eligibility publication evidence unavailable
+KONGLO,KONGLO_TRAKINDO,Tiara Marga Trakindo holdings,,,,0,0,no,no,0,Dated membership or eligibility publication evidence unavailable
+KONGLO,KONGLO_VICTORIA,Victoria Investama holdings,,,,0,0,no,no,0,Dated membership or eligibility publication evidence unavailable
+SECTOR,Basic Materials,Basic Materials,6afa959a5c0924f26ccc,2026-09-01,2026-10-02,24,5,yes,yes,1,
+SECTOR,Consumer Cyclicals,Consumer Cyclicals,7b46900f50ac0bc0c99e,2026-09-01,2026-10-02,24,5,yes,yes,1,
+SECTOR,Consumer Non-Cyclicals,Consumer Non-Cyclicals,c2792d1d472ef1724b4c,2026-10-01,2026-10-02,2,1,no,no,3,Fewer than three comparable observations in the current segment
+SECTOR,Energy,Energy,93583bddf8738a8f4d8e,2026-09-01,2026-10-02,24,5,yes,yes,1,
+SECTOR,Financials,Financials,734c7b8dda23da9c8d11,2026-09-01,2026-10-02,24,5,yes,yes,1,
+SECTOR,Healthcare,Healthcare,9e1836971c335740c848,2026-10-02,2026-10-02,1,1,no,no,4,Fewer than three comparable observations in the current segment
+SECTOR,Industrials,Industrials,656cbd4895e22604ea3b,2026-10-02,2026-10-02,1,1,no,no,3,Fewer than three comparable observations in the current segment
+SECTOR,Infrastructures,Infrastructures,4e00e995939dcb50aedc,2026-09-01,2026-10-02,24,5,yes,yes,1,
+SECTOR,Properties & Real Estate,Properties & Real Estate,6457e05d4848b303d5d5,2026-09-01,2026-10-02,24,5,yes,yes,1,
+SECTOR,Technology,Technology,0c6937b1408307b42d7f,2026-09-01,2026-10-02,24,5,yes,yes,1,
+SECTOR,Transportation & Logistic,Transportation & Logistic,c86bbc28b4a54abfc88c,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_ADVERTISING,Advertising,0fcc863f092f80ab85d6,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_AGRICULTURAL_CHEMICALS,Agricultural Chemicals,c1b6de509aac4b8397d3,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_AIRLINES,Airlines,59d7cdc2086f536b46da,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_AIRPORT_OPERATORS,Airport Operators,f06a55813e53416fd816,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_ALTERNATIVE_ENERGY_EQUIPMENT,Alternative Energy Equipment,ea7037ae36b6592a1c75,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_ALUMINUM,Aluminum,51d1d2e256d520e90b1e,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_APPAREL_TEXTILE_RETAIL,Apparel & Textile Retail,549c96f219f02cddaab9,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_AUTOMOTIVE_RETAIL,Automotive Retail,0f2894d72012b7534580,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_AUTO_PARTS_EQUIPMENT,Auto Parts & Equipment,f79af40bc2908039d326,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_BANKS,Banks,249df3479996b08ac6f3,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_BASIC_CHEMICALS,Basic Chemicals,929e41d3ac4118ec2e38,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_BROADCASTING,Broadcasting,c51eb4828b1bb32e9d7d,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_BUILDING_PRODUCTS_FIXTURES,Building Products & Fixtures,1f32924ba20c06ca8203,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_BUSINESS_SUPPORT_SERVICES,Business Support Services,7455ea0ad0fe84e9920a,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_CABLE_SATELLITE,Cable & Satellite,27d694d9715cad091045,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_CLOTHING_ACCESSORIES_BAGS,"Clothing, Accessories & Bags",72e6c07672437d5471cf,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_COAL_DISTRIBUTION,Coal Distribution,ab5ccc94e62346ff0a0a,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_COAL_PRODUCTION,Coal Production,0c18b4e5716485fe1ab3,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_COMMERCIAL_PRINTING,Commercial Printing,454a6d22ea7d80b98873,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_COMPUTER_HARDWARE,Computer Hardware,a023a1b8308f45d84d80,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_CONSTRUCTION_MACHINERY_HEAVY_VEHICLES,Construction Machinery & Heavy Vehicles,3b2128420050612fd8a7,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_CONSTRUCTION_MATERIALS,Construction Materials,c661bd91ee444309a460,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_CONSUMER_DISTRIBUTORS,Consumer Distributors,72a9842647cfc0b8fad6,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_CONSUMER_ELECTRONICS,Consumer Electronics,9ee7ef678697b09f9a9c,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_CONSUMER_FINANCING,Consumer Financing,4e138521fdf7099b11b1,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_CONSUMER_PUBLISHING,Consumer Publishing,aeff7a86eb16c3b38d74,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_CONTAINERS_PACKAGING,Containers & Packaging,e87f11ef92da0a78fe2a,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_COOPER,Cooper,742e8d774a7b9434316c,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_DAIRY_PRODUCTS,Dairy Products,feca8cdf3daa3326bd52,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_DEPARTMENT_STORES,Department Stores,4450bbb7111095c7c6df,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_DIVERSIFIED_FOREST,Diversified Forest,c3af9a2f0814af4a45fc,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_DIVERSIFIED_INDUSTRIAL_TRADING,Diversified Industrial Trading,5c7c74eab605d4b4f8c7,2026-10-02,2026-10-02,1,1,no,no,3,Fewer than three comparable observations in the current segment
+THEMES,ACTIVITY_DIVERSIFIED_METALS_MINERALS,Diversified Metals & Minerals,b8e6074f35462ff36abc,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_DRUG_RETAIL_DISTRIBUTORS,Drug Retail & Distributors,614fb0db5e1e2b13ef20,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_EDUCATION_SERVICES,Education Services,9fc5d8a45dbe3c199aa0,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_ELECTRICAL_COMPONENTS_EQUIPMENT,Electrical Components & Equipment,ede06a359955a3bc2f27,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_ELECTRIC_UTILITIES,Electric Utilities,367a06a68928fad32643,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_ELECTRONICS_RETAIL,Electronics Retail,63fff1235b9bb913f3f5,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_ELECTRONIC_EQUIPMENT_INSTRUMENTS,Electronic Equipment & Instruments,2cc0f9d66bca71f20643,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_ENTERTAINMENT_MOVIE_PRODUCTION,Entertainment & Movie Production,45bf6f575eec126c258b,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_ENVIRONMENTAL_FACILITIES_SERVICES,Environmental & Facilities Services,8c5731a7eda4762b022e,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_FINANCIAL_HOLDINGS,Financial Holdings,864712a7d4791c7809d1,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_FISH_MEAT_POULTRY,"Fish, Meat, & Poultry",66b930d723e2dbef3533,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_FOOD_RETAIL_DISTRIBUTORS,Food Retail & Distributors,0b54823aa0073e3117d3,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_FOOTWEAR,Footwear,,,,0,0,no,no,0,No eligible members with complete session history
+THEMES,ACTIVITY_GAS_UTILITIES,Gas Utilities,,,,0,0,no,no,0,No eligible members with complete session history
+THEMES,ACTIVITY_GENERAL_INSURANCE,General Insurance,0dd0a87c6a8a01c11115,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_GOLD,Gold,ae3ae5a2a47418d39e4d,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_HEALTHCARE_EQUIPMENT,Healthcare Equipment,,,,0,0,no,no,0,YTD baseline or return warm-up unavailable
+THEMES,ACTIVITY_HEALTHCARE_PROVIDERS,Healthcare Providers,0d8b04f710642ed74ae5,2026-10-01,2026-10-02,2,1,no,no,3,Fewer than three comparable observations in the current segment
+THEMES,ACTIVITY_HEALTHCARE_SUPPLIES_DISTRIBUTIONS,Healthcare Supplies & Distributions,5e7b095229a93e9481ae,2026-10-02,2026-10-02,1,1,no,no,2,Fewer than three comparable observations in the current segment
+THEMES,ACTIVITY_HEAVY_CONSTRUCTIONS_CIVIL_ENGINEERING,Heavy Constructions & Civil Engineering,94140c31c17d4685a2fc,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_HIGHWAYS_RAILTRACKS,Highways & Railtracks,ca829ddfdcae3c8c79ca,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_HOME_FURNISHINGS,Home Furnishings,f9fc86e1d97c5487b924,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_HOME_IMPROVEMENT_RETAIL,Home Improvement Retail,894aa4470f3860b6bea4,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_HOTELS_RESORTS_CRUISE_LINES,"Hotels, Resorts & Cruise Lines",3b37020f5226fce9b9cc,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_HOUSEHOLD_APPLIANCES,Household Appliances,848c3421d8a4d6aa6008,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_HOUSEWARES_SPECIALTIES,Housewares & Specialties,d9d7006fb5da631dcc76,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_HUMAN_RESOURCE_EMPLOYMENT_SERVICES,Human Resource & Employment Services,5cb389cd9c9da31a1bbf,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_INDUSTRIAL_MACHINERY_COMPONENTS,Industrial Machinery & Components,e557a1224299fb5b8528,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_INTEGRATED_TELECOMMUNICATION_SERVICE,Integrated Telecommunication Service,e45f7b1f7aca97b25942,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_INVESTMENT_BANKING_BROKERAGE_SERVICES,Investment Banking & Brokerage Services,e38f9046dca8776d0d92,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_INVESTMENT_COMPANIES,Investment Companies,35610fa6772754293710,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_INVESTMENT_MANAGEMENT,Investment Management,0b535fbfeb87f4b341ef,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_IRON_STEEL,Iron & Steel,47d420008caf01233532,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_IT_SERVICES_CONSULTING,IT Services & Consulting,ff7fb43753b2da0fb1f9,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_LIFE_INSURANCE,Life Insurance,9c0662bf2d0156802f8d,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_LIQUORS,Liquors,d130b8ea726bfdd71198,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_LOGISTICS_DELIVERIES,Logistics & Deliveries,8f480d5829d4c4d6bb75,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_MARINE_PORTS_SERVICES,Marine Ports & Services,ebc20e2696aaf7341f98,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_MULTI_SECTOR_HOLDINGS,Multi-sector Holdings,1a47033217ee21481d0c,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_NETWORKING_EQUIPMENT,Networking Equipment,1a530a9f0aa801e3ffcc,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_OFFICE_SUPPLIES,Office Supplies,ea1fc4b664a420c2305e,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_OIL_GAS_COAL_EQUIPMENT_SERVICES,"Oil, Gas & Coal Equipment & Services",7763c73f46abd3f0c36f,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_OIL_GAS_DRILLING_SERVICE,Oil & Gas Drilling Service,5c9353ed6f0f9db14cca,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_OIL_GAS_PRODUCTION_REFINERY,Oil & Gas Production & Refinery,c871f191e200706fed35,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_OIL_GAS_STORAGE_DISTRIBUTION,Oil & Gas Storage & Distribution,6195086fdc69d6425147,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_ONLINE_APPLICATIONS_SERVICES,Online Applications & Services,3a6c3daaf39302bebf85,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_PAPER,Paper,54804501a2f1693a3554,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_PERSONAL_CARE_PRODUCTS,Personal Care Products,21fc921d61791db8da2e,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_PHARMACEUTICALS,Pharmaceuticals,ad61652d4696c3f5e305,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_PLANTATIONS_CROPS,Plantations & Crops,06611257cee154eeefe4,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_PROCESSED_FOODS,Processed Foods,01fa5123c0fca1e50bc9,2026-10-01,2026-10-02,2,1,no,no,3,Fewer than three comparable observations in the current segment
+THEMES,ACTIVITY_REAL_ESTATE_DEVELOPMENT_MANAGEMENT,Real Estate Development & Management,c14bd21f0bed9f04a026,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_REAL_ESTATE_SERVICES,Real Estate Services,4005b04018f7b36e7711,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_RECREATIONAL_SPORTS_FACILITIES,Recreational & Sports Facilities,c65ba63a148c75e9a846,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_REINSURANCE,Reinsurance,d7f389e4883236e0d646,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_RESEARCH_CONSULTING_SERVICES,Research & Consulting Services,885f398a438839eb8c52,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_RESTAURANTS,Restaurants,9f4562f2d0a4f31f9c8e,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_ROAD_TRANSPORTATION,Road Transportation,e41409d9325d7c84bcde,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_SOFTWARE,Software,664ec61f7547db01d644,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_SOFT_DRINKS,Soft Drinks,d31d5b903e1a15e8d8ea,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_SPECIALTY_CHEMICALS,Specialty Chemicals,6966e4b5d833766a2e92,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_SPORT_EQUIPMENT_HOBBIES_GOODS,Sport Equipment & Hobbies Goods,8274a64b37c5784b5c07,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_SUPERMARKETS_CONVENIENCE_STORE,Supermarkets & Convenience Store,f44d617ac5ac52bee8c3,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_TEXTILES,Textiles,fe5e1fcd24275d60f6d8,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_TIMBER,Timber,1204c1cac0cc101c91c0,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_TIRES,Tires,f21b6ac8706438c2ea18,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_TOBACCO,Tobacco,eae2c1642f624f798e6a,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_TRAVEL_AGENCIES,Travel Agencies,ff2cf35f1e16c8d18ae8,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_WIRED_TELECOMMUNICATION_SERVICE,Wired Telecommunication Service,4d5dd441414cd27ddfa6,2026-09-01,2026-10-02,24,5,yes,yes,1,
+THEMES,ACTIVITY_WIRELESS_TELECOMMUNICATION_SERVICES,Wireless Telecommunication Services,38a7d36e6f5d60426ad7,2026-09-01,2026-10-02,24,5,yes,yes,1,
