@@ -52,6 +52,14 @@ def main() -> int:
         ),
     )
     parser.add_argument(
+        "--snapshots-root",
+        default=None,
+        help=(
+            "Override the snapshot directory root (default data/snapshots). "
+            "Lets an isolated run curate an index from a specific snapshot tree."
+        ),
+    )
+    parser.add_argument(
         "--allow-outside-root",
         action="store_true",
         help="Acknowledge writing outputs outside the project root.",
@@ -88,7 +96,9 @@ def main() -> int:
         "SECTORS_LIVE" if args.provider_mode == "LIVE — SECTORS" else args.provider_mode
     )
 
-    reader = SnapshotReader()
+    reader = SnapshotReader(
+        root=Path(args.snapshots_root) if args.snapshots_root else None
+    )
     out_path = Path(args.out) if args.out else PUBLIC_DIR / "index.json"
     entries: list[dict[str, str | None]] = []
     rejected: dict[str, str] = {}

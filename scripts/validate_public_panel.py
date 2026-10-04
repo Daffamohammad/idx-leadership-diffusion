@@ -242,6 +242,59 @@ def _check_panel_integrity(
     }
 
 
+def _module_available(name: str) -> bool:
+    import importlib.util
+
+    return importlib.util.find_spec(name) is not None
+
+
+def _fail_official_comparisons_unavailable(
+    *,
+    integrity: dict[str, Any],
+    panel_dir: Path,
+    panel_manifest: dict[str, Any],
+    out_path: Path,
+    missing_sources: list[str],
+    missing_parsers: list[str],
+) -> int:
+    """Fail with an explicit verdict when official comparison cannot run.
+
+    The panel's own structural verdict is still reported, so the operator can
+    tell "the panel is broken" apart from "the official files are not here".
+    """
+    unavailable = {
+        "source": "official IDX files",
+        "missing_files": missing_sources,
+        "missing_parsers": missing_parsers,
+        "note": (
+            "official comparison could not run; the panel passed its own "
+            "integrity and provenance checks only"
+        ),
+        "status": "SOURCE_UNAVAILABLE",
+    }
+    report = {
+        "kind": "PUBLIC_PANEL_VALIDATION",
+        "validated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "panel_dir": _display_path(panel_dir),
+        "panel_window": panel_manifest.get("window"),
+        "status": "FAIL",
+        "checks": {
+            "panel_integrity": integrity,
+            "benchmark_vs_official_workbook": unavailable,
+            "benchmark_vs_daily_statistics_pdfs": unavailable,
+            "stocks_vs_official_stock_summary": unavailable,
+        },
+    }
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+    print(
+        "status=FAIL (official comparisons unavailable): "
+        f"missing_files={missing_sources} missing_parsers={missing_parsers}",
+        file=sys.stderr,
+    )
+    return 1
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="validate_public_panel")
     parser.add_argument("--panel-dir", default=None)
@@ -267,24 +320,24 @@ def main() -> int:
     # hashes recorded at fetch time, or that carries a non-finite price, must
     # not be compared against official sources — every downstream number would
     # inherit the defect while still looking validated.
-    integrity_early = _check_panel_integrity(prices, benchmark, panel_manifest, panel_dir)
-    if integrity_early["status"] != "PASS":
+    integrity = _check_panel_integrity(prices, benchmark, panel_manifest, panel_dir)
+    if integrity["status"] != "PASS":
         report = {
             "kind": "PUBLIC_PANEL_VALIDATION",
             "validated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "panel_dir": _display_path(panel_dir),
             "panel_window": panel_manifest.get("window"),
             "status": "FAIL",
-            "checks": {"panel_integrity": integrity_early},
+            "checks": {"panel_integrity": integrity},
         }
         out_path = Path(args.out)
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
         print(
             "status=FAIL (panel integrity/provenance gate): "
-            f"nonfinite={integrity_early['nonfinite_price_rows']} "
-            f"hash_mismatches={len(integrity_early['panel_file_hash_mismatches'])} "
-            f"baseline_invalid={integrity_early['ytd_baseline_invalid_rows']}",
+            f"nonfinite={integrity['nonfinite_price_rows']} "
+            f"hash_mismatches={len(integrity['panel_file_hash_mismatches'])} "
+            f"baseline_invalid={integrity['ytd_baseline_invalid_rows']}",
             file=sys.stderr,
         )
         return 1
@@ -295,6 +348,29 @@ def main() -> int:
         / "data" / "raw" / "idx_composite_index"
         / "Composite Stock Price Index & Stock Trading Volume - Sep 2026.xlsx"
     )
+    summary_path = PROJECT_ROOT / "data" / "raw" / "idx_stock_summary" / "Stock Summary-20261002.xlsx"
+    ds_dir = PROJECT_ROOT / "data" / "raw" / "idx_daily_statistics"
+    # Official sources are cached artifacts, not committed files. When one is
+    # absent the run must say so and fail; it must never crash, and it must
+    # never quietly reduce the verdict to the panel's internal checks.
+    missing_sources = [
+        str(path) for path in (workbook_path, summary_path) if not path.is_file()
+    ]
+    if not (ds_dir.is_dir() and any(ds_dir.glob("ds_*.pdf"))):
+        missing_sources.append(str(ds_dir))
+    # Optional parsers are a hard requirement for the official comparisons.
+    # Report them instead of raising an ImportError traceback.
+    missing_parsers = [name for name in ("openpyxl", "pdfplumber") if not _module_available(name)]
+    if missing_sources or missing_parsers:
+        return _fail_official_comparisons_unavailable(
+            integrity=integrity,
+            panel_dir=panel_dir,
+            panel_manifest=panel_manifest,
+            out_path=Path(args.out),
+            missing_sources=missing_sources,
+            missing_parsers=missing_parsers,
+        )
+
     official = _load_composite_workbook(workbook_path)
     bench = dict(zip(benchmark["date"], benchmark["close"]))
     diffs = []
@@ -470,11 +546,9 @@ def main() -> int:
     }
 
     # --- 5. panel integrity ------------------------------------------------
-    # Shared with the early gate: finiteness, positivity and panel-file
-    # provenance are checked before any official comparison runs.
-    checks["panel_integrity"] = _check_panel_integrity(
-        prices, benchmark, panel_manifest, panel_dir
-    )
+    # Computed before the official comparisons (see the early gate); finiteness,
+    # positivity and panel-file provenance are therefore never optional.
+    checks["panel_integrity"] = integrity
 
     # --- 6. corporate actions disclosure -----------------------------------
     checks["corporate_actions"] = {
