@@ -38,6 +38,7 @@ class TaxonomyMembership:
     confidence: float = 1.0
     source: str = ""
     source_as_of: date | None = None
+    relationship: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -48,6 +49,7 @@ class TaxonomyMembership:
             "confidence": round(float(self.confidence), 4),
             "source": self.source,
             "source_as_of": self.source_as_of.isoformat() if self.source_as_of else None,
+            **({"relationship": self.relationship} if self.relationship else {}),
         }
 
     @classmethod
@@ -75,6 +77,7 @@ class TaxonomyMembership:
             confidence=confidence,
             source=str(payload.get("source", "") or ""),
             source_as_of=source_as_of,
+            relationship=str(payload["relationship"]) if payload.get("relationship") else None,
         )
 
 

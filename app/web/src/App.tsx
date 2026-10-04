@@ -1,3 +1,4 @@
+import "./market-workspace.css";
 import {
   Link,
   RouterProvider,
@@ -15,6 +16,9 @@ import Methodology from "./pages/Methodology";
 import WhatChanged from "./pages/WhatChanged";
 import ChartDemo from "./pages/ChartDemo";
 import TickerAnalysis from "./pages/TickerAnalysis";
+import StockHeatmap from "./pages/StockHeatmap";
+import ForeignFlow from "./pages/ForeignFlow";
+import Ownership from "./pages/Ownership";
 import MarketOverview from "./pages/MarketOverview";
 import TaxonomyMapPage from "./pages/TaxonomyMapPage";
 import MasterGroupTable from "./pages/MasterGroupTable";
@@ -111,6 +115,9 @@ const router = createBrowserRouter([
     children: [
       { path: "/what-changed", Component: WhatChanged },
       { path: "/overview", Component: MarketOverview },
+      { path: "/heatmap", Component: StockHeatmap },
+      { path: "/foreign", Component: ForeignFlow },
+      { path: "/ownership", Component: Ownership },
       { path: "/map", Component: LeadershipMap },
       { path: "/maps/konglo", Component: TaxonomyMapPage },
       { path: "/maps/themes", Component: TaxonomyMapPage },

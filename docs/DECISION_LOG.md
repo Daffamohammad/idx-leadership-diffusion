@@ -645,3 +645,20 @@
   terminology everywhere outside historical handoff records.
 - **Revisit trigger:** a concrete, methodology-backed macro module
   proposal reviewed and approved as new work.
+
+## D042 — Whole-market EOD workspace with separately versioned evidence
+
+- **Decision:** Publish the approved whole-market overview, stock heatmap,
+  documented corporate/activity catalogs, foreign flow and full public ownership
+  workspace under `snap_public_market_2026-10-02`, preserving the earlier indexed
+  bundles. Use official EOD observations, retained public adjusted histories,
+  exact disclosed names and separately dated issuer control statements.
+- **Reason:** Whole-market display coverage, policy eligibility, dated membership,
+  index attribution and ownership disclosures answer different questions. They
+  require explicit boundaries rather than inferred missing values or control.
+- **Consequences:** FASW history is quarantined, 41 acquisition failures remain
+  disclosed, longer foreign-flow periods and incomparable expanded rotation
+  trails are unavailable. Expanded catalogs use the canonical policy cohort and
+  five-member confirmation floor. Quad stays retired and Sectors stays HOLD.
+- **Evidence:** `docs/market-expansion-handoff/HANDOFF.md`, source manifest and
+  browser QA matrix. No push or deployment is included in this decision.

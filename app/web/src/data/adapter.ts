@@ -641,6 +641,7 @@ function normalizeTaxonomyView(value: unknown): TaxonomyView | null {
       typeof raw.source_kind === "string"
         ? (raw.source_kind as TaxonomyView["source_kind"])
         : "PROTOTYPE_CONFIG",
+    source_as_of: typeof raw.source_as_of === "string" ? raw.source_as_of : null,
     membership_policy:
       typeof raw.membership_policy === "string"
         ? raw.membership_policy

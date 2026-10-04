@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
+import { WorkspaceTable } from "../components/WorkspaceTable";
+import { useWorkspaceAsset, type MarketWorkspace } from "../data/marketWorkspace";
 import { useSnapshot } from "../data/SnapshotProvider";
 import type { TaxonomyGroupAggregate, TaxonomyMembershipData, TaxonomyView } from "../data/snapshot";
 import { LeadershipChip, DiffusionChip, DataStatusChip } from "../components/StatusChips";
@@ -57,6 +59,7 @@ const headerLink: React.CSSProperties = {
 
 export default function ThemesExplorer() {
   const { data } = useSnapshot();
+  const market = useWorkspaceAsset<MarketWorkspace>("market");
   const location = useLocation();
   const [params, setParams] = useSearchParams();
 
@@ -114,6 +117,8 @@ export default function ThemesExplorer() {
     ? membershipsByGroup.get(selected.taxonomy_group_id) ?? []
     : [];
 
+  const expanded = taxonomyView?.taxonomy_version?.startsWith("market-") ?? false;
+  const stockByTicker = new Map(market.data?.records.map(r => [r.ticker, r]) ?? []);
   const kindLabel = taxonomyKind === "KONGLO" ? "Konglo" : "Themes";
   const singularLabel = taxonomyKind === "KONGLO" ? "Konglo group" : "Theme";
   const catalogPath = `/groups?taxonomy=${taxonomyKind}`;
@@ -160,10 +165,13 @@ export default function ThemesExplorer() {
             color: "var(--ink)",
           }}
         >
-          {taxonomyKind === "KONGLO" ? "Verified corporate ecosystems" : "Theme browser"}
+          {expanded ? taxonomyKind === "KONGLO" ? "Documented corporate portfolios" : "Business-activity themes" : taxonomyKind === "KONGLO" ? "Verified corporate ecosystems" : "Theme browser"}
         </h1>
         <p style={{ margin: 0, color: "var(--muted)", fontSize: 13, maxWidth: 720 }}>
-          {taxonomyKind === "KONGLO"
+          {expanded ? taxonomyKind === "KONGLO"
+            ? "Portfolios use exact named positions of at least 20% in the dated official register and explicitly named listed parents. Holdings can overlap; a holding percentage does not establish legal control. Issuer-documented control is shown separately in Ownership."
+            : "Each theme includes stocks matching one exact captured business subindustry. This is a dated activity lens, with classification evidence as of 27 Aug 2026. It does not claim current revenue exposure or infer cross-sector investment themes."
+          : taxonomyKind === "KONGLO"
             ? "A deliberately narrow research lens: a group is included only when an official company source supports the relationship. It is not an official IDX classification, a complete beneficial-ownership graph, or a claim that every company is controlled in the same legal manner."
             : "Static analyst-defined themes for cross-sector pattern exploration. Aggregate metrics use the current snapshot, while the membership lens is not an authoritative taxonomy. Multiple memberships are allowed and never double-counted across themes."}
         </p>
@@ -386,6 +394,18 @@ export default function ThemesExplorer() {
 
               {selected.membership_kind_breakdown ? (
                 <div style={{ marginBottom: 14 }}>
+                  <details open={expanded} style={{ marginBottom: 18 }}>
+                    <summary style={{ cursor: "pointer", fontWeight: 600 }}>Member stocks · {selectedMembers.length}</summary>
+                    <div style={{ marginTop: 12 }}>
+                      <WorkspaceTable rows={selectedMembers} rowKey={m => `${m.ticker}:${m.membership_type}`} columns={[
+                        { label: "Stock", cell: m => <Link to={`/ticker/${m.ticker}`}>{m.ticker.replace(".JK", "")}</Link> },
+                        { label: "Company", cell: m => stockByTicker.get(m.ticker)?.company_name ?? m.ticker.replace(".JK", "") },
+                        { label: "Relationship / rule", cell: m => m.relationship ?? "Unresolved" },
+                        { label: "Evidence date", cell: m => formatDateLabel(m.source_as_of) },
+                        { label: "Source", cell: m => m.source?.startsWith("https://") ? <a href={m.source} target="_blank" rel="noreferrer">Official register</a> : m.source ?? "Unavailable" },
+                      ]}/>
+                    </div>
+                  </details>
                   <div className="eyebrow-muted" style={{ marginBottom: 6 }}>Membership breakdown</div>
                   <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
                     {Object.entries(selected.membership_kind_breakdown).map(([k, v]) => (

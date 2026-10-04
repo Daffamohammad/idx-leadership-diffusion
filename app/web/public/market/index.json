@@ -1,0 +1,24 @@
+{
+  "as_of": "2026-10-02",
+  "assets": {
+    "foreign": {
+      "as_of": "2026-10-02",
+      "path": "/market/foreign-2026-10-02.json",
+      "schema_version": "idx-foreign-history-v1",
+      "sha256": "d433bce59892484957b34a43e348b785f8fc48171e10ea53301b8c8719db6c3d"
+    },
+    "market": {
+      "as_of": "2026-10-02",
+      "path": "/market/market-2026-10-02.json",
+      "schema_version": "market-workspace-v1",
+      "sha256": "2ec78df72b732299117dd1cabc9688ef8cc33f125629a492f4f5be6170f46272"
+    },
+    "ownership": {
+      "as_of": "2026-09-30",
+      "path": "/market/ownership-2026-09-30.json",
+      "schema_version": "idx-ownership-v1",
+      "sha256": "d3bbdcc53b5491b86391988e1630374e4e80bc0aa06e8b1a09e452ce4be17527"
+    }
+  },
+  "snapshot_id": "snap_public_market_2026-10-02"
+}

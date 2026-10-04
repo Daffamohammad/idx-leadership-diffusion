@@ -1,0 +1,129 @@
+# Exact disclosed holder names; a dated holdings lens, not inferred legal control.
+version: market-holdings-v1
+minimum_percentage: 20
+as_of: '2026-09-30'
+groups:
+- id: KONGLO_ASTRA
+  name: Astra corporate holdings
+  parent: ASII
+  owners:
+  - PT ASTRA INTERNATIONAL TBK
+- id: KONGLO_INDOFOOD
+  name: Indofood corporate holdings
+  parent: INDF
+  owners:
+  - INDOFOOD SUKSES MAKMUR TBK
+  - INDOFOOD AGRI RESOURCES LTD
+  - PT SALIM IVOMAS PRATAMA TBK
+- id: KONGLO_BARITO
+  name: Barito Pacific corporate holdings
+  parent: BRPT
+  owners:
+  - PT BARITO PACIFIC TBK
+- id: KONGLO_PRAJOGO
+  name: Prajogo Pangestu disclosed holdings
+  owners:
+  - PRAJOGO PANGESTU
+- id: KONGLO_EMTEK
+  name: EMTEK corporate holdings
+  parent: EMTK
+  owners:
+  - ELANG MAHKOTA TEKNOLOGI TBK, PT
+- id: KONGLO_PANIN
+  name: Panin corporate holdings
+  parent: PNBN
+  owners:
+  - Panin Bank Tbk, PT
+  - PANIN FINANCIAL Tbk.
+  - PANINVEST TBK, PT
+  - PANINKORP, PT
+- id: KONGLO_APP
+  name: APP Purinusa disclosed holdings
+  owners:
+  - PT APP PURINUSA EKAPERSADA
+- id: KONGLO_HARITA
+  name: Harita Jayaraya disclosed holdings
+  owners:
+  - HARITA JAYARAYA
+- id: KONGLO_MULTIPOLAR
+  name: Multipolar / Inti Anugerah holdings
+  parent: MLPL
+  owners:
+  - MULTIPOLAR,PT,TBK
+  - INTI ANUGERAH PRATAMA, PT
+- id: KONGLO_MNC
+  name: MNC Asia corporate holdings
+  parent: BHIT
+  owners:
+  - PT MNC ASIA HOLDING TBK
+  - GLOBAL MEDIACOM TBK, PT
+  - MNC KAPITAL INDONESIA TBK, PT
+- id: KONGLO_TRAKINDO
+  name: Tiara Marga Trakindo holdings
+  owners:
+  - PT TIARA MARGA TRAKINDO
+- id: KONGLO_MEGA
+  name: Mega Corpora disclosed holdings
+  owners:
+  - PT MEGA CORPORA
+- id: KONGLO_SARATOGA
+  name: Saratoga corporate holdings
+  parent: SRTG
+  owners:
+  - SARATOGA INVESTAMA SEDAYA TBK
+- id: KONGLO_ADARO
+  name: Adaro Strategic Investments holdings
+  owners:
+  - ADARO STRATEGIC INVESTMENTS
+- id: KONGLO_KALBE
+  name: Kalbe Farma corporate holdings
+  parent: KLBF
+  owners:
+  - PT Kalbe Farma Tbk
+- id: KONGLO_VICTORIA
+  name: Victoria Investama holdings
+  parent: VICO
+  owners:
+  - PT VICTORIA INVESTAMA TBK
+- id: KONGLO_BUDI
+  name: Sungai Budi / Budi Delta holdings
+  owners:
+  - PT SUNGAI BUDI
+  - PT BUDI DELTA SWAKARYA
+- id: KONGLO_PROTELINDO
+  name: Protelindo disclosed holdings
+  owners:
+  - PROFESIONAL TELEKOMUNIKASI INDONESIA
+- id: KONGLO_TANCORP
+  name: Tancorp Global disclosed holdings
+  owners:
+  - PT TANCORP GLOBAL SENTOSA
+- id: KONGLO_HARTONO
+  name: Hartono / Dwimuria holdings
+  owners:
+  - PT DWIMURIA INVESTAMA ANDALAN
+- id: KONGLO_SINARMAS
+  name: Sinar Mas corporate holdings
+  owners:
+  - PT. SINAR MAS TUNGGAL
+  - SINAR MAS CAKRAWALA
+  - PT SINAR MAS MULTIARTHA Tbk
+- id: KONGLO_BSDE
+  name: Paraga / Ekacentra disclosed holdings
+  owners:
+  - PT EKACENTRA USAHAMAJU
+  - PT PARAGA ARTAMIDA
+control_evidence:
+- owner: PT BARITO PACIFIC TBK
+  ticker: TPIA
+  relationship: Issuer-documented control
+  as_of: '2026-03-31'
+  source: https://www.barito-pacific.com/newsroom/pt-barito-pacific-tbk-idx-brpt-announces-its-audited-consolidated-performance-for-the-full-year-of-2025
+- owner: PT DWIMURIA INVESTAMA ANDALAN
+  ticker: BBCA
+  relationship: Issuer-documented control
+  as_of: '2025-12-31'
+  source: https://www.bca.co.id/en/tentang-bca/Hubungan-Investor/Informasi-Saham/Komposisi-Pemegang-Saham
+  ultimate_holders:
+  - Robert Budi Hartono
+  - Bambang Hartono

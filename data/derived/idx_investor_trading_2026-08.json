@@ -1,0 +1,539 @@
+{
+  "as_of": {
+    "max": "2026-08-31",
+    "min": "2026-08-03"
+  },
+  "daily": [
+    {
+      "as_of": "2026-08-03",
+      "direction": "NET_SELL",
+      "domestic_to_domestic": {
+        "frequency": 1698907,
+        "value_idr": 7720700234928,
+        "volume": 25019424994
+      },
+      "domestic_to_foreign": {
+        "frequency": 183943,
+        "value_idr": 1976153116646,
+        "volume": 4497592297
+      },
+      "foreign_to_domestic": {
+        "frequency": 373468,
+        "value_idr": 2683741414749,
+        "volume": 5516445077
+      },
+      "foreign_to_foreign": {
+        "frequency": 55536,
+        "value_idr": 1985516798612,
+        "volume": 2633687961
+      },
+      "net_foreign_value_idr": -707588298103
+    },
+    {
+      "as_of": "2026-08-04",
+      "direction": "NET_BUY",
+      "domestic_to_domestic": {
+        "frequency": 1555127,
+        "value_idr": 6164259431579,
+        "volume": 21412616271
+      },
+      "domestic_to_foreign": {
+        "frequency": 225162,
+        "value_idr": 2863368669868,
+        "volume": 4765144424
+      },
+      "foreign_to_domestic": {
+        "frequency": 271094,
+        "value_idr": 2239893177638,
+        "volume": 5189345566
+      },
+      "foreign_to_foreign": {
+        "frequency": 61466,
+        "value_idr": 1726913634154,
+        "volume": 1051107523
+      },
+      "net_foreign_value_idr": 623475492230
+    },
+    {
+      "as_of": "2026-08-05",
+      "direction": "NET_SELL",
+      "domestic_to_domestic": {
+        "frequency": 1672965,
+        "value_idr": 7381376041907,
+        "volume": 25563742444
+      },
+      "domestic_to_foreign": {
+        "frequency": 244409,
+        "value_idr": 2822613780845,
+        "volume": 6138355317
+      },
+      "foreign_to_domestic": {
+        "frequency": 334846,
+        "value_idr": 3005387626731,
+        "volume": 6254501276
+      },
+      "foreign_to_foreign": {
+        "frequency": 64003,
+        "value_idr": 1706833318250,
+        "volume": 1311951382
+      },
+      "net_foreign_value_idr": -182773845886
+    },
+    {
+      "as_of": "2026-08-06",
+      "direction": "NET_SELL",
+      "domestic_to_domestic": {
+        "frequency": 1971900,
+        "value_idr": 9882269463086,
+        "volume": 36201830538
+      },
+      "domestic_to_foreign": {
+        "frequency": 245322,
+        "value_idr": 3131551986946,
+        "volume": 7119016501
+      },
+      "foreign_to_domestic": {
+        "frequency": 382108,
+        "value_idr": 3405017528018,
+        "volume": 8627020354
+      },
+      "foreign_to_foreign": {
+        "frequency": 61950,
+        "value_idr": 1745168005072,
+        "volume": 1557314906
+      },
+      "net_foreign_value_idr": -273465541072
+    },
+    {
+      "as_of": "2026-08-07",
+      "direction": "NET_BUY",
+      "domestic_to_domestic": {
+        "frequency": 1588893,
+        "value_idr": 8228491715337,
+        "volume": 24425634932
+      },
+      "domestic_to_foreign": {
+        "frequency": 237109,
+        "value_idr": 3774634645540,
+        "volume": 5778799662
+      },
+      "foreign_to_domestic": {
+        "frequency": 309397,
+        "value_idr": 2539113606700,
+        "volume": 5529306093
+      },
+      "foreign_to_foreign": {
+        "frequency": 56675,
+        "value_idr": 1906691001922,
+        "volume": 1146600244
+      },
+      "net_foreign_value_idr": 1235521038840
+    },
+    {
+      "as_of": "2026-08-10",
+      "direction": "NET_BUY",
+      "domestic_to_domestic": {
+        "frequency": 1881276,
+        "value_idr": 9073661209033,
+        "volume": 27994844142
+      },
+      "domestic_to_foreign": {
+        "frequency": 240678,
+        "value_idr": 4418292403770,
+        "volume": 10292935141
+      },
+      "foreign_to_domestic": {
+        "frequency": 423708,
+        "value_idr": 3588603891638,
+        "volume": 6071011457
+      },
+      "foreign_to_foreign": {
+        "frequency": 61837,
+        "value_idr": 1107264027162,
+        "volume": 1095909822
+      },
+      "net_foreign_value_idr": 829688512132
+    },
+    {
+      "as_of": "2026-08-11",
+      "direction": "NET_SELL",
+      "domestic_to_domestic": {
+        "frequency": 1582556,
+        "value_idr": 7735807037664,
+        "volume": 23510453539
+      },
+      "domestic_to_foreign": {
+        "frequency": 178501,
+        "value_idr": 2410039258535,
+        "volume": 4349902243
+      },
+      "foreign_to_domestic": {
+        "frequency": 344215,
+        "value_idr": 3097880808127,
+        "volume": 5063853099
+      },
+      "foreign_to_foreign": {
+        "frequency": 58003,
+        "value_idr": 1238549420068,
+        "volume": 1089574563
+      },
+      "net_foreign_value_idr": -687841549592
+    },
+    {
+      "as_of": "2026-08-12",
+      "direction": "NET_BUY",
+      "domestic_to_domestic": {
+        "frequency": 1445262,
+        "value_idr": 9194619456163,
+        "volume": 21446744741
+      },
+      "domestic_to_foreign": {
+        "frequency": 247180,
+        "value_idr": 3536309489055,
+        "volume": 5103601845
+      },
+      "foreign_to_domestic": {
+        "frequency": 308742,
+        "value_idr": 2811101754392,
+        "volume": 4953464659
+      },
+      "foreign_to_foreign": {
+        "frequency": 66612,
+        "value_idr": 1815626817576,
+        "volume": 1176447173
+      },
+      "net_foreign_value_idr": 725207734663
+    },
+    {
+      "as_of": "2026-08-13",
+      "direction": "NET_SELL",
+      "domestic_to_domestic": {
+        "frequency": 1330362,
+        "value_idr": 6619484861371,
+        "volume": 16585323762
+      },
+      "domestic_to_foreign": {
+        "frequency": 136177,
+        "value_idr": 1744555399000,
+        "volume": 2414617800
+      },
+      "foreign_to_domestic": {
+        "frequency": 368151,
+        "value_idr": 3157794757076,
+        "volume": 5107007453
+      },
+      "foreign_to_foreign": {
+        "frequency": 70367,
+        "value_idr": 2082922129011,
+        "volume": 2679507425
+      },
+      "net_foreign_value_idr": -1413239358076
+    },
+    {
+      "as_of": "2026-08-14",
+      "direction": "NET_SELL",
+      "domestic_to_domestic": {
+        "frequency": 1214977,
+        "value_idr": 6204437020661,
+        "volume": 15951081035
+      },
+      "domestic_to_foreign": {
+        "frequency": 181149,
+        "value_idr": 1959661795055,
+        "volume": 3270970088
+      },
+      "foreign_to_domestic": {
+        "frequency": 268896,
+        "value_idr": 2994325596726,
+        "volume": 8021437269
+      },
+      "foreign_to_foreign": {
+        "frequency": 64832,
+        "value_idr": 1272771824028,
+        "volume": 3880496951
+      },
+      "net_foreign_value_idr": -1034663801671
+    },
+    {
+      "as_of": "2026-08-18",
+      "direction": "NET_SELL",
+      "domestic_to_domestic": {
+        "frequency": 1521146,
+        "value_idr": 7495191917051,
+        "volume": 20676839049
+      },
+      "domestic_to_foreign": {
+        "frequency": 219755,
+        "value_idr": 2638288807782,
+        "volume": 5553913798
+      },
+      "foreign_to_domestic": {
+        "frequency": 347043,
+        "value_idr": 2993463123197,
+        "volume": 4655193858
+      },
+      "foreign_to_foreign": {
+        "frequency": 74945,
+        "value_idr": 1679950995784,
+        "volume": 1185009136
+      },
+      "net_foreign_value_idr": -355174315415
+    },
+    {
+      "as_of": "2026-08-19",
+      "direction": "NET_BUY",
+      "domestic_to_domestic": {
+        "frequency": 1588660,
+        "value_idr": 7224169682723,
+        "volume": 21602875440
+      },
+      "domestic_to_foreign": {
+        "frequency": 180698,
+        "value_idr": 3402587043894,
+        "volume": 5761655559
+      },
+      "foreign_to_domestic": {
+        "frequency": 345797,
+        "value_idr": 2469060674428,
+        "volume": 5918910020
+      },
+      "foreign_to_foreign": {
+        "frequency": 63660,
+        "value_idr": 1161819719980,
+        "volume": 984209892
+      },
+      "net_foreign_value_idr": 933526369466
+    },
+    {
+      "as_of": "2026-08-20",
+      "direction": "NET_BUY",
+      "domestic_to_domestic": {
+        "frequency": 1646790,
+        "value_idr": 7969786818486,
+        "volume": 25913121825
+      },
+      "domestic_to_foreign": {
+        "frequency": 267504,
+        "value_idr": 3132751809086,
+        "volume": 5460245240
+      },
+      "foreign_to_domestic": {
+        "frequency": 279488,
+        "value_idr": 2452497133879,
+        "volume": 7085105508
+      },
+      "foreign_to_foreign": {
+        "frequency": 68789,
+        "value_idr": 2221459982383,
+        "volume": 38634282170
+      },
+      "net_foreign_value_idr": 680254675207
+    },
+    {
+      "as_of": "2026-08-21",
+      "direction": "NET_BUY",
+      "domestic_to_domestic": {
+        "frequency": 1652376,
+        "value_idr": 8793681967323,
+        "volume": 27959660876
+      },
+      "domestic_to_foreign": {
+        "frequency": 233591,
+        "value_idr": 3738557102760,
+        "volume": 5560169691
+      },
+      "foreign_to_domestic": {
+        "frequency": 292197,
+        "value_idr": 2763981041746,
+        "volume": 9494998992
+      },
+      "foreign_to_foreign": {
+        "frequency": 58449,
+        "value_idr": 2151941698538,
+        "volume": 14770977562
+      },
+      "net_foreign_value_idr": 974576061014
+    },
+    {
+      "as_of": "2026-08-24",
+      "direction": "NET_SELL",
+      "domestic_to_domestic": {
+        "frequency": 1599559,
+        "value_idr": 7808862646336,
+        "volume": 23352734379
+      },
+      "domestic_to_foreign": {
+        "frequency": 178853,
+        "value_idr": 2316105056471,
+        "volume": 3180715468
+      },
+      "foreign_to_domestic": {
+        "frequency": 331371,
+        "value_idr": 2666816743095,
+        "volume": 5149355793
+      },
+      "foreign_to_foreign": {
+        "frequency": 62205,
+        "value_idr": 1478014915851,
+        "volume": 2549573197
+      },
+      "net_foreign_value_idr": -350711686624
+    },
+    {
+      "as_of": "2026-08-26",
+      "direction": "NET_BUY",
+      "domestic_to_domestic": {
+        "frequency": 1821236,
+        "value_idr": 9049913926520,
+        "volume": 24898499835
+      },
+      "domestic_to_foreign": {
+        "frequency": 204622,
+        "value_idr": 4326045057620,
+        "volume": 5343347813
+      },
+      "foreign_to_domestic": {
+        "frequency": 384554,
+        "value_idr": 2951753870350,
+        "volume": 7789146258
+      },
+      "foreign_to_foreign": {
+        "frequency": 79074,
+        "value_idr": 1736771195615,
+        "volume": 2130220700
+      },
+      "net_foreign_value_idr": 1374291187270
+    },
+    {
+      "as_of": "2026-08-27",
+      "direction": "NET_SELL",
+      "domestic_to_domestic": {
+        "frequency": 1399075,
+        "value_idr": 7430378735306,
+        "volume": 20893955714
+      },
+      "domestic_to_foreign": {
+        "frequency": 228012,
+        "value_idr": 2291341361011,
+        "volume": 5068303032
+      },
+      "foreign_to_domestic": {
+        "frequency": 260129,
+        "value_idr": 2553453552364,
+        "volume": 8283893322
+      },
+      "foreign_to_foreign": {
+        "frequency": 66837,
+        "value_idr": 1400715098679,
+        "volume": 1153224625
+      },
+      "net_foreign_value_idr": -262112191353
+    },
+    {
+      "as_of": "2026-08-28",
+      "direction": "NET_SELL",
+      "domestic_to_domestic": {
+        "frequency": 1445566,
+        "value_idr": 8073889109858,
+        "volume": 19208782917
+      },
+      "domestic_to_foreign": {
+        "frequency": 170477,
+        "value_idr": 2552069779252,
+        "volume": 2960002948
+      },
+      "foreign_to_domestic": {
+        "frequency": 320380,
+        "value_idr": 3034309248437,
+        "volume": 8575263376
+      },
+      "foreign_to_foreign": {
+        "frequency": 55590,
+        "value_idr": 1471612921208,
+        "volume": 3668096383
+      },
+      "net_foreign_value_idr": -482239469185
+    },
+    {
+      "as_of": "2026-08-31",
+      "direction": "NET_SELL",
+      "domestic_to_domestic": {
+        "frequency": 1687620,
+        "value_idr": 10126116694870,
+        "volume": 26928540650
+      },
+      "domestic_to_foreign": {
+        "frequency": 268624,
+        "value_idr": 3738520430800,
+        "volume": 6386867639
+      },
+      "foreign_to_domestic": {
+        "frequency": 345808,
+        "value_idr": 4172769694270,
+        "volume": 10229601722
+      },
+      "foreign_to_foreign": {
+        "frequency": 70064,
+        "value_idr": 6958759060084,
+        "volume": 6794754659
+      },
+      "net_foreign_value_idr": -434249263470
+    }
+  ],
+  "limitations": [
+    "Net foreign is derived from the two cross-investor value columns published by IDX.",
+    "Foreign-to-foreign and domestic-to-domestic trades are retained for audit detail and excluded from net foreign.",
+    "This release is market-level investor flow; it does not provide per-ticker ownership flow.",
+    "The parser does not use search summaries or infer missing trading days.",
+    "Search/crawl discovery metadata is not numeric evidence; this artifact is reduced from directly retrieved official IDX table cells."
+  ],
+  "provider": "IDX",
+  "provider_mode": "IDX_OFFICIAL_RELEASE",
+  "quality": {
+    "daily_rows": 19,
+    "dynamic_page_discovery_separate": true,
+    "full_month_release": true,
+    "negative_day_count": 11,
+    "positive_day_count": 8,
+    "reconciliation": {
+      "domestic_to_foreign_matches_total": true,
+      "foreign_to_domestic_matches_total": true,
+      "net_matches_component_totals": true
+    },
+    "search_agent_role": "DISCOVERY_ONLY",
+    "source_table_count": 2
+  },
+  "quantitative_use": true,
+  "release": {
+    "period": {
+      "label": "2026-08",
+      "month": 8,
+      "year": 2026
+    },
+    "title": "Table Daily Trading by Type of Investor - Agustus 2026",
+    "trading_day_count": 19
+  },
+  "schema_version": "idx-investor-trading-v1",
+  "scope": "MONTHLY_EQUITY_TRADING_BY_INVESTOR_TYPE",
+  "source": {
+    "parser": "idx_monthly_investor_html",
+    "parser_type": "DETERMINISTIC_FIRST_PARTY_HTML_REDUCER",
+    "publisher": "Indonesia Stock Exchange",
+    "retrieved_at": "2026-10-04T08:45:00Z",
+    "source_kind": "FIRST_PARTY_DYNAMIC_TABLE",
+    "table_endpoints": [
+      "/api/tabledailytradingbyinvestor/getforeign",
+      "/api/tabledailytradingbyinvestor/getdomestic"
+    ],
+    "url": "https://www.idx.co.id/id/data-pasar/laporan-statistik/digital-statistic/monthly/equity-trading-by-investor/table-daily-trading-by-type-of-investor?filter=eyJ5ZWFyIjoiMjAyNiIsIm1vbnRoIjoiOCIsInF1YXJ0ZXIiOjAsInR5cGUiOiJtb250aGx5In0%3D"
+  },
+  "status": "READY",
+  "totals": {
+    "direction": "NET_BUY",
+    "domestic_to_domestic_value_idr": 152177097970202,
+    "domestic_to_foreign_value_idr": 56773446993936,
+    "foreign_to_domestic_value_idr": 55580965243561,
+    "foreign_to_foreign_value_idr": 36849302563977,
+    "net_foreign_value_idr": 1192481750375
+  }
+}

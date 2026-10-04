@@ -180,3 +180,9 @@ def test_manual_price_contract_requires_full_contract_match():
     assert not manual_price_fallback_contract_matches(
         contract, {**contract, "price_basis": "adjusted_close"}
     )
+
+
+def test_monthly_parser_accepts_official_agt_abbreviation():
+    html=_release_html().replace("Juli 2026", "Agustus 2026").replace("Jul 2026", "Agt 2026")
+    payload=parse_idx_monthly_investor_html(html,source_url=build_monthly_investor_url(2026,8))
+    assert payload['status']=='READY' and payload['daily'][0]['as_of']=='2026-08-30'

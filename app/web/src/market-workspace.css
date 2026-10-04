@@ -1,0 +1,29 @@
+.workspace-page {padding:24px var(--page-gutter) 56px;max-width:1500px;width:100%;margin:auto;box-sizing:border-box;min-width:0;display:grid;gap:20px}
+.workspace-page h1 {font-size:30px;letter-spacing:-.025em;margin:0 0 8px}
+.workspace-page h2 {font-size:19px;margin:6px 0 14px}
+.workspace-page h3 {font-size:13px;margin:12px 0}
+.workspace-page p {line-height:1.6}
+.workspace-controls {display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0}
+.workspace-controls .btn[aria-pressed=true] {border-color:var(--accent);background:var(--surface-subtle);font-weight:600}
+.workspace-search {min-height:40px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 12px;border-radius:4px;max-width:100%;box-sizing:border-box;min-width:0}
+.market-grid {display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:var(--card-gap);min-width:0}
+.market-level {font-size:30px;font-variant-numeric:tabular-nums;letter-spacing:-.025em;margin:12px 0 0}
+.workspace-chart {height:300px;width:100%;min-width:0}
+.breadth-bar {display:flex;height:7px;gap:2px;width:100%;margin-top:10px}
+.mover-columns {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.mover-row {display:grid;grid-template-columns:1fr auto;gap:4px;text-decoration:none;color:var(--ink);padding:9px 0;border-bottom:1px solid var(--line);font-size:12px}
+.mover-row small {grid-column:1 / -1;color:var(--muted)}
+.positive {color:var(--up)}.negative {color:var(--down)}
+.workspace-table-scroll {max-width:100%;overflow-x:auto;border:1px solid var(--line);border-radius:5px}
+.workspace-table {border-collapse:collapse;width:100%;font-size:12px;background:var(--surface)}
+.workspace-table th {text-align:left;font-weight:600;background:var(--surface-subtle);white-space:nowrap}
+.workspace-table th,.workspace-table td {padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.workspace-table td {overflow-wrap:anywhere;min-width:80px;max-width:340px}
+.workspace-stats {display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.workspace-stat {border:1px solid var(--line);padding:16px;border-radius:5px;background:var(--surface)}
+.workspace-stat strong {display:block;font-size:23px;margin-top:5px;font-variant-numeric:tabular-nums}
+.ownership-graph {display:grid;gap:12px}
+.ownership-edge {display:flex;gap:12px;align-items:center;flex-wrap:wrap;border:1px solid var(--line);padding:14px;border-radius:5px;background:var(--surface)}
+.ownership-node {padding:10px 12px;background:var(--surface-subtle);border:1px solid var(--line);border-radius:4px;overflow-wrap:anywhere;max-width:320px}
+@media(max-width:900px){.market-grid {grid-template-columns:minmax(0,1fr)}.workspace-chart {height:270px}}
+@media(max-width:480px){.workspace-page {padding:18px 12px 40px}.market-level {font-size:25px}.mover-columns {gap:10px}.workspace-table th,.workspace-table td {padding:8px}.workspace-search {width:100%}}

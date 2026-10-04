@@ -541,10 +541,13 @@ def test_canonical_index_keeps_sectors_evidence_and_validated_latest():
     )
     assert latest.get("provider") == "yfinance"
 
-    # Exactly the two curated entries, and the newest as-of is the public one.
-    assert len(index) == 2, f"Expected 2 curated entries, got {sorted(by_id)}"
+    # The expanded cohort is separately versioned; both earlier evidence bundles remain.
+    assert set(by_id) == {"snap_sectors_2026-08-27", "snap_public_2026-10-02", "snap_public_market_2026-10-02"}
+    expanded = by_id["snap_public_market_2026-10-02"]
+    assert expanded["as_of"] == latest["as_of"]
+    assert expanded["provider_mode"] == "PUBLIC_PROTOTYPE"
     newest = max(index, key=lambda e: (str(e.get("as_of")), str(e.get("snapshot_id"))))
-    assert newest["snapshot_id"] == "snap_public_2026-10-02"
+    assert newest["snapshot_id"] == "snap_public_market_2026-10-02"
 
     # Every advertised entry must have a fetchable payload with matching identity.
     for entry in index:
@@ -801,3 +804,17 @@ def test_diffusion_readiness_separates_data_gap_from_method_guardrail():
             "missingDelta": 0,
         },
     ]
+
+
+def test_frontend_preserves_dated_expanded_catalog_definitions():
+    import subprocess
+    script = (
+        'import fs from "node:fs"; '
+        'import {adaptSnapshot} from "./app/web/src/data/adapter.ts"; '
+        'const p=JSON.parse(fs.readFileSync("./app/web/public/snapshots/snap_public_market_2026-10-02.json","utf8")); '
+        'const d=adaptSnapshot(p); '
+        'console.log(JSON.stringify([d.taxonomyViews.themes.source_as_of,d.taxonomyViews.konglo.source_as_of]));'
+    )
+    result=subprocess.run(["bun","x","tsx","-e",script],capture_output=True,text=True,cwd=REPO_ROOT,timeout=30)
+    assert result.returncode==0,result.stderr
+    assert json.loads(result.stdout.strip())==["2026-08-27","2026-09-30"]

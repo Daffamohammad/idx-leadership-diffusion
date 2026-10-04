@@ -109,7 +109,7 @@ def normalize_stock_summary(
             "return_1d": (close / previous - 1) * 100 if observed else None,
             "listed_shares": listed_shares,
             "market_cap": close * listed_shares if close and listed_shares else None,
-            "weight_for_index": _number(raw.get("Weight For Index"), positive=True),
+            "weight_for_index": _number(raw.get("Weight For Index")),
             "volume_shares": volume,
             "traded": not multiple_voting and observed and volume is not None and volume > 0,
             "value_idr": _number(raw.get("Value")),

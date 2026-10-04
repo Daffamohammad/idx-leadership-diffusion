@@ -150,6 +150,7 @@ _MONTHS = {
     "july": 7,
     "juli": 7,
     "aug": 8,
+    "agt": 8,
     "august": 8,
     "agustus": 8,
     "sep": 9,

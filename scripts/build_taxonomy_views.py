@@ -8,6 +8,7 @@ trading-session return engine and never calls a live provider.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 import tempfile
@@ -212,6 +213,17 @@ def _breadth_lookup(aggregates: list[Any]) -> dict[str, float]:
     }
 
 
+def _workspace_eligible(path: Path, snapshot_id: str, entry: Mapping[str, Any]) -> set[str]:
+    workspace = _load_json(path)
+    if workspace.get("snapshot_id") != snapshot_id or workspace.get("as_of") != entry.get("as_of"):
+        raise ValueError("eligibility workspace identity mismatch")
+    eligible = {r["ticker"] for r in workspace.get("records", []) if r.get("signal_eligible") is True}
+    cohort = hashlib.sha256(json.dumps(sorted(eligible)).encode()).hexdigest()[:16]
+    if not eligible or cohort != entry.get("eligible_ticker_set_hash"):
+        raise ValueError("eligibility workspace cohort mismatch")
+    return eligible
+
+
 def build_taxonomy_views(
     snapshot_root: Path,
     registry: TaxonomyRegistry,
@@ -220,6 +232,7 @@ def build_taxonomy_views(
     previous_snapshot_id: str | None = None,
     universe: list[str] | None = None,
     foreign_flow_path: Path | None = None,
+    eligibility_workspace: Path | None = None,
 ) -> dict[str, dict[str, Any]]:
     reader = SnapshotReader(root=snapshot_root)
     current_id = snapshot_id or _default_snapshot_id(reader)
@@ -232,7 +245,9 @@ def build_taxonomy_views(
     previous_id, previous, comparison = _compatible_previous(
         reader, current_id, current_entry, previous_snapshot_id
     )
-    current_prices = _read_prices(current, universe or [])
+    eligible = _workspace_eligible(eligibility_workspace, current_id, current_entry) if eligibility_workspace else None
+    calculation_universe = sorted(eligible) if eligible is not None else universe or []
+    current_prices = _read_prices(current, calculation_universe)
     current_benchmark = _read_benchmark(current)
     if current_prices.empty or current_benchmark.empty:
         raise ValueError(f"snapshot {current_id!r} lacks prices or benchmark")
@@ -245,13 +260,14 @@ def build_taxonomy_views(
         if previous is not None:
             previous_entry = _manifest_entry(previous)
             previous_as_of = str(previous_entry.get("as_of") or "") or None
-            previous_prices = _read_prices(previous, universe or [])
+            previous_prices = _read_prices(previous, calculation_universe)
             previous_aggregates = aggregate_taxonomy(
                 taxonomy,
                 previous_prices,
                 _read_benchmark(previous),
                 as_of=previous_as_of,
                 price_col=_price_column(previous_entry, previous_prices),
+                min_eligible_constituents=5 if eligible is not None else 2,
             )
             previous_breadth = _breadth_lookup(previous_aggregates)
 
@@ -267,6 +283,7 @@ def build_taxonomy_views(
             prev_as_of=previous_as_of,
             foreign_flow_by_group=flow_by_group,
             price_col=_price_column(current_entry, current_prices),
+            min_eligible_constituents=5 if eligible is not None else 2,
         )
         view = build_taxonomy_payload(
             taxonomy,
@@ -290,6 +307,9 @@ def build_taxonomy_views(
                     "return_horizons": "TRADING_SESSIONS",
                     "as_of_filtered": True,
                     "front_end_recompute": False,
+                    "eligibility_scope": "SNAPSHOT_POLICY_AND_AVAILABLE_RETURNS" if eligible is not None else "AVAILABLE_TAXONOMY_RETURNS",
+                    "eligible_ticker_set_hash": current_entry.get("eligible_ticker_set_hash") if eligible is not None else None,
+                    "minimum_eligible_constituents": 5 if eligible is not None else 2,
                     "foreign_flow_scope": "LATEST_TOP_LIST_SAMPLE_CONTEXT",
                 },
                 "calculation_coverage": {
@@ -327,6 +347,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--config-dir", default="config")
     parser.add_argument("--out-dir", default="data/derived/taxonomy_views")
     parser.add_argument("--universe", default="config/universe.yaml")
+    parser.add_argument("--eligibility-workspace", help="Bind expanded taxonomy calculations to the snapshot policy cohort.")
     parser.add_argument(
         "--foreign-flow", default="data/derived/foreign_flow_sample.json"
     )
@@ -389,6 +410,7 @@ def main(argv: list[str] | None = None) -> int:
                 ),
                 universe=universe,
                 foreign_flow_path=project / args.foreign_flow,
+                eligibility_workspace=project / args.eligibility_workspace if args.eligibility_workspace else None,
             )
         except (FileNotFoundError, OSError, ValueError, json.JSONDecodeError) as exc:
             _log.warning("Skipping taxonomy build for %s: %s", snapshot_id, exc)

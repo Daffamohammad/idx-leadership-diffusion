@@ -26,6 +26,9 @@ import { formatDateLabel, formatEnumLabel, formatSnapshotId } from "../data/form
 const navItems = [
   { path: "/what-changed", label: "What Changed", Icon: ActivityLogIcon },
   { path: "/overview", label: "Overview", Icon: DashboardIcon },
+  { path: "/heatmap", label: "Stock Heatmap", Icon: GridIcon },
+  { path: "/foreign", label: "Foreign Flow", Icon: BarChartIcon },
+  { path: "/ownership", label: "Ownership", Icon: MixIcon },
   { path: "/map", label: "Leadership Map", Icon: LayersIcon },
   { path: "/maps/konglo", label: "Konglo Map", Icon: CubeIcon },
   { path: "/maps/themes", label: "Themes Map", Icon: GridIcon },

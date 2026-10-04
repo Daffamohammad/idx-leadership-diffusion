@@ -1,0 +1,461 @@
+taxonomy_id: konglo
+taxonomy_name: Documented corporate and named-holder portfolios
+taxonomy_version: market-holdings-v1
+taxonomy_kind: KONGLO
+source_kind: ANALYST_DEFINED
+source_as_of: '2026-09-30'
+membership_policy: MULTI
+provider_mode: PUBLIC_PROTOTYPE
+memberships:
+- ticker: AALI.JK
+  taxonomy_group_id: KONGLO_ASTRA
+  taxonomy_group_name: Astra corporate holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: ASGR.JK
+  taxonomy_group_id: KONGLO_ASTRA
+  taxonomy_group_name: Astra corporate holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: AUTO.JK
+  taxonomy_group_id: KONGLO_ASTRA
+  taxonomy_group_name: Astra corporate holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: UNTR.JK
+  taxonomy_group_id: KONGLO_ASTRA
+  taxonomy_group_name: Astra corporate holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: ASII.JK
+  taxonomy_group_id: KONGLO_ASTRA
+  taxonomy_group_name: Astra corporate holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Named listed parent; does not imply self-ownership
+- ticker: ICBP.JK
+  taxonomy_group_id: KONGLO_INDOFOOD
+  taxonomy_group_name: Indofood corporate holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: LSIP.JK
+  taxonomy_group_id: KONGLO_INDOFOOD
+  taxonomy_group_name: Indofood corporate holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: SIMP.JK
+  taxonomy_group_id: KONGLO_INDOFOOD
+  taxonomy_group_name: Indofood corporate holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: INDF.JK
+  taxonomy_group_id: KONGLO_INDOFOOD
+  taxonomy_group_name: Indofood corporate holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Named listed parent; does not imply self-ownership
+- ticker: BREN.JK
+  taxonomy_group_id: KONGLO_BARITO
+  taxonomy_group_name: Barito Pacific corporate holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: TPIA.JK
+  taxonomy_group_id: KONGLO_BARITO
+  taxonomy_group_name: Barito Pacific corporate holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Issuer-documented control
+- ticker: BRPT.JK
+  taxonomy_group_id: KONGLO_BARITO
+  taxonomy_group_name: Barito Pacific corporate holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Named listed parent; does not imply self-ownership
+- ticker: BRPT.JK
+  taxonomy_group_id: KONGLO_PRAJOGO
+  taxonomy_group_name: Prajogo Pangestu disclosed holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: CUAN.JK
+  taxonomy_group_id: KONGLO_PRAJOGO
+  taxonomy_group_name: Prajogo Pangestu disclosed holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: SAME.JK
+  taxonomy_group_id: KONGLO_EMTEK
+  taxonomy_group_name: EMTEK corporate holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: SCMA.JK
+  taxonomy_group_id: KONGLO_EMTEK
+  taxonomy_group_name: EMTEK corporate holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: EMTK.JK
+  taxonomy_group_id: KONGLO_EMTEK
+  taxonomy_group_name: EMTEK corporate holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Named listed parent; does not imply self-ownership
+- ticker: CFIN.JK
+  taxonomy_group_id: KONGLO_PANIN
+  taxonomy_group_name: Panin corporate holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: PANS.JK
+  taxonomy_group_id: KONGLO_PANIN
+  taxonomy_group_name: Panin corporate holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: PNBN.JK
+  taxonomy_group_id: KONGLO_PANIN
+  taxonomy_group_name: Panin corporate holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: PNBS.JK
+  taxonomy_group_id: KONGLO_PANIN
+  taxonomy_group_name: Panin corporate holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: PNIN.JK
+  taxonomy_group_id: KONGLO_PANIN
+  taxonomy_group_name: Panin corporate holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: PNLF.JK
+  taxonomy_group_id: KONGLO_PANIN
+  taxonomy_group_name: Panin corporate holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: VRNA.JK
+  taxonomy_group_id: KONGLO_PANIN
+  taxonomy_group_name: Panin corporate holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: INKP.JK
+  taxonomy_group_id: KONGLO_APP
+  taxonomy_group_name: APP Purinusa disclosed holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: TKIM.JK
+  taxonomy_group_id: KONGLO_APP
+  taxonomy_group_name: APP Purinusa disclosed holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: UCID.JK
+  taxonomy_group_id: KONGLO_APP
+  taxonomy_group_name: APP Purinusa disclosed holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: CITA.JK
+  taxonomy_group_id: KONGLO_HARITA
+  taxonomy_group_name: Harita Jayaraya disclosed holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: NCKL.JK
+  taxonomy_group_id: KONGLO_HARITA
+  taxonomy_group_name: Harita Jayaraya disclosed holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: TIRT.JK
+  taxonomy_group_id: KONGLO_HARITA
+  taxonomy_group_name: Harita Jayaraya disclosed holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: LPIN.JK
+  taxonomy_group_id: KONGLO_MULTIPOLAR
+  taxonomy_group_name: Multipolar / Inti Anugerah holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: LPKR.JK
+  taxonomy_group_id: KONGLO_MULTIPOLAR
+  taxonomy_group_name: Multipolar / Inti Anugerah holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: LPLI.JK
+  taxonomy_group_id: KONGLO_MULTIPOLAR
+  taxonomy_group_name: Multipolar / Inti Anugerah holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: LPPS.JK
+  taxonomy_group_id: KONGLO_MULTIPOLAR
+  taxonomy_group_name: Multipolar / Inti Anugerah holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: MLPL.JK
+  taxonomy_group_id: KONGLO_MULTIPOLAR
+  taxonomy_group_name: Multipolar / Inti Anugerah holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: MLPT.JK
+  taxonomy_group_id: KONGLO_MULTIPOLAR
+  taxonomy_group_name: Multipolar / Inti Anugerah holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: MPPA.JK
+  taxonomy_group_id: KONGLO_MULTIPOLAR
+  taxonomy_group_name: Multipolar / Inti Anugerah holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: BCAP.JK
+  taxonomy_group_id: KONGLO_MNC
+  taxonomy_group_name: MNC Asia corporate holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: BMTR.JK
+  taxonomy_group_id: KONGLO_MNC
+  taxonomy_group_name: MNC Asia corporate holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: BHIT.JK
+  taxonomy_group_id: KONGLO_MNC
+  taxonomy_group_name: MNC Asia corporate holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Named listed parent; does not imply self-ownership
+- ticker: ABMM.JK
+  taxonomy_group_id: KONGLO_TRAKINDO
+  taxonomy_group_name: Tiara Marga Trakindo holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: HDFA.JK
+  taxonomy_group_id: KONGLO_TRAKINDO
+  taxonomy_group_name: Tiara Marga Trakindo holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: BBHI.JK
+  taxonomy_group_id: KONGLO_MEGA
+  taxonomy_group_name: Mega Corpora disclosed holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: MEGA.JK
+  taxonomy_group_id: KONGLO_MEGA
+  taxonomy_group_name: Mega Corpora disclosed holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: MPMX.JK
+  taxonomy_group_id: KONGLO_SARATOGA
+  taxonomy_group_name: Saratoga corporate holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: SRTG.JK
+  taxonomy_group_id: KONGLO_SARATOGA
+  taxonomy_group_name: Saratoga corporate holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Named listed parent; does not imply self-ownership
+- ticker: AADI.JK
+  taxonomy_group_id: KONGLO_ADARO
+  taxonomy_group_name: Adaro Strategic Investments holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: ADRO.JK
+  taxonomy_group_id: KONGLO_ADARO
+  taxonomy_group_name: Adaro Strategic Investments holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: EPMT.JK
+  taxonomy_group_id: KONGLO_KALBE
+  taxonomy_group_name: Kalbe Farma corporate holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: KLBF.JK
+  taxonomy_group_id: KONGLO_KALBE
+  taxonomy_group_name: Kalbe Farma corporate holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Named listed parent; does not imply self-ownership
+- ticker: BVIC.JK
+  taxonomy_group_id: KONGLO_VICTORIA
+  taxonomy_group_name: Victoria Investama holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: VINS.JK
+  taxonomy_group_id: KONGLO_VICTORIA
+  taxonomy_group_name: Victoria Investama holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: VICO.JK
+  taxonomy_group_id: KONGLO_VICTORIA
+  taxonomy_group_name: Victoria Investama holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Named listed parent; does not imply self-ownership
+- ticker: BUDI.JK
+  taxonomy_group_id: KONGLO_BUDI
+  taxonomy_group_name: Sungai Budi / Budi Delta holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: TBLA.JK
+  taxonomy_group_id: KONGLO_BUDI
+  taxonomy_group_name: Sungai Budi / Budi Delta holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: DATA.JK
+  taxonomy_group_id: KONGLO_PROTELINDO
+  taxonomy_group_name: Protelindo disclosed holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: SUPR.JK
+  taxonomy_group_id: KONGLO_PROTELINDO
+  taxonomy_group_name: Protelindo disclosed holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: CLEO.JK
+  taxonomy_group_id: KONGLO_TANCORP
+  taxonomy_group_name: Tancorp Global disclosed holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: RISE.JK
+  taxonomy_group_id: KONGLO_TANCORP
+  taxonomy_group_name: Tancorp Global disclosed holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: BBCA.JK
+  taxonomy_group_id: KONGLO_HARTONO
+  taxonomy_group_name: Hartono / Dwimuria holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Issuer-documented control
+- ticker: BSIM.JK
+  taxonomy_group_id: KONGLO_SINARMAS
+  taxonomy_group_name: Sinar Mas corporate holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: DSSA.JK
+  taxonomy_group_id: KONGLO_SINARMAS
+  taxonomy_group_name: Sinar Mas corporate holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: SMMA.JK
+  taxonomy_group_id: KONGLO_SINARMAS
+  taxonomy_group_name: Sinar Mas corporate holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+- ticker: BSDE.JK
+  taxonomy_group_id: KONGLO_BSDE
+  taxonomy_group_name: Paraga / Ekacentra disclosed holdings
+  source: https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx
+  source_as_of: '2026-09-30'
+  confidence: 1.0
+  relationship: Disclosed shareholding
+source_hashes:
+  universe: 4ecac94989988bff426f2942e8cb688f6dd5009b4d74c5fa498888d654a26038
+  ownership: d3bbdcc53b5491b86391988e1630374e4e80bc0aa06e8b1a09e452ce4be17527
+  rules: b9fd556249014b3cdb65452b97d5518f209b2f7c1a4a9770a501708828a524db

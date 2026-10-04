@@ -6,6 +6,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { useSnapshot } from "../data/SnapshotProvider";
+import MarketDailyDashboard from "../components/MarketDailyDashboard";
 import MarketHeatmap from "../components/MarketHeatmap";
 import ForeignFlowSample from "../components/ForeignFlowSample";
 import IDXStatisticsRelease from "../components/IDXStatisticsRelease";
@@ -198,6 +199,9 @@ export default function MarketOverview() {
         </div>
       </header>
 
+      <MarketDailyDashboard />
+
+      <details><summary className="btn btn-outline">Leadership and group summary</summary>
       <div className="dash-grid" aria-label="Market dashboard">
         <section className="dash-card" aria-labelledby="dash-market-title">
           <div className="eyebrow-muted">Market snapshot · 20D window</div>
@@ -272,6 +276,8 @@ export default function MarketOverview() {
           <div className="meta" style={{ marginTop: 8 }}>Breadth shown elsewhere is % outperforming, not advancers/decliners.</div>
         </section>
       </div>
+
+      </details>
 
       <div className="tabs" role="tablist" aria-label="Overview detail">
         {(["overview", "market", "flow", "structure"] as DetailTab[]).map((t) => (

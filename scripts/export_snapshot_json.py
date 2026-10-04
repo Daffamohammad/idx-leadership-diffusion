@@ -733,6 +733,7 @@ def _build_listing_registry(
     coverage: Any,
     features: pd.DataFrame | None,
     manifest_entry: dict[str, Any],
+    taxonomy_config_dir: Path | None = None,
 ) -> dict[str, Any]:
     """Expose one complete listing/taxonomy contract to the web UI.
 
@@ -769,8 +770,9 @@ def _build_listing_registry(
             if str(value).strip()
         }
 
-    konglo_map = _membership_map(project_root() / "config" / "konglo.yaml")
-    theme_map = _membership_map(project_root() / "config" / "themes.yaml")
+    config_dir = taxonomy_config_dir or project_root() / "config"
+    konglo_map = _membership_map(config_dir / "konglo.yaml")
+    theme_map = _membership_map(config_dir / "themes.yaml")
     by_ticker: dict[str, dict[str, Any]] = {}
     duplicate_tickers = 0
     records: list[dict[str, Any]] = []
@@ -870,8 +872,8 @@ def _build_listing_registry(
         "theme_mapped_count": mapped_themes,
         "membership_sources": {
             "sector": "provider security master",
-            "konglo": "config/konglo.yaml",
-            "themes": "config/themes.yaml",
+            "konglo": str((config_dir / "konglo.yaml").relative_to(project_root())) if config_dir.is_relative_to(project_root()) else str(config_dir / "konglo.yaml"),
+            "themes": str((config_dir / "themes.yaml").relative_to(project_root())) if config_dir.is_relative_to(project_root()) else str(config_dir / "themes.yaml"),
         },
         "integrity": {
             "unique_ticker_count": len(records),
@@ -1211,6 +1213,8 @@ def export(
     *,
     snapshot_root: Path | None = None,
     rotation_history_root: Path | None = None,
+    taxonomy_config_dir: Path | None = None,
+    compact: bool = False,
 ) -> dict[str, Any]:
     validate_snapshot_id(snapshot_id)
     reader = SnapshotReader(root=snapshot_root)
@@ -1272,6 +1276,7 @@ def export(
             coverage=snap.get("coverage"),
             features=snap.get("features"),
             manifest_entry=entry,
+            taxonomy_config_dir=taxonomy_config_dir,
         ),
         "change_digest": snap.get("change_digest"),
         "evidence": snap.get("evidence"),
@@ -1293,7 +1298,7 @@ def export(
     out_path.parent.mkdir(parents=True, exist_ok=True)
     _atomic_write_text(
         out_path,
-        json.dumps(payload, indent=2, default=str),
+        json.dumps(payload, indent=None if compact else 2, separators=(",", ":") if compact else None, default=str),
     )
     return {
         "snapshot_id": snapshot_id,
@@ -1306,6 +1311,8 @@ def export(
 
 def main() -> int:
     parser = argparse.ArgumentParser(prog="export_snapshot_json")
+    parser.add_argument("--compact", action="store_true", help="Omit JSON whitespace for large market bundles.")
+    parser.add_argument("--taxonomy-config-dir", default=None, help="Dated membership definitions for this export.")
     parser.add_argument("--snapshot-id", default=None, help="Snapshot id (e.g. snap_2026-08-20).")
     parser.add_argument("--latest", action="store_true", help="Use the latest snapshot.")
     parser.add_argument("--out", default=None, help="Override output path.")
@@ -1356,6 +1363,8 @@ def main() -> int:
             out_path,
             snapshot_root=Path(args.snapshot_root) if args.snapshot_root else None,
             rotation_history_root=Path(args.rotation_history_root) if args.rotation_history_root else None,
+            taxonomy_config_dir=Path(args.taxonomy_config_dir) if args.taxonomy_config_dir else None,
+            compact=args.compact,
         )
     except (ValueError, FileNotFoundError) as exc:
         print(f"export refused: {exc}", file=__import__("sys").stderr)
