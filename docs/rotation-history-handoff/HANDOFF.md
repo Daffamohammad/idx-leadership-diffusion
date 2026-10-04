@@ -50,9 +50,9 @@ Per-group coverage, first/last dates, segment identifiers and reasons:
   Their earlier segments are retained in the evidence; the UI draws no trail
   across an unsupported boundary and states "Fewer than three comparable
   observations in the current segment".
-- **Four theme groups** lack trails: two with no eligible members with complete
+- **Seven theme groups** lack trails (four among the 99 plotted): two with no eligible members with complete
   session history (Footwear, Gas Utilities), one whose YTD baseline or warm-up
-  is unavailable (Healthcare Equipment), and three with too few observations in
+  is unavailable (Healthcare Equipment), and four with too few observations in
   the current segment (Healthcare Providers, Healthcare Supplies &
   Distributions, Processed Foods, Diversified Industrial Trading).
 
@@ -69,8 +69,8 @@ Per-group coverage, first/last dates, segment identifiers and reasons:
   rewritten and never bridged.
 - Replay history is a separate chart-only asset. Canonical diffusion,
   `previous_snapshot_id`, breadth history and the five-member confirmation
-  gates are untouched (`snap_public_market_2026-10-02` still compares against
-  `snap_public_market_2026-09-25`).
+  gates are untouched (`snap_public_market_2026-10-02` retains
+  `previous_snapshot_id: null` and `NO_COMPARABLE_HISTORY`).
 
 ## Source ledger
 
@@ -91,7 +91,7 @@ whose availability claims lack publication evidence, whose membership
 partitions diverge from the captured registry, whose hashes do not match, or
 whose universes lack explicit board/classification values.
 
-## Reproducing the replay (verified byte-identical)
+## Reproducing the replay (verified identical JSON content)
 
 All inputs are offline, hash-checked, and already in the repository or in the
 gitignored derived panel documented by `docs/data-refresh-handoff/HANDOFF.md`:
@@ -145,3 +145,29 @@ available by each close and a later-retrieved price vintage — it is not an
 archived real-time feed. Intervening unrecorded register changes are not
 asserted absent. Five-member confirmation requirements are independent of
 trail availability. Sectors remains HOLD; no live or paid provider was called.
+
+## Completion verification — 5 October 2026
+
+- Actual clean clone of `4cfd9cc` at `/private/tmp/idx-rotation-clean-4cfd9cc`:
+  **832 passed, zero skips, two pre-existing warnings**, exit 0. Imports and
+  `project_root()` were asserted inside the clone before execution. The clone
+  had no raw cache or frontend `node_modules`, and remained Git-clean afterward.
+  Existing Python dependencies were reused with the clone's `src` explicitly
+  first on `PYTHONPATH`; no original-checkout import was permitted.
+- Rechecked all **7,920 published historical axis values** with independent CSV
+  arithmetic (no feature-engine imports). Maximum absolute difference:
+  **1.1368683772161603e-13 percentage points**. The report and exact asset hash
+  are saved in `INDEPENDENT_CHECKS.json`. This count excludes the six current
+  Konglo endpoint comparisons included in the earlier 7,926-check audit;
+  no historical Konglo observations exist to compare.
+- Rechecked the built preview using the in-app browser: 8 sector Weekly trails
+  with five points each; 95 Theme trails; a Coal search reduced Themes to three
+  matching trails; Konglo retained 22 current groups with disabled cadence
+  controls, zero trails and explicit publication-evidence reasons. At 390px,
+  all three views had no document-level horizontal overflow. The viewport
+  override was reset afterward.
+- Corrected two documentation errors: seven Themes lack trails (four of those
+  are plotted); the canonical active snapshot has no comparable prior.
+  No calculations, source assets or snapshot bundles changed in this completion
+  pass. Implementation remains in local commits `9353632`, `2e2a702`, `17cc5d2`;
+  no push or deployment was performed.

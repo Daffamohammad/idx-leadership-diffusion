@@ -1,0 +1,9 @@
+{
+  "checked_on": "2026-10-05",
+  "asset_sha256": "e71d3a145b698e0dadffeaf1e71e0550fc65de0a4a6f035ac76a8785f67a797d",
+  "method": "Independent CSV arithmetic; no feature-engine imports. Per-axis persisted contributors, own-sequence horizons and common-calendar YTD baseline.",
+  "comparisons": 7920,
+  "max_absolute_difference_pp": 1.1368683772161603e-13,
+  "status": "PASS",
+  "konglo": "No published historical points; no historical numeric comparisons possible."
+}
