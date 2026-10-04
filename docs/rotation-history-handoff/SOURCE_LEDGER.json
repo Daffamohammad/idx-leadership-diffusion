@@ -1,0 +1,105 @@
+{
+  "schema_version": "rotation-source-ledger-v1",
+  "audit_date": "2026-10-04",
+  "sources": {
+    "listing_and_board": {
+      "path": "config/universe_market.yaml",
+      "sha256": "4ecac94989988bff426f2942e8cb688f6dd5009b4d74c5fa498888d654a26038",
+      "observed_on": "2026-10-02",
+      "published_on": null,
+      "available_on": null,
+      "publication_evidence": null,
+      "note": "Derived from October 2 official Stock Summary and captured classification. Observation date is known; publication timing and earlier listing/board states are not established."
+    },
+    "classification": {
+      "path": "app/web/public/snapshots/snap_sectors_2026-08-27.json",
+      "sha256": "eb26918986e0b38a56d4e9428dbd9c2a204ae46c75015081c34ded5e29be46a6",
+      "observed_on": "2026-08-27",
+      "published_on": null,
+      "available_on": "2026-08-29",
+      "publication_evidence": "listing_registry.listing_source.captured_at = 20260829T004355Z in this hash-bound snapshot proves availability by 29 August, before the first replay session. Exact publisher release date is unknown.",
+      "note": "Latest captured listing, board and IDXIC metadata known before replay. Same 962 tickers, boards and sector classifications as the October 2 derived universe. No claim of a daily refreshed register.",
+      "publication_basis": "capture_upper_bound"
+    },
+    "konglo_membership": {
+      "path": "config/market_expansion/konglo.yaml",
+      "sha256": "d8b7b7a3427d30341d5586296f85bc5c44a523cc17282afa969282dd5b59d3a4",
+      "observed_on": "2026-09-30",
+      "published_on": null,
+      "available_on": null,
+      "publication_evidence": null,
+      "note": "Derived named holdings. September 30 register observation date does not establish publication date. Do not backdate."
+    },
+    "theme_membership": {
+      "path": "config/market_expansion/themes.yaml",
+      "sha256": "76eaca3a8c1fde20114f3a33afa8be8dc5b8cb0f5fdada962ee2e99f6e1130b3",
+      "observed_on": "2026-08-27",
+      "published_on": null,
+      "available_on": "2026-08-29",
+      "publication_evidence": "Derived exact subindustry partition of classification source captured at 20260829T004355Z. Availability bound belongs to membership facts, not the later authored presentation labels.",
+      "note": "Deterministic classification lens applied to facts captured before September. Not a historical investment thesis or a claim this UI existed then.",
+      "publication_basis": "capture_upper_bound",
+      "capture_source_id": "classification",
+      "derivation": "exact_captured_subindustry"
+    },
+    "ownership_evidence": {
+      "path": "docs/market-expansion-handoff/SOURCE_MANIFEST.json",
+      "sha256": "b930778d0426be8c805634704f69a079f4a30994f99e6a88fc18cbe543e5f35f",
+      "observed_on": "2026-09-30",
+      "published_on": null,
+      "available_on": null,
+      "publication_evidence": null,
+      "note": "Contains original official workbook URLs and hashes, including August 31 and September 30 observations. Publication dates are not recorded; no historical identity or control inferred."
+    }
+  },
+  "universes": [
+    {
+      "effective_from": "2026-08-29",
+      "config_source_id": "classification",
+      "source_ids": [
+        "classification"
+      ],
+      "format": "captured_registry"
+    }
+  ],
+  "taxonomies": {
+    "SECTOR": [
+      {
+        "effective_from": "2026-08-29",
+        "config_source_id": "classification",
+        "source_ids": [
+          "classification"
+        ],
+        "format": "captured_registry",
+        "method_version": "captured-idxic-v1"
+      }
+    ],
+    "KONGLO": [
+      {
+        "effective_from": "2026-09-30",
+        "config_source_id": "konglo_membership",
+        "source_ids": [
+          "konglo_membership",
+          "ownership_evidence"
+        ],
+        "method_version": "market-holdings-v1"
+      }
+    ],
+    "THEMES": [
+      {
+        "effective_from": "2026-08-27",
+        "config_source_id": "theme_membership",
+        "source_ids": [
+          "theme_membership",
+          "classification"
+        ],
+        "method_version": "market-business-activities-v1"
+      }
+    ]
+  },
+  "limitations": [
+    "Exact publisher release dates remain null where unknown; capture_upper_bound records a hash-bound historical capture proving availability by a date.",
+    "Replay uses the latest known August 29 captured listing/board/classification state; intervening unrecorded announcements are not asserted absent.",
+    "Known observation dates and source hashes remain useful evidence, but do not authorize point-in-time replay."
+  ]
+}
