@@ -837,6 +837,13 @@ export interface SnapshotPayload {
   // Legacy payloads may still carry an empty object.
   breadth_history: SnapshotBreadthHistoryPoint[] | Record<string, unknown>;
   rotation_history?: SnapshotRotationHistoryPoint[] | Record<string, unknown>;
+  rotation_daily_history?: {
+    sessions: string[];
+    points: SnapshotRotationHistoryPoint[];
+    panel_files: Record<string, string>;
+    snapshot_ids: string[];
+    source: "COMPATIBLE_PUBLIC_SNAPSHOTS";
+  };
   // Descriptive equal-weight group index, rebased to 100. This is chart-only
   // data and is never consumed by the analytical signal pipeline.
   group_price_history?: Record<string, GroupPriceHistoryPoint[]>;

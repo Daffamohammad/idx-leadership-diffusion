@@ -78,6 +78,36 @@ export interface RotationTrailPoint {
   y: number;
 }
 
+export type RotationInterval = "daily" | "weekly";
+
+/** Sampling changes observation dates, never the YTD/20D/60D formulas.
+ * Require every persisted benchmark session before offering either cadence.
+ * Weeks end at their last observed session, including a partial current week.
+ */
+export function sampleRotationHistory<T extends {
+  as_of: string;
+  group_excess_return_ytd: number;
+  relative_momentum: number | null;
+}>(history: ReadonlyArray<T>, sessions: ReadonlyArray<string>, interval: RotationInterval): T[] {
+  if (sessions.length < MIN_ROTATION_TRAIL_POINTS || history.length !== sessions.length) return [];
+  const dated = [...history].sort((a, b) => a.as_of.localeCompare(b.as_of));
+  const weeks = new Map<string, T>();
+  for (let index = 0; index < sessions.length; index++) {
+    const session = sessions[index];
+    const point = dated[index];
+    const day = new Date(`${session}T00:00:00Z`);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(session) || !Number.isFinite(day.getTime())
+      || day.toISOString().slice(0, 10) !== session
+      || (index > 0 && session <= sessions[index - 1])
+      || point.as_of !== session || !Number.isFinite(point.group_excess_return_ytd)
+      || point.relative_momentum === null || !Number.isFinite(point.relative_momentum)) return [];
+    day.setUTCDate(day.getUTCDate() - ((day.getUTCDay() + 6) % 7));
+    weeks.set(day.toISOString().slice(0, 10), point);
+  }
+  const sampled = interval === "daily" ? dated : [...weeks.values()];
+  return sampled.length >= MIN_ROTATION_TRAIL_POINTS ? sampled : [];
+}
+
 /**
  * Build a real dated trail from persisted rotation history.
  *

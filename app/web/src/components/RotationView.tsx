@@ -10,6 +10,7 @@ import {
   buildRotationTrail,
   classifyRotation,
   relativeMomentum,
+  sampleRotationHistory,
   withRotationPhase,
   MIN_ROTATION_TRAIL_POINTS,
   type RotationGroupInput,
@@ -131,6 +132,12 @@ export default function RotationView() {
   const taxonomyKind: TaxonomyKind = urlTaxonomy === "KONGLO" || urlTaxonomy === "THEMES" ? urlTaxonomy : "SECTOR";
   const search = params.get("q") ?? "";
   const mode = params.get("mode") === "stocks" ? "stocks" : "groups";
+  const interval = params.get("interval") === "daily" ? "daily" : "weekly";
+  const setInterval = (value: "daily" | "weekly") => {
+    const next = new URLSearchParams(params);
+    next.set("interval", value);
+    setParams(next, { replace: true });
+  };
   const setTaxonomyKind = (k: TaxonomyKind) => {
     const next = new URLSearchParams(params);
     next.set("taxonomy", k);
@@ -228,27 +235,49 @@ export default function RotationView() {
     });
   };
 
-  // Real dated trails. The exporter emits `rotation_history` only from
-  // contract-compatible snapshots at or before this as-of, and only for
-  // observations where the pipeline computed both axes, so a trail can be
-  // drawn through nothing but persisted values. Analyst taxonomies and the
-  // per-ticker view have no comparable history, so they stay trail-free.
-  const historyByGroup = useMemo(() => {
+  // Daily replay is separate from the canonical comparison snapshots. Cadence
+  // is available only with complete benchmark sessions for every plotted group.
+  const dailyHistoryByGroup = useMemo(() => {
     const out = new Map<string, NonNullable<typeof data>["rotationHistory"]>();
     if (!data || isDiagnostic || mode !== "groups" || taxonomyKind !== "SECTOR") return out;
-    for (const point of data.rotationHistory ?? []) {
+    for (const point of data.rotationDailyHistory?.points ?? []) {
       const list = out.get(point.group_id) ?? [];
       list.push(point);
       out.set(point.group_id, list);
     }
     return out;
   }, [data, isDiagnostic, mode, taxonomyKind]);
+  const sessions = data?.rotationDailyHistory?.sessions ?? [];
+  const dailyAvailable = plottable.length > 0 && plottable.every((row) =>
+    sampleRotationHistory(dailyHistoryByGroup.get(row.id) ?? [], sessions, "daily").length > 0);
+  const weeklyAvailable = dailyAvailable && plottable.every((row) =>
+    sampleRotationHistory(dailyHistoryByGroup.get(row.id) ?? [], sessions, "weekly").length > 0);
+  const effectiveInterval = dailyAvailable ? (interval === "daily" || !weeklyAvailable ? "daily" : "weekly") : null;
+
+  // Older bundles retain their real dated tails; no cadence is inferred from
+  // sparse snapshots. Analyst taxonomies and stocks have no comparable series.
+  const historyByGroup = useMemo(() => {
+    const out = new Map<string, NonNullable<typeof data>["rotationHistory"]>();
+    if (!data || isDiagnostic || mode !== "groups" || taxonomyKind !== "SECTOR") return out;
+    if (effectiveInterval) {
+      for (const [groupId, history] of dailyHistoryByGroup) {
+        out.set(groupId, sampleRotationHistory(history, data.rotationDailyHistory?.sessions ?? [], effectiveInterval));
+      }
+      return out;
+    }
+    for (const point of data.rotationHistory ?? []) {
+      const list = out.get(point.group_id) ?? [];
+      list.push(point);
+      out.set(point.group_id, list);
+    }
+    return out;
+  }, [data, isDiagnostic, mode, taxonomyKind, dailyHistoryByGroup, effectiveInterval]);
   const maxTrailLength = useMemo(() => {
     let max = 0;
     for (const list of historyByGroup.values()) {
       max = Math.max(max, list.length - 1);
     }
-    return Math.min(max, 5);
+    return Math.min(max, 20);
   }, [historyByGroup]);
   const tailAvailable = !isDiagnostic && mode === "groups" && taxonomyKind === "SECTOR" && maxTrailLength >= MIN_ROTATION_TRAIL_POINTS - 1;
   const effectiveTailLength = tailAvailable ? Math.min(tailLength, maxTrailLength) : 0;
@@ -283,12 +312,14 @@ export default function RotationView() {
     for (const list of historyByGroup.values()) {
       for (const point of list.slice(-(effectiveTailLength + 1))) dates.add(point.as_of);
     }
-    return [...dates].sort().join(", ");
+    const ordered = [...dates].sort();
+    return ordered.length > 6
+      ? `${formatDateLabel(ordered[0])} – ${formatDateLabel(ordered[ordered.length - 1])}`
+      : ordered.join(", ");
   }, [historyByGroup, effectiveTailLength]);
 
   if (!data) return null;
   const snapshotAsOf = formatDateLabel(data.payload.as_of);
-  const comparable = data.payload.comparability?.status === "COMPATIBLE";
   const currentTaxonomyLabel = TAXONOMY_OPTIONS.find((option) => option.kind === taxonomyKind)?.label ?? "Sector";
 
   return (
@@ -376,8 +407,23 @@ export default function RotationView() {
 
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginBottom: 12, fontSize: 11, color: "var(--muted)" }}>
         <span className="eyebrow-muted">History:</span>
-        <button type="button" disabled title="Daily intervals require dated observation series with consistent snapshot/provider/price-basis/membership versions — only dated snapshots are persisted, so no daily series exists" style={{ border: "1px solid var(--line)", padding: "4px 10px", opacity: 0.5, cursor: "not-allowed" }}>Daily</button>
-        <button type="button" disabled title="Weekly sampling does not change the return formula into a weekly formula; only dated snapshot observations are persisted, so no weekly series exists" style={{ border: "1px solid var(--line)", padding: "4px 10px", opacity: 0.5, cursor: "not-allowed" }}>Weekly</button>
+        {(["daily", "weekly"] as const).map((cadence) => {
+          const available = cadence === "daily" ? dailyAvailable : weeklyAvailable;
+          const selected = effectiveInterval === cadence;
+          return (
+            <button key={cadence} type="button" disabled={!available} aria-pressed={selected}
+              onClick={() => setInterval(cadence)}
+              title={available
+                ? cadence === "daily" ? "Every persisted trading session; YTD strength and 20D − 60D momentum are unchanged"
+                  : "Last persisted session each week, including the current partial week; return formulas are unchanged"
+                : "Requires complete comparable daily observations for this selection (at least three points per trail)"}
+              style={{ border: "1px solid var(--line)", padding: "4px 10px", opacity: available ? 1 : 0.5,
+                cursor: available ? "pointer" : "not-allowed", background: selected ? "var(--surface-subtle)" : "var(--surface)",
+                color: selected ? "var(--ink)" : "var(--muted)", fontWeight: selected ? 600 : 400 }}>
+              {cadence === "daily" ? "Daily" : "Weekly"}
+            </button>
+          );
+        })}
         <label
           style={{ display: "inline-flex", gap: 6, alignItems: "center", opacity: tailAvailable ? 1 : 0.6 }}
           title={tailAvailable
@@ -409,11 +455,11 @@ export default function RotationView() {
         <strong style={{ color: "var(--ink)" }}>{isDiagnostic ? "YTD signal" : "Current phase"}</strong>
         <span>{isDiagnostic
           ? `Baseline unavailable; ${formatCountLabel(diagnosticPlottable.length, mode === "stocks" ? "ticker" : "group")} remain visible in the diagnostic map and table.`
-          : comparable
+          : tailAvailable
             ? effectiveTailLength > 0
-              ? `Comparable prior exists; the trail connects ${effectiveTailLength + 1} real dated observations per group (${historyDatesLabel}).`
-              : "Comparable prior exists; enable Tail to connect real dated observations per group."
-            : "No compatible prior snapshot; no historical phase trail is shown."}</span>
+              ? `The trail connects ${effectiveTailLength + 1} real dated observations per group (${historyDatesLabel}).`
+              : "Enable Tail to connect real dated observations per group."
+            : "Dated rotation history is unavailable for this selection."}</span>
         {taxonomyKind !== "SECTOR" && <span style={{ color: "var(--link)" }}>Analyst-defined taxonomy</span>}
       </div>
 

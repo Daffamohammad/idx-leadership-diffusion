@@ -494,6 +494,92 @@ def _load_optional_json(path: Path) -> dict[str, Any] | None:
     return payload if isinstance(payload, dict) else None
 
 
+def _build_daily_rotation_history(
+    reader: SnapshotReader,
+    snapshot_id: str,
+    current_snapshot: dict[str, Any],
+    history_root: Path,
+) -> dict[str, Any]:
+    """Read a separate daily replay without changing the comparison baseline.
+
+    Every benchmark session in the replay window must have complete, compatible
+    group observations from the same panel. Missing days, stale inputs or a
+    divergent endpoint refuse export before the served payload is touched.
+    """
+    provenance = _load_optional_json(reader.root / snapshot_id / "panel_provenance.json")
+    panel_files = (provenance or {}).get("panel_files", {})
+    if not isinstance(panel_files, dict) or not all(
+        isinstance(panel_files.get(name), str) and len(panel_files[name]) == 64
+        for name in ("prices.csv", "benchmark.csv")
+    ):
+        raise ValueError("daily rotation requires current snapshot panel provenance")
+    entry = current_snapshot["manifest"]["entries"][0]
+    as_of = _iso_date(entry.get("as_of"))
+    if as_of is None or not history_root.is_dir():
+        raise ValueError("daily rotation requires a dated snapshot and an existing history root")
+    daily_reader = SnapshotReader(root=history_root)
+    daily_snapshots: dict[str, str] = {}
+    endpoint_groups = None
+    for path in daily_reader.list_snapshots():
+        loaded = daily_reader.load(path.name)
+        entries = (loaded.get("manifest") or {}).get("entries") or []
+        candidate = entries[0] if entries else {}
+        session = _iso_date(candidate.get("as_of"))
+        if session is None:
+            raise ValueError(f"daily rotation snapshot {path.name} has no valid date")
+        if session > as_of:
+            continue
+        if not loaded.get("complete") or not check_snapshot_compatibility(entry, candidate).comparable:
+            raise ValueError(f"daily rotation snapshot {path.name} is incomplete or incomparable")
+        source = _load_optional_json(path / "panel_provenance.json") or {}
+        if source.get("panel_files") != panel_files:
+            raise ValueError(f"daily rotation snapshot {path.name} has different panel provenance")
+        if session in daily_snapshots:
+            raise ValueError(f"daily rotation has duplicate session {session}")
+        daily_snapshots[session] = path.name
+        if session == as_of:
+            endpoint_groups = loaded["groups"]
+
+    if not daily_snapshots or endpoint_groups is None:
+        raise ValueError("daily rotation must reach the current snapshot date")
+    benchmark_dates = sorted({
+        session for value in current_snapshot["benchmark"]["date"]
+        if (session := _iso_date(value)) is not None
+    })
+    sessions = [session for session in benchmark_dates if min(daily_snapshots) <= session <= as_of]
+    if len(sessions) < 3 or set(sessions) != set(daily_snapshots):
+        raise ValueError("daily rotation must cover every benchmark session in its window")
+
+    points = _build_rotation_history(daily_reader, snapshot_id, current_snapshot)
+    axes = ("group_excess_return_ytd", "group_excess_return_20d", "group_excess_return_60d")
+    current_groups = _records(current_snapshot["groups"])
+    endpoint = {row["group_id"]: row for row in _records(endpoint_groups)}
+    # Do not let a replay with different current prices/membership draw a trail
+    # into a position that differs from the published current group row.
+    for row in current_groups:
+        other = endpoint.get(row["group_id"], {})
+        if any(_finite_number(row.get(axis)) != _finite_number(other.get(axis)) for axis in axes):
+            raise ValueError(f"daily rotation endpoint differs for {row['group_id']}")
+    expected_groups = {
+        row["group_id"] for row in current_groups
+        if all(_finite_number(row.get(axis)) is not None for axis in axes)
+    }
+    expected = {(group, session) for group in expected_groups for session in sessions}
+    actual = {
+        (point["group_id"], point["as_of"]) for point in points
+        if all(_finite_number(point.get(axis)) is not None for axis in axes)
+    }
+    if not expected or actual != expected:
+        raise ValueError("daily rotation has missing group observations or return axes")
+    return {
+        "sessions": sessions,
+        "points": points,
+        "panel_files": panel_files,
+        "snapshot_ids": [daily_snapshots[session] for session in sessions],
+        "source": "COMPATIBLE_PUBLIC_SNAPSHOTS",
+    }
+
+
 def _load_yaml_optional(path: Path) -> dict[str, Any]:
     if not path.exists():
         return {}
@@ -1124,6 +1210,7 @@ def export(
     out_path: Path,
     *,
     snapshot_root: Path | None = None,
+    rotation_history_root: Path | None = None,
 ) -> dict[str, Any]:
     validate_snapshot_id(snapshot_id)
     reader = SnapshotReader(root=snapshot_root)
@@ -1190,6 +1277,10 @@ def export(
         "evidence": snap.get("evidence"),
         "complete": snap.get("complete"),
     }
+    if rotation_history_root is not None:
+        payload["rotation_daily_history"] = _build_daily_rotation_history(
+            reader, snapshot_id, snap, rotation_history_root
+        )
     _enrich_with_taxonomy_views(
         payload,
         snapshot_id=snapshot_id,
@@ -1228,6 +1319,11 @@ def main() -> int:
         default=None,
         help="Read snapshots from an alternate root (useful for isolated harnesses).",
     )
+    parser.add_argument(
+        "--rotation-history-root",
+        default=None,
+        help="Separate daily replay root; complete sessions and matching panel provenance required.",
+    )
     args = parser.parse_args()
 
     if not args.snapshot_id and not args.latest:
@@ -1254,11 +1350,16 @@ def main() -> int:
                 file=__import__("sys").stderr,
             )
             return 2
-    info = export(
-        sid,
-        out_path,
-        snapshot_root=Path(args.snapshot_root) if args.snapshot_root else None,
-    )
+    try:
+        info = export(
+            sid,
+            out_path,
+            snapshot_root=Path(args.snapshot_root) if args.snapshot_root else None,
+            rotation_history_root=Path(args.rotation_history_root) if args.rotation_history_root else None,
+        )
+    except (ValueError, FileNotFoundError) as exc:
+        print(f"export refused: {exc}", file=__import__("sys").stderr)
+        return 2
     print(json.dumps(info, indent=2))
     return 0
 

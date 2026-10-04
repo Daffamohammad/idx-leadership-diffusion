@@ -365,6 +365,7 @@ export interface AdaptedSnapshot {
   materialChanges: SectorData[];
   breadthHistory: BreadthHistoryPoint[];
   rotationHistory: RotationHistoryPoint[];
+  rotationDailyHistory: { sessions: string[]; points: RotationHistoryPoint[] } | null;
   groupPriceHistory: Record<string, GroupPricePoint[]>;
   tickerPriceHistory: Record<string, GroupPricePoint[]>;
   trajectoryData: Record<string, Array<{ x: number; y: number; label?: string }>>;
@@ -1762,6 +1763,12 @@ export function adaptSnapshot(
   // exporter-owned history array, which is built from persisted group rows.
   const breadthHistory = normalizeBreadthHistory(payload.breadth_history);
   const rotationHistory = normalizeRotationHistory(payload.rotation_history);
+  const dailyRotation = payload.rotation_daily_history;
+  const rotationDailyHistory = dailyRotation?.source === "COMPATIBLE_PUBLIC_SNAPSHOTS"
+    && Array.isArray(dailyRotation.sessions)
+    && dailyRotation.sessions.every((session) => typeof session === "string")
+    ? { sessions: dailyRotation.sessions, points: normalizeRotationHistory(dailyRotation.points) }
+    : null;
   const groupPriceHistory = normalizeGroupPriceHistory(payload.group_price_history);
 
   // New sections: taxonomy views, foreign flow, research events.
@@ -1882,6 +1889,7 @@ export function adaptSnapshot(
     acquisitionDiagnostics: adaptAcquisitionDiagnostics(payload.history_diagnostics),
     breadthHistory,
     rotationHistory,
+    rotationDailyHistory,
     groupPriceHistory,
     tickerPriceHistory,
     trajectoryData: {},

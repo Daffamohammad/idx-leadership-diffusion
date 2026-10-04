@@ -124631,6 +124631,1951 @@
     }
   ],
   "complete": true,
+  "rotation_daily_history": {
+    "sessions": [
+      "2026-09-04",
+      "2026-09-07",
+      "2026-09-08",
+      "2026-09-09",
+      "2026-09-10",
+      "2026-09-11",
+      "2026-09-14",
+      "2026-09-15",
+      "2026-09-16",
+      "2026-09-17",
+      "2026-09-18",
+      "2026-09-21",
+      "2026-09-22",
+      "2026-09-23",
+      "2026-09-24",
+      "2026-09-25",
+      "2026-09-28",
+      "2026-09-29",
+      "2026-09-30",
+      "2026-10-01",
+      "2026-10-02"
+    ],
+    "points": [
+      {
+        "group_id": "Consumer",
+        "as_of": "2026-09-04",
+        "group_excess_return_ytd": 15.8013251788,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -5.6838746179,
+        "group_excess_return_60d": 0.7240979895,
+        "relative_momentum": -6.4079726074
+      },
+      {
+        "group_id": "Consumer",
+        "as_of": "2026-09-07",
+        "group_excess_return_ytd": 15.3248664174,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -6.1175027983,
+        "group_excess_return_60d": 1.3587899771,
+        "relative_momentum": -7.4762927754
+      },
+      {
+        "group_id": "Consumer",
+        "as_of": "2026-09-08",
+        "group_excess_return_ytd": 15.1815978801,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -5.9012870521,
+        "group_excess_return_60d": -0.5148110598,
+        "relative_momentum": -5.386475992299999
+      },
+      {
+        "group_id": "Consumer",
+        "as_of": "2026-09-09",
+        "group_excess_return_ytd": 15.0890659972,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -5.4576655524,
+        "group_excess_return_60d": -0.9447937609,
+        "relative_momentum": -4.5128717915
+      },
+      {
+        "group_id": "Consumer",
+        "as_of": "2026-09-10",
+        "group_excess_return_ytd": 15.1309669631,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -6.6430071119,
+        "group_excess_return_60d": 1.5291509212,
+        "relative_momentum": -8.1721580331
+      },
+      {
+        "group_id": "Consumer",
+        "as_of": "2026-09-11",
+        "group_excess_return_ytd": 14.8360635238,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -4.9912577305,
+        "group_excess_return_60d": 0.2025465182,
+        "relative_momentum": -5.1938042487
+      },
+      {
+        "group_id": "Consumer",
+        "as_of": "2026-09-14",
+        "group_excess_return_ytd": 14.3818060674,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -6.2188365885,
+        "group_excess_return_60d": -1.6550842045,
+        "relative_momentum": -4.563752384000001
+      },
+      {
+        "group_id": "Consumer",
+        "as_of": "2026-09-15",
+        "group_excess_return_ytd": 16.6372552046,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -2.4166438491,
+        "group_excess_return_60d": 2.5717515324,
+        "relative_momentum": -4.9883953815
+      },
+      {
+        "group_id": "Consumer",
+        "as_of": "2026-09-16",
+        "group_excess_return_ytd": 16.3799633175,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -1.5834017151,
+        "group_excess_return_60d": 0.2941401911,
+        "relative_momentum": -1.8775419061999998
+      },
+      {
+        "group_id": "Consumer",
+        "as_of": "2026-09-17",
+        "group_excess_return_ytd": 17.810227867,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -2.4594970271,
+        "group_excess_return_60d": 0.9936537814,
+        "relative_momentum": -3.4531508085
+      },
+      {
+        "group_id": "Consumer",
+        "as_of": "2026-09-18",
+        "group_excess_return_ytd": 18.0008792965,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -0.4984813727,
+        "group_excess_return_60d": -2.2630937921,
+        "relative_momentum": 1.7646124194
+      },
+      {
+        "group_id": "Consumer",
+        "as_of": "2026-09-21",
+        "group_excess_return_ytd": 18.2696825909,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 0.2742582251,
+        "group_excess_return_60d": -0.7253866904,
+        "relative_momentum": 0.9996449155
+      },
+      {
+        "group_id": "Consumer",
+        "as_of": "2026-09-22",
+        "group_excess_return_ytd": 18.4041025311,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 0.308961507,
+        "group_excess_return_60d": -1.5981020479,
+        "relative_momentum": 1.9070635549000001
+      },
+      {
+        "group_id": "Consumer",
+        "as_of": "2026-09-23",
+        "group_excess_return_ytd": 18.2537530972,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -0.1802193258,
+        "group_excess_return_60d": -3.2847974168,
+        "relative_momentum": 3.104578091
+      },
+      {
+        "group_id": "Consumer",
+        "as_of": "2026-09-24",
+        "group_excess_return_ytd": 18.3748930676,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 0.3393994419,
+        "group_excess_return_60d": -5.2334270119,
+        "relative_momentum": 5.5728264538
+      },
+      {
+        "group_id": "Consumer",
+        "as_of": "2026-09-25",
+        "group_excess_return_ytd": 18.092810395,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 0.9270283545,
+        "group_excess_return_60d": -4.6068117981,
+        "relative_momentum": 5.5338401526
+      },
+      {
+        "group_id": "Consumer",
+        "as_of": "2026-09-28",
+        "group_excess_return_ytd": 19.4739277105,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 3.8314979429,
+        "group_excess_return_60d": -2.0187490749,
+        "relative_momentum": 5.8502470178
+      },
+      {
+        "group_id": "Consumer",
+        "as_of": "2026-09-29",
+        "group_excess_return_ytd": 19.4080412044,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 5.1610277909,
+        "group_excess_return_60d": -0.6108216908,
+        "relative_momentum": 5.7718494817
+      },
+      {
+        "group_id": "Consumer",
+        "as_of": "2026-09-30",
+        "group_excess_return_ytd": 19.7982065666,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 6.229558338,
+        "group_excess_return_60d": 0.9533884094,
+        "relative_momentum": 5.2761699286
+      },
+      {
+        "group_id": "Consumer",
+        "as_of": "2026-10-01",
+        "group_excess_return_ytd": 19.283335268,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 4.5615736326,
+        "group_excess_return_60d": 1.8165656967,
+        "relative_momentum": 2.7450079359000004
+      },
+      {
+        "group_id": "Consumer",
+        "as_of": "2026-10-02",
+        "group_excess_return_ytd": 19.0622007118,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 4.2337286915,
+        "group_excess_return_60d": -0.1127296907,
+        "relative_momentum": 4.3464583822
+      },
+      {
+        "group_id": "Energy",
+        "as_of": "2026-09-04",
+        "group_excess_return_ytd": 37.9562509631,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 1.3197362482,
+        "group_excess_return_60d": 1.9703561549,
+        "relative_momentum": -0.6506199067
+      },
+      {
+        "group_id": "Energy",
+        "as_of": "2026-09-07",
+        "group_excess_return_ytd": 38.2448019553,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 2.0773805432,
+        "group_excess_return_60d": 5.1383546696,
+        "relative_momentum": -3.0609741264
+      },
+      {
+        "group_id": "Energy",
+        "as_of": "2026-09-08",
+        "group_excess_return_ytd": 39.3925347346,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 3.6057716437,
+        "group_excess_return_60d": 4.5617490734,
+        "relative_momentum": -0.9559774296999999
+      },
+      {
+        "group_id": "Energy",
+        "as_of": "2026-09-09",
+        "group_excess_return_ytd": 40.9716738758,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 4.1473012373,
+        "group_excess_return_60d": 4.5183385606,
+        "relative_momentum": -0.3710373233000004
+      },
+      {
+        "group_id": "Energy",
+        "as_of": "2026-09-10",
+        "group_excess_return_ytd": 40.6788772369,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 3.361155471,
+        "group_excess_return_60d": 7.6843633372,
+        "relative_momentum": -4.3232078662
+      },
+      {
+        "group_id": "Energy",
+        "as_of": "2026-09-11",
+        "group_excess_return_ytd": 40.8655743499,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 6.9465403108,
+        "group_excess_return_60d": 8.0284343665,
+        "relative_momentum": -1.0818940557000012
+      },
+      {
+        "group_id": "Energy",
+        "as_of": "2026-09-14",
+        "group_excess_return_ytd": 39.656580621,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 4.2712310377,
+        "group_excess_return_60d": 7.1896080834,
+        "relative_momentum": -2.9183770457
+      },
+      {
+        "group_id": "Energy",
+        "as_of": "2026-09-15",
+        "group_excess_return_ytd": 39.4586882725,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 4.6276129202,
+        "group_excess_return_60d": 6.01238233,
+        "relative_momentum": -1.3847694098000005
+      },
+      {
+        "group_id": "Energy",
+        "as_of": "2026-09-16",
+        "group_excess_return_ytd": 39.9337370037,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 5.0758895518,
+        "group_excess_return_60d": 6.2018013972,
+        "relative_momentum": -1.1259118454
+      },
+      {
+        "group_id": "Energy",
+        "as_of": "2026-09-17",
+        "group_excess_return_ytd": 40.5435265566,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 3.4757163794,
+        "group_excess_return_60d": 9.9408514999,
+        "relative_momentum": -6.465135120500001
+      },
+      {
+        "group_id": "Energy",
+        "as_of": "2026-09-18",
+        "group_excess_return_ytd": 40.4888163749,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 4.9577880028,
+        "group_excess_return_60d": 7.9935324589,
+        "relative_momentum": -3.0357444560999998
+      },
+      {
+        "group_id": "Energy",
+        "as_of": "2026-09-21",
+        "group_excess_return_ytd": 40.2502933253,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 4.2632292192,
+        "group_excess_return_60d": 9.3428828042,
+        "relative_momentum": -5.079653585
+      },
+      {
+        "group_id": "Energy",
+        "as_of": "2026-09-22",
+        "group_excess_return_ytd": 39.2781245108,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 2.9565013267,
+        "group_excess_return_60d": 9.9875969888,
+        "relative_momentum": -7.0310956621
+      },
+      {
+        "group_id": "Energy",
+        "as_of": "2026-09-23",
+        "group_excess_return_ytd": 40.2755927613,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 3.7770251508,
+        "group_excess_return_60d": 11.6177092769,
+        "relative_momentum": -7.840684126099999
+      },
+      {
+        "group_id": "Energy",
+        "as_of": "2026-09-24",
+        "group_excess_return_ytd": 40.6411190075,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 4.1696405228,
+        "group_excess_return_60d": 9.6033677058,
+        "relative_momentum": -5.433727183
+      },
+      {
+        "group_id": "Energy",
+        "as_of": "2026-09-25",
+        "group_excess_return_ytd": 41.4019599305,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 5.1409300379,
+        "group_excess_return_60d": 10.0227133941,
+        "relative_momentum": -4.881783356200001
+      },
+      {
+        "group_id": "Energy",
+        "as_of": "2026-09-28",
+        "group_excess_return_ytd": 41.653776926,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 5.0215896356,
+        "group_excess_return_60d": 9.3007248014,
+        "relative_momentum": -4.2791351658
+      },
+      {
+        "group_id": "Energy",
+        "as_of": "2026-09-29",
+        "group_excess_return_ytd": 39.9688893514,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 4.4584838339,
+        "group_excess_return_60d": 8.4815790139,
+        "relative_momentum": -4.023095179999999
+      },
+      {
+        "group_id": "Energy",
+        "as_of": "2026-09-30",
+        "group_excess_return_ytd": 39.2380173367,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 5.0226946054,
+        "group_excess_return_60d": 7.9324437508,
+        "relative_momentum": -2.9097491454
+      },
+      {
+        "group_id": "Energy",
+        "as_of": "2026-10-01",
+        "group_excess_return_ytd": 37.9482523746,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 2.734115085,
+        "group_excess_return_60d": 7.6123336412,
+        "relative_momentum": -4.8782185562
+      },
+      {
+        "group_id": "Energy",
+        "as_of": "2026-10-02",
+        "group_excess_return_ytd": 39.3410138105,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 3.5479622095,
+        "group_excess_return_60d": 7.5824189405,
+        "relative_momentum": -4.034456731000001
+      },
+      {
+        "group_id": "Financials",
+        "as_of": "2026-09-04",
+        "group_excess_return_ytd": 11.1698348952,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -3.114654632,
+        "group_excess_return_60d": -4.2884341205,
+        "relative_momentum": 1.1737794884999997
+      },
+      {
+        "group_id": "Financials",
+        "as_of": "2026-09-07",
+        "group_excess_return_ytd": 11.307669061,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -2.9713784259,
+        "group_excess_return_60d": -3.8000096649,
+        "relative_momentum": 0.8286312390000004
+      },
+      {
+        "group_id": "Financials",
+        "as_of": "2026-09-08",
+        "group_excess_return_ytd": 10.7706206871,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -2.6842318022,
+        "group_excess_return_60d": -5.3614045826,
+        "relative_momentum": 2.6771727804
+      },
+      {
+        "group_id": "Financials",
+        "as_of": "2026-09-09",
+        "group_excess_return_ytd": 10.4283416041,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -3.1514718801,
+        "group_excess_return_60d": -7.3530273748,
+        "relative_momentum": 4.2015554947
+      },
+      {
+        "group_id": "Financials",
+        "as_of": "2026-09-10",
+        "group_excess_return_ytd": 10.786392156,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -3.4775788597,
+        "group_excess_return_60d": -4.4952346501,
+        "relative_momentum": 1.0176557903999996
+      },
+      {
+        "group_id": "Financials",
+        "as_of": "2026-09-11",
+        "group_excess_return_ytd": 10.4925780738,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -2.2947907255,
+        "group_excess_return_60d": -3.9318736996,
+        "relative_momentum": 1.6370829741000001
+      },
+      {
+        "group_id": "Financials",
+        "as_of": "2026-09-14",
+        "group_excess_return_ytd": 11.7508251456,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -2.0737894649,
+        "group_excess_return_60d": -2.1316763818,
+        "relative_momentum": 0.05788691690000025
+      },
+      {
+        "group_id": "Financials",
+        "as_of": "2026-09-15",
+        "group_excess_return_ytd": 11.4233255111,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -0.6662049724,
+        "group_excess_return_60d": -1.6921718894,
+        "relative_momentum": 1.0259669169999999
+      },
+      {
+        "group_id": "Financials",
+        "as_of": "2026-09-16",
+        "group_excess_return_ytd": 10.8874348882,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 0.0660474917,
+        "group_excess_return_60d": -2.1751785308,
+        "relative_momentum": 2.2412260225
+      },
+      {
+        "group_id": "Financials",
+        "as_of": "2026-09-17",
+        "group_excess_return_ytd": 11.0458936154,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -0.1456542577,
+        "group_excess_return_60d": -0.338890454,
+        "relative_momentum": 0.1932361963
+      },
+      {
+        "group_id": "Financials",
+        "as_of": "2026-09-18",
+        "group_excess_return_ytd": 9.5407424272,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -1.2292743834,
+        "group_excess_return_60d": -4.4889908425,
+        "relative_momentum": 3.2597164591
+      },
+      {
+        "group_id": "Financials",
+        "as_of": "2026-09-21",
+        "group_excess_return_ytd": 9.8783742201,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -0.4292835482,
+        "group_excess_return_60d": -3.2360833266,
+        "relative_momentum": 2.8067997784000003
+      },
+      {
+        "group_id": "Financials",
+        "as_of": "2026-09-22",
+        "group_excess_return_ytd": 9.9369667212,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -0.007794776,
+        "group_excess_return_60d": -3.9377185083,
+        "relative_momentum": 3.9299237323000002
+      },
+      {
+        "group_id": "Financials",
+        "as_of": "2026-09-23",
+        "group_excess_return_ytd": 9.4164616115,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -1.2452573219,
+        "group_excess_return_60d": -4.0185736461,
+        "relative_momentum": 2.7733163242
+      },
+      {
+        "group_id": "Financials",
+        "as_of": "2026-09-24",
+        "group_excess_return_ytd": 8.7545188214,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -0.977097686,
+        "group_excess_return_60d": -9.245688368,
+        "relative_momentum": 8.268590682
+      },
+      {
+        "group_id": "Financials",
+        "as_of": "2026-09-25",
+        "group_excess_return_ytd": 8.9376766885,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -1.6013035877,
+        "group_excess_return_60d": -6.2631490567,
+        "relative_momentum": 4.661845468999999
+      },
+      {
+        "group_id": "Financials",
+        "as_of": "2026-09-28",
+        "group_excess_return_ytd": 9.0611521973,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -1.2672786869,
+        "group_excess_return_60d": -6.6683524583,
+        "relative_momentum": 5.4010737714
+      },
+      {
+        "group_id": "Financials",
+        "as_of": "2026-09-29",
+        "group_excess_return_ytd": 9.4557082516,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -0.6880304681,
+        "group_excess_return_60d": -5.2379107316,
+        "relative_momentum": 4.5498802635
+      },
+      {
+        "group_id": "Financials",
+        "as_of": "2026-09-30",
+        "group_excess_return_ytd": 9.4134526268,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -1.6228236812,
+        "group_excess_return_60d": -6.535738822,
+        "relative_momentum": 4.9129151408
+      },
+      {
+        "group_id": "Financials",
+        "as_of": "2026-10-01",
+        "group_excess_return_ytd": 9.2606080429,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -1.7200543571,
+        "group_excess_return_60d": -5.451435514,
+        "relative_momentum": 3.7313811569
+      },
+      {
+        "group_id": "Financials",
+        "as_of": "2026-10-02",
+        "group_excess_return_ytd": 8.9455256726,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -2.4606055087,
+        "group_excess_return_60d": -7.3539497124,
+        "relative_momentum": 4.8933442037
+      },
+      {
+        "group_id": "Healthcare",
+        "as_of": "2026-09-04",
+        "group_excess_return_ytd": -6.4753021151,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -10.7925669953,
+        "group_excess_return_60d": -13.3989288529,
+        "relative_momentum": 2.6063618575999996
+      },
+      {
+        "group_id": "Healthcare",
+        "as_of": "2026-09-07",
+        "group_excess_return_ytd": -4.6101488139,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -7.1040379625,
+        "group_excess_return_60d": -8.38710122,
+        "relative_momentum": 1.2830632575000003
+      },
+      {
+        "group_id": "Healthcare",
+        "as_of": "2026-09-08",
+        "group_excess_return_ytd": -6.5938678173,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -10.9302611099,
+        "group_excess_return_60d": -12.414610331,
+        "relative_momentum": 1.4843492211000004
+      },
+      {
+        "group_id": "Healthcare",
+        "as_of": "2026-09-09",
+        "group_excess_return_ytd": -8.2718763227,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -12.9412393718,
+        "group_excess_return_60d": -12.6425308661,
+        "relative_momentum": -0.2987085057000005
+      },
+      {
+        "group_id": "Healthcare",
+        "as_of": "2026-09-10",
+        "group_excess_return_ytd": -8.6880082019,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -13.9634324964,
+        "group_excess_return_60d": -8.8345563872,
+        "relative_momentum": -5.1288761092
+      },
+      {
+        "group_id": "Healthcare",
+        "as_of": "2026-09-11",
+        "group_excess_return_ytd": -7.8503717425,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -10.6619877905,
+        "group_excess_return_60d": -9.7232327846,
+        "relative_momentum": -0.9387550058999992
+      },
+      {
+        "group_id": "Healthcare",
+        "as_of": "2026-09-14",
+        "group_excess_return_ytd": -7.5276628261,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -7.9847683686,
+        "group_excess_return_60d": -9.244695336,
+        "relative_momentum": 1.2599269673999993
+      },
+      {
+        "group_id": "Healthcare",
+        "as_of": "2026-09-15",
+        "group_excess_return_ytd": -7.6425323809,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -4.7751129573,
+        "group_excess_return_60d": -10.5901807177,
+        "relative_momentum": 5.815067760399999
+      },
+      {
+        "group_id": "Healthcare",
+        "as_of": "2026-09-16",
+        "group_excess_return_ytd": -7.5278300172,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -4.3512254904,
+        "group_excess_return_60d": -11.0639723212,
+        "relative_momentum": 6.7127468308
+      },
+      {
+        "group_id": "Healthcare",
+        "as_of": "2026-09-17",
+        "group_excess_return_ytd": -8.5810157628,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -6.4522777462,
+        "group_excess_return_60d": -13.3710005144,
+        "relative_momentum": 6.9187227682
+      },
+      {
+        "group_id": "Healthcare",
+        "as_of": "2026-09-18",
+        "group_excess_return_ytd": -9.6115863015,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -6.5337963389,
+        "group_excess_return_60d": -16.2912017924,
+        "relative_momentum": 9.757405453499999
+      },
+      {
+        "group_id": "Healthcare",
+        "as_of": "2026-09-21",
+        "group_excess_return_ytd": -7.6491282735,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -3.3718880462,
+        "group_excess_return_60d": -16.2511784858,
+        "relative_momentum": 12.8792904396
+      },
+      {
+        "group_id": "Healthcare",
+        "as_of": "2026-09-22",
+        "group_excess_return_ytd": -6.5286118066,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -1.1663089127,
+        "group_excess_return_60d": -14.5320239385,
+        "relative_momentum": 13.3657150258
+      },
+      {
+        "group_id": "Healthcare",
+        "as_of": "2026-09-23",
+        "group_excess_return_ytd": -7.5387817578,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -3.9929123021,
+        "group_excess_return_60d": -18.0509328198,
+        "relative_momentum": 14.0580205177
+      },
+      {
+        "group_id": "Healthcare",
+        "as_of": "2026-09-24",
+        "group_excess_return_ytd": -7.5323427044,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -2.4546247605,
+        "group_excess_return_60d": -20.8050029697,
+        "relative_momentum": 18.3503782092
+      },
+      {
+        "group_id": "Healthcare",
+        "as_of": "2026-09-25",
+        "group_excess_return_ytd": -8.5432159223,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -3.8107154173,
+        "group_excess_return_60d": -22.2134971922,
+        "relative_momentum": 18.4027817749
+      },
+      {
+        "group_id": "Healthcare",
+        "as_of": "2026-09-28",
+        "group_excess_return_ytd": -7.4933114851,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -1.1587016827,
+        "group_excess_return_60d": -19.3886315335,
+        "relative_momentum": 18.2299298508
+      },
+      {
+        "group_id": "Healthcare",
+        "as_of": "2026-09-29",
+        "group_excess_return_ytd": -7.1331144407,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -2.2450174519,
+        "group_excess_return_60d": -17.9787699862,
+        "relative_momentum": 15.733752534299999
+      },
+      {
+        "group_id": "Healthcare",
+        "as_of": "2026-09-30",
+        "group_excess_return_ytd": -6.0699032012,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -1.7757410122,
+        "group_excess_return_60d": -15.150883938,
+        "relative_momentum": 13.3751429258
+      },
+      {
+        "group_id": "Healthcare",
+        "as_of": "2026-10-01",
+        "group_excess_return_ytd": -6.2777725688,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -1.1706044312,
+        "group_excess_return_60d": -15.5132021351,
+        "relative_momentum": 14.342597703900001
+      },
+      {
+        "group_id": "Healthcare",
+        "as_of": "2026-10-02",
+        "group_excess_return_ytd": -6.7140430565,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -1.3942048365,
+        "group_excess_return_60d": -18.0150903743,
+        "relative_momentum": 16.620885537800003
+      },
+      {
+        "group_id": "Industrial",
+        "as_of": "2026-09-04",
+        "group_excess_return_ytd": 2.9134511317,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -0.1012473813,
+        "group_excess_return_60d": -2.1607191301,
+        "relative_momentum": 2.0594717488
+      },
+      {
+        "group_id": "Industrial",
+        "as_of": "2026-09-07",
+        "group_excess_return_ytd": 2.8315816871,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -0.8876486532,
+        "group_excess_return_60d": -1.6455736529,
+        "relative_momentum": 0.7579249997
+      },
+      {
+        "group_id": "Industrial",
+        "as_of": "2026-09-08",
+        "group_excess_return_ytd": 2.7301677451,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -0.1012463898,
+        "group_excess_return_60d": -1.3434750256,
+        "relative_momentum": 1.2422286358
+      },
+      {
+        "group_id": "Industrial",
+        "as_of": "2026-09-09",
+        "group_excess_return_ytd": 2.3167733546,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -0.8942032533,
+        "group_excess_return_60d": -0.8419215005,
+        "relative_momentum": -0.052281752799999914
+      },
+      {
+        "group_id": "Industrial",
+        "as_of": "2026-09-10",
+        "group_excess_return_ytd": 2.9288348919,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -0.6082193896,
+        "group_excess_return_60d": 3.8253002927,
+        "relative_momentum": -4.4335196823
+      },
+      {
+        "group_id": "Industrial",
+        "as_of": "2026-09-11",
+        "group_excess_return_ytd": 3.0101698105,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 1.4790298558,
+        "group_excess_return_60d": 3.2829696461,
+        "relative_momentum": -1.8039397903000003
+      },
+      {
+        "group_id": "Industrial",
+        "as_of": "2026-09-14",
+        "group_excess_return_ytd": 2.8345286518,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 0.8148222148,
+        "group_excess_return_60d": 5.0980789074,
+        "relative_momentum": -4.283256692599999
+      },
+      {
+        "group_id": "Industrial",
+        "as_of": "2026-09-15",
+        "group_excess_return_ytd": 2.8532269221,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 0.58082791,
+        "group_excess_return_60d": 6.6224535981,
+        "relative_momentum": -6.0416256881
+      },
+      {
+        "group_id": "Industrial",
+        "as_of": "2026-09-16",
+        "group_excess_return_ytd": 2.7961074947,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 1.7303827571,
+        "group_excess_return_60d": 3.305862251,
+        "relative_momentum": -1.5754794939000003
+      },
+      {
+        "group_id": "Industrial",
+        "as_of": "2026-09-17",
+        "group_excess_return_ytd": 2.8880666928,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 0.0323006152,
+        "group_excess_return_60d": 3.145566404,
+        "relative_momentum": -3.1132657888
+      },
+      {
+        "group_id": "Industrial",
+        "as_of": "2026-09-18",
+        "group_excess_return_ytd": 2.0182410959,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 0.5055104635,
+        "group_excess_return_60d": -3.0974037929,
+        "relative_momentum": 3.6029142563999996
+      },
+      {
+        "group_id": "Industrial",
+        "as_of": "2026-09-21",
+        "group_excess_return_ytd": 2.4843911074,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 0.7094782451,
+        "group_excess_return_60d": -1.3607969344,
+        "relative_momentum": 2.0702751795
+      },
+      {
+        "group_id": "Industrial",
+        "as_of": "2026-09-22",
+        "group_excess_return_ytd": 3.1148920004,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 2.3552944062,
+        "group_excess_return_60d": -0.3405466608,
+        "relative_momentum": 2.695841067
+      },
+      {
+        "group_id": "Industrial",
+        "as_of": "2026-09-23",
+        "group_excess_return_ytd": 2.4894079879,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 0.8192930246,
+        "group_excess_return_60d": -1.818455798,
+        "relative_momentum": 2.6377488226
+      },
+      {
+        "group_id": "Industrial",
+        "as_of": "2026-09-24",
+        "group_excess_return_ytd": 2.454729226,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 1.3329707098,
+        "group_excess_return_60d": -3.0780128014,
+        "relative_momentum": 4.4109835111999995
+      },
+      {
+        "group_id": "Industrial",
+        "as_of": "2026-09-25",
+        "group_excess_return_ytd": 2.683519757,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 2.489459438,
+        "group_excess_return_60d": -1.8795837047,
+        "relative_momentum": 4.3690431427
+      },
+      {
+        "group_id": "Industrial",
+        "as_of": "2026-09-28",
+        "group_excess_return_ytd": 2.7238931721,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 1.7718068915,
+        "group_excess_return_60d": -2.8794631571,
+        "relative_momentum": 4.6512700486
+      },
+      {
+        "group_id": "Industrial",
+        "as_of": "2026-09-29",
+        "group_excess_return_ytd": 3.47361909,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -0.2587748728,
+        "group_excess_return_60d": -0.5329408171,
+        "relative_momentum": 0.27416594429999996
+      },
+      {
+        "group_id": "Industrial",
+        "as_of": "2026-09-30",
+        "group_excess_return_ytd": 3.5417773047,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 0.5426360147,
+        "group_excess_return_60d": -1.4911981332,
+        "relative_momentum": 2.0338341479
+      },
+      {
+        "group_id": "Industrial",
+        "as_of": "2026-10-01",
+        "group_excess_return_ytd": 3.2902919651,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -1.1073029508,
+        "group_excess_return_60d": -3.043590854,
+        "relative_momentum": 1.9362879032
+      },
+      {
+        "group_id": "Industrial",
+        "as_of": "2026-10-02",
+        "group_excess_return_ytd": 3.2252385069,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -0.5400322494,
+        "group_excess_return_60d": -3.0971095109,
+        "relative_momentum": 2.5570772615
+      },
+      {
+        "group_id": "Materials",
+        "as_of": "2026-09-04",
+        "group_excess_return_ytd": -6.5508574886,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -3.0873104444,
+        "group_excess_return_60d": -5.4786836053,
+        "relative_momentum": 2.3913731608999997
+      },
+      {
+        "group_id": "Materials",
+        "as_of": "2026-09-07",
+        "group_excess_return_ytd": -7.8590168131,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -6.3392155821,
+        "group_excess_return_60d": 0.5425481803,
+        "relative_momentum": -6.881763762399999
+      },
+      {
+        "group_id": "Materials",
+        "as_of": "2026-09-08",
+        "group_excess_return_ytd": -8.5519917605,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -7.4086269444,
+        "group_excess_return_60d": -1.1392525642,
+        "relative_momentum": -6.2693743802
+      },
+      {
+        "group_id": "Materials",
+        "as_of": "2026-09-09",
+        "group_excess_return_ytd": -8.4827844969,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -8.893476812,
+        "group_excess_return_60d": -1.4406177569,
+        "relative_momentum": -7.452859055099999
+      },
+      {
+        "group_id": "Materials",
+        "as_of": "2026-09-10",
+        "group_excess_return_ytd": -8.4321226033,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -11.8631927241,
+        "group_excess_return_60d": -0.2190965549,
+        "relative_momentum": -11.6440961692
+      },
+      {
+        "group_id": "Materials",
+        "as_of": "2026-09-11",
+        "group_excess_return_ytd": -9.9260398207,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -12.4805710005,
+        "group_excess_return_60d": -6.0344352969,
+        "relative_momentum": -6.4461357035999995
+      },
+      {
+        "group_id": "Materials",
+        "as_of": "2026-09-14",
+        "group_excess_return_ytd": -10.6803369666,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -11.1890623923,
+        "group_excess_return_60d": -7.6750806846,
+        "relative_momentum": -3.5139817077
+      },
+      {
+        "group_id": "Materials",
+        "as_of": "2026-09-15",
+        "group_excess_return_ytd": -12.1345970742,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -9.674104034,
+        "group_excess_return_60d": -5.6577323908,
+        "relative_momentum": -4.016371643200001
+      },
+      {
+        "group_id": "Materials",
+        "as_of": "2026-09-16",
+        "group_excess_return_ytd": -13.0075629691,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -9.063596642,
+        "group_excess_return_60d": -7.710066918,
+        "relative_momentum": -1.3535297240000004
+      },
+      {
+        "group_id": "Materials",
+        "as_of": "2026-09-17",
+        "group_excess_return_ytd": -12.8767256986,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -8.444414766,
+        "group_excess_return_60d": -7.0712487932,
+        "relative_momentum": -1.3731659727999999
+      },
+      {
+        "group_id": "Materials",
+        "as_of": "2026-09-18",
+        "group_excess_return_ytd": -12.9075304229,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -7.7889326697,
+        "group_excess_return_60d": -6.4504391904,
+        "relative_momentum": -1.3384934793000003
+      },
+      {
+        "group_id": "Materials",
+        "as_of": "2026-09-21",
+        "group_excess_return_ytd": -12.3405702492,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -6.1165368871,
+        "group_excess_return_60d": -2.219902216,
+        "relative_momentum": -3.8966346710999997
+      },
+      {
+        "group_id": "Materials",
+        "as_of": "2026-09-22",
+        "group_excess_return_ytd": -12.1896556184,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -5.9309714184,
+        "group_excess_return_60d": -0.7605148427,
+        "relative_momentum": -5.1704565757
+      },
+      {
+        "group_id": "Materials",
+        "as_of": "2026-09-23",
+        "group_excess_return_ytd": -11.5714039254,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -1.7203077862,
+        "group_excess_return_60d": 4.6745721202,
+        "relative_momentum": -6.3948799064
+      },
+      {
+        "group_id": "Materials",
+        "as_of": "2026-09-24",
+        "group_excess_return_ytd": -12.4422679108,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -4.9571755148,
+        "group_excess_return_60d": 1.2762665625,
+        "relative_momentum": -6.2334420773
+      },
+      {
+        "group_id": "Materials",
+        "as_of": "2026-09-25",
+        "group_excess_return_ytd": -13.294290683,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -6.2869183441,
+        "group_excess_return_60d": -4.4916019361,
+        "relative_momentum": -1.7953164079999997
+      },
+      {
+        "group_id": "Materials",
+        "as_of": "2026-09-28",
+        "group_excess_return_ytd": -13.5237681886,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -8.0262724159,
+        "group_excess_return_60d": -6.5270981694,
+        "relative_momentum": -1.499174246499999
+      },
+      {
+        "group_id": "Materials",
+        "as_of": "2026-09-29",
+        "group_excess_return_ytd": -12.9498820768,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -9.9488407818,
+        "group_excess_return_60d": -4.2589105192,
+        "relative_momentum": -5.6899302626
+      },
+      {
+        "group_id": "Materials",
+        "as_of": "2026-09-30",
+        "group_excess_return_ytd": -13.3030677869,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -11.1094628682,
+        "group_excess_return_60d": -7.1137892507,
+        "relative_momentum": -3.9956736174999996
+      },
+      {
+        "group_id": "Materials",
+        "as_of": "2026-10-01",
+        "group_excess_return_ytd": -12.6141496587,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -9.0286848087,
+        "group_excess_return_60d": -3.788208142,
+        "relative_momentum": -5.240476666699999
+      },
+      {
+        "group_id": "Materials",
+        "as_of": "2026-10-02",
+        "group_excess_return_ytd": -11.7183336269,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -8.2217521744,
+        "group_excess_return_60d": -5.0349062639,
+        "relative_momentum": -3.1868459105000007
+      },
+      {
+        "group_id": "Property",
+        "as_of": "2026-09-04",
+        "group_excess_return_ytd": 5.8193767058,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 2.6943337417,
+        "group_excess_return_60d": 2.9317345843,
+        "relative_momentum": -0.23740084260000005
+      },
+      {
+        "group_id": "Property",
+        "as_of": "2026-09-07",
+        "group_excess_return_ytd": 6.0217168006,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -0.257087236,
+        "group_excess_return_60d": 2.6977066549,
+        "relative_momentum": -2.9547938909
+      },
+      {
+        "group_id": "Property",
+        "as_of": "2026-09-08",
+        "group_excess_return_ytd": 5.6493035552,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 1.3169425731,
+        "group_excess_return_60d": -0.3056701313,
+        "relative_momentum": 1.6226127043999998
+      },
+      {
+        "group_id": "Property",
+        "as_of": "2026-09-09",
+        "group_excess_return_ytd": 4.4578440649,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 0.7946157066,
+        "group_excess_return_60d": -0.8480927394,
+        "relative_momentum": 1.6427084459999999
+      },
+      {
+        "group_id": "Property",
+        "as_of": "2026-09-10",
+        "group_excess_return_ytd": 4.6031668646,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -0.7146899105,
+        "group_excess_return_60d": 3.5675577805,
+        "relative_momentum": -4.282247691
+      },
+      {
+        "group_id": "Property",
+        "as_of": "2026-09-11",
+        "group_excess_return_ytd": 5.2733125887,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 2.5445906537,
+        "group_excess_return_60d": 5.9134032663,
+        "relative_momentum": -3.3688126125999998
+      },
+      {
+        "group_id": "Property",
+        "as_of": "2026-09-14",
+        "group_excess_return_ytd": 5.3326218187,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 1.012784098,
+        "group_excess_return_60d": 8.0407184957,
+        "relative_momentum": -7.0279343977
+      },
+      {
+        "group_id": "Property",
+        "as_of": "2026-09-15",
+        "group_excess_return_ytd": 2.6562843715,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -2.3073672772,
+        "group_excess_return_60d": 7.3199168488,
+        "relative_momentum": -9.627284126
+      },
+      {
+        "group_id": "Property",
+        "as_of": "2026-09-16",
+        "group_excess_return_ytd": 2.4823171975,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -2.7059446499,
+        "group_excess_return_60d": 3.6990399158,
+        "relative_momentum": -6.4049845656999995
+      },
+      {
+        "group_id": "Property",
+        "as_of": "2026-09-17",
+        "group_excess_return_ytd": 2.453129116,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -5.6289630864,
+        "group_excess_return_60d": 5.2355206407,
+        "relative_momentum": -10.8644837271
+      },
+      {
+        "group_id": "Property",
+        "as_of": "2026-09-18",
+        "group_excess_return_ytd": -0.0264392433,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -6.8171476132,
+        "group_excess_return_60d": -4.2861148323,
+        "relative_momentum": -2.5310327809000004
+      },
+      {
+        "group_id": "Property",
+        "as_of": "2026-09-21",
+        "group_excess_return_ytd": -0.7933636813,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -5.9514053908,
+        "group_excess_return_60d": -2.5755509683,
+        "relative_momentum": -3.3758544225
+      },
+      {
+        "group_id": "Property",
+        "as_of": "2026-09-22",
+        "group_excess_return_ytd": -0.4493564208,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -5.8420746421,
+        "group_excess_return_60d": -2.6366194193,
+        "relative_momentum": -3.2054552228
+      },
+      {
+        "group_id": "Property",
+        "as_of": "2026-09-23",
+        "group_excess_return_ytd": 0.3296905802,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -4.3809383647,
+        "group_excess_return_60d": -2.8079167601,
+        "relative_momentum": -1.5730216046000005
+      },
+      {
+        "group_id": "Property",
+        "as_of": "2026-09-24",
+        "group_excess_return_ytd": -0.7037103096,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -6.0025604213,
+        "group_excess_return_60d": -6.3104793671,
+        "relative_momentum": 0.3079189458
+      },
+      {
+        "group_id": "Property",
+        "as_of": "2026-09-25",
+        "group_excess_return_ytd": -0.7188323021,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -6.7246238467,
+        "group_excess_return_60d": -5.2860900303,
+        "relative_momentum": -1.4385338164000006
+      },
+      {
+        "group_id": "Property",
+        "as_of": "2026-09-28",
+        "group_excess_return_ytd": -1.280594854,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -8.439450888,
+        "group_excess_return_60d": -8.1583284527,
+        "relative_momentum": -0.28112243530000036
+      },
+      {
+        "group_id": "Property",
+        "as_of": "2026-09-29",
+        "group_excess_return_ytd": -1.7086286135,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -8.0484441486,
+        "group_excess_return_60d": -7.6460054437,
+        "relative_momentum": -0.4024387048999998
+      },
+      {
+        "group_id": "Property",
+        "as_of": "2026-09-30",
+        "group_excess_return_ytd": -1.5965302758,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -7.1961521253,
+        "group_excess_return_60d": -8.9287349375,
+        "relative_momentum": 1.7325828121999995
+      },
+      {
+        "group_id": "Property",
+        "as_of": "2026-10-01",
+        "group_excess_return_ytd": -2.0277174685,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -8.8609018443,
+        "group_excess_return_60d": -6.9422802414,
+        "relative_momentum": -1.918621602900001
+      },
+      {
+        "group_id": "Property",
+        "as_of": "2026-10-02",
+        "group_excess_return_ytd": -2.2758529851,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -9.1307140172,
+        "group_excess_return_60d": -6.8853127038,
+        "relative_momentum": -2.2454013134000004
+      },
+      {
+        "group_id": "Technology",
+        "as_of": "2026-09-04",
+        "group_excess_return_ytd": -10.4830702758,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -6.8249584815,
+        "group_excess_return_60d": -14.8955250888,
+        "relative_momentum": 8.070566607299998
+      },
+      {
+        "group_id": "Technology",
+        "as_of": "2026-09-07",
+        "group_excess_return_ytd": -10.8656781628,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -7.0204563473,
+        "group_excess_return_60d": -14.5842421691,
+        "relative_momentum": 7.5637858218
+      },
+      {
+        "group_id": "Technology",
+        "as_of": "2026-09-08",
+        "group_excess_return_ytd": -11.1169147405,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -6.0771744066,
+        "group_excess_return_60d": -13.9159191291,
+        "relative_momentum": 7.8387447225
+      },
+      {
+        "group_id": "Technology",
+        "as_of": "2026-09-09",
+        "group_excess_return_ytd": -11.1765938925,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -5.7692140834,
+        "group_excess_return_60d": -12.9877420563,
+        "relative_momentum": 7.2185279729000005
+      },
+      {
+        "group_id": "Technology",
+        "as_of": "2026-09-10",
+        "group_excess_return_ytd": -11.6687053687,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -8.0010620463,
+        "group_excess_return_60d": -10.1218095821,
+        "relative_momentum": 2.1207475357999996
+      },
+      {
+        "group_id": "Technology",
+        "as_of": "2026-09-11",
+        "group_excess_return_ytd": -11.5359882798,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -6.3893014636,
+        "group_excess_return_60d": -8.7904804486,
+        "relative_momentum": 2.4011789850000005
+      },
+      {
+        "group_id": "Technology",
+        "as_of": "2026-09-14",
+        "group_excess_return_ytd": -11.5826733783,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -5.4509919184,
+        "group_excess_return_60d": -9.2365411586,
+        "relative_momentum": 3.7855492402
+      },
+      {
+        "group_id": "Technology",
+        "as_of": "2026-09-15",
+        "group_excess_return_ytd": -11.4890949794,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -4.9722286185,
+        "group_excess_return_60d": -9.0475498559,
+        "relative_momentum": 4.0753212374
+      },
+      {
+        "group_id": "Technology",
+        "as_of": "2026-09-16",
+        "group_excess_return_ytd": -11.6670135472,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -5.584753291,
+        "group_excess_return_60d": -8.9074565819,
+        "relative_momentum": 3.3227032909
+      },
+      {
+        "group_id": "Technology",
+        "as_of": "2026-09-17",
+        "group_excess_return_ytd": -11.2309154761,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -5.9350689565,
+        "group_excess_return_60d": -6.288473563,
+        "relative_momentum": 0.35340460649999983
+      },
+      {
+        "group_id": "Technology",
+        "as_of": "2026-09-18",
+        "group_excess_return_ytd": -12.0017831454,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -7.4885720531,
+        "group_excess_return_60d": -11.1211029694,
+        "relative_momentum": 3.6325309163000004
+      },
+      {
+        "group_id": "Technology",
+        "as_of": "2026-09-21",
+        "group_excess_return_ytd": -10.8402200016,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -4.5780042787,
+        "group_excess_return_60d": -9.6185687899,
+        "relative_momentum": 5.0405645111999995
+      },
+      {
+        "group_id": "Technology",
+        "as_of": "2026-09-22",
+        "group_excess_return_ytd": -10.3018099308,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -3.4989324942,
+        "group_excess_return_60d": -7.5016255401,
+        "relative_momentum": 4.0026930459
+      },
+      {
+        "group_id": "Technology",
+        "as_of": "2026-09-23",
+        "group_excess_return_ytd": -11.2846564601,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -3.1195994037,
+        "group_excess_return_60d": -11.0091093564,
+        "relative_momentum": 7.889509952699999
+      },
+      {
+        "group_id": "Technology",
+        "as_of": "2026-09-24",
+        "group_excess_return_ytd": -11.3200846269,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -2.7331627802,
+        "group_excess_return_60d": -12.7059594571,
+        "relative_momentum": 9.9727966769
+      },
+      {
+        "group_id": "Technology",
+        "as_of": "2026-09-25",
+        "group_excess_return_ytd": -11.1851227197,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -2.2284652178,
+        "group_excess_return_60d": -12.5551421273,
+        "relative_momentum": 10.3266769095
+      },
+      {
+        "group_id": "Technology",
+        "as_of": "2026-09-28",
+        "group_excess_return_ytd": -14.3264078168,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -6.4403110709,
+        "group_excess_return_60d": -16.9121601384,
+        "relative_momentum": 10.4718490675
+      },
+      {
+        "group_id": "Technology",
+        "as_of": "2026-09-29",
+        "group_excess_return_ytd": -17.1238952866,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -12.3619744144,
+        "group_excess_return_60d": -19.3281809492,
+        "relative_momentum": 6.9662065347999995
+      },
+      {
+        "group_id": "Technology",
+        "as_of": "2026-09-30",
+        "group_excess_return_ytd": -19.3663003907,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -14.5907250054,
+        "group_excess_return_60d": -20.4602504303,
+        "relative_momentum": 5.869525424900001
+      },
+      {
+        "group_id": "Technology",
+        "as_of": "2026-10-01",
+        "group_excess_return_ytd": -21.0717794054,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -17.1247190932,
+        "group_excess_return_60d": -21.4890942716,
+        "relative_momentum": 4.3643751783999996
+      },
+      {
+        "group_id": "Technology",
+        "as_of": "2026-10-02",
+        "group_excess_return_ytd": -20.1978507325,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -15.8055787326,
+        "group_excess_return_60d": -20.2698761557,
+        "relative_momentum": 4.4642974231
+      },
+      {
+        "group_id": "Telecom",
+        "as_of": "2026-09-04",
+        "group_excess_return_ytd": 10.4044010187,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 5.5537982078,
+        "group_excess_return_60d": -2.1159746667,
+        "relative_momentum": 7.6697728745
+      },
+      {
+        "group_id": "Telecom",
+        "as_of": "2026-09-07",
+        "group_excess_return_ytd": 9.9957632434,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -0.0152006751,
+        "group_excess_return_60d": -2.4661171802,
+        "relative_momentum": 2.4509165051
+      },
+      {
+        "group_id": "Telecom",
+        "as_of": "2026-09-08",
+        "group_excess_return_ytd": 10.0553819549,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 2.6740235609,
+        "group_excess_return_60d": -2.792680888,
+        "relative_momentum": 5.4667044489
+      },
+      {
+        "group_id": "Telecom",
+        "as_of": "2026-09-09",
+        "group_excess_return_ytd": 10.7683433733,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 2.6666920343,
+        "group_excess_return_60d": -0.2429605913,
+        "relative_momentum": 2.9096526256
+      },
+      {
+        "group_id": "Telecom",
+        "as_of": "2026-09-10",
+        "group_excess_return_ytd": 11.2185737969,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -1.41579877,
+        "group_excess_return_60d": 5.1072399604,
+        "relative_momentum": -6.523038730400001
+      },
+      {
+        "group_id": "Telecom",
+        "as_of": "2026-09-11",
+        "group_excess_return_ytd": 11.2924359065,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -2.1280146636,
+        "group_excess_return_60d": 6.8208796052,
+        "relative_momentum": -8.9488942688
+      },
+      {
+        "group_id": "Telecom",
+        "as_of": "2026-09-14",
+        "group_excess_return_ytd": 10.8372980042,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -5.9193240031,
+        "group_excess_return_60d": 7.9425252262,
+        "relative_momentum": -13.861849229299999
+      },
+      {
+        "group_id": "Telecom",
+        "as_of": "2026-09-15",
+        "group_excess_return_ytd": 11.9421068573,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -5.3121838993,
+        "group_excess_return_60d": 9.9899318509,
+        "relative_momentum": -15.302115750199999
+      },
+      {
+        "group_id": "Telecom",
+        "as_of": "2026-09-16",
+        "group_excess_return_ytd": 11.2676421525,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -7.8906992682,
+        "group_excess_return_60d": 7.8421154995,
+        "relative_momentum": -15.732814767699999
+      },
+      {
+        "group_id": "Telecom",
+        "as_of": "2026-09-17",
+        "group_excess_return_ytd": 10.7529586261,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -8.9826997642,
+        "group_excess_return_60d": 7.2398481552,
+        "relative_momentum": -16.2225479194
+      },
+      {
+        "group_id": "Telecom",
+        "as_of": "2026-09-18",
+        "group_excess_return_ytd": 9.9770655315,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -7.8853103068,
+        "group_excess_return_60d": 2.8884709545,
+        "relative_momentum": -10.7737812613
+      },
+      {
+        "group_id": "Telecom",
+        "as_of": "2026-09-21",
+        "group_excess_return_ytd": 8.3925873756,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -8.3519244437,
+        "group_excess_return_60d": 3.183568693,
+        "relative_momentum": -11.5354931367
+      },
+      {
+        "group_id": "Telecom",
+        "as_of": "2026-09-22",
+        "group_excess_return_ytd": 10.7456119611,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -4.8221303807,
+        "group_excess_return_60d": 6.2639266079,
+        "relative_momentum": -11.0860569886
+      },
+      {
+        "group_id": "Telecom",
+        "as_of": "2026-09-23",
+        "group_excess_return_ytd": 9.7204044055,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -5.5872096111,
+        "group_excess_return_60d": 5.8920240529,
+        "relative_momentum": -11.479233663999999
+      },
+      {
+        "group_id": "Telecom",
+        "as_of": "2026-09-24",
+        "group_excess_return_ytd": 9.6350380432,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -6.2672163452,
+        "group_excess_return_60d": -0.3672057809,
+        "relative_momentum": -5.9000105643
+      },
+      {
+        "group_id": "Telecom",
+        "as_of": "2026-09-25",
+        "group_excess_return_ytd": 8.9150206861,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -5.5037315777,
+        "group_excess_return_60d": -1.1185497764,
+        "relative_momentum": -4.3851818013
+      },
+      {
+        "group_id": "Telecom",
+        "as_of": "2026-09-28",
+        "group_excess_return_ytd": 7.7522146401,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -6.656910836,
+        "group_excess_return_60d": -6.1057443804,
+        "relative_momentum": -0.5511664555999998
+      },
+      {
+        "group_id": "Telecom",
+        "as_of": "2026-09-29",
+        "group_excess_return_ytd": 9.4924959165,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -1.8876780926,
+        "group_excess_return_60d": -0.4332169475,
+        "relative_momentum": -1.4544611451
+      },
+      {
+        "group_id": "Telecom",
+        "as_of": "2026-09-30",
+        "group_excess_return_ytd": 9.0010706896,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -1.0093233504,
+        "group_excess_return_60d": 0.0226504167,
+        "relative_momentum": -1.0319737671
+      },
+      {
+        "group_id": "Telecom",
+        "as_of": "2026-10-01",
+        "group_excess_return_ytd": 9.2106079159,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -0.9532654078,
+        "group_excess_return_60d": 1.1049501663,
+        "relative_momentum": -2.0582155741
+      },
+      {
+        "group_id": "Telecom",
+        "as_of": "2026-10-02",
+        "group_excess_return_ytd": 8.5653761791,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -1.5746023703,
+        "group_excess_return_60d": -1.4030236102,
+        "relative_momentum": -0.17157876010000006
+      },
+      {
+        "group_id": "Transportation",
+        "as_of": "2026-09-04",
+        "group_excess_return_ytd": -8.3820727043,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 21.9224209734,
+        "group_excess_return_60d": 8.589792519,
+        "relative_momentum": 13.332628454400002
+      },
+      {
+        "group_id": "Transportation",
+        "as_of": "2026-09-07",
+        "group_excess_return_ytd": -9.2081664736,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 20.1781365533,
+        "group_excess_return_60d": 5.7044626848,
+        "relative_momentum": 14.4736738685
+      },
+      {
+        "group_id": "Transportation",
+        "as_of": "2026-09-08",
+        "group_excess_return_ytd": -8.9599280575,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": 19.7557739879,
+        "group_excess_return_60d": 10.4756152624,
+        "relative_momentum": 9.2801587255
+      },
+      {
+        "group_id": "Transportation",
+        "as_of": "2026-09-09",
+        "group_excess_return_ytd": -7.8442176936,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -10.4700687842,
+        "group_excess_return_60d": 10.2670562427,
+        "relative_momentum": -20.737125026900003
+      },
+      {
+        "group_id": "Transportation",
+        "as_of": "2026-09-10",
+        "group_excess_return_ytd": -8.8573491177,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -19.4143704473,
+        "group_excess_return_60d": 6.518700985,
+        "relative_momentum": -25.9330714323
+      },
+      {
+        "group_id": "Transportation",
+        "as_of": "2026-09-11",
+        "group_excess_return_ytd": -10.343507427,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -16.1418755731,
+        "group_excess_return_60d": 7.1263839936,
+        "relative_momentum": -23.2682595667
+      },
+      {
+        "group_id": "Transportation",
+        "as_of": "2026-09-14",
+        "group_excess_return_ytd": -11.2866156066,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -16.1962300137,
+        "group_excess_return_60d": 2.7500954151,
+        "relative_momentum": -18.946325428799998
+      },
+      {
+        "group_id": "Transportation",
+        "as_of": "2026-09-15",
+        "group_excess_return_ytd": -10.4361407332,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -18.0310001708,
+        "group_excess_return_60d": 4.0228707537,
+        "relative_momentum": -22.0538709245
+      },
+      {
+        "group_id": "Transportation",
+        "as_of": "2026-09-16",
+        "group_excess_return_ytd": -11.1755268358,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -17.1321334471,
+        "group_excess_return_60d": 5.4800317468,
+        "relative_momentum": -22.612165193899997
+      },
+      {
+        "group_id": "Transportation",
+        "as_of": "2026-09-17",
+        "group_excess_return_ytd": -10.4509242351,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -14.7668944006,
+        "group_excess_return_60d": 4.6079673881,
+        "relative_momentum": -19.3748617887
+      },
+      {
+        "group_id": "Transportation",
+        "as_of": "2026-09-18",
+        "group_excess_return_ytd": -11.2253265696,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -15.2868154376,
+        "group_excess_return_60d": 5.3435434952,
+        "relative_momentum": -20.6303589328
+      },
+      {
+        "group_id": "Transportation",
+        "as_of": "2026-09-21",
+        "group_excess_return_ytd": -9.5522815729,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -10.3398626283,
+        "group_excess_return_60d": 14.7246822986,
+        "relative_momentum": -25.0645449269
+      },
+      {
+        "group_id": "Transportation",
+        "as_of": "2026-09-22",
+        "group_excess_return_ytd": -10.3477770359,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -8.1393497487,
+        "group_excess_return_60d": 8.6340018848,
+        "relative_momentum": -16.7733516335
+      },
+      {
+        "group_id": "Transportation",
+        "as_of": "2026-09-23",
+        "group_excess_return_ytd": -12.5000096515,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -4.2815041656,
+        "group_excess_return_60d": 5.8649098705,
+        "relative_momentum": -10.146414036100001
+      },
+      {
+        "group_id": "Transportation",
+        "as_of": "2026-09-24",
+        "group_excess_return_ytd": -12.6379647247,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -7.1845392904,
+        "group_excess_return_60d": 1.847316026,
+        "relative_momentum": -9.0318553164
+      },
+      {
+        "group_id": "Transportation",
+        "as_of": "2026-09-25",
+        "group_excess_return_ytd": -15.0432941379,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -9.6082914325,
+        "group_excess_return_60d": 0.2031362878,
+        "relative_momentum": -9.8114277203
+      },
+      {
+        "group_id": "Transportation",
+        "as_of": "2026-09-28",
+        "group_excess_return_ytd": -13.9558201911,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -8.0593112724,
+        "group_excess_return_60d": 0.6717002915,
+        "relative_momentum": -8.731011563900001
+      },
+      {
+        "group_id": "Transportation",
+        "as_of": "2026-09-29",
+        "group_excess_return_ytd": -12.6328923386,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -6.3901997661,
+        "group_excess_return_60d": 1.3702317492,
+        "relative_momentum": -7.7604315153000005
+      },
+      {
+        "group_id": "Transportation",
+        "as_of": "2026-09-30",
+        "group_excess_return_ytd": -12.0481534527,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -5.6822168469,
+        "group_excess_return_60d": 4.926031725,
+        "relative_momentum": -10.608248571899999
+      },
+      {
+        "group_id": "Transportation",
+        "as_of": "2026-10-01",
+        "group_excess_return_ytd": -15.4169762409,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -14.4116904156,
+        "group_excess_return_60d": -0.3842795301,
+        "relative_momentum": -14.0274108855
+      },
+      {
+        "group_id": "Transportation",
+        "as_of": "2026-10-02",
+        "group_excess_return_ytd": -18.7949166474,
+        "ytd_start_date": "2025-12-30T00:00:00.000",
+        "group_excess_return_20d": -16.3384147635,
+        "group_excess_return_60d": -6.6301782758,
+        "relative_momentum": -9.708236487700002
+      }
+    ],
+    "panel_files": {
+      "prices.csv": "3c824e7bed129727342f8ba8491416817c2279a108f808e2dd5806d75556a58f",
+      "benchmark.csv": "c5d242d24a0cb3a4cf9fce6c2da500163c191fac05f2540047ec8370302e0e00"
+    },
+    "snapshot_ids": [
+      "snap_public_2026-09-04",
+      "snap_public_2026-09-07",
+      "snap_public_2026-09-08",
+      "snap_public_2026-09-09",
+      "snap_public_2026-09-10",
+      "snap_public_2026-09-11",
+      "snap_public_2026-09-14",
+      "snap_public_2026-09-15",
+      "snap_public_2026-09-16",
+      "snap_public_2026-09-17",
+      "snap_public_2026-09-18",
+      "snap_public_2026-09-21",
+      "snap_public_2026-09-22",
+      "snap_public_2026-09-23",
+      "snap_public_2026-09-24",
+      "snap_public_2026-09-25",
+      "snap_public_2026-09-28",
+      "snap_public_2026-09-29",
+      "snap_public_2026-09-30",
+      "snap_public_2026-10-01",
+      "snap_public_2026-10-02"
+    ],
+    "source": "COMPATIBLE_PUBLIC_SNAPSHOTS"
+  },
   "taxonomy_views": {
     "konglo": {
       "schema_version": "taxonomy-view-v2",

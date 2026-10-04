@@ -241,13 +241,13 @@ endpoint (WAF 403), IDX statistics index page direct fetch (403).
 
 | Command | Result |
 |---|---|
-| `.venv/bin/python -m pytest -q` | **772 passed**, 2 warnings (both pre-existing `SectorsProvider.get_full_universe_close` deprecations in `tests/test_sectors_provider.py`) |
-| `.venv/bin/python -m pytest -q` in a **fresh `git clone`** | **772 passed, 0 skipped** — identical, see §6.1.1 |
+| `.venv/bin/python -m pytest -q` | **784 passed**, 2 warnings (both pre-existing `SectorsProvider.get_full_universe_close` deprecations in `tests/test_sectors_provider.py`) |
+| `.venv/bin/python -m pytest -q` in a **fresh `git clone`** | **784 passed, 0 skipped** — identical, see §11 |
 | `npm run typecheck --prefix app/web` | clean |
 | `npm run build --prefix app/web` | built; chunk-size advisory only (pre-existing) |
 | `git diff --check` | clean |
 
-Baseline before this work was 729 passed with the same 2 warnings; +43 tests.
+Baseline before this work was 729 passed with the same 2 warnings; +55 tests.
 New coverage in `tests/test_public_refresh_chain.py` (25 tests): export completeness, manifest
 parity, disclosed WSKT gap, YTD baseline and per-feature YTD, benchmark-YTD reconciliation against
 official closes, comparability (COMPATIBLE with 4 real priors, Sectors INCOMPARABLE), transitions
@@ -329,7 +329,7 @@ exit 1 and name the file; a clean run exits 0.
 |---|---|
 | Active bundle | `snap_public_2026-10-02.json` fetched; header shows "Data as of 2 Oct 2026 · Public prototype" |
 | YTD copy | "Sector history covers 20D/60D/YTD excess vs IHSG, with the YTD baseline at **2025-12-30**" (data-driven; the old hardcoded "not available in this bundle" string is gone) |
-| Rotation | Tail enabled, max `4 obs`, **10 polylines drawn** (one per group), no diagnostic badge, Daily/Weekly remain disabled |
+| Rotation | Daily/Weekly enabled for sectors, **10 polylines drawn** (one per group); Daily has 21 sessions (up to `20 obs` tail steps), Weekly samples 5 week-ending sessions (`4 obs`), no diagnostic badge. See §11. |
 | What Changed | "vs 25 Sep 2026", breadth movers `Consumer +40.0%`, `Technology −33.3%`, `Industrial −28.6%`, material shifts with `Broadening → Stable`, `Stable → Narrowing`, breadth history chart with all 5 dates |
 | Network | **0 requests to api.sectors.app / any Sectors endpoint**; only local `/snapshots/*` and `/idx/*` plus api/cdn.fontshare.com font CSS/WOFF (pre-existing) |
 | Console / page errors | none |
@@ -359,6 +359,8 @@ python3 -m scripts.validate_public_panel          # needs openpyxl + pdfplumber 
 
 # 2. offline chain (one pass, point-in-time, hash parity enforced)
 .venv/bin/python -m scripts.build_snapshot_chain --asofs 2026-09-04 2026-09-11 2026-09-18 2026-09-25 2026-10-02
+# 2a. separate daily replay for rotation only (recipe in §11)
+#     data/normalized/public_rotation_snapshots/ — never add daily dates to the canonical root
 
 # 3. optional IDX context card (1 document, 2 pages)
 .venv/bin/python -m scripts.refresh_idx_daily_statistics \
@@ -370,12 +372,13 @@ python3 -m scripts.validate_public_panel          # needs openpyxl + pdfplumber 
 .venv/bin/python -m scripts.calculate_foreign_flow_sample
 .venv/bin/python -m scripts.build_taxonomy_views --snapshot-id snap_public_2026-10-02
 .venv/bin/python -m scripts.validate_data
-.venv/bin/python -m scripts.export_snapshot_json --snapshot-id snap_public_2026-10-02
+.venv/bin/python -m scripts.export_snapshot_json --snapshot-id snap_public_2026-10-02 \
+  --rotation-history-root data/normalized/public_rotation_snapshots
 .venv/bin/python -m scripts.build_snapshot_index \
   --ids snap_sectors_2026-08-27 snap_public_2026-10-02
 
 # 5. gates
-.venv/bin/python -m pytest -q          # 772 passed / 0 skipped; also asserts a clean tree
+.venv/bin/python -m pytest -q          # 784 passed / 0 skipped; also checks for changes in git status
 npm run typecheck --prefix app/web && npm run build --prefix app/web
 git diff --check
 git status --porcelain                 # must be empty (the suite enforces this itself)
@@ -439,9 +442,9 @@ Notes for the next operator:
    within-panel consistency.
 4. **Groups below 5 eligible constituents** (6 of 10) remain `UNCONFIRMED` by policy — real
    numbers are shown, classifications are withheld.
-5. **Daily/Weekly rotation intervals stay disabled** — only dated snapshot observations are
-   persisted, so no daily or weekly series exists. Tail is enabled because ≥3 real dated
-   observations per group now exist.
+5. **Daily/Weekly rotation is available for sectors only**, from the separate 21-session replay
+   (§11). Stock/Konglo/Theme cadence stays unavailable because comparable daily observations
+   for those views are not persisted. Sparse legacy bundles retain their dated snapshot tails.
 6. **`Confirmation` on What Changed reads "Not available"** for all groups: confirmation requires
    a persistence/confirmation series that the current payload does not carry. Pre-existing,
    unchanged by this refresh.
@@ -539,3 +542,65 @@ When the cache directory lived outside the repository, a qualifying Sectors regi
 source is now rendered with the existing `_display_path` helper (absolute outside the repo).
 Covered by `test_validator_handles_populated_external_sources_root`, which fakes the parser gate
 and the xlsx/pdf loaders in-process so it runs identically on a fresh checkout.
+
+## 11. Real Daily/Weekly rotation (Codex continuation)
+
+The validated public panel contains **21 benchmark sessions, 2026-09-04 → 2026-10-02**, with
+the same 53 observed tickers on every day. Replayed offline through the existing snapshot
+pipeline into **`data/normalized/public_rotation_snapshots/`**, these produce **210 real sector
+observations**. No provider/network/parser request or additional credit spend was needed.
+
+The daily root is separate from `data/snapshots/`. Its daily prior comparisons are not promoted
+into the active market snapshot: `previous_snapshot_id` remains `snap_public_2026-09-25`, and
+the published transitions, breadth deltas, classifications and canonical five-date history
+are unchanged. Comparing the enriched payload against the prior active export showed **zero
+changed existing fields**; only `rotation_daily_history` was added.
+
+`export_snapshot_json --rotation-history-root` requires COMPLETE bundles, exact contract and
+eligible-cohort parity, matching `prices.csv`/`benchmark.csv` hashes, every benchmark session
+inside the replay window, finite group return axes, and endpoint equality with current group
+rows. A missing day/group, stale panel, incomparable cohort or divergent endpoint refuses
+export before replacing an existing output. Future snapshots cannot enter the history.
+The served metadata records sessions, source snapshot ids and panel hashes.
+
+Daily sampling uses every actual trading session; Weekly uses the last actual session in each
+Monday–Sunday week, including a partial current week. Sampling never changes the axes:
+**X = YTD excess vs IHSG; Y = 20D excess − 60D excess**. Both need at least three real points.
+The interval is persisted in `?interval=daily|weekly`; the tail can show all 21 daily points or
+all five weekly points. Unsupported selections keep explicit disabled controls.
+
+To reproduce the separate daily replay from the current persisted panel:
+
+```bash
+.venv/bin/python - <<'PY'
+import sys
+from pathlib import Path
+import pandas as pd
+from scripts.build_snapshot_chain import main
+
+panel = Path('data/raw/public/panel_2025-12-15_2026-10-04')
+sessions = [d for d in sorted(pd.read_csv(panel / 'benchmark.csv').date)
+            if '2026-09-04' <= d <= '2026-10-02']
+sys.argv = ['build_snapshot_chain', '--panel-dir', str(panel), '--asofs', *sessions,
+            '--snapshots-root', 'data/normalized/public_rotation_snapshots',
+            '--report', 'data/normalized/public_rotation_chain_report.json']
+# After a panel refresh, append --force-rebuild and rebuild the canonical chain too.
+raise SystemExit(main())
+PY
+.venv/bin/python -m scripts.export_snapshot_json \
+  --snapshot-id snap_public_2026-10-02 \
+  --rotation-history-root data/normalized/public_rotation_snapshots
+```
+
+`tests/test_rotation_cadence.py` adds 12 hermetic regressions: generated replay/export fixtures,
+failure without output replacement, future exclusion, actual week-end/partial-week sampling,
+sparse/duplicate/invalid-axis refusal, and the tracked active daily/weekly contract. Tests never
+read the ignored replay or panel. The full suite now has **784 tests**.
+
+Browser verification of the production build: Daily draws 10 sector polylines with 21 points
+each; Weekly draws the same 10 with five points each. Interval switching updates the URL;
+Stock and Theme views disable cadence and draw no invented trails. No horizontal overflow
+at 1440×1000, 1368×858, 768×1024 or 390×844; no console/page errors. Long daily date captions
+show the range rather than listing all 21 dates. Typecheck/build pass with the existing Vite
+config and chunk-size advisories. Fresh-clone tests run without raw data, replay bundles or
+frontend node_modules and leave the clone clean.
