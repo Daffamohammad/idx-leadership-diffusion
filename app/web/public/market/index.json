@@ -18,6 +18,12 @@
       "path": "/market/ownership-2026-09-30.json",
       "schema_version": "idx-ownership-v1",
       "sha256": "d3bbdcc53b5491b86391988e1630374e4e80bc0aa06e8b1a09e452ce4be17527"
+    },
+    "rotation": {
+      "as_of": "2026-10-02",
+      "path": "/market/rotation-2026-10-02-e71d3a145b698e0d.json",
+      "schema_version": "rotation-history-v1",
+      "sha256": "e71d3a145b698e0dadffeaf1e71e0550fc65de0a4a6f035ac76a8785f67a797d"
     }
   },
   "snapshot_id": "snap_public_market_2026-10-02"

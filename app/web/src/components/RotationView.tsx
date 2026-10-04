@@ -2,6 +2,8 @@ import { useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { EvidenceBadge } from "./EvidenceModel";
 import { useSnapshot } from "../data/SnapshotProvider";
+import { useWorkspaceAsset } from "../data/marketWorkspace";
+import { replaySelection, type RotationReplay } from "../data/rotationReplay";
 import type { SectorData, TaxonomyGroupData } from "../data/adapter";
 import type { TaxonomyKind } from "../data/snapshot";
 import { formatCountLabel, formatDateLabel, formatEnumLabel, formatPercent } from "../data/format";
@@ -126,7 +128,8 @@ function openGroup(navigate: ReturnType<typeof useNavigate>, row: RotationGroupI
 
 export default function RotationView() {
   const navigate = useNavigate();
-  const { data } = useSnapshot();
+  const { data, snapshotId } = useSnapshot();
+  const rotationAsset = useWorkspaceAsset<RotationReplay>("rotation");
   const [params, setParams] = useSearchParams();
   const urlTaxonomy = (params.get("taxonomy") ?? "SECTOR").toUpperCase() as TaxonomyKind;
   const taxonomyKind: TaxonomyKind = urlTaxonomy === "KONGLO" || urlTaxonomy === "THEMES" ? urlTaxonomy : "SECTOR";
@@ -248,16 +251,29 @@ export default function RotationView() {
     return out;
   }, [data, isDiagnostic, mode, taxonomyKind]);
   const sessions = data?.rotationDailyHistory?.sessions ?? [];
-  const dailyAvailable = plottable.length > 0 && plottable.every((row) =>
-    sampleRotationHistory(dailyHistoryByGroup.get(row.id) ?? [], sessions, "daily").length > 0);
-  const weeklyAvailable = dailyAvailable && plottable.every((row) =>
-    sampleRotationHistory(dailyHistoryByGroup.get(row.id) ?? [], sessions, "weekly").length > 0);
+  const replay = !isDiagnostic && mode === "groups" ? rotationAsset.data : null;
+  const selections = useMemo(() => {
+    const out = new Map<string, { daily: ReturnType<typeof replaySelection>; weekly: ReturnType<typeof replaySelection> }>();
+    if (replay) for (const row of plottedRows) out.set(row.id, {
+      daily: replaySelection(replay, taxonomyKind, row.id, "daily", row),
+      weekly: replaySelection(replay, taxonomyKind, row.id, "weekly", row),
+    });
+    return out;
+  }, [replay, taxonomyKind, plottedRows]);
+  const dailyAvailable = replay ? [...selections.values()].some(s => s.daily.points.length > 0)
+    : plottable.some(row => sampleRotationHistory(dailyHistoryByGroup.get(row.id) ?? [], sessions, "daily").length > 0);
+  const weeklyAvailable = replay ? [...selections.values()].some(s => s.weekly.points.length > 0)
+    : plottable.some(row => sampleRotationHistory(dailyHistoryByGroup.get(row.id) ?? [], sessions, "weekly").length > 0);
   const effectiveInterval = dailyAvailable ? (interval === "daily" || !weeklyAvailable ? "daily" : "weekly") : null;
 
   // Older bundles retain their real dated tails; no cadence is inferred from
   // sparse snapshots. Analyst taxonomies and stocks have no comparable series.
   const historyByGroup = useMemo(() => {
-    const out = new Map<string, NonNullable<typeof data>["rotationHistory"]>();
+    const out = new Map<string, Array<{ as_of: string; group_excess_return_ytd: number; relative_momentum: number | null }>>();
+    if (replay) {
+      if (effectiveInterval) for (const [id, selection] of selections) out.set(id, selection[effectiveInterval].points);
+      return out;
+    }
     if (!data || isDiagnostic || mode !== "groups" || taxonomyKind !== "SECTOR") return out;
     if (effectiveInterval) {
       for (const [groupId, history] of dailyHistoryByGroup) {
@@ -271,7 +287,7 @@ export default function RotationView() {
       out.set(point.group_id, list);
     }
     return out;
-  }, [data, isDiagnostic, mode, taxonomyKind, dailyHistoryByGroup, effectiveInterval]);
+  }, [data, isDiagnostic, mode, taxonomyKind, dailyHistoryByGroup, effectiveInterval, replay, selections]);
   const maxTrailLength = useMemo(() => {
     let max = 0;
     for (const list of historyByGroup.values()) {
@@ -279,7 +295,7 @@ export default function RotationView() {
     }
     return Math.min(max, 20);
   }, [historyByGroup]);
-  const tailAvailable = !isDiagnostic && mode === "groups" && taxonomyKind === "SECTOR" && maxTrailLength >= MIN_ROTATION_TRAIL_POINTS - 1;
+  const tailAvailable = !isDiagnostic && mode === "groups" && maxTrailLength >= MIN_ROTATION_TRAIL_POINTS - 1;
   const effectiveTailLength = tailAvailable ? Math.min(tailLength, maxTrailLength) : 0;
   const trails = useMemo(() => {
     if (!tailAvailable || effectiveTailLength <= 0) return [];
@@ -457,11 +473,23 @@ export default function RotationView() {
           ? `Baseline unavailable; ${formatCountLabel(diagnosticPlottable.length, mode === "stocks" ? "ticker" : "group")} remain visible in the diagnostic map and table.`
           : tailAvailable
             ? effectiveTailLength > 0
-              ? `The trail connects ${effectiveTailLength + 1} real dated observations per group (${historyDatesLabel}).`
+              ? `Trails connect up to ${effectiveTailLength + 1} real dated observations in each group's current comparable segment (${historyDatesLabel}).`
               : "Enable Tail to connect real dated observations per group."
             : "Dated rotation history is unavailable for this selection."}</span>
         {taxonomyKind !== "SECTOR" && <span style={{ color: "var(--link)" }}>Analyst-defined taxonomy</span>}
       </div>
+
+      {replay && mode === "groups" && <details style={{ marginBottom: 12, fontSize: 12 }}>
+        <summary>History coverage · {[...selections.values()].filter(s => s[effectiveInterval ?? "daily"].points.length > 0).length} of {plottedRows.length} plotted groups have {effectiveInterval ?? "daily"} trails</summary>
+        <p>Point-in-time membership and eligibility · {formatDateLabel(replay.start)}–{formatDateLabel(replay.as_of)}. Lines stop at membership, eligibility or data gaps. Earlier segments are retained in the evidence; they are not connected to current points.</p>
+        <p>Membership uses the latest evidenced disclosure available by each close. Historical prices were retrieved later; this is not an archived real-time feed.</p>
+        {effectiveInterval === "weekly" && <p>Weekly endpoints use the last observed session. Current week is shown through {formatDateLabel(replay.as_of)}{new Date(`${replay.as_of}T00:00:00Z`).getUTCDay() < 5 ? " (week to date)" : ""}.</p>}
+        <ul>{plottedRows.map(row => {
+          const selection = selections.get(row.id)?.[effectiveInterval ?? "daily"];
+          return <li key={row.id}>{row.name}: {selection?.reason ?? `${selection?.points.length ?? 0} dated observations (${formatDateLabel(selection!.points[0].as_of)}–${formatDateLabel(selection!.points[selection!.points.length - 1].as_of)})`}</li>;
+        })}</ul>
+      </details>}
+      {!replay && rotationAsset.error && snapshotId?.startsWith("snap_public_market") && <p role="status">Rotation history could not be verified. Current points remain available.</p>}
 
       <div ref={frameRef} className="rotation-map-frame" style={{ border: "1px solid var(--line)", background: "var(--surface)", overflow: "hidden" }}>
         <svg viewBox={(() => { const w = 1000 / zoom; const h = 450 / zoom; return `${(1000 - w) / 2} ${(450 - h) / 2} ${w} ${h}`; })()} role="img" aria-label={isDiagnostic ? "Market rotation diagnostic map" : "Market rotation map"} style={{ display: "block", width: "100%", height: "auto" }}>

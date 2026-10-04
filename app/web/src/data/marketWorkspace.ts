@@ -59,7 +59,7 @@ async function checkedFetch(asset: Asset): Promise<unknown> {
   if (data.schema_version !== asset.schema_version || data.as_of !== asset.as_of) throw new Error("Workspace identity mismatch");
   return data;
 }
-export function useWorkspaceAsset<T extends { as_of: string }>(key: "market" | "ownership" | "foreign") {
+export function useWorkspaceAsset<T extends { as_of: string }>(key: "market" | "ownership" | "foreign" | "rotation") {
   const snapshot = useSnapshot();
   const [state, setState] = useState<{ data: T | null; error: string | null; loading: boolean }>({ data: null, error: null, loading: true });
   useEffect(() => {
@@ -75,7 +75,9 @@ export function useWorkspaceAsset<T extends { as_of: string }>(key: "market" | "
       const asset = index.assets?.[key];
       if (index.snapshot_id !== id || index.as_of.slice(0, 10) !== cutoff || !asset || asset.as_of > cutoff) throw new Error("Workspace does not belong to this snapshot");
       const data = await checkedFetch(asset) as T;
-      if (key === "market" && (data as unknown as MarketWorkspace).snapshot_id !== id) throw new Error("Market snapshot identity mismatch");
+      if (key === "rotation" && asset.schema_version !== "rotation-history-v1") throw new Error("Rotation schema is unsupported");
+      if ((key === "market" || key === "rotation") && (data as unknown as MarketWorkspace).snapshot_id !== id) throw new Error("Market snapshot identity mismatch");
+      if (key === "rotation" && data.as_of !== cutoff) throw new Error("Rotation date mismatch");
       if (key === "ownership" && (data as unknown as OwnershipWorkspace).five_as_of > cutoff) throw new Error("Ownership release is later than this snapshot");
       return data;
     })());
