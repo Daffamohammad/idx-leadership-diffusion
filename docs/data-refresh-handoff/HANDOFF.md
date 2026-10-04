@@ -241,13 +241,13 @@ endpoint (WAF 403), IDX statistics index page direct fetch (403).
 
 | Command | Result |
 |---|---|
-| `.venv/bin/python -m pytest -q` | **770 passed**, 2 warnings (both pre-existing `SectorsProvider.get_full_universe_close` deprecations in `tests/test_sectors_provider.py`) |
-| `.venv/bin/python -m pytest -q` in a **fresh `git clone`** | **770 passed, 0 skipped** — identical, see §6.1.1 |
+| `.venv/bin/python -m pytest -q` | **772 passed**, 2 warnings (both pre-existing `SectorsProvider.get_full_universe_close` deprecations in `tests/test_sectors_provider.py`) |
+| `.venv/bin/python -m pytest -q` in a **fresh `git clone`** | **772 passed, 0 skipped** — identical, see §6.1.1 |
 | `npm run typecheck --prefix app/web` | clean |
 | `npm run build --prefix app/web` | built; chunk-size advisory only (pre-existing) |
 | `git diff --check` | clean |
 
-Baseline before this work was 729 passed with the same 2 warnings; +41 tests.
+Baseline before this work was 729 passed with the same 2 warnings; +43 tests.
 New coverage in `tests/test_public_refresh_chain.py` (25 tests): export completeness, manifest
 parity, disclosed WSKT gap, YTD baseline and per-feature YTD, benchmark-YTD reconciliation against
 official closes, comparability (COMPATIBLE with 4 real priors, Sectors INCOMPARABLE), transitions
@@ -256,12 +256,12 @@ history (5 dates/group, axis consistency, endpoint equality with the group row, 
 incompatible leakage), all panel-validation invariants, plus four `bun x tsx` contracts for
 `pickLatestEntry` and `buildRotationTrail` (including the <3-point refusal and axis-drop rules).
 
-`tests/test_refresh_tool_safety.py` (15 tests) locks the three post-review tooling fixes
+`tests/test_refresh_tool_safety.py` (17 tests) locks the three post-review tooling fixes
 described in §9 plus the fixture-publication guard. It is fully self-contained: the panel and
 snapshot fixtures are generated inside `tmp_path`, official comparison is isolated with an empty
 `--sources-root`, and `--no-publish-fixture` keeps it away from the tracked evidence. Verified by
 hiding `data/raw/public`, `data/raw/idx_composite_index`, `data/raw/idx_stock_summary` and
-`data/snapshots/`: the file runs **15 passed, 0 skipped**, and the full suite is **770 passed**
+`data/snapshots/`: the file runs **17 passed, 0 skipped**, and the full suite is **772 passed**
 in that state.
 
 Updated contracts in `tests/test_comparability_and_adapter.py`: the index is now the curated pair
@@ -281,8 +281,8 @@ both ways:
 
 | Environment | Result |
 |---|---|
-| Full working tree (panel, `data/snapshots/`, official IDX caches, `node_modules` all present) | 770 passed, 0 skipped |
-| Fresh `git clone` (committed files only; no `data/raw`, no `data/snapshots`, no `node_modules`) | 770 passed, 0 skipped |
+| Full working tree (panel, `data/snapshots/`, official IDX caches, `node_modules` all present) | 772 passed, 0 skipped |
+| Fresh `git clone` (committed files only; no `data/raw`, no `data/snapshots`, no `node_modules`) | 772 passed, 0 skipped |
 
 To reproduce the fresh-clone run, note that an editable install of this package makes
 `project_root()` (`src/idx_leadership/utils/config.py`, file-based) resolve to the *original*
@@ -375,7 +375,7 @@ python3 -m scripts.validate_public_panel          # needs openpyxl + pdfplumber 
   --ids snap_sectors_2026-08-27 snap_public_2026-10-02
 
 # 5. gates
-.venv/bin/python -m pytest -q          # 770 passed / 0 skipped; also asserts a clean tree
+.venv/bin/python -m pytest -q          # 772 passed / 0 skipped; also asserts a clean tree
 npm run typecheck --prefix app/web && npm run build --prefix app/web
 git diff --check
 git status --porcelain                 # must be empty (the suite enforces this itself)
@@ -525,4 +525,17 @@ fresh-clone reproduction command.
   through `index.json`), and the raw `data/snapshots/` chain evidence is untouched. They are
   recoverable from git history only if ever needed again, since they were never tracked.
 
-**Result: 770 passed / 0 skipped in both the full working tree and a fresh clone.**
+**Result: 772 passed / 0 skipped in both the full working tree and a fresh clone.**
+
+**9.5 The tree guard normalised filenames and could miss drift.**
+`tree_drift` stripped the letters `R`/`C` from *paths* (they are also used in git status codes
+for renames/copies). Renaming `notesR.txt` to `notes.txt` therefore produced identical keys and
+the guard stayed silent. Paths are now compared verbatim alongside the exact two-letter status;
+`_STATUS_LETTER` is gone. Covered by `test_tree_drift_preserves_exact_filenames`.
+
+**9.6 An external `--sources-root` crashed the validator.**
+When the cache directory lived outside the repository, a qualifying Sectors registry report hit
+`report_path.relative_to(PROJECT_ROOT)` and raised ValueError — no report was written. The
+source is now rendered with the existing `_display_path` helper (absolute outside the repo).
+Covered by `test_validator_handles_populated_external_sources_root`, which fakes the parser gate
+and the xlsx/pdf loaders in-process so it runs identically on a fresh checkout.

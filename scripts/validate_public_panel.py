@@ -579,9 +579,7 @@ def main() -> int:
             rows = taxonomy.get("structured_query_complete_rows") or taxonomy.get("rows")
             if isinstance(rows, int) and rows >= 900:
                 sectors_registry = rows
-                sectors_registry_source = str(
-                    report_path.relative_to(PROJECT_ROOT)
-                )
+                sectors_registry_source = _display_path(report_path)
                 break
     counts = panel_manifest.get("counts", {})
     checks["coverage_reconciliation"] = {

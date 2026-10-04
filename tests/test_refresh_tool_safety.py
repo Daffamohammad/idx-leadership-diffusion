@@ -470,6 +470,91 @@ def test_validator_records_new_integrity_fields() -> None:
     assert integrity["panel_file_hash_mismatches"] == []
 
 
+def test_validator_handles_populated_external_sources_root(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """A populated --sources-root *outside* the repository must not crash
+    report writing. Previously a qualifying Sectors registry report reached
+    ``report_path.relative_to(PROJECT_ROOT)``, which raised ValueError and
+    left no validation report at all.
+
+    This exercises that code path hermetically: the parser availability and
+    the two xlsx/pdf loaders are stubbed in-process so the early
+    SOURCE_UNAVAILABLE gate is satisfied even without parsers or the real
+    IDX cache, and the cache directory is populated with synthetic files in
+    a fresh tmp tree (i.e. outside PROJECT_ROOT)."""
+    import importlib.util
+    import sys as _sys
+
+    spec = importlib.util.spec_from_file_location(
+        "validate_public_panel", REPO_ROOT / "scripts" / "validate_public_panel.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    monkeypatch.setattr(module, "_module_available", lambda name: True)
+    monkeypatch.setattr(module, "_load_composite_workbook", lambda path: {})
+    monkeypatch.setattr(
+        module, "_load_stock_summary", lambda path: {"_trade_dates": ["30 Sep 2026"]}
+    )
+
+    sources = tmp_path / "external_sources"  # guaranteed outside PROJECT_ROOT
+    composite = sources / "idx_composite_index"
+    composite.mkdir(parents=True)
+    (composite / "Composite Stock Price Index & Stock Trading Volume - Sep 2026.xlsx").touch()
+    summaries = sources / "idx_stock_summary"
+    summaries.mkdir()
+    (summaries / "Stock Summary-20261002.xlsx").touch()
+    ds = sources / "idx_daily_statistics"
+    ds.mkdir()
+    (ds / "ds_260930.pdf").touch()
+    monkeypatch.setattr(
+        module,
+        "_parse_ds_pdf",
+        lambda path: (date(2026, 9, 30), 0.0, 0.0, float("nan")),
+    )
+
+    report_dir = sources / "sectors_validation" / "2026-10-02"
+    report_dir.mkdir(parents=True)
+    (report_dir / "validation_report.json").write_text(
+        json.dumps(
+            {
+                "status": "PASS",
+                "checks": {"taxonomy": {"structured_query_complete_rows": 950}},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    panel = _panel_fixture(tmp_path)
+    out = tmp_path / "validation.json"
+    monkeypatch.setattr(
+        _sys,
+        "argv",
+        [
+            "validate_public_panel",
+            "--panel-dir",
+            str(panel),
+            "--sources-root",
+            str(sources),
+            "--out",
+            str(out),
+            "--no-publish-fixture",
+        ],
+    )
+    # Pre-fix this raises ValueError; post-fix main() returns 1 (FAIL on the
+    # synthetic-vs-stub comparisons) and still writes the report.
+    rc = module.main()
+    assert rc == 1
+    assert out.exists()
+    report = json.loads(out.read_text(encoding="utf-8"))
+    reconciliation = report["checks"]["coverage_reconciliation"]
+    assert reconciliation["sectors_snapshot_registry_codes"] == 950
+    assert reconciliation["sectors_registry_source"] == str(
+        report_dir / "validation_report.json"
+    ), "outside the repo the registry source must be reported as its abs path"
+
+
 def test_fixture_publication_refuses_non_passing_reports(tmp_path: Path) -> None:
     """Committed evidence must never be overwritten by a failing run.
 
@@ -617,6 +702,21 @@ def test_tree_drift_reports_changes_in_status() -> None:
     # Pre-existing dirt that the suite leaves alone is tolerated.
     assert tree_drift(" M existing.txt\n?? other.txt\n", " M existing.txt\n?? other.txt\n") == []
 
+
+def test_tree_drift_preserves_exact_filenames() -> None:
+    """Paths are compared verbatim: stripping status letters (R/C) from
+    filenames would make a rename of ``notesR.txt`` to ``notes.txt`` — or
+    replacing ``notesC.txt`` with ``notes.txt`` — invisible to the guard."""
+    from tests.conftest import tree_drift
+
+    assert tree_drift("?? notesR.txt\n", "?? notes.txt\n") == [
+        "notes.txt",
+        "notesR.txt",
+    ]
+    assert tree_drift(" M notesC.txt\n", " M notes.txt\n") == [
+        "notes.txt",
+        "notesC.txt",
+    ]
 
 def test_tree_drift_handles_unknown_baseline() -> None:
     """When git status can't be determined, the guard must stay silent."""

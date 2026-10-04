@@ -13,11 +13,6 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from idx_leadership.providers.fixture import FixtureProvider  # noqa: E402
 
-# Status codes git uses for a working-tree entry. The leading letter is the
-# one that matters here: a single code keeps renames/copies reported as the
-# destination path.
-_STATUS_LETTER = str.maketrans("", "", "RC")
-
 _BASELINE_KEY = "idx_baseline_git_status"
 
 
@@ -54,13 +49,16 @@ def tree_drift(before: str | None, after: str | None) -> list[str]:
         return []
     # Index by path so a status change (clean -> modified, or
     # untracked -> tracked) is detected even when the path is in both.
+    # Filenames are compared exactly: normalising them (for example by
+    # stripping R/C because they appear in some status codes) would hide
+    # drift such as renaming ``notesR.txt`` to ``notes.txt``.
     before_map = {
-        line[3:].translate(_STATUS_LETTER): line[:2].translate(_STATUS_LETTER)
+        line[3:]: line[:2]
         for line in before.splitlines()
         if len(line) > 3
     }
     after_map = {
-        line[3:].translate(_STATUS_LETTER): line[:2].translate(_STATUS_LETTER)
+        line[3:]: line[:2]
         for line in after.splitlines()
         if len(line) > 3
     }
