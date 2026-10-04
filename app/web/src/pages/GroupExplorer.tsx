@@ -842,7 +842,7 @@ function TaxonomyGroupDetail({
               color: "var(--muted)",
             }}
           >
-            Code · {group.id} · {formatSnapshotId(data.payload.snapshot_id, data.payload.as_of)}
+            {formatEnumLabel(group.taxonomyKind)} · {formatSnapshotId(data.payload.snapshot_id, data.payload.as_of)}
           </div>
           <p style={{ margin: "8px 0 0", color: "var(--muted)", fontSize: 13, lineHeight: 1.5, maxWidth: 640 }}>
             Aggregate metrics use the current snapshot. Membership is an analyst-defined research
@@ -1139,7 +1139,7 @@ export default function GroupExplorer() {
         <div>
           <CatalogBackLink taxonomyKind="SECTOR" groupId={sector.id} label="All Groups catalog" />
           <div className="eyebrow-muted" style={{ marginBottom: 8, marginTop: 12 }}>
-            IDX → Group → {sector.name} · {sector.id} · {sector.eligibleConstituents}/{sector.constituents} eligible
+            IDX → Group → {sector.name} · {sector.eligibleConstituents}/{sector.constituents} eligible
           </div>
           <h1
             style={{

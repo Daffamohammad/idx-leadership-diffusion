@@ -421,7 +421,7 @@ export default function MasterGroupTable() {
             <tbody>
               {taxRows.map((g) => (
                 <tr key={g.id}>
-                  <td style={{ ...bodyCell, fontWeight: 600 }}>{g.name}<span style={{ display: "block", fontWeight: 400, fontSize: 11, color: "var(--muted)" }}>{g.id} · {g.taxonomyVersion}</span></td>
+                  <td style={{ ...bodyCell, fontWeight: 600 }}>{g.name}<span style={{ display: "block", fontWeight: 400, fontSize: 11, color: "var(--muted)" }}>{formatEnumLabel(g.taxonomyKind)} · {formatEnumLabel(g.taxonomyVersion)}</span></td>
                   <td style={{ ...bodyCell, textAlign: "right" }} className="tabnum">{g.eligible}/{g.constituents}</td>
                   <td style={{ ...bodyCell, textAlign: "right", color: signColor(g.excess20d) }} className="tabnum">{formatPercent(g.excess20d)}</td>
                   <td style={{ ...bodyCell, textAlign: "right", color: signColor(g.excess60d) }} className="tabnum">{formatPercent(g.excess60d)}</td>

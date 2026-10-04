@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import importlib
 import os
+from pathlib import Path
 from typing import Any
 
 from ..models import ProviderMode
@@ -63,6 +64,7 @@ def build_provider_from_config(
     max_estimated_credits: float | None = None,
     max_http_requests: int | None = SectorsClient.DEFAULT_MAX_HTTP_REQUESTS,
     ledger: RequestLedger | None = None,
+    universe_path: str | Path | None = None,
 ) -> MarketDataProvider:
     """Construct one provider without any mode fallback.
 
@@ -154,7 +156,7 @@ def build_provider_from_config(
         }
     else:
         kwargs = {
-            "universe_path": options.get(
+            "universe_path": universe_path or options.get(
                 "default_universe", spec.get("default_universe", "config/universe.yaml")
             ),
             "request_timeout_seconds": int(options.get("request_timeout_seconds", 20)),

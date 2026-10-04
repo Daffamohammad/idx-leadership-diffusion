@@ -54,8 +54,8 @@ class PanelCacheProvider(YFinanceProvider):
     window and ``date <= as_of`` by construction.
     """
 
-    def __init__(self, panel_dir: Path, *, as_of: date) -> None:
-        super().__init__()
+    def __init__(self, panel_dir: Path, *, as_of: date, universe_path: str | Path = "config/universe.yaml") -> None:
+        super().__init__(universe_path=universe_path)
         self._as_of = as_of
         self._prices = pd.read_csv(panel_dir / "prices.csv", parse_dates=["date"])
         self._benchmark = pd.read_csv(panel_dir / "benchmark.csv", parse_dates=["date"])
@@ -173,12 +173,13 @@ def _panel_fingerprints(panel_dir: Path) -> dict[str, str]:
     }
 
 
-def _write_provenance(out_dir: Path, *, as_of: str, panel_dir: Path, fingerprints: dict[str, str]) -> None:
+def _write_provenance(out_dir: Path, *, as_of: str, panel_dir: Path, fingerprints: dict[str, str], input_contracts: dict[str, str] | None = None) -> None:
     payload = {
         "kind": "PUBLIC_PANEL_PROVENANCE",
         "as_of": as_of,
         "panel_dir": str(panel_dir),
         "panel_files": fingerprints,
+        "input_contracts": input_contracts,
         "bound_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
     }
     (out_dir / PROVENANCE_FILENAME).write_text(
@@ -193,6 +194,8 @@ def _verify_existing(
     panel_dir: Path,
     fingerprints: dict[str, str],
     force_rebuild: bool,
+    input_contracts: dict[str, str] | None = None,
+    require_input_contracts: bool = False,
 ) -> bool:
     """Decide whether an existing snapshot may be reused as-is.
 
@@ -222,6 +225,11 @@ def _verify_existing(
         )
         raise SystemExit(2)
     recorded_files = recorded.get("panel_files") or {}
+    recorded_inputs = recorded.get("input_contracts")
+    if input_contracts is not None and (require_input_contracts or recorded_inputs is not None):
+        if recorded_inputs != input_contracts:
+            print(f"ERROR: {snapshot_id} input contract mismatch; rebuild the chain explicitly with --force-rebuild", file=sys.stderr)
+            raise SystemExit(2)
     mismatched = sorted(
         name
         for name, digest in fingerprints.items()
@@ -243,6 +251,8 @@ def main() -> int:
     parser.add_argument("--panel-dir", default=None)
     parser.add_argument("--asofs", nargs="*", default=DEFAULT_ASOFS)
     parser.add_argument("--snapshots-root", default=str(SNAPSHOTS_ROOT))
+    parser.add_argument("--universe", default="config/universe.yaml")
+    parser.add_argument("--snapshot-prefix", default="snap_public")
     parser.add_argument("--report", default=None)
     parser.add_argument(
         "--force-rebuild",
@@ -253,17 +263,27 @@ def main() -> int:
         ),
     )
     args = parser.parse_args()
+    from idx_leadership.data.snapshots import validate_snapshot_id
+
+    validate_snapshot_id(f"{args.snapshot_prefix}_2000-01-01")
 
     panel_dir = Path(args.panel_dir) if args.panel_dir else _latest_panel()
     snapshots_root = Path(args.snapshots_root)
     snapshots_root.mkdir(parents=True, exist_ok=True)
     fingerprints = _panel_fingerprints(panel_dir)
+    input_contracts = {
+        "universe_sha256": hashlib.sha256(Path(args.universe).read_bytes()).hexdigest(),
+        "methodology_sha256": hashlib.sha256((project_root() / "config/methodology.yaml").read_bytes()).hexdigest(),
+    }
+    # Historical default bundles predate config hashes. Keep that immutable
+    # lane reusable; every new or injected-universe bundle binds its inputs.
+    require_input_contracts = Path(args.universe).resolve() != (project_root() / "config/universe.yaml").resolve() or args.snapshot_prefix != "snap_public"
 
     records: list[dict[str, Any]] = []
     hashes: set[str] = set()
     for requested in args.asofs:
         as_of_str, as_of = _resolve_asof(requested, panel_dir)
-        snapshot_id = f"snap_public_{as_of_str}"
+        snapshot_id = f"{args.snapshot_prefix}_{as_of_str}"
         out_dir = snapshots_root / snapshot_id
         if (out_dir / "manifest.json").is_file() and _verify_existing(
             out_dir,
@@ -271,6 +291,8 @@ def main() -> int:
             panel_dir=panel_dir,
             fingerprints=fingerprints,
             force_rebuild=args.force_rebuild,
+            input_contracts=input_contracts,
+            require_input_contracts=require_input_contracts,
         ):
             print(f"reuse verified {snapshot_id}", file=sys.stderr)
         else:
@@ -279,7 +301,7 @@ def main() -> int:
                 # would make the rebuild treat its own directory as an earlier
                 # snapshot, and stale files could survive into the new bundle.
                 shutil.rmtree(out_dir)
-            provider = PanelCacheProvider(panel_dir, as_of=as_of)
+            provider = PanelCacheProvider(panel_dir, as_of=as_of, universe_path=args.universe)
             provider.set_as_of(as_of)
             print(f"building {snapshot_id} ...", file=sys.stderr)
             build_snapshot(
@@ -289,9 +311,10 @@ def main() -> int:
                 out_dir=snapshots_root,
                 provider_mode="PUBLIC_PROTOTYPE",
                 price_basis="adjusted_close",
+                universe_path=args.universe,
             )
             _write_provenance(
-                out_dir, as_of=as_of_str, panel_dir=panel_dir, fingerprints=fingerprints
+                out_dir, as_of=as_of_str, panel_dir=panel_dir, fingerprints=fingerprints, input_contracts=input_contracts
             )
         summary = _summarize(out_dir)
         summary["panel_files"] = fingerprints
@@ -307,6 +330,7 @@ def main() -> int:
         "kind": "PUBLIC_SNAPSHOT_CHAIN",
         "panel_dir": str(panel_dir.relative_to(project_root())) if str(panel_dir).startswith(str(project_root())) else str(panel_dir),
         "panel_files": fingerprints,
+        "input_contracts": input_contracts,
         "chain_hash": chain_hash,
         "connects_to_august_priors": chain_hash == LEGACY_HASH,
         "legacy_august_hash": LEGACY_HASH,

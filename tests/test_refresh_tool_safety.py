@@ -288,6 +288,104 @@ def test_chain_rejects_snapshot_built_from_a_different_panel(tmp_path: Path) -> 
     assert "prices.csv" in third.stderr
 
 
+def test_injected_universe_is_used_and_bound_to_snapshot_inputs(tmp_path: Path) -> None:
+    import pandas as pd
+    import yaml
+
+    panel = _panel_fixture(tmp_path)
+    universe = yaml.safe_load((REPO_ROOT / "config/universe.yaml").read_text())
+    retained = universe["universe"][:2]
+    universe["universe"] = retained
+    config = tmp_path / "universe.yaml"
+    config.write_text(yaml.safe_dump(universe))
+    root = tmp_path / "market_snapshots"
+    report = tmp_path / "report.json"
+    flags = ("--universe", str(config), "--snapshot-prefix", "snap_public_market")
+    first = _build_chain(panel, root, report, *flags)
+    assert first.returncode == 0, first.stderr
+    bundle = root / f"snap_public_market_{CHAIN_AS_OF.isoformat()}"
+    assert set(pd.read_parquet(bundle / "features.parquet")["ticker"]) == {r["ticker"] for r in retained}
+    provenance = json.loads((bundle / "panel_provenance.json").read_text())
+    assert provenance["input_contracts"]["universe_sha256"] == hashlib.sha256(config.read_bytes()).hexdigest()
+    before = (bundle / "features.parquet").read_bytes()
+    retained[0]["sectors"] = "Changed grouping"
+    config.write_text(yaml.safe_dump(universe))
+    again = _build_chain(panel, root, report, *flags)
+    assert again.returncode == 2
+    assert "input contract mismatch" in again.stderr
+    assert (bundle / "features.parquet").read_bytes() == before
+
+
+def test_quarantine_preserves_original_source_hashes_and_prices(tmp_path: Path) -> None:
+    import pandas as pd
+    from scripts.quarantine_public_panel import derive_panel
+
+    panel = _panel_fixture(tmp_path)
+    manifest = json.loads((panel / "source_manifest.json").read_text())
+    prices = pd.read_csv(panel / "prices.csv")
+    ticker = _universe_tickers()[0]
+    close = float(prices[(prices.ticker == ticker) & (prices.date == CHAIN_AS_OF.isoformat())].iloc[0]["close"])
+    report = {"panel_window": manifest["window"], "checks": {
+        "panel_integrity": {"status": "PASS"},
+        "benchmark_vs_official_workbook": {"status": "PASS"},
+        "benchmark_vs_daily_statistics_pdfs": {"status": "PASS"},
+        "stocks_vs_official_stock_summary": {"official_date_matches_panel": True, "mismatched": [
+            {"ticker": ticker, "panel_raw_close": close, "official": close + 10, "status": "MISMATCH"}
+        ]},
+    }}
+    report_path = tmp_path / "failed-validation.json"
+    report_path.write_text(json.dumps(report))
+    before = (panel / "prices.csv").read_bytes()
+    derived = tmp_path / "derived"
+    evidence = derive_panel(panel, report_path, derived)
+    result = json.loads((derived / "source_manifest.json").read_text())
+    assert (panel / "prices.csv").read_bytes() == before
+    assert evidence["source_files"] == manifest["files"]
+    assert result["reconciliation"]["source_files"] == manifest["files"]
+    assert result["files"]["prices.csv"]["sha256"] != manifest["files"]["prices.csv"]["sha256"]
+    assert ticker not in set(pd.read_csv(derived / "prices.csv").ticker)
+    assert result["counts"]["requested"] == manifest["counts"]["requested"]
+    assert result["counts"]["quarantined"] == 1
+    assert result["reconciliation"]["acquisition_counts"] == manifest["counts"]
+    with pytest.raises(ValueError, match="already exists"):
+        derive_panel(panel, report_path, derived)
+    report["checks"]["stocks_vs_official_stock_summary"]["mismatched"][0]["panel_raw_close"] = 1
+    report_path.write_text(json.dumps(report))
+    with pytest.raises(ValueError, match="stale"):
+        derive_panel(panel, report_path, tmp_path / "stale")
+    assert not (tmp_path / "stale").exists()
+
+
+def test_quarantine_refuses_a_corrupt_panel_before_writing(tmp_path: Path) -> None:
+    from scripts.quarantine_public_panel import derive_panel
+
+    panel = _panel_fixture(tmp_path)
+    report = tmp_path / "report.json"
+    report.write_text("{}")
+    with (panel / "prices.csv").open("a") as handle:
+        handle.write("UNKNOWN.JK,2026-10-02,100,100,10\n")
+    with pytest.raises(ValueError, match="integrity"):
+        derive_panel(panel, report, tmp_path / "derived")
+    assert not (tmp_path / "derived").exists()
+
+
+def test_panel_integrity_rejects_unaccounted_requested_securities(tmp_path: Path) -> None:
+    import pandas as pd
+    from scripts.validate_public_panel import _check_panel_integrity
+
+    panel = _panel_fixture(tmp_path)
+    manifest = json.loads((panel / "source_manifest.json").read_text())
+    prices = pd.read_csv(panel / "prices.csv", parse_dates=["date"])
+    benchmark = pd.read_csv(panel / "benchmark.csv", parse_dates=["date"])
+    for frame in (prices, benchmark):
+        frame["date"] = frame["date"].dt.date
+    assert _check_panel_integrity(prices, benchmark, manifest, panel)["status"] == "PASS"
+    manifest["counts"]["requested"] += 1
+    result = _check_panel_integrity(prices, benchmark, manifest, panel)
+    assert result["status"] == "FAIL"
+    assert not result["counts_reconciled"]
+
+
 def test_chain_refuses_snapshot_without_provenance(tmp_path: Path) -> None:
     """A pre-existing bundle with no provenance record cannot be verified."""
     panel = _panel_fixture(tmp_path)

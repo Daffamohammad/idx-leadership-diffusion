@@ -251,7 +251,7 @@ export default function ThemesExplorer() {
                         {g.taxonomy_group_name}
                       </div>
                       <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 2 }}>
-                        {g.taxonomy_group_id} · {g.eligible_constituent_count} / {g.constituent_count} eligible
+                        {g.eligible_constituent_count} / {g.constituent_count} eligible
                       </div>
                     </div>
                     <LeadershipChip state={asLeadership(g.leadership_state)} small />
@@ -297,7 +297,7 @@ export default function ThemesExplorer() {
                     textTransform: "uppercase",
                   }}
                 >
-                  Code · {selected.taxonomy_group_id}
+                  {formatEnumLabel(taxonomyKind)} · {selected.eligible_constituent_count} eligible members
                 </div>
                 <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
                   <Link

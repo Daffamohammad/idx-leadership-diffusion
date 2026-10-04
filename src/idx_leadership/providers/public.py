@@ -91,13 +91,15 @@ class YFinanceProvider(
                     country="ID",
                     sector=meta.get("sectors"),
                     subsector=meta.get("sub_sectors"),
-                    industry=None,
-                    subindustry=None,
+                    industry=meta.get("industry"),
+                    subindustry=meta.get("subindustry"),
                     group_id=meta.get("sectors"),
                     active=True,
                     benchmark_flag=False,
                     source=ProviderName.YFINANCE,
-                    source_as_of=date.today(),
+                    source_as_of=date.fromisoformat(str(meta["source_as_of"])) if meta.get("source_as_of") else date.today(),
+                    market_cap=meta.get("market_cap"),
+                    listing_board=meta.get("listing_board"),
                 )
             )
         return out

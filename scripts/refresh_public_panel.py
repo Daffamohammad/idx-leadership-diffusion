@@ -110,7 +110,7 @@ def main() -> int:
 
     ledger = RequestLedger()
     provider = build_provider_from_config(
-        "config/providers.yaml", mode="PUBLIC_PROTOTYPE", ledger=ledger
+        "config/providers.yaml", mode="PUBLIC_PROTOTYPE", ledger=ledger, universe_path=args.universe
     )
     if not isinstance(provider, YFinanceProvider):
         print("refresh_public_panel requires the public (yfinance) provider", file=sys.stderr)
@@ -180,6 +180,7 @@ def main() -> int:
         "retrieved_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "window": {"start": start.isoformat(), "end": end.isoformat()},
         "universe_path": args.universe,
+        "universe_sha256": _sha256(Path(args.universe)),
         "universe_version": str(universe_cfg.get("universe_version")),
         "benchmark_id": benchmark_id,
         "endpoint": (

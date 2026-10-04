@@ -207,6 +207,16 @@ def _check_panel_integrity(
     )
     bench = dict(zip(benchmark["date"], benchmark["close"]))
     expected_latest = ((panel_manifest.get("sessions") or {}).get("latest_session")) or ""
+    diagnostics = panel_manifest.get("diagnostics") or {}
+    requested_counts = {name: counts.get(name, 0) for name in ("requested", "downloaded", "failed", "empty", "quarantined")}
+    counts_reconciled = (
+        all(isinstance(value, int) and not isinstance(value, bool) and value >= 0 for value in requested_counts.values())
+        and requested_counts["requested"] == sum(requested_counts[name] for name in ("downloaded", "failed", "empty", "quarantined"))
+        and requested_counts["downloaded"] == int(prices["ticker"].nunique())
+        and requested_counts["failed"] == len(diagnostics.get("failed_symbols") or [])
+        and requested_counts["empty"] == len(diagnostics.get("empty_symbols") or [])
+        and requested_counts["quarantined"] == len(diagnostics.get("quarantined_symbols") or [])
+    )
     ok = (
         dupes == 0
         and nonpositive == 0
@@ -218,6 +228,7 @@ def _check_panel_integrity(
         and not missing_hash_records
         and len(baseline_rows) == counts.get("ytd_baseline_present")
         and expected_latest == latest_session.isoformat()
+        and counts_reconciled
     )
     return {
         "rows": int(len(prices)),
@@ -227,6 +238,8 @@ def _check_panel_integrity(
         "nonfinite_price_rows": nonfinite,
         "benchmark_nonfinite_rows": bench_nonfinite,
         "benchmark_nonpositive_rows": bench_nonpositive,
+        "counts_reconciled": counts_reconciled,
+        "population_counts": requested_counts,
         "ytd_baseline_invalid_rows": baseline_invalid,
         "panel_file_hashes_verified": not hash_mismatches and not missing_hash_records,
         "panel_file_hash_mismatches": hash_mismatches,
@@ -588,12 +601,13 @@ def main() -> int:
         "sectors_registry_source": sectors_registry_source,
         "universe_requested": counts.get("requested"),
         "downloaded": counts.get("downloaded"),
+        "quarantined_symbols": panel_manifest.get("diagnostics", {}).get("quarantined_symbols", []),
         "failed_symbols": panel_manifest.get("diagnostics", {}).get("failed_symbols"),
         "usable_ge_60_sessions": counts.get("usable_ge_60_sessions"),
         "ytd_baseline_present": counts.get("ytd_baseline_present"),
         "note": (
             "official registry (all listed codes), sectors snapshot registry, "
-            "and prototype universe are three distinct populations; no count "
+            "and requested analysis universe are distinct populations; no count "
             "is forced to match another"
         ),
         "status": "PASS",
