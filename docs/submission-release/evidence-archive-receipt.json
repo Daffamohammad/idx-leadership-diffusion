@@ -1,0 +1,11 @@
+{
+  "archive_bytes": 151079885,
+  "archive_path": "data/handoff/2026-10-06/candidate-diffusion-count-fix-konglo-2026-10-06.tar.gz",
+  "archive_sha256": "d60c0128cab98b69114553df5e316c0aaf328091d7f4298d6ceaa82a86d00edb",
+  "candidate_manifest_sha256": "cea9e4a7e17f8a21dc3ad22c351c994ff9ece80297c32a0a47e361306e1c153a",
+  "candidate_path": "data/staging/submission-2026-10-02/candidate-diffusion-count-fix-konglo-2026-10-06",
+  "file_count": 136,
+  "inventory_path": "docs/submission-release/evidence-archive-inventory.tsv",
+  "inventory_sha256": "48e053228e7fa5898abaef102037565a0494e04eda222befebf628a25c6386fd",
+  "preserves_relative_paths_and_permission_bits": true
+}

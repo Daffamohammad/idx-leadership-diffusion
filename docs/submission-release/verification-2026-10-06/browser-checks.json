@@ -1,0 +1,51 @@
+{
+  "hartono": {
+    "contributors": 1,
+    "leadership": "—",
+    "diffusion": "—",
+    "history_leadership_dash_count": 5,
+    "raw_unconfirmed": 0
+  },
+  "healthcare_first_date": {
+    "as_of": "2026-09-04",
+    "contributors": 36,
+    "diffusion": "—",
+    "diffusion_aria_label": "No comparable diffusion reading",
+    "raw_unconfirmed": 0
+  },
+  "taxonomy_switches": [
+    {
+      "plot": "IDXIC rotation plot: YTD excess return versus IHSG against 20D minus 60D excess momentum",
+      "pressed": [
+        "IDXIC activities102"
+      ],
+      "rawUnconfirmed": 0,
+      "url": "http://127.0.0.1:4174/map?taxonomy=IDXIC&q=Healthcare"
+    },
+    {
+      "plot": "CURATED_THEMES rotation plot: YTD excess return versus IHSG against 20D minus 60D excess momentum",
+      "pressed": [
+        "Curated themes15"
+      ],
+      "rawUnconfirmed": 0,
+      "url": "http://127.0.0.1:4174/map?taxonomy=CURATED_THEMES&q=Healthcare"
+    },
+    {
+      "plot": "KONGLO rotation plot: YTD excess return versus IHSG against 20D minus 60D excess momentum",
+      "pressed": [
+        "Konglo22"
+      ],
+      "rawUnconfirmed": 0,
+      "url": "http://127.0.0.1:4174/map?taxonomy=KONGLO&q=Healthcare"
+    },
+    {
+      "plot": "SECTOR rotation plot: YTD excess return versus IHSG against 20D minus 60D excess momentum",
+      "pressed": [
+        "Sectors11"
+      ],
+      "rawUnconfirmed": 0,
+      "url": "http://127.0.0.1:4174/map?taxonomy=SECTOR&q=Healthcare"
+    }
+  ],
+  "console_errors": []
+}

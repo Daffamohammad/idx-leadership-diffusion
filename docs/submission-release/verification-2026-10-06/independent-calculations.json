@@ -1,0 +1,37 @@
+{
+  "active_vs_candidate_healthcare": {
+    "active": {
+      "as_of": "2026-10-02",
+      "breadth_change_count": 5,
+      "breadth_change_pp": 13.88888888888889,
+      "breadth_denominator": 36,
+      "diffusion_v2": "STABLE"
+    },
+    "candidate": {
+      "as_of": "2026-10-02",
+      "breadth_change_count": 5,
+      "breadth_change_pp": 13.88888888888889,
+      "breadth_denominator": 36,
+      "diffusion_v2": "BROADENING_FIRM"
+    }
+  },
+  "cadence_delta_mismatches": 0,
+  "market_weekly_dates": [
+    "2026-09-25",
+    "2026-09-28",
+    "2026-09-29",
+    "2026-09-30",
+    "2026-10-01",
+    "2026-10-02"
+  ],
+  "market_weekly_mismatches": 0,
+  "market_weekly_observed": 920,
+  "market_weekly_records_checked": 963,
+  "notes": [
+    "Raw replay returns and counts independently reconstructed with pandas; production builders and classifiers were not imported.",
+    "Market weekly returns reconciled to the pinned December vintage; supplemental replay and breadth are reconciled to the September vintage."
+  ],
+  "raw_price_metrics_and_breadth_mismatches": 0,
+  "replay_observations_checked": 4160,
+  "status": "PASS"
+}

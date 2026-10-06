@@ -1,0 +1,12 @@
+{
+  "date": "2026-10-05",
+  "source": "local immutable release; localhost only",
+  "viewport": {
+    "width": 1280,
+    "height": 800
+  },
+  "duration_seconds": 204.56,
+  "audio": "silent; on-screen captions and WebVTT companion",
+  "recording": "submission-walkthrough-2026-10-05.mp4",
+  "captions": "submission-walkthrough-2026-10-05.vtt"
+}
