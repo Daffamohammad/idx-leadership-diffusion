@@ -74,3 +74,44 @@ npm run build --prefix app/web
 ```
 
 The build refreshes the preview copy of the active pointer. Smoke-check `/overview` and `/map`: Healthcare on 2 October should show **Broadening Firm**; small or unconfirmed readings should render as an em dash; and switching among the four taxonomies should update the URL and clear the selected group. Preview runs use the immutable local package and make no Sectors requests.
+
+## Recorded clean-checkout results
+
+These results were reproduced in a fresh detached worktree at commit `b338699` after installing the locked dependencies:
+
+- `pytest -q`: **872 passed**, with two existing provider-deprecation warnings. The broader working-copy report of 880 also included eight Sectors recording/acquisition tests that remain outside this release branch; they were not run as part of this clean-checkout result.
+- Web typecheck and production build passed. The build transformed 672 modules and emitted the existing Vite config-loader notice and large-chunk advisory.
+- The built pointer and tracked pointer were byte-identical, SHA-256 `1a56ff2919bbdf59abc97d0bdb3248aa11c6af06d4dad0677c8c788438aaa48b`.
+- The active and rollback packages validated. The source archive checksum passed; extraction reproduced all 136 inventory entries with matching paths, file sizes, permission bits, and SHA-256 values. Candidate validation passed.
+- The independent diffusion oracle reported zero mismatches across 160 groups, 3,360 daily observations, and 800 weekly observations. The independent breadth oracle passed for 5d, 20d, 60d, and 52w with matching asset lists; the 52w result had 819 eligible names, 11 new highs, and 32 new lows.
+- Browser smoke checks showed Healthcare on 2 October as **Broadening Firm** at +13.9pp. Hartono's one-contributor group showed an em dash for unavailable readings and no raw `UNCONFIRMED` text. Switching through Sector, Konglo, Curated themes, and IDXIC updated the URL and cleared the selected group.
+- No Sectors calls or acquisition runs were made. The Sectors HOLD remains in force.
+
+## Local commit and working-copy record
+
+The scoped branch contains these implementation commits:
+
+| Scope | Commit |
+| --- | --- |
+| Release pipeline, diffusion correction, viewer, and regression coverage | `6922126` |
+| Active release and rollback packages | `f1f23f2` |
+| Release handoff and source archive documentation | `eb539c3` |
+| Frontend checks aligned with pinned release loading | `b338699` |
+
+The final clean-checkout results are recorded in the documentation commit following these four commits. No commits were pushed.
+
+The original checkout still has the following unrelated Sectors work unstaged and untracked; it was deliberately excluded from this branch:
+
+```text
+ M src/idx_leadership/providers/sectors_client.py
+?? docs/release-refresh-plan/
+?? scripts/prepare_sectors_recording.py
+?? scripts/record_acquisition.py
+?? scripts/record_sectors_sample.py
+?? src/idx_leadership/providers/persistent_budget.py
+?? tests/test_acquisition_inventory.py
+?? tests/test_persistent_budget.py
+?? tests/test_prepare_sectors_recording.py
+```
+
+These files remain in the original working copy. They were not discarded or included in the release commits.
