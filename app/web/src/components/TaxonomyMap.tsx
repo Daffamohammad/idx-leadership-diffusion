@@ -21,11 +21,12 @@ interface TaxonomyMapProps {
   taxonomyKind: TaxonomyKind;
   title: string;
   subtitle?: string;
+  asOf?: string;
   onSelectGroup?: (groupId: string) => void;
 }
 
 const VIEWBOX = { width: 1000, height: 500 };
-const PLOT = { left: 118, top: 32, width: 820, height: 390 };
+const PLOT = { left: 90, top: 32, width: 820, height: 390 };
 const DOMAIN = { xMin: -15, xMax: 15, yMin: 0, yMax: 100 };
 const KIND_LABEL: Record<TaxonomyKind, string> = {
   SECTOR: "Sector",
@@ -70,6 +71,7 @@ export default function TaxonomyMap({
   taxonomyKind,
   title,
   subtitle,
+  asOf,
   onSelectGroup,
 }: TaxonomyMapProps) {
   const [hoverId, setHoverId] = useState<string | null>(null);
@@ -101,6 +103,10 @@ export default function TaxonomyMap({
     }, candidates.length);
   }, [groups]);
   const activeGroup = groups.find((group) => `${group.taxonomyId}::${group.id}` === hoverId) ?? null;
+  const leadingGroups = allGroups
+    .filter((group) => group.leadership === "LEADING")
+    .sort((a, b) => (b.excess20d ?? -Infinity) - (a.excess20d ?? -Infinity));
+  const strongestLeader = leadingGroups[0];
   const foreignByGroup: Record<string, ForeignFlowDirection> = {};
   if (foreignFlow) {
     for (const summary of foreignFlow.groupSummaries) {
@@ -157,9 +163,23 @@ export default function TaxonomyMap({
         )}
       </header>
 
+      <div className="taxonomy-map-read" role="note">
+        <div className="eyebrow-muted">Current cross-section{asOf ? ` · ${asOf}` : ""}</div>
+        <p>
+          {leadingGroups.length === 0
+            ? "No group currently qualifies as leading."
+            : `${leadingGroups.length} leading ${leadingGroups.length === 1 ? "group" : "groups"}: ${leadingGroups.slice(0, 3).map((group) => group.name).join(", ")}${leadingGroups.length > 3 ? ` and ${leadingGroups.length - 3} more` : ""}.`}
+          {strongestLeader && strongestLeader.excess20d !== null && strongestLeader.breadth !== null
+            ? ` Strongest leader: ${strongestLeader.name}, ${formatPercent(strongestLeader.excess20d)} 20D excess and ${strongestLeader.breadth.toFixed(1)}% current breadth.`
+            : ""}
+        </p>
+        <span>X is 20D excess return vs IHSG; Y is current constituent breadth. Quadrants describe current levels, not a breadth trend.</span>
+      </div>
+
+      <div className="taxonomy-map-chart-scroll" role="region" aria-label={`${title} chart`} tabIndex={0}>
       <svg
         role="img"
-        aria-label={`${title} map`}
+        aria-label={`${title} map. Horizontal axis is 20-day excess return versus IHSG; vertical axis is current constituent breadth.`}
         viewBox={`0 0 ${VIEWBOX.width} ${VIEWBOX.height}`}
         style={{ width: "100%", height: "auto", display: "block", marginTop: 8 }}
       >
@@ -228,16 +248,16 @@ export default function TaxonomyMap({
 
         {/* Quadrant annotations — centered within each quadrant */}
         <text x={scaleX(7.5)} y={scaleY(78)} fontSize={10} fontFamily="Geist Mono, monospace" fill="var(--up)" textAnchor="middle">
-          Leading · Broadening
+          Leading · Higher breadth
         </text>
         <text x={scaleX(7.5)} y={scaleY(22)} fontSize={10} fontFamily="Geist Mono, monospace" fill="var(--accent-ink)" textAnchor="middle">
-          Leading · Narrowing
+          Leading · Lower breadth
         </text>
         <text x={scaleX(-7.5)} y={scaleY(78)} fontSize={10} fontFamily="Geist Mono, monospace" fill="var(--accent-ink)" textAnchor="middle">
-          Lagging · Broadening
+          Lagging · Higher breadth
         </text>
         <text x={scaleX(-7.5)} y={scaleY(22)} fontSize={10} fontFamily="Geist Mono, monospace" fill="var(--down)" textAnchor="middle">
-          Lagging · Narrowing
+          Lagging · Lower breadth
         </text>
 
         {groups.map((group) => {
@@ -351,6 +371,7 @@ export default function TaxonomyMap({
           </text>
         )}
       </svg>
+      </div>
 
       <div
         className="map-summary-grid"

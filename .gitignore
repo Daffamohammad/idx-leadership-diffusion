@@ -52,6 +52,11 @@ data/cache/*
 data/fixtures/*.parquet
 !data/fixtures/.gitkeep
 
+# Local release inputs and archives are verified separately before use.
+data/staging/
+data/research/acquisitions/
+data/handoff/
+
 # Logs
 logs/
 *.log
@@ -76,3 +81,13 @@ app/web/public/snapshots/*.json
 # Latest validated public-prototype refresh (2026-10-02): the active bundle
 # rendered by the preview and asserted by the SPA contract tests.
 !app/web/public/snapshots/snap_public_2026-10-02.json
+
+# Keep only the active release and its immediate rollback package in Git.
+app/web/public/releases/*
+!app/web/public/releases/active.json
+!app/web/public/releases/rel-514f199a7d88a377ccf623f647e9196bcbbaea3d750b81b550affeefe93520f2/
+!app/web/public/releases/rel-514f199a7d88a377ccf623f647e9196bcbbaea3d750b81b550affeefe93520f2/**
+!app/web/public/releases/rel-48500fc94300469fed51247a129a900cfbe9c541e2d679f7a55ef558212941e7/
+!app/web/public/releases/rel-48500fc94300469fed51247a129a900cfbe9c541e2d679f7a55ef558212941e7/**
+# Browser-automation scratch output (playwright-cli screenshots/snapshots).
+.playwright-cli/

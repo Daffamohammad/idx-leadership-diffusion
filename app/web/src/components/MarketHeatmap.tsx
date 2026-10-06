@@ -10,11 +10,8 @@
 // data-gap groups are rendered explicitly muted rather than as zero.
 
 import { useMemo, useState } from "react";
-import type {
-  ForeignFlowAdapted,
-  TaxonomyGroupData,
-} from "../data/adapter";
-import type { ForeignFlowDirection, TaxonomyKind } from "../data/snapshot";
+import type { TaxonomyGroupData } from "../data/adapter";
+import type { TaxonomyKind } from "../data/snapshot";
 import { formatCountLabel, formatDateLabel, formatEnumLabel, formatPercent } from "../data/format";
 import { EvidenceBadge } from "./EvidenceModel";
 
@@ -27,7 +24,6 @@ interface MarketHeatmapProps {
   taxonomyGroups: Record<string, TaxonomyGroupData>;
   taxonomyNames: Record<TaxonomyKind, string>;
   taxonomyKindsById: Record<string, TaxonomyKind>;
-  foreignFlow: ForeignFlowAdapted | null;
   asOf: string | null;
   onSelectGroup?: (taxonomyKind: TaxonomyKind, taxonomyId: string, groupId: string) => void;
 }
@@ -173,50 +169,27 @@ function legendForMetric(metric: HeatmapMetric): Array<{ label: string; color: s
         { label: "Improving", color: colorFor(0.33, metric) },
         { label: "Weakening", color: colorFor(-0.33, metric) },
         { label: "Lagging", color: colorFor(-1, metric) },
-        { label: "Unconfirmed", color: colorFor(null, metric) },
       ];
     case "diffusion":
       return [
         { label: "Broadening", color: colorFor(1, metric) },
         { label: "Stable", color: colorFor(0, metric) },
         { label: "Narrowing", color: colorFor(-1, metric) },
-        { label: "Unconfirmed", color: colorFor(null, metric) },
       ];
   }
-}
-
-function dataGapReason(group: TaxonomyGroupData): string {
-  if (group.constituents === 0) return "No constituents";
-  if (group.eligible === 0) return "No eligible history";
-  if (group.diffusion === "UNCONFIRMED") return "No comparable prior";
-  return "Coverage incomplete";
 }
 
 function metricDisplay(group: TaxonomyGroupData, metric: HeatmapMetric, value: number | null): string {
   if (metric === "leadership") return formatEnumLabel(group.leadership);
   if (metric === "diffusion") return formatEnumLabel(group.diffusion);
-  if (metric === "breadth") return value === null ? "Not available" : `${value.toFixed(0)}%`;
-  return value === null ? "Not available" : formatPercent(value);
-}
-
-function directionBadge(direction: ForeignFlowDirection | null): string {
-  switch (direction) {
-    case "NET_BUY":
-      return "▲ Net buy";
-    case "NET_SELL":
-      return "▼ Net sell";
-    case "FLAT":
-      return "≈ Flat";
-    default:
-      return "—";
-  }
+  if (metric === "breadth") return value === null ? "—" : `${value.toFixed(0)}%`;
+  return value === null ? "—" : formatPercent(value);
 }
 
 export default function MarketHeatmap({
   taxonomyGroups,
   taxonomyNames,
   taxonomyKindsById,
-  foreignFlow,
   asOf,
   onSelectGroup,
 }: MarketHeatmapProps) {
@@ -234,16 +207,6 @@ export default function MarketHeatmap({
       .filter((group) => group.taxonomyKind === taxonomyKind)
       .sort((a, b) => b.constituents - a.constituents);
   }, [taxonomyGroups, taxonomyKind]);
-
-  const foreignByGroup = useMemo(() => {
-    const map = new Map<string, ForeignFlowDirection>();
-    if (foreignFlow) {
-      for (const summary of foreignFlow.groupSummaries) {
-        if (summary.netValueIdr !== 0) map.set(summary.groupId, summary.direction);
-      }
-    }
-    return map;
-  }, [foreignFlow]);
 
   if (!taxonomyKind || filteredGroups.length === 0) {
     return (
@@ -272,7 +235,7 @@ export default function MarketHeatmap({
 
   const asOfLabel = asOf ? formatDateLabel(asOf) : "snapshot";
   const legend = legendForMetric(metric);
-  const evidenceKind = taxonomyKind === "SECTOR" ? "SNAPSHOT" : "PROTOTYPE";
+  const evidenceKind = taxonomyKind === "SECTOR" ? "SNAPSHOT" : "CLASSIFICATION";
 
   return (
     <section
@@ -446,11 +409,12 @@ export default function MarketHeatmap({
             {item.label}
           </span>
         ))}
-        <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
-          <span aria-hidden="true" style={{ width: 12, height: 12, background: "var(--surface-subtle)", border: "1px dashed #9aa19f" }} />
-          Not available
-        </span>
       </div>
+
+      <details className="heatmap-coverage-details">
+        <summary>Sources and coverage</summary>
+        <p>{filteredGroups.length} groups are shown from the selected release. Tiles without a calculated value are left blank; membership and source dates are documented in each catalog.</p>
+      </details>
 
       <div
         role="grid"
@@ -463,13 +427,10 @@ export default function MarketHeatmap({
       >
         {filteredGroups.map((group) => {
           const value = metricValue(group, metric);
-          const flow = foreignByGroup.get(group.id);
-          const isPrototype = group.prototype;
           const isDataGap = group.dataQuality === "DATA_GAP" || value === null;
-          const gapReason = dataGapReason(group);
           const cellBg = isDataGap ? "var(--surface-subtle)" : colorFor(value, metric);
           const cellInk = isDataGap ? "var(--muted)" : inkOn(colorFor(value, metric));
-          const ariaLabel = `${group.name}: ${metricLabel(metric)} ${isDataGap ? `not available, ${gapReason.toLowerCase()}` : metricDisplay(group, metric, value)}, leadership ${formatEnumLabel(group.leadership)}, diffusion ${formatEnumLabel(group.diffusion)}, ${formatCountLabel(group.constituents, "ticker")}.`;
+          const ariaLabel = `${group.name}: ${metricLabel(metric)} ${isDataGap ? "—" : metricDisplay(group, metric, value)}, ${formatCountLabel(group.constituents, "ticker")}.`;
           return (
             <button
               key={`${group.taxonomyId}::${group.id}`}
@@ -501,18 +462,6 @@ export default function MarketHeatmap({
                 }}
               >
                 <span>{formatEnumLabel(group.taxonomyKind)}</span>
-                {isPrototype && (
-                  <span
-                    title="Analyst-defined prototype taxonomy"
-                    style={{
-                      background: "rgba(255,255,255,0.7)",
-                      padding: "1px 6px",
-                      border: "1px solid rgba(0,0,0,0.15)",
-                    }}
-                  >
-                    Prototype
-                  </span>
-                )}
               </div>
               <div
                 style={{
@@ -534,7 +483,7 @@ export default function MarketHeatmap({
               >
                 {isDataGap ? (
                   <span style={{ color: "var(--muted)", fontSize: 12, fontWeight: 400 }}>
-                    Not available · {gapReason}
+                    —
                   </span>
                 ) : (
                   metricDisplay(group, metric, value)
@@ -552,18 +501,6 @@ export default function MarketHeatmap({
                 <span>{formatCountLabel(group.constituents, "ticker")}</span>
                 <span>{formatEnumLabel(group.leadership)}</span>
               </div>
-              {flow && (
-                <div
-                  style={{
-                    fontSize: 11,
-                    fontFamily: "Geist Mono, monospace",
-                    color: cellInk,
-                  }}
-                  title="Foreign-flow sample context (latest published market date)"
-                >
-                  {directionBadge(flow)} · sample
-                </div>
-              )}
             </button>
           );
         })}

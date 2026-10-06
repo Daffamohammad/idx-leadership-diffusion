@@ -33,6 +33,24 @@ def read_stock_summary(path: Path) -> list[dict[str, Any]]:
         workbook.close()
 
 
+def read_stock_summary_frequencies(path: Path, *, as_of: str) -> dict[str, int | None]:
+    """Read official trade counts, excluding stale last-trade observations."""
+    date.fromisoformat(as_of)
+    result: dict[str, int | None] = {}
+    for row in read_stock_summary(path):
+        code = str(row.get("Stock Code") or "").strip().upper()
+        if not code:
+            continue
+        ticker = f"{code}.JK"
+        if ticker in result:
+            raise ValueError(f"Duplicate official stock code: {code}")
+        last_trade_date = _trade_date(row.get("Last Trading Date"))
+        result[ticker] = _count(row.get("Frequency"), label="frequency", ticker=ticker) if last_trade_date == as_of else None
+    if not result:
+        raise ValueError("Official Stock Summary has no stock-code rows")
+    return result
+
+
 def _number(value: Any, *, positive: bool = False) -> float | None:
     if isinstance(value, bool):
         return None
@@ -43,6 +61,15 @@ def _number(value: Any, *, positive: bool = False) -> float | None:
     if not math.isfinite(result) or (positive and result <= 0):
         return None
     return result
+
+
+def _count(value: Any, *, label: str, ticker: str) -> int | None:
+    number = _number(value)
+    if number is None:
+        return None
+    if number < 0 or not number.is_integer():
+        raise ValueError(f"Invalid {label} for {ticker}: expected a nonnegative whole number")
+    return int(number)
 
 
 def _trade_date(value: Any) -> str:
@@ -91,6 +118,7 @@ def normalize_stock_summary(
         volume = _number(raw.get("Volume"))
         if volume is not None and volume < 0:
             raise ValueError(f"Negative volume for {ticker}")
+        frequency = _count(raw.get("Frequency"), label="frequency", ticker=ticker)
         foreign_buy = _number(raw.get("Foreign Buy"))
         foreign_sell = _number(raw.get("Foreign Sell"))
         if any(v is not None and v < 0 for v in (foreign_buy, foreign_sell)):
@@ -111,6 +139,7 @@ def normalize_stock_summary(
             "market_cap": close * listed_shares if close and listed_shares else None,
             "weight_for_index": _number(raw.get("Weight For Index")),
             "volume_shares": volume,
+            "frequency_trades": frequency,
             "traded": not multiple_voting and observed and volume is not None and volume > 0,
             "value_idr": _number(raw.get("Value")),
             "foreign_buy_shares": foreign_buy,
@@ -129,7 +158,7 @@ def normalize_stock_summary(
         "schema_version": "market-daily-v1",
         "as_of": as_of,
         "price_basis": "official_close",
-        "units": {"price": "IDR per share", "market_cap": "IDR", "foreign": "shares"},
+        "units": {"price": "IDR per share", "market_cap": "IDR", "value": "IDR", "volume": "shares", "frequency": "trades", "foreign": "shares"},
         "listed_count": len(records),
         "observed_price_count": sum(r["return_1d"] is not None for r in records),
         "classification_count": sum(bool(r["taxonomy"].get("sector")) for r in records),

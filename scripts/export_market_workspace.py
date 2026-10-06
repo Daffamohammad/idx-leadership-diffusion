@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import pandas as pd
 from idx_leadership.data.market_workspace import build_workspace
+from idx_leadership.providers.idx_stock_summary import read_stock_summary_frequencies, sha256
 from scripts.validate_public_panel import _check_panel_integrity
 
 
@@ -13,6 +14,7 @@ def main() -> int:
     p=argparse.ArgumentParser()
     for key in ('daily','panel-dir','validation','snapshot-dir','edges','universe','out'):
         p.add_argument('--'+key,required=True)
+    p.add_argument('--stock-summary')
     a=p.parse_args()
     try:
         root=Path(a.panel_dir);manifest=json.loads((root/'source_manifest.json').read_text());prices=pd.read_csv(root/'prices.csv');benchmark=pd.read_csv(root/'benchmark.csv')
@@ -40,6 +42,15 @@ def main() -> int:
         if cohort != entry['eligible_ticker_set_hash']:
             raise ValueError('replayed eligibility cohort mismatch')
         payload=build_workspace(daily,prices,benchmark,eligible=eligible,gaps=gaps,edges=json.loads(Path(a.edges).read_text()))
+        if a.stock_summary:
+            stock_summary=Path(a.stock_summary)
+            expected=(daily.get('sources',{}).get('stock_summary') or {}).get('sha256')
+            if not expected or sha256(stock_summary) != expected:
+                raise ValueError('Stock Summary bytes differ from the dated daily workspace source')
+            frequencies=read_stock_summary_frequencies(stock_summary,as_of=daily['as_of'])
+            for row in payload['records']:
+                row['frequency_trades']=frequencies.get(row['ticker'])
+        payload['units']={'price':'IDR per share','value':'IDR','volume':'shares','frequency':'trades','foreign_net':'shares'}
         payload['snapshot_id']=snapshot.name
         payload['sources']['validated_panel'] = dict(files=fingerprints,validation_sha256=hashlib.sha256(Path(a.validation).read_bytes()).hexdigest())
         out=Path(a.out);out.parent.mkdir(parents=True,exist_ok=True);out.write_text(json.dumps(payload,separators=(',',':'),allow_nan=False)+'\n')

@@ -175,6 +175,7 @@ def _build_taxonomy_from_yaml(document: Mapping[str, object]) -> Taxonomy:
             "taxonomy_kind": taxonomy_kind.value,
             "source_kind": document.get("source_kind", "PROTOTYPE_CONFIG"),
             "source_as_of": document.get("source_as_of"),
+            "available_on": document.get("available_on"),
             "membership_policy": document.get("membership_policy", "PRIMARY_ONLY"),
             "provider_mode": document.get("provider_mode", "PUBLIC_PROTOTYPE"),
             "memberships": [m.to_dict() for m in memberships],

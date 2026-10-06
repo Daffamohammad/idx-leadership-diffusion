@@ -474,7 +474,7 @@ def _empty_aggregate(
         map_y=None,
         off_scale=False,
         data_quality="DATA_GAP",
-        prototype=taxonomy.source_kind.value != "PRIMARY_INDEX",
+        prototype=taxonomy.source_kind.value in {"PROTOTYPE_CONFIG", "ANALYST_DEFINED"},
         membership_kind_breakdown=_group_breakdown(members),
     )
 

@@ -639,7 +639,7 @@ export default function PublicHome() {
             >
               <EvidenceBadge kind="SNAPSHOT" compact />
               <EvidenceBadge kind="SAMPLE" compact />
-              <EvidenceBadge kind="PROTOTYPE" compact />
+              <EvidenceBadge kind="CLASSIFICATION" compact />
               <EvidenceBadge kind="CONTEXT" compact />
             </div>
           </div>

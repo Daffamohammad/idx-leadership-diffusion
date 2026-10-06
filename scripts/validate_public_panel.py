@@ -35,6 +35,8 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from idx_leadership.data.releases import PUBLIC_PANEL_VALIDATION_CONTRACT
+
 warnings.filterwarnings("ignore", message="Workbook contains no default style")
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -149,12 +151,61 @@ def _parse_ds_pdf(path: Path) -> tuple[date, float, float, float]:
     return session, prev, change, printed if printed is not None else float("nan")
 
 
-def _display_path(path: Path) -> str:
-    """Repo-relative when possible, absolute otherwise (temp panels, etc.)."""
-    try:
-        return str(path.relative_to(PROJECT_ROOT))
-    except ValueError:
-        return str(path)
+def _validation_input_hashes(
+    *,
+    panel_dir: Path,
+    workbook_path: Path,
+    summary_path: Path,
+    daily_statistics_pdfs: list[Path],
+) -> dict[str, Any]:
+    """Bind a PASS report to every panel and official file it compared."""
+    def sha256(path: Path) -> str:
+        return hashlib.sha256(path.read_bytes()).hexdigest()
+
+    return {
+        "validator_contract": PUBLIC_PANEL_VALIDATION_CONTRACT,
+        "panel_files": {
+            name: sha256(panel_dir / name)
+            for name in ("prices.csv", "benchmark.csv", "source_manifest.json")
+        },
+        "official_sources": {
+            "composite_workbook": {
+                "file_name": workbook_path.name,
+                "sha256": sha256(workbook_path),
+            },
+            "stock_summary": {
+                "file_name": summary_path.name,
+                "sha256": sha256(summary_path),
+            },
+            "daily_statistics_pdfs": {
+                path.name: sha256(path) for path in sorted(daily_statistics_pdfs)
+            },
+        },
+    }
+
+
+def _available_validation_input_hashes(
+    *, panel_dir: Path, workbook_path: Path, summary_path: Path, daily_statistics_pdfs: list[Path]
+) -> dict[str, Any]:
+    """Keep exact byte evidence in failed reports without inventing absent hashes."""
+    def sha256(path: Path) -> str:
+        return hashlib.sha256(path.read_bytes()).hexdigest()
+
+    return {
+        "validator_contract": PUBLIC_PANEL_VALIDATION_CONTRACT,
+        "panel_files": {
+            name: sha256(panel_dir / name)
+            for name in ("prices.csv", "benchmark.csv", "source_manifest.json")
+            if (panel_dir / name).is_file()
+        },
+        "official_sources": {
+            "composite_workbook": {"file_name": workbook_path.name, "sha256": sha256(workbook_path)}
+                if workbook_path.is_file() else None,
+            "stock_summary": {"file_name": summary_path.name, "sha256": sha256(summary_path)}
+                if summary_path.is_file() else None,
+            "daily_statistics_pdfs": {path.name: sha256(path) for path in sorted(daily_statistics_pdfs) if path.is_file()},
+        },
+    }
 
 
 def _check_panel_integrity(
@@ -264,11 +315,12 @@ def _module_available(name: str) -> bool:
 def _fail_official_comparisons_unavailable(
     *,
     integrity: dict[str, Any],
-    panel_dir: Path,
     panel_manifest: dict[str, Any],
     out_path: Path,
     missing_sources: list[str],
     missing_parsers: list[str],
+    input_hashes: dict[str, Any],
+    target_session: str | None,
 ) -> int:
     """Fail with an explicit verdict when official comparison cannot run.
 
@@ -287,9 +339,10 @@ def _fail_official_comparisons_unavailable(
     }
     report = {
         "kind": "PUBLIC_PANEL_VALIDATION",
-        "validated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "panel_dir": _display_path(panel_dir),
         "panel_window": panel_manifest.get("window"),
+        "target_session": target_session,
+        "validator_contract": PUBLIC_PANEL_VALIDATION_CONTRACT,
+        "input_hashes": input_hashes,
         "status": "FAIL",
         "checks": {
             "panel_integrity": integrity,
@@ -306,6 +359,24 @@ def _fail_official_comparisons_unavailable(
         file=sys.stderr,
     )
     return 1
+
+
+def _write_validation_receipt(
+    path: Path, args: argparse.Namespace, panel_dir: Path, workbook_path: Path,
+    summary_path: Path, daily_statistics_pdfs: list[Path], status: str,
+) -> None:
+    receipt = {
+        "schema_version": "public-panel-validation-receipt-v1",
+        "completed_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "requested_target_session": args.target_session,
+        "panel_dir": str(panel_dir.resolve()),
+        "composite_workbook": str(workbook_path.resolve()),
+        "stock_summary": str(summary_path.resolve()),
+        "daily_statistics_pdfs": [str(item.resolve()) for item in daily_statistics_pdfs],
+        "status": status,
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(receipt, indent=2), encoding="utf-8")
 
 
 def _publish_fixture(report: dict[str, Any], fixture_path: Path) -> bool:
@@ -329,6 +400,9 @@ def _publish_fixture(report: dict[str, Any], fixture_path: Path) -> bool:
     trimmed = {
         "kind": report["kind"],
         "panel_window": report["panel_window"],
+        "target_session": report.get("target_session"),
+        "validator_contract": report.get("validator_contract"),
+        "input_hashes": report.get("input_hashes"),
         "status": report["status"],
         "checks": report["checks"],
     }
@@ -339,6 +413,15 @@ def _publish_fixture(report: dict[str, Any], fixture_path: Path) -> bool:
 def main() -> int:
     parser = argparse.ArgumentParser(prog="validate_public_panel")
     parser.add_argument("--panel-dir", default=None)
+    parser.add_argument("--target-session", default=None, help="Require this exact completed session; requires --panel-dir.")
+    parser.add_argument("--composite-workbook", type=Path, default=None)
+    parser.add_argument("--stock-summary", type=Path, default=None)
+    parser.add_argument("--daily-statistics-pdf", type=Path, action="append", default=None,
+                        help="Exact dated IDX Daily Statistics PDF; repeat for each required session.")
+    parser.add_argument("--sectors-validation-report", type=Path, default=None,
+                        help="Exact dated coverage report to use for optional population reconciliation.")
+    parser.add_argument("--receipt-out", type=Path, default=None,
+                        help="Optional run receipt path for invocation time and local input paths.")
     parser.add_argument(
         "--out", default=str(PROJECT_ROOT / "data" / "normalized" / "public_panel_validation.json")
     )
@@ -371,6 +454,24 @@ def main() -> int:
     )
     args = parser.parse_args()
     sources_root = Path(args.sources_root)
+    if args.target_session:
+        try:
+            if date.fromisoformat(args.target_session).isoformat() != args.target_session:
+                raise ValueError
+        except ValueError:
+            parser.error("--target-session must use YYYY-MM-DD")
+        if not args.panel_dir:
+            parser.error("--target-session requires an explicit --panel-dir")
+
+    workbook_path = args.composite_workbook or (
+        sources_root / "idx_composite_index" / "Composite Stock Price Index & Stock Trading Volume - Sep 2026.xlsx"
+    )
+    summary_path = args.stock_summary or (sources_root / "idx_stock_summary" / "Stock Summary-20261002.xlsx")
+    ds_dir = sources_root / "idx_daily_statistics"
+    daily_statistics_pdfs = (
+        args.daily_statistics_pdf if args.daily_statistics_pdf is not None
+        else sorted(ds_dir.glob("ds_*.pdf"))
+    )
 
     import pandas as pd
 
@@ -390,18 +491,27 @@ def main() -> int:
     # not be compared against official sources — every downstream number would
     # inherit the defect while still looking validated.
     integrity = _check_panel_integrity(prices, benchmark, panel_manifest, panel_dir)
+    if args.target_session and (panel_manifest.get("window") or {}).get("end") != args.target_session:
+        integrity = {**integrity, "status": "FAIL", "target_session_mismatch": {
+            "requested": args.target_session, "panel_end": (panel_manifest.get("window") or {}).get("end")}}
     if integrity["status"] != "PASS":
         report = {
             "kind": "PUBLIC_PANEL_VALIDATION",
-            "validated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-            "panel_dir": _display_path(panel_dir),
             "panel_window": panel_manifest.get("window"),
+            "target_session": args.target_session,
+            "validator_contract": PUBLIC_PANEL_VALIDATION_CONTRACT,
+            "input_hashes": _available_validation_input_hashes(
+                panel_dir=panel_dir, workbook_path=workbook_path, summary_path=summary_path,
+                daily_statistics_pdfs=daily_statistics_pdfs),
             "status": "FAIL",
             "checks": {"panel_integrity": integrity},
         }
         out_path = Path(args.out)
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+        if args.receipt_out:
+            _write_validation_receipt(args.receipt_out, args, panel_dir, workbook_path, summary_path,
+                                      daily_statistics_pdfs, report["status"])
         print(
             "status=FAIL (panel integrity/provenance gate): "
             f"nonfinite={integrity['nonfinite_price_rows']} "
@@ -412,33 +522,34 @@ def main() -> int:
         return 1
 
     # --- 1. benchmark vs official composite workbook ---------------------
-    workbook_path = (
-        sources_root
-        / "idx_composite_index"
-        / "Composite Stock Price Index & Stock Trading Volume - Sep 2026.xlsx"
-    )
-    summary_path = sources_root / "idx_stock_summary" / "Stock Summary-20261002.xlsx"
-    ds_dir = sources_root / "idx_daily_statistics"
     # Official sources are cached artifacts, not committed files. When one is
     # absent the run must say so and fail; it must never crash, and it must
     # never quietly reduce the verdict to the panel's internal checks.
     missing_sources = [
         str(path) for path in (workbook_path, summary_path) if not path.is_file()
     ]
-    if not (ds_dir.is_dir() and any(ds_dir.glob("ds_*.pdf"))):
-        missing_sources.append(str(ds_dir))
+    if not daily_statistics_pdfs:
+        missing_sources.append("explicit Daily Statistics PDF list")
+    missing_sources.extend(str(path) for path in daily_statistics_pdfs if not path.is_file())
     # Optional parsers are a hard requirement for the official comparisons.
     # Report them instead of raising an ImportError traceback.
     missing_parsers = [name for name in ("openpyxl", "pdfplumber") if not _module_available(name)]
     if missing_sources or missing_parsers:
-        return _fail_official_comparisons_unavailable(
+        result = _fail_official_comparisons_unavailable(
             integrity=integrity,
-            panel_dir=panel_dir,
             panel_manifest=panel_manifest,
             out_path=Path(args.out),
             missing_sources=missing_sources,
             missing_parsers=missing_parsers,
+            input_hashes=_available_validation_input_hashes(
+                panel_dir=panel_dir, workbook_path=workbook_path, summary_path=summary_path,
+                daily_statistics_pdfs=daily_statistics_pdfs),
+            target_session=args.target_session,
         )
+        if args.receipt_out:
+            _write_validation_receipt(args.receipt_out, args, panel_dir, workbook_path, summary_path,
+                                      daily_statistics_pdfs, "FAIL")
+        return result
 
     official = _load_composite_workbook(workbook_path)
     bench = dict(zip(benchmark["date"], benchmark["close"]))
@@ -475,8 +586,7 @@ def main() -> int:
     # --- 2. benchmark vs IDX daily statistics PDFs ------------------------
     pdf_rows = []
     pdf_errors = []
-    ds_dir = sources_root / "idx_daily_statistics"
-    for pdf_path in sorted(ds_dir.glob("ds_*.pdf")):
+    for pdf_path in sorted(daily_statistics_pdfs):
         try:
             session, prev, change, printed = _parse_ds_pdf(pdf_path)
         except ValueError as exc:
@@ -503,16 +613,20 @@ def main() -> int:
         or r.get("computed_vs_printed", 0) > 0.001
     ]
     checks["benchmark_vs_daily_statistics_pdfs"] = {
-        "source": f"{ds_dir.name}/ds_*.pdf",
+        "source": [path.name for path in sorted(daily_statistics_pdfs)],
         "dates_checked": len(pdf_rows),
+        "latest_session": max((row["session"] for row in pdf_rows), default=None),
+        "target_session": args.target_session or (panel_manifest.get("window") or {}).get("end"),
         "tolerance_index_points": BENCHMARK_TOL,
         "rows": pdf_rows,
         "parse_errors": pdf_errors,
-        "status": "PASS" if pdf_rows and not pdf_bad and not pdf_errors else "FAIL",
+        "status": "PASS" if (
+            pdf_rows and not pdf_bad and not pdf_errors
+            and max(row["session"] for row in pdf_rows) == (args.target_session or (panel_manifest.get("window") or {}).get("end"))
+        ) else "FAIL",
     }
 
     # --- 3. stocks vs official stock summary ------------------------------
-    summary_path = sources_root / "idx_stock_summary" / "Stock Summary-20261002.xlsx"
     summary = _load_stock_summary(summary_path)
     trade_dates = summary.pop("_trade_dates")  # type: ignore[misc]
     official_date = None
@@ -576,29 +690,36 @@ def main() -> int:
     # --- 4. coverage reconciliation (distinct counts, never merged) -------
     sectors_registry = None
     sectors_registry_source = None
+    sectors_registry_source_sha256 = None
     validation_root = sources_root / "sectors_validation"
-    if validation_root.is_dir():
+    if args.sectors_validation_report is not None:
+        reports = [args.sectors_validation_report]
+    elif validation_root.is_dir():
         reports = sorted(
             validation_root.glob("*/validation_report.json"), reverse=True
         )
-        for report_path in reports:
-            try:
-                report = json.loads(report_path.read_text())
-            except (OSError, json.JSONDecodeError):
-                continue
-            if report.get("status") not in {"PASS", "REVIEW_REQUIRED"}:
-                continue
-            taxonomy = (report.get("checks", {}) or {}).get("taxonomy", {}) or {}
-            rows = taxonomy.get("structured_query_complete_rows") or taxonomy.get("rows")
-            if isinstance(rows, int) and rows >= 900:
-                sectors_registry = rows
-                sectors_registry_source = _display_path(report_path)
-                break
+    else:
+        reports = []
+    for report_path in reports:
+        try:
+            report = json.loads(report_path.read_text())
+        except (OSError, json.JSONDecodeError):
+            continue
+        if report.get("status") not in {"PASS", "REVIEW_REQUIRED"}:
+            continue
+        taxonomy = (report.get("checks", {}) or {}).get("taxonomy", {}) or {}
+        rows = taxonomy.get("structured_query_complete_rows") or taxonomy.get("rows")
+        if isinstance(rows, int) and rows >= 900:
+            sectors_registry = rows
+            sectors_registry_source = report_path.name
+            sectors_registry_source_sha256 = hashlib.sha256(report_path.read_bytes()).hexdigest()
+            break
     counts = panel_manifest.get("counts", {})
     checks["coverage_reconciliation"] = {
         "official_stock_summary_codes": len(summary),
         "sectors_snapshot_registry_codes": sectors_registry,
-        "sectors_registry_source": sectors_registry_source,
+        "sectors_registry_source_file": sectors_registry_source,
+        "sectors_registry_source_sha256": sectors_registry_source_sha256,
         "universe_requested": counts.get("requested"),
         "downloaded": counts.get("downloaded"),
         "quarantined_symbols": panel_manifest.get("diagnostics", {}).get("quarantined_symbols", []),
@@ -640,9 +761,15 @@ def main() -> int:
     )
     report = {
         "kind": "PUBLIC_PANEL_VALIDATION",
-        "validated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "panel_dir": _display_path(panel_dir),
         "panel_window": panel_manifest.get("window"),
+        "target_session": args.target_session or (panel_manifest.get("window") or {}).get("end"),
+        "validator_contract": PUBLIC_PANEL_VALIDATION_CONTRACT,
+        "input_hashes": _validation_input_hashes(
+            panel_dir=panel_dir,
+            workbook_path=workbook_path,
+            summary_path=summary_path,
+            daily_statistics_pdfs=daily_statistics_pdfs,
+        ),
         "status": status,
         "checks": checks,
     }
@@ -650,6 +777,9 @@ def main() -> int:
     out_path = Path(args.out)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+    if args.receipt_out:
+        _write_validation_receipt(args.receipt_out, args, panel_dir, workbook_path, summary_path,
+                                  daily_statistics_pdfs, status)
 
     if args.publish_fixture:
         _publish_fixture(report, Path(args.fixture_output))

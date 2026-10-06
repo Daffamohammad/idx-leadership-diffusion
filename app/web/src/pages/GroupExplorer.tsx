@@ -34,6 +34,7 @@ import { formatCountLabel, formatDateLabel, formatEnumLabel, formatPercent, form
 import { EvidenceBadge } from "../components/EvidenceModel";
 import { WindowCapNotice } from "../components/SnapshotNotices";
 import { catalogHref, rememberCatalogFocus } from "../data/catalogFocus";
+import { useHistoricalComparison } from "../data/marketWorkspace";
 
 const card: React.CSSProperties = {
   background: "var(--surface)",
@@ -45,6 +46,24 @@ function displayMetric(val: number | null | undefined, suffix = "%"): string {
   if (suffix === "%") return formatPercent(val);
   if (val === null || val === undefined || !Number.isFinite(val)) return "—";
   return `${val > 0 ? "+" : ""}${val.toFixed(1)}${suffix}`;
+}
+
+function submissionInvalidationLabel(row: { condition: string; threshold: string | null }): string {
+  if (/diffusion shifts to narrowing or unconfirmed/i.test(row.condition)) {
+    return "Participation narrows or no longer meets the diffusion evidence floor";
+  }
+  if (/breadth falls below/i.test(row.condition)) {
+    const cutoff = row.threshold?.match(/<\s*([\d.]+)%/)?.[1];
+    return cutoff ? `Breadth falls below ${cutoff}%` : "Breadth falls below its configured threshold";
+  }
+  return row.condition;
+}
+
+function replayTransitionLabel(value: string | null | undefined): string {
+  if (!value) return "No phase change";
+  return value.split(/\s*(?:->|→)\s*/)
+    .map(part => part.toUpperCase() === "UNCONFIRMED" ? "Baseline" : formatEnumLabel(part))
+    .join(" → ");
 }
 
 function Num({ val, suffix = "%" }: { val: number | null | undefined; suffix?: string }) {
@@ -117,7 +136,7 @@ const flowCfg: Record<FlowState, { label: string; color: string }> = {
   CONFIRMING: { label: "Confirming", color: "var(--up)" },
   NEUTRAL: { label: "Neutral", color: "var(--muted)" },
   AGAINST: { label: "Against", color: "var(--down)" },
-  DATA_GAP: { label: "Not available", color: "var(--accent-ink)" },
+  DATA_GAP: { label: "—", color: "var(--accent-ink)" },
 };
 
 function ConstituentTable({ constituents }: { constituents: ConstituentData[] }) {
@@ -226,8 +245,8 @@ function ContribBars({ constituents }: { constituents: ConstituentData[] }) {
     return (
       <EmptyState
         label="NO CONTRIBUTION DATA"
-        title="Contribution percentages are unavailable"
-        body="The snapshot does not contain enough constituent-level return data to calculate this breakdown."
+        title="Contribution share —"
+        body="Driver shares are shown when this release contains enough constituent-level return observations."
         height={100}
       />
     );
@@ -324,10 +343,9 @@ function CatalogBackLink({ taxonomyKind, groupId, label }: {
 
 type MemberSortKey = "ticker" | "membership" | "confidence" | "sourceDate";
 
-// A relationship subtype is only shown when the snapshot stored one. Absent
-// evidence stays "Unresolved" — never inferred from a job title or name.
+// A relationship subtype is only shown when the snapshot stored one.
 function relationshipLabel(member: TaxonomyMembershipData): string {
-  return member.relationship?.trim() ? formatEnumLabel(member.relationship) : "Unresolved";
+  return member.relationship?.trim() ? formatEnumLabel(member.relationship) : "—";
 }
 
 const th: React.CSSProperties = {
@@ -403,8 +421,8 @@ function MembershipTable({ members, compact }: { members: TaxonomyMembershipData
     return (
       <EmptyState
         label="NO MEMBERSHIPS"
-        title="Membership list unavailable"
-        body="The aggregate is preserved without inventing constituent records."
+        title="Membership count"
+        body="The documented aggregate count is preserved; constituent rows follow the selected release evidence."
         height={140}
       />
     );
@@ -526,7 +544,7 @@ function LeadersLaggards({ constituents }: { constituents: ConstituentData[] }) 
 
   const leaders = scored.slice(0, 5);
   const laggards = scored.slice(-5).reverse();
-  const periodLabel = useYtd ? "YTD excess vs IHSG" : "20D excess vs IHSG (YTD unavailable)";
+  const periodLabel = useYtd ? "YTD excess vs IHSG" : "20D excess vs IHSG";
 
   const column = (title: string, rows: typeof leaders, tone: "up" | "down") => (
     <div style={{ flex: 1, minWidth: 240 }}>
@@ -799,13 +817,13 @@ function TaxonomyGroupDetail({
   };
 
   const catalogLabel =
-    group.taxonomyKind === "KONGLO" ? "Konglo catalog" : group.taxonomyKind === "THEMES" ? "Themes catalog" : "All Groups catalog";
+    group.taxonomyKind === "KONGLO" ? "Konglo catalog" : group.taxonomyKind === "THEMES" ? "IDXIC subindustries" : "All Groups catalog";
 
   const coverageNotes = [
     group.constituents > 0
       ? `${group.eligible} of ${group.constituents} members have the 20D history required for the diagnostic metric (${group.coveragePct.toFixed(0)}% coverage).`
       : "No member counts are recorded for this group in the current snapshot.",
-    `${ytdCoverage} members carry YTD history${group.ytdStartDate ? `, measured from ${formatDateLabel(group.ytdStartDate)} against IHSG on the same dates` : "; the YTD baseline is unavailable, so YTD is a rotation diagnostic only"}.`,
+    `${ytdCoverage} members carry YTD history${group.ytdStartDate ? `, measured from ${formatDateLabel(group.ytdStartDate)} against IHSG on the same dates` : "; no YTD baseline is included in this release"}.`,
     group.offScale
       ? "This group is off-scale — its value sits outside the standard map axis."
       : null,
@@ -827,7 +845,7 @@ function TaxonomyGroupDetail({
             <div className="eyebrow-muted">
               {group.taxonomyName} · group detail
             </div>
-            <EvidenceBadge kind="PROTOTYPE" compact />
+            <EvidenceBadge kind="CLASSIFICATION" compact />
           </div>
           <h1 style={{ margin: 0, fontSize: 30, fontWeight: 400, letterSpacing: "-1.5px" }}>
             {group.name}
@@ -845,8 +863,8 @@ function TaxonomyGroupDetail({
             {formatEnumLabel(group.taxonomyKind)} · {formatSnapshotId(data.payload.snapshot_id, data.payload.as_of)}
           </div>
           <p style={{ margin: "8px 0 0", color: "var(--muted)", fontSize: 13, lineHeight: 1.5, maxWidth: 640 }}>
-            Aggregate metrics use the current snapshot. Membership is an analyst-defined research
-            lens and is not an official IDX classification.
+            Aggregate metrics use the selected release. Membership follows dated ownership evidence
+            or captured IDXIC subindustry classifications.
           </p>
         </div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
@@ -872,40 +890,29 @@ function TaxonomyGroupDetail({
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
           <LeadershipChip state={group.leadership as Parameters<typeof LeadershipChip>[0]["state"]} />
           <DiffusionChip state={group.diffusion as Parameters<typeof DiffusionChip>[0]["state"]} />
-          <span style={{ fontFamily: "Geist Mono, monospace", fontSize: 11, color: "var(--muted)", border: "1px solid var(--line)", padding: "2px 8px", borderRadius: 4 }}>
-            {formatEnumLabel(group.dataQuality)}
-          </span>
           <span style={{ fontFamily: "Geist Mono, monospace", fontSize: 11, color: "var(--muted)" }}>
             {formatCountLabel(group.constituents, "ticker")} · {group.eligible} with 20D history
           </span>
-          {group.sampleForeignFlowIdr !== null && group.sampleForeignFlowDirection && (
-            <span style={{ fontFamily: "Geist Mono, monospace", fontSize: 11, color: "var(--accent-ink)" }}>
-              Flow sample {formatEnumLabel(group.sampleForeignFlowDirection)}
-            </span>
-          )}
         </div>
         <div className="explorer-metrics" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginTop: 16 }}>
-          <MetricCard label="YTD excess" value={metric(group.excessYtd)} sub={group.ytdStartDate ? `from ${formatDateLabel(group.ytdStartDate)} vs IHSG` : "baseline unavailable"} />
+          <MetricCard label="YTD excess" value={metric(group.excessYtd)} sub={group.ytdStartDate ? `from ${formatDateLabel(group.ytdStartDate)} vs IHSG` : "selected release dates"} />
           <MetricCard label="YTD group return" value={metric(group.returnYtd)} sub={`${ytdCoverage} with YTD history`} />
           <MetricCard label="IHSG YTD" value={metric(group.benchmarkYtd)} sub="same dates and price basis" />
           <MetricCard label="20D excess" value={metric(group.excess20d)} sub="diagnostic vs IHSG" />
-          <MetricCard label="Breadth" value={metric(group.breadth, "%")} sub={group.breadthDelta === null ? "change unavailable" : `${metric(group.breadthDelta)} vs prior`} />
+          <MetricCard label="Breadth" value={metric(group.breadth, "%")} sub={group.breadthDelta === null ? "current level" : `${metric(group.breadthDelta)} vs prior`} />
           <MetricCard label="Concentration" value={metric(group.concentration, "%")} sub="Top-3 contribution" />
         </div>
       </div>
 
-      <div style={{ marginBottom: 20 }}>
-        <WindowCapNotice data={data} compact />
-      </div>
-
-      <SectionHead label="Coverage notes" />
-      <div style={{ ...card, padding: "16px 18px" }}>
-        <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: "var(--muted)", lineHeight: 1.7 }}>
-          {coverageNotes.map((note) => (
-            <li key={note}>{note}</li>
-          ))}
-        </ul>
-      </div>
+      <details className="source-details">
+        <summary>Sources and coverage</summary>
+        <div style={{ ...card, padding: "16px 18px", marginTop: 10 }}>
+          <WindowCapNotice data={data} compact />
+          <ul style={{ margin: "12px 0 0", paddingLeft: 18, fontSize: 12, color: "var(--muted)", lineHeight: 1.7 }}>
+            {coverageNotes.map((note) => <li key={note}>{note}</li>)}
+          </ul>
+        </div>
+      </details>
 
       <SectionHead label="Performance and membership" />
       <div style={{ ...card, padding: "16px 18px", marginBottom: 12 }}>
@@ -917,7 +924,7 @@ function TaxonomyGroupDetail({
           <ConstituentTable constituents={constituents} />
         ) : (
           <div style={{ color: "var(--muted)", fontSize: 12, padding: "12px 0" }}>
-            Constituent rows unavailable in this snapshot. Membership definitions are preserved below.
+            Membership definitions and constituent counts are shown below.
           </div>
         )}
       </div>
@@ -938,8 +945,7 @@ function TaxonomyGroupDetail({
         {pricePoints.length > 0 ? (
           <div style={{ marginTop: 16 }}>
             <div className="eyebrow-muted" style={{ marginBottom: 6 }}>
-              Period tabs live on the chart. Unavailable periods stay visible with the reason
-              they are disabled; the choice is kept in the URL so the view is shareable.
+              Period tabs live on the chart; the selected period is kept in the URL.
             </div>
             <PriceChart
               groupName={group.name}
@@ -960,7 +966,7 @@ function TaxonomyGroupDetail({
           </div>
         ) : (
           <div style={{ marginTop: 12, color: "var(--muted)", fontSize: 12 }}>
-            No persisted group price history is available. No synthetic history is shown.
+            Price history is not part of this group release.
           </div>
         )}
       </div>
@@ -973,9 +979,9 @@ function TaxonomyGroupDetail({
         <MembershipTable members={members} />
         <div style={{ marginTop: 12, fontSize: 11, color: "var(--muted)", lineHeight: 1.55 }}>
           Relationship subtype (control / subsidiary / affiliate / cross-shareholding /
-          founder-director / ecosystem) is shown only where a source-backed value is stored;
-          otherwise the row stays <strong>Unresolved</strong>. Confidence and source date are
-          reproduced exactly as recorded and are never upgraded to fit a narrative.
+          founder-director / ecosystem) is shown only where a source-backed value is stored.
+          Confidence and source date are reproduced exactly as recorded and are never upgraded
+          to fit a narrative.
         </div>
       </div>
 
@@ -1000,6 +1006,7 @@ function ResearchEvidencePanel({
   const context = getTavilyCategory(payload, category);
   const status = getTavilyCategoryStatus(payload, category);
   const hasContext = context.records.length > 0;
+  if (!hasContext) return null;
   const verdict = hasContext ? "CONTEXT_ONLY" : status === "FAILED" ? "FAILED" : "DATA_GAP";
   const verdictColor = hasContext ? "var(--accent-ink)" : status === "FAILED" ? "var(--down)" : "var(--accent-ink)";
   return (
@@ -1063,6 +1070,7 @@ function ResearchEvidencePanel({
 
 export default function GroupExplorer() {
   const { data } = useSnapshot();
+  const historyState = useHistoricalComparison();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selected, setSelected] = useState<string>("");
@@ -1099,7 +1107,7 @@ export default function GroupExplorer() {
     if (!taxonomyGroup) {
       return (
         <div style={{ padding: "36px 40px", maxWidth: 1280, margin: "0 auto" }}>
-          <EmptyState label="GROUP NOT FOUND" title="Taxonomy group is unavailable" body="The selected taxonomy group is not present in the current snapshot." height={220} />
+          <EmptyState label="GROUP DETAILS" title="This group is outside the selected release" body="Choose a group from the current catalog to view its supported members and metrics." height={220} />
         </div>
       );
     }
@@ -1123,8 +1131,14 @@ export default function GroupExplorer() {
   const groupBreadthHistory = data.breadthHistory.filter(
     (point) => point.group_id === sector.id,
   );
+  const matchedReplay = historyState.data?.weekly.flatMap((week) => {
+    const group = week.groups.find((candidate) => candidate.group_id === sector.id || candidate.name === sector.name);
+    return group ? [{ as_of: week.as_of, ...group }] : [];
+  }) ?? [];
   const groupPricePoints = groupPriceHistory[sector.id] ?? [];
   const manifestEntry = data.payload.manifest.entries[0];
+  const hasResearchContext = (["fundamentals", "foreign_flow", "events"] as ResearchContextCategory[])
+    .some(category => getTavilyCategory(data.payload, category).records.length > 0);
   const chartSource = manifestEntry?.provider
     ? `${manifestEntry.provider} snapshot`
     : "Snapshot data";
@@ -1218,24 +1232,22 @@ export default function GroupExplorer() {
         <div style={{ marginTop: 10, display: "flex", gap: 16, flexWrap: "wrap", fontSize: 11, color: "var(--muted)", fontFamily: "Geist Mono" }}>
           <span>YTD Excess <b style={{ color: sector.excessYtd !== null && sector.excessYtd >= 0 ? "var(--up)" : "var(--down)" }}>{displayMetric(sector.excessYtd)}</b></span>
           <span>20D Excess <b style={{ color: sector.excess20d !== null && sector.excess20d >= 0 ? "var(--up)" : "var(--down)" }}>{displayMetric(sector.excess20d)}</b></span>
-          <span>Breadth <b>{displayMetric(sector.breadth)}</b> {delta !== undefined ? <span style={{ color: delta !== null && delta > 0 ? "var(--up)" : delta !== null && delta < 0 ? "var(--down)" : "var(--muted)" }}>({delta === null ? "Δ unavailable" : `${formatPercent(delta)} vs prior observation`})</span> : ""}</span>
+          <span>Breadth <b>{displayMetric(sector.breadth)}</b> {delta !== undefined && delta !== null ? <span style={{ color: delta > 0 ? "var(--up)" : delta < 0 ? "var(--down)" : "var(--muted)" }}>({formatPercent(delta)} vs prior observation)</span> : ""}</span>
           <span>Top-3 <b>{displayMetric(sector.concentration)}</b></span>
           {sector.missingConstituents > 0 && (
             <span style={{ color: "var(--accent-ink)" }}>{sector.missingConstituents} constituent{sector.missingConstituents !== 1 ? "s" : ""} missing from the 20D metric</span>
           )}
         </div>
         <div style={{ marginTop: 8, fontSize: 10, color: "var(--muted)" }}>
-          {sector.diffusion === "UNCONFIRMED" ? "No comparable prior snapshot is available. Current breadth can be shown, but diffusion change cannot yet be classified." : `Diffusion: ${formatEnumLabel(sector.diffusion)}${sector.prevDiffusion ? ` (previous ${formatEnumLabel(sector.prevDiffusion)})` : ""}${sector.diffusionV2 ? ` · v2 detail ${formatEnumLabel(sector.diffusionV2)}` : ""}`}
+          {sector.diffusion === "UNCONFIRMED" ? "Diffusion —" : `Diffusion: ${formatEnumLabel(sector.diffusion)}${sector.prevDiffusion ? ` (previous ${formatEnumLabel(sector.prevDiffusion)})` : ""}${sector.diffusionV2 ? ` · v2 detail ${formatEnumLabel(sector.diffusionV2)}` : ""}`}
         </div>
       </div>
-
-      <WindowCapNotice data={data} />
 
       <div className="explorer-metrics" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 24 }}>
         <MetricCard
           label="YTD excess"
           value={displayMetric(sector.excessYtd)}
-          sub={sector.ytdStartDate ? `from ${formatDateLabel(sector.ytdStartDate)} vs IHSG` : "baseline unavailable"}
+          sub={sector.ytdStartDate ? `from ${formatDateLabel(sector.ytdStartDate)} vs IHSG` : "selected release dates"}
           color={
             sector.excessYtd === null
               ? "var(--muted)"
@@ -1257,7 +1269,7 @@ export default function GroupExplorer() {
         <MetricCard
           label="Breadth"
           value={displayMetric(sector.breadth)}
-          sub={delta != null ? `${formatPercent(delta)} vs prior` : "change unavailable"}
+          sub={delta != null ? `${formatPercent(delta)} vs prior` : "current level"}
           color={sector.breadth === null ? "var(--muted)" : "var(--up)"}
         />
         <MetricCard
@@ -1282,7 +1294,26 @@ export default function GroupExplorer() {
       </div>
 
       <SectionHead label="Time series" />
-      {dataSources.breadthHistory && groupBreadthHistory.length > 0 ? (
+      {matchedReplay.length > 0 ? (
+        <div style={{ ...card, padding: "16px 18px", marginBottom: 12 }}>
+          <div style={{ fontSize: 13, fontWeight: 500, color: "var(--ink)", marginBottom: 6 }}>
+            {sector.name} · historical price replay using current membership
+          </div>
+          <p style={{ margin: "0 0 12px", color: "var(--muted)", fontSize: 11, lineHeight: 1.5 }}>
+            {matchedReplay[0].cohort_count} fixed contributors · membership reference {formatDateLabel(historyState.data!.membership_as_of)} · leadership, breadth, and diffusion are replay measures; current release readings above remain separate.
+          </p>
+          <div className="table-scroll">
+            <table className="matched-replay-table"><thead><tr><th>As of</th><th>20D excess</th><th>60D excess</th><th>Breadth</th><th>Weekly breadth</th><th>Diffusion</th><th>Phase change</th></tr></thead>
+              <tbody>{matchedReplay.map((point) => <tr key={point.as_of}>
+                <td>{formatDateLabel(point.as_of)}</td><td>{formatPercent(point.excess_return_20d)}</td><td>{formatPercent(point.excess_return_60d)}</td>
+                <td>{point.breadth_pct.toFixed(1)}%</td><td>{point.breadth_change_pp === null ? "Baseline" : `${point.breadth_change_pp > 0 ? "+" : ""}${point.breadth_change_pp.toFixed(1)} pp`}</td>
+                <td>{point.diffusion === "UNCONFIRMED" ? "Baseline observation" : formatEnumLabel(point.diffusion)}</td>
+                <td>{replayTransitionLabel(point.leadership_transition ?? point.diffusion_transition)}</td>
+              </tr>)}</tbody>
+            </table>
+          </div>
+        </div>
+      ) : dataSources.breadthHistory && groupBreadthHistory.length > 0 ? (
         <div style={{ ...card, padding: "16px 18px", marginBottom: 12 }}>
           <div style={{ fontSize: 13, fontWeight: 500, color: "var(--ink)", marginBottom: 8 }}>
             {sector.name} — breadth history
@@ -1299,12 +1330,9 @@ export default function GroupExplorer() {
         </div>
       ) : (
         <div style={{ ...card, padding: "16px 18px", marginBottom: 12 }}>
-          <EmptyState
-            label="NO HISTORY"
-            title="Per-group breadth history not emitted"
-            body="Export a snapshot that includes breadth history to see the time series."
-            height={140}
-          />
+          <div style={{ padding: 16, color: "var(--muted)", fontSize: 12 }}>
+            <Link to={`/map?taxonomy=SECTOR&mode=groups&q=${encodeURIComponent(sector.name)}`}>Open the dated group readings →</Link>
+          </div>
         </div>
       )}
 
@@ -1344,8 +1372,8 @@ export default function GroupExplorer() {
         <div style={{ ...card, padding: "16px 18px", marginBottom: 12 }}>
           <EmptyState
             label="NO PRICE SERIES"
-            title="Group price history is unavailable"
-            body="The selected snapshot does not emit a safe chart series for this group. No demonstration values are shown."
+            title="Group price history"
+            body="The selected release does not include this group's daily price series."
             height={140}
           />
         </div>
@@ -1392,9 +1420,11 @@ export default function GroupExplorer() {
         />
       )}
 
-      <SectionHead label="Coverage notes" />
-      <div style={{ ...card, padding: "16px 18px", marginBottom: 12 }}>
-        <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: "var(--muted)", lineHeight: 1.7 }}>
+      <details className="source-details" style={{ marginBottom: 16 }}>
+        <summary>Sources and coverage</summary>
+        <div style={{ ...card, padding: "16px 18px", marginTop: 10 }}>
+        <WindowCapNotice data={data} compact />
+        <ul style={{ margin: "12px 0 0", paddingLeft: 18, fontSize: 12, color: "var(--muted)", lineHeight: 1.7 }}>
           <li>
             {sector.eligibleConstituents} of {sector.constituents} members carry the 20D history
             required for the diagnostic metric.
@@ -1403,7 +1433,7 @@ export default function GroupExplorer() {
             {sector.ytdEligible} of {sector.constituents} members carry YTD history
             {sector.ytdStartDate
               ? `, measured from ${formatDateLabel(sector.ytdStartDate)} against IHSG on the same dates`
-              : "; the YTD baseline is unavailable, so YTD stays a rotation diagnostic only"}
+              : "; no YTD baseline is included in this release"}
             .
           </li>
           {sector.missingConstituents > 0 && (
@@ -1416,7 +1446,8 @@ export default function GroupExplorer() {
             Theme and Konglo groups overlap and must not be.
           </li>
         </ul>
-      </div>
+        </div>
+      </details>
 
       <SectionHead label="Leaders and laggards" />
       <div style={{ ...card, padding: "16px 18px", marginBottom: 12 }}>
@@ -1429,27 +1460,14 @@ export default function GroupExplorer() {
         peers={sectors.filter((candidate) => candidate.id !== sector.id).map(fromSector)}
       />
 
-      <SectionHead label="Confirmation" />
-      <div className="explorer-confirmation-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 12 }}>
-        <ResearchEvidencePanel
-          label="Fundamentals"
-          category="fundamentals"
-          payload={data.payload}
-          groupName={sector.name}
-        />
-        <ResearchEvidencePanel
-          label="Foreign flow"
-          category="foreign_flow"
-          payload={data.payload}
-          groupName={sector.name}
-        />
-        <ResearchEvidencePanel
-          label="Events / catalyst"
-          category="events"
-          payload={data.payload}
-          groupName={sector.name}
-        />
-      </div>
+      {hasResearchContext && <>
+        <SectionHead label="Research context" />
+        <div className="explorer-confirmation-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 12 }}>
+          <ResearchEvidencePanel label="Fundamentals" category="fundamentals" payload={data.payload} groupName={sector.name} />
+          <ResearchEvidencePanel label="Foreign flow" category="foreign_flow" payload={data.payload} groupName={sector.name} />
+          <ResearchEvidencePanel label="Events / catalyst" category="events" payload={data.payload} groupName={sector.name} />
+        </div>
+      </>}
 
       <SectionHead label="What could contradict this signal?" />
       {sector.contradictions.length ? (
@@ -1484,10 +1502,7 @@ export default function GroupExplorer() {
         {sector.invalidation.length ? (
           <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: "var(--ink)", lineHeight: 1.6 }}>
             {sector.invalidation.map((row, i) => (
-              <li key={i}>
-                {row.condition}
-                {row.threshold ? <span style={{ color: "var(--muted)" }}>{` (${row.threshold})`}</span> : null}
-              </li>
+              <li key={i}>{submissionInvalidationLabel(row)}</li>
             ))}
           </ul>
         ) : (

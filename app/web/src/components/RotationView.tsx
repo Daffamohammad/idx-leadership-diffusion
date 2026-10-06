@@ -344,7 +344,7 @@ export default function RotationView() {
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
             <div className="eyebrow-muted" style={{ color: "var(--color-improving)" }}>Rotation mapping</div>
-            <EvidenceBadge kind={taxonomyKind === "SECTOR" ? "SNAPSHOT" : "PROTOTYPE"} compact />
+            <EvidenceBadge kind={taxonomyKind === "SECTOR" ? "SNAPSHOT" : "CLASSIFICATION"} compact />
             {isDiagnostic && (
               <span style={{ border: "1px solid #d5c59d", borderRadius: 20, padding: "4px 9px", color: "var(--accent-ink)", fontFamily: "Geist Mono, monospace", fontSize: 10 }}>
                 YTD unavailable · diagnostic view

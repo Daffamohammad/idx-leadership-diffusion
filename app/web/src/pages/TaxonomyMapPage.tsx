@@ -74,7 +74,7 @@ export default function TaxonomyMapPage() {
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
             <div className="eyebrow-muted">{KIND_LABEL[taxonomyKind]} taxonomy map</div>
-            <EvidenceBadge kind="PROTOTYPE" compact />
+            <EvidenceBadge kind="CLASSIFICATION" compact />
           </div>
           <h1 style={{ margin: "6px 0 4px", fontSize: 30, letterSpacing: "-.02em" }}>
             {view?.taxonomy_name ?? `${KIND_LABEL[taxonomyKind]} taxonomy`}
@@ -161,9 +161,10 @@ export default function TaxonomyMapPage() {
         title={view?.taxonomy_name ?? `${KIND_LABEL[taxonomyKind]} taxonomy`}
         subtitle={
           taxonomyKind === "KONGLO"
-            ? "Analyst-defined conglomerate archetype. Lower confidence rows are excluded from signal eligibility."
-            : "Analyst-defined prototype themes. Multi-theme tickers counted per-theme, never aggregated cross-theme."
+            ? "Documented disclosed holdings and named listed parents. Overlapping portfolios are shown separately."
+            : "Captured IDXIC subindustries. Multi-classification tickers count within each subindustry."
         }
+        asOf={adapted.payload.as_of}
         onSelectGroup={(groupId) => {
           navigate(`/explorer?taxonomy=${taxonomyKind}&group=${encodeURIComponent(groupId)}`);
         }}

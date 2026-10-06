@@ -94,6 +94,7 @@ class Taxonomy:
     membership_policy: str
     provider_mode: str
     memberships: tuple[TaxonomyMembership, ...] = field(default_factory=tuple)
+    available_on: date | None = None
 
     def groups(self) -> list[str]:
         seen: list[str] = []
@@ -120,7 +121,7 @@ class Taxonomy:
         return seen
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        payload = {
             "taxonomy_id": self.taxonomy_id,
             "taxonomy_name": self.taxonomy_name,
             "taxonomy_version": self.taxonomy_version,
@@ -132,6 +133,9 @@ class Taxonomy:
             "coverage": self._coverage_payload(),
             "memberships": [m.to_dict() for m in self.memberships],
         }
+        if self.available_on:
+            payload["available_on"] = self.available_on.isoformat()
+        return payload
 
     def _coverage_payload(self) -> dict[str, Any]:
         included = [
@@ -146,7 +150,10 @@ class Taxonomy:
             "excluded_count": sum(
                 1 for m in self.memberships if m.membership_type == MembershipType.EXCLUDED
             ),
-            "prototype": self.source_kind != TaxonomySourceKind.PRIMARY_INDEX,
+            "prototype": self.source_kind in {
+                TaxonomySourceKind.PROTOTYPE_CONFIG,
+                TaxonomySourceKind.ANALYST_DEFINED,
+            },
         }
 
     @classmethod
@@ -158,6 +165,13 @@ class Taxonomy:
                 source_as_of = date.fromisoformat(str(source_as_of_raw))
             except ValueError:
                 source_as_of = None
+        available_on_raw = payload.get("available_on")
+        available_on: date | None = None
+        if available_on_raw:
+            try:
+                available_on = date.fromisoformat(str(available_on_raw))
+            except ValueError:
+                available_on = None
         memberships = tuple(
             TaxonomyMembership.from_dict(m)
             for m in payload.get("memberships", [])
@@ -176,4 +190,5 @@ class Taxonomy:
             membership_policy=str(payload.get("membership_policy", "PRIMARY_ONLY") or "PRIMARY_ONLY"),
             provider_mode=str(payload.get("provider_mode", "PUBLIC_PROTOTYPE") or "PUBLIC_PROTOTYPE"),
             memberships=memberships,
+            available_on=available_on,
         )

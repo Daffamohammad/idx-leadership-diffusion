@@ -125,6 +125,59 @@ def test_ledger_capture_cannot_be_backdated(tmp_path):
     with pytest.raises(ValueError, match="predates"): load_ledger(ledger, tmp_path)
 
 
+def test_konglo_capture_uses_hash_bound_import_date(tmp_path):
+    ownership = tmp_path / "raw" / "ownership.xlsx"
+    ownership.parent.mkdir(parents=True)
+    ownership.write_bytes(b"captured ownership register")
+    membership = tmp_path / "config" / "konglo.yaml"
+    membership.parent.mkdir(parents=True)
+    membership.write_text("taxonomy_kind: KONGLO\nmemberships: []\n")
+    inventory = tmp_path / "data" / "research" / "acquisitions" / "inventory.jsonl"
+    inventory.parent.mkdir(parents=True)
+    inventory.write_text(json.dumps({
+        "schema_version": "idx-acquisition-inventory-v1",
+        "acquisition_id": "ownership-2026-10-05",
+        "retrieved_at": "2026-10-05T03:00:00Z",
+        "observation_start": "2026-09-30",
+        "observation_end": "2026-09-30",
+        "availability_basis": "capture_upper_bound",
+        "available_on": "2026-10-05",
+        "captured_file": {
+            "path": "raw/ownership.xlsx", "sha256": sha(ownership),
+            "bytes": ownership.stat().st_size, "hash_scope": "captured_file_bytes",
+        },
+    }) + "\n")
+    ledger = tmp_path / "ledger.json"
+    ledger.write_text(json.dumps({
+        "schema_version": "rotation-source-ledger-v1",
+        "acquisition_inventory": "data/research/acquisitions/inventory.jsonl",
+        "sources": {
+            "ownership_capture": {
+                "path": "raw/ownership.xlsx", "sha256": sha(ownership),
+                "observed_on": "2026-09-30", "published_on": None,
+                "available_on": "2026-10-05", "publication_basis": "capture_upper_bound",
+                "publication_evidence": "hash-bound local capture", "acquisition_id": "ownership-2026-10-05",
+            },
+            "konglo_membership": {
+                "path": "config/konglo.yaml", "sha256": sha(membership),
+                "observed_on": "2026-09-30", "published_on": None,
+                "available_on": "2026-10-05", "publication_basis": "capture_upper_bound",
+                "publication_evidence": "derived from captured ownership register",
+                "capture_source_id": "ownership_capture", "taxonomy_kind": "KONGLO",
+                "derivation": "ownership_register_threshold_v1",
+                "derivation_input_sha256": sha(ownership),
+            },
+        },
+        "universes": [],
+        "taxonomies": {"KONGLO": [{
+            "effective_from": "2026-10-05", "config_source_id": "konglo_membership",
+            "source_ids": ["konglo_membership", "ownership_capture"],
+        }]},
+    }))
+    _, _, loaded = load_ledger(ledger, tmp_path)
+    assert loaded["KONGLO"][0]["effective_from"] == "2026-10-05"
+
+
 @pytest.mark.parametrize("defect", ["duplicate", "nan", "quarantine", "missing_session", "endpoint"])
 def test_invalid_replay_refused(inputs, defect):
     if defect == "duplicate": inputs["prices"] = pd.concat([inputs["prices"], inputs["prices"].iloc[:1]])
@@ -156,7 +209,7 @@ def test_unknown_source_hash_refuses_ledger(tmp_path):
     with pytest.raises(ValueError, match="source hash"): load_ledger(ledger, tmp_path)
 
 
-def test_publication_refuses_tampered_report_and_preserves_index(inputs, tmp_path):
+def test_rotation_publisher_refuses_independent_index_switch(inputs, tmp_path):
     payload = replay(**inputs)
     public = tmp_path / "public"; (public / "market").mkdir(parents=True); (public / "snapshots").mkdir()
     snapshot = dict(snapshot_id="test", as_of=inputs["as_of"], groups=[dict(group_id="Test", group_name="Test", **inputs["endpoints"]["SECTOR"]["Test"])],
@@ -164,10 +217,12 @@ def test_publication_refuses_tampered_report_and_preserves_index(inputs, tmp_pat
     path = public / "snapshots/test.json"; path.write_text(json.dumps(snapshot))
     payload["provenance"] = dict(snapshot_sha256=sha(path))
     index = public / "market/index.json"; index.write_text(json.dumps(dict(snapshot_id="test", as_of=inputs["as_of"], assets={})))
-    publish(payload, public)
     original = index.read_bytes(); asset_names = set((public / "market").iterdir())
+    with pytest.raises(ValueError, match="complete five-family"):
+        publish(payload, public)
     payload["taxonomies"]["THEMES"]["Test"]["segments"][0]["points"][3]["source_ids"] = []
-    with pytest.raises(ValueError, match="source was unavailable"): publish(payload, public)
+    with pytest.raises(ValueError, match="complete five-family"):
+        publish(payload, public)
     assert index.read_bytes() == original and set((public / "market").iterdir()) == asset_names
 
 

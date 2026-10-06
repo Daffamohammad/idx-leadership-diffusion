@@ -37,13 +37,13 @@ def build_catalogs(universe: dict, ownership: dict, rules: dict) -> tuple[dict, 
         if not activity or not row.get('classification_as_of'):
             continue
         theme_members.append(dict(ticker=row['ticker'], taxonomy_group_id='ACTIVITY_' + re.sub(r'[^A-Z0-9]+', '_', activity.upper()).strip('_'),
-                                  taxonomy_group_name=activity, confidence=1., source='Captured issuer business-activity classification: ' + activity,
-                                  source_as_of=row['classification_as_of'], relationship='Business activity; exact captured subindustry match'))
-    def taxonomy(kind, members, version, as_of, description):
-        return dict(taxonomy_id=kind.lower(), taxonomy_name=description, taxonomy_version=version, taxonomy_kind=kind, source_kind='ANALYST_DEFINED',
-                    source_as_of=as_of, membership_policy='MULTI', provider_mode='PUBLIC_PROTOTYPE', memberships=members)
+                                  taxonomy_group_name=activity, confidence=1., source='Captured Sectors IDXIC subindustry classification: ' + activity,
+                                  source_as_of=row['classification_as_of'], relationship='Classification; exact captured subindustry match'))
+    def taxonomy(kind, members, version, as_of, description, source_kind='ANALYST_DEFINED', provider_mode='DOCUMENTED_HOLDINGS'):
+        return dict(taxonomy_id=kind.lower(), taxonomy_name=description, taxonomy_version=version, taxonomy_kind=kind, source_kind=source_kind,
+                    source_as_of=as_of, membership_policy='MULTI', provider_mode=provider_mode, memberships=members)
     return (taxonomy('KONGLO', konglo_members, rules['version'], ownership['as_of'], 'Documented corporate and named-holder portfolios'),
-            taxonomy('THEMES', theme_members, 'market-business-activities-v1', '2026-08-27', 'Business-activity themes: exact captured subindustry inclusion'), edges)
+            taxonomy('THEMES', theme_members, 'captured-idxic-v1', '2026-08-27', 'IDXIC subindustries', 'THIRD_PARTY', 'CLASSIFICATION_CAPTURE'), edges)
 
 
 def main() -> int:

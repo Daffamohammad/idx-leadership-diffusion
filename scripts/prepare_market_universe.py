@@ -2,12 +2,43 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 
 import yaml
 
 from idx_leadership.providers.idx_stock_summary import normalize_stock_summary, read_stock_summary, sha256
+
+
+def structural_versions(records: list[dict]) -> tuple[str, str]:
+    """Fingerprint listing eligibility and classification facts, without dates or quotes."""
+    universe_facts = []
+    classification_facts = []
+    for row in records:
+        ticker = str(row.get("ticker") or "").upper()
+        instrument_type = row.get("instrument_type")
+        if not ticker:
+            raise ValueError("structural version input contains a missing ticker")
+        universe_facts.append({
+            "ticker": ticker,
+            "instrument_type": instrument_type,
+            "analysis_requested": bool(row.get("analysis_requested")),
+            "listing_board": row.get("listing_board"),
+        })
+        if row.get("analysis_requested"):
+            taxonomy = row.get("taxonomy") or {}
+            classification_facts.append({
+                "ticker": ticker,
+                "sector": taxonomy.get("sector"),
+                "subsector": taxonomy.get("subsector"),
+                "industry": taxonomy.get("industry"),
+                "subindustry": taxonomy.get("subindustry"),
+            })
+    canonical = lambda value: json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    universe_hash = hashlib.sha256(canonical({"policy": "idx-analysis-eligibility-v1", "records": sorted(universe_facts, key=lambda row: row["ticker"])}).encode()).hexdigest()[:16]
+    taxonomy_hash = hashlib.sha256(canonical({"policy": "captured-idxic-v1", "records": sorted(classification_facts, key=lambda row: row["ticker"])}).encode()).hexdigest()[:16]
+    return f"idx-universe-{universe_hash}-v1", f"captured-idxic-{taxonomy_hash}-v1"
 
 
 def main() -> int:
@@ -31,11 +62,12 @@ def main() -> int:
             "classification": {"snapshot_id": reference["snapshot_id"], "sha256": sha256(reference_path), "as_of": reference["as_of"], "source": "Previously captured registry; no live provider request"},
         }
         daily["sources"] = provenance
+        universe_version, taxonomy_version = structural_versions(daily["records"])
         universe = {
             "benchmark": "^JKSE",
             "benchmark_name": "IHSG",
-            "universe_version": f"idx-official-market-{args.as_of}-v1",
-            "taxonomy_version": f"captured-idxic-{reference['as_of']}-v1",
+            "universe_version": universe_version,
+            "taxonomy_version": taxonomy_version,
             "sources": provenance,
             "excluded_listings": [{"ticker": r["ticker"], "reason": r["instrument_type"]} for r in daily["records"] if not r["analysis_requested"]],
             "universe": [

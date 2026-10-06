@@ -53,7 +53,7 @@ export function buildDiffusionReadiness(
       unconfirmedGroups,
       belowMinimumGroups,
       missingBreadthDeltaGroups,
-      note: "No group observations were emitted by the current snapshot.",
+        note: "The selected release contains no group rows.",
     };
   }
 
@@ -65,8 +65,7 @@ export function buildDiffusionReadiness(
       unconfirmedGroups,
       belowMinimumGroups,
       missingBreadthDeltaGroups,
-      note:
-        "No persisted comparable prior snapshot is available; breadth change and diffusion states remain UNCONFIRMED by design.",
+      note: "Current breadth levels are shown without a weekly change label.",
     };
   }
 
@@ -84,14 +83,10 @@ export function buildDiffusionReadiness(
 
   const causes: string[] = [];
   if (belowMinimumGroups > 0) {
-    causes.push(
-      `${belowMinimumGroups} group(s) are below the configured minimum group size`,
-    );
+    causes.push(`${belowMinimumGroups} group(s) are below the configured minimum group size`);
   }
   if (missingBreadthDeltaGroups > 0) {
-    causes.push(
-      `${missingBreadthDeltaGroups} group(s) are missing a comparable breadth delta`,
-    );
+    causes.push(`${missingBreadthDeltaGroups} group(s) do not meet the paired-observation rule`);
   }
   if (causes.length === 0) {
     causes.push("some groups do not meet the diffusion evidence requirements");
@@ -104,6 +99,6 @@ export function buildDiffusionReadiness(
     unconfirmedGroups,
     belowMinimumGroups,
     missingBreadthDeltaGroups,
-    note: `${confirmedGroups}/${totalGroups} groups classified; ${causes.join(" and ")}. UNCONFIRMED is retained rather than inferred.`,
+    note: `${confirmedGroups}/${totalGroups} groups meet the diffusion evidence rules; ${causes.join(" and ")}.`,
   };
 }

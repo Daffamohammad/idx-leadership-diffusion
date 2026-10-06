@@ -1,6 +1,7 @@
 import "./market-workspace.css";
 import {
   Link,
+  Navigate,
   RouterProvider,
   createBrowserRouter,
   isRouteErrorResponse,
@@ -9,18 +10,17 @@ import {
 } from "react-router";
 import { useState } from "react";
 import AppShell from "./components/AppShell";
-import PublicHome from "./pages/PublicHome";
-import LeadershipMap from "./pages/LeadershipMap";
 import GroupExplorer from "./pages/GroupExplorer";
 import Methodology from "./pages/Methodology";
 import WhatChanged from "./pages/WhatChanged";
-import ChartDemo from "./pages/ChartDemo";
 import TickerAnalysis from "./pages/TickerAnalysis";
 import StockHeatmap from "./pages/StockHeatmap";
 import ForeignFlow from "./pages/ForeignFlow";
 import Ownership from "./pages/Ownership";
 import MarketOverview from "./pages/MarketOverview";
-import TaxonomyMapPage from "./pages/TaxonomyMapPage";
+import MarketMovers from "./pages/MarketMovers";
+import RecordedSample from "./pages/RecordedSample";
+import SubmissionRotationMap from "./components/SubmissionRotationMap";
 import MasterGroupTable from "./pages/MasterGroupTable";
 import ThemesExplorer from "./pages/ThemesExplorer";
 import TickerExplorer from "./pages/TickerExplorer";
@@ -108,26 +108,28 @@ function RouteErrorElement() {
 }
 
 const router = createBrowserRouter([
-  { path: "/", Component: PublicHome, errorElement: <RouteErrorElement /> },
+  { path: "/", element: <Navigate to="/overview" replace />, errorElement: <RouteErrorElement /> },
   {
     Component: WorkspaceLayout,
     errorElement: <RouteErrorElement />,
     children: [
       { path: "/what-changed", Component: WhatChanged },
+      { path: "/movers", Component: MarketMovers },
+      { path: "/recorded-sample", Component: RecordedSample },
       { path: "/overview", Component: MarketOverview },
       { path: "/heatmap", Component: StockHeatmap },
       { path: "/foreign", Component: ForeignFlow },
       { path: "/ownership", Component: Ownership },
-      { path: "/map", Component: LeadershipMap },
-      { path: "/maps/konglo", Component: TaxonomyMapPage },
-      { path: "/maps/themes", Component: TaxonomyMapPage },
+      { path: "/map", Component: SubmissionRotationMap },
+      { path: "/maps/konglo", element: <Navigate to="/map?taxonomy=KONGLO&mode=groups" replace /> },
+      { path: "/maps/themes", element: <Navigate to="/map?taxonomy=THEMES&mode=groups" replace /> },
       { path: "/themes", Component: ThemesExplorer },
       { path: "/konglo", Component: ThemesExplorer },
       { path: "/tickers", Component: TickerExplorer },
       { path: "/explorer", Component: GroupExplorer },
       { path: "/groups", Component: MasterGroupTable },
       { path: "/methodology", Component: Methodology },
-      { path: "/chart-demo", Component: ChartDemo },
+      { path: "/chart-demo", element: <Navigate to="/map" replace /> },
       { path: "/ticker/:ticker", Component: TickerAnalysis },
     ],
   },

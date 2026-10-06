@@ -2,6 +2,7 @@
 import { createContext, useContext } from "react";
 import type { AdaptedSnapshot } from "./adapter";
 import type { SnapshotPayload } from "./snapshot";
+import type { SelectedRelease } from "./release";
 
 export interface SnapshotContextValue {
   loading: boolean;
@@ -9,6 +10,7 @@ export interface SnapshotContextValue {
   data: AdaptedSnapshot | null;
   snapshotId: string | null;
   payload: SnapshotPayload | null;
+  release: SelectedRelease | null;
 }
 
 export const SnapshotContext = createContext<SnapshotContextValue>({
@@ -17,6 +19,7 @@ export const SnapshotContext = createContext<SnapshotContextValue>({
   data: null,
   snapshotId: null,
   payload: null,
+  release: null,
 });
 
 export function useSnapshotContext(): SnapshotContextValue {

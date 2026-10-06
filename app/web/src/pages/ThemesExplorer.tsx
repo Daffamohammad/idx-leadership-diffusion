@@ -7,7 +7,6 @@ import type { TaxonomyGroupAggregate, TaxonomyMembershipData, TaxonomyView } fro
 import { LeadershipChip, DiffusionChip, DataStatusChip } from "../components/StatusChips";
 import { EmptyState } from "../components/EmptyState";
 import { formatDateLabel, formatEnumLabel } from "../data/format";
-import { EvidenceBadge } from "../components/EvidenceModel";
 import type { TaxonomyKind } from "../data/snapshot";
 
 const TAXONOMY_BY_PARAM: Record<string, TaxonomyKind> = {
@@ -117,10 +116,10 @@ export default function ThemesExplorer() {
     ? membershipsByGroup.get(selected.taxonomy_group_id) ?? []
     : [];
 
-  const expanded = taxonomyView?.taxonomy_version?.startsWith("market-") ?? false;
+  const expanded = taxonomyView?.taxonomy_version === "captured-idxic-v1" || (taxonomyView?.taxonomy_version?.startsWith("market-") ?? false);
   const stockByTicker = new Map(market.data?.records.map(r => [r.ticker, r]) ?? []);
-  const kindLabel = taxonomyKind === "KONGLO" ? "Konglo" : "Themes";
-  const singularLabel = taxonomyKind === "KONGLO" ? "Konglo group" : "Theme";
+  const kindLabel = taxonomyKind === "KONGLO" ? "Konglo" : "IDXIC subindustries";
+  const singularLabel = taxonomyKind === "KONGLO" ? "Konglo group" : "Subindustry";
   const catalogPath = `/groups?taxonomy=${taxonomyKind}`;
   const mapPath = taxonomyKind === "KONGLO" ? "/maps/konglo" : "/maps/themes";
 
@@ -133,7 +132,7 @@ export default function ThemesExplorer() {
     return (
       <EmptyState
         label="Catalog"
-        title={`${kindLabel} taxonomy not available`}
+        title={`${kindLabel} catalog is not included`}
         body="The current snapshot does not expose this taxonomy view. Verify that the snapshot pipeline emitted its groups for this snapshot."
       />
     );
@@ -154,7 +153,6 @@ export default function ThemesExplorer() {
           >
             {kindLabel} Catalog · {taxonomyView.taxonomy_version}
           </div>
-          <EvidenceBadge kind="PROTOTYPE" compact />
         </div>
         <h1
           style={{
@@ -165,15 +163,15 @@ export default function ThemesExplorer() {
             color: "var(--ink)",
           }}
         >
-          {expanded ? taxonomyKind === "KONGLO" ? "Documented corporate portfolios" : "Business-activity themes" : taxonomyKind === "KONGLO" ? "Verified corporate ecosystems" : "Theme browser"}
+          {expanded ? taxonomyKind === "KONGLO" ? "Documented corporate portfolios" : "IDXIC subindustry classifications" : taxonomyKind === "KONGLO" ? "Corporate portfolios" : "Research themes"}
         </h1>
         <p style={{ margin: 0, color: "var(--muted)", fontSize: 13, maxWidth: 720 }}>
           {expanded ? taxonomyKind === "KONGLO"
             ? "Portfolios use exact named positions of at least 20% in the dated official register and explicitly named listed parents. Holdings can overlap; a holding percentage does not establish legal control. Issuer-documented control is shown separately in Ownership."
-            : "Each theme includes stocks matching one exact captured business subindustry. This is a dated activity lens, with classification evidence as of 27 Aug 2026. It does not claim current revenue exposure or infer cross-sector investment themes."
+            : "Each row maps a stock to its captured IDXIC subindustry classification as of 27 Aug 2026. This describes the recorded classification and does not infer current revenue exposure."
           : taxonomyKind === "KONGLO"
             ? "A deliberately narrow research lens: a group is included only when an official company source supports the relationship. It is not an official IDX classification, a complete beneficial-ownership graph, or a claim that every company is controlled in the same legal manner."
-            : "Static analyst-defined themes for cross-sector pattern exploration. Aggregate metrics use the current snapshot, while the membership lens is not an authoritative taxonomy. Multiple memberships are allowed and never double-counted across themes."}
+            : "Research groupings are shown with their dated membership evidence. Multiple memberships are counted once within each group."}
         </p>
         <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
           <span style={headerLink}>Source kind · {formatEnumLabel(taxonomyView.source_kind)}</span>
@@ -222,14 +220,19 @@ export default function ThemesExplorer() {
               }}
             />
             <div style={{ marginTop: 8, fontSize: 10, color: "var(--muted)" }}>
-              {filteredGroups.length} of {groups.length} groups
+              {filteredGroups.length} of {groups.length}{taxonomyKind === "KONGLO" ? " documented portfolios" : " groups"}
               {filter.trim() ? " match" : ""}
             </div>
           </div>
           <ul
             role="list"
             aria-label={`${kindLabel} list`}
-            style={{ listStyle: "none", margin: 0, padding: 0, maxHeight: 520, overflowY: "auto" }}
+            style={{
+              listStyle: "none",
+              margin: 0,
+              padding: 0,
+              ...(taxonomyKind === "KONGLO" ? {} : { maxHeight: 520, overflowY: "auto" as const }),
+            }}
           >
             {filteredGroups.length === 0 && (
               <li style={{ padding: "16px 12px", fontSize: 12, color: "var(--muted)" }}>
@@ -400,9 +403,9 @@ export default function ThemesExplorer() {
                       <WorkspaceTable rows={selectedMembers} rowKey={m => `${m.ticker}:${m.membership_type}`} columns={[
                         { label: "Stock", cell: m => <Link to={`/ticker/${m.ticker}`}>{m.ticker.replace(".JK", "")}</Link> },
                         { label: "Company", cell: m => stockByTicker.get(m.ticker)?.company_name ?? m.ticker.replace(".JK", "") },
-                        { label: "Relationship / rule", cell: m => m.relationship ?? "Unresolved" },
+                        { label: "Relationship / rule", cell: m => m.relationship ?? "—" },
                         { label: "Evidence date", cell: m => formatDateLabel(m.source_as_of) },
-                        { label: "Source", cell: m => m.source?.startsWith("https://") ? <a href={m.source} target="_blank" rel="noreferrer">Official register</a> : m.source ?? "Unavailable" },
+                        { label: "Source", cell: m => m.source?.startsWith("https://") ? <a href={m.source} target="_blank" rel="noreferrer">Source record</a> : m.source ?? "—" },
                       ]}/>
                     </div>
                   </details>
@@ -444,8 +447,8 @@ export default function ThemesExplorer() {
                   </li>
                   <li style={{ color: relationshipRecorded === 0 ? "var(--accent-ink)" : "var(--muted)" }}>
                     {relationshipRecorded === 0
-                      ? "Relationship subtype (control / subsidiary / affiliate / cross-shareholding / founder-director / ecosystem) is not recorded for any member in this snapshot, so every row stays Unresolved rather than being inferred from a job title or a similar name."
-                      : `${relationshipRecorded} member${relationshipRecorded === 1 ? "" : "s"} carry a recorded relationship subtype; the rest stay Unresolved.`}
+                      ? "No source-backed relationship subtype is included for these members. The release does not infer one from a job title or a similar name."
+                      : `${relationshipRecorded} member${relationshipRecorded === 1 ? "" : "s"} carry a source-backed relationship subtype; other fields are left blank.`}
                   </li>
                 </ul>
               </div>

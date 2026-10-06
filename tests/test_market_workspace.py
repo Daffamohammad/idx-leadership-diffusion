@@ -119,23 +119,14 @@ def test_catalog_requires_exact_owner_name_and_dated_activity_not_shared_directo
     assert build_catalogs(universe,ownership,rules)[0]['memberships']==[]
 
 
-def test_publication_rejects_future_or_broken_data_without_touching_index(tmp_path: Path):
-    current=normalize_one([one()],as_of='2026-09-30');five=normalize_five(five_rows(),as_of='2026-10-01',previous_as_of='2026-09-30')
-    market=dict(schema_version='market-workspace-v1',snapshot_id='snap_test_2026-10-02',as_of='2026-10-02',benchmark=[{'date':'2026-10-01'},{'date':'2026-10-02'}],ownership_edges=[])
-    ownership=dict(schema_version='idx-ownership-v1',as_of='2026-09-30',previous_as_of='2026-08-31',five_as_of='2026-10-01',registers={'one':current,'five':five})
-    foreign=dict(schema_version='idx-foreign-history-v1',as_of='2026-10-02',validation={'session_continuity':True,'ytd_continuity':True},daily=[dict(as_of='2026-10-01',net_foreign_value_idr=1,ytd_net_foreign_value_idr=1),dict(as_of='2026-10-02',net_foreign_value_idr=1,ytd_net_foreign_value_idr=2)])
+def test_legacy_workspace_publisher_refuses_without_touching_market_index(tmp_path: Path):
     paths=[]
-    for name,payload in [('market',market),('ownership',ownership),('foreign',foreign)]:
-        path=tmp_path/f'{name}.json';path.write_text(json.dumps(payload));paths.append(path)
+    for name in ('market','ownership','foreign'):
+        path=tmp_path/f'{name}.json';path.write_text('{}');paths.append(path)
     out=tmp_path/'served';out.mkdir();index=out/'index.json';index.write_bytes(b'previous index')
-    ownership['five_as_of']='2026-10-03';paths[1].write_text(json.dumps(ownership))
-    with pytest.raises(ValueError,match='incompatible'):publish(*paths,out)
+    with pytest.raises(ValueError,match='complete five-family'):
+        publish(*paths,out)
     assert index.read_bytes()==b'previous index' and list(out.iterdir())==[index]
-    ownership['five_as_of']='2026-10-01';paths[1].write_text(json.dumps(ownership))
-    result=publish(*paths,out)
-    assert result['snapshot_id']=='snap_test_2026-10-02' and len(result['assets'])==3
-    import hashlib
-    for asset in result['assets'].values():assert hashlib.sha256((out/Path(asset['path']).name).read_bytes()).hexdigest()==asset['sha256']
 
 
 def test_taxonomy_eligibility_requires_snapshot_identity_and_exact_cohort(tmp_path):

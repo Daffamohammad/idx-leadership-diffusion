@@ -1,0 +1,152 @@
+{
+  "taxonomy_id": "curated_themes",
+  "taxonomy_name": "Curated business themes",
+  "taxonomy_version": "curated-themes-v1",
+  "taxonomy_kind": "CURATED_THEMES",
+  "source_catalog_id": "themes",
+  "source_as_of": "2026-08-27",
+  "membership_policy": "MULTI",
+  "themes": [
+    {
+      "id": "THEME_COAL",
+      "name": "Coal",
+      "parent_category": "Energy",
+      "definition": "Listed issuers classified in the IDXIC coal production or coal distribution activities.",
+      "source_activity_ids": ["ACTIVITY_COAL_PRODUCTION", "ACTIVITY_COAL_DISTRIBUTION"],
+      "inclusion_rules": ["Exact membership in a dated IDXIC coal activity."],
+      "exclusion_rules": ["Mixed oil, gas and coal equipment activity is excluded from this coal-only theme."]
+    },
+    {
+      "id": "THEME_OIL_GAS",
+      "name": "Oil & gas",
+      "parent_category": "Energy",
+      "definition": "Listed issuers classified in a dedicated IDXIC oil and gas activity.",
+      "source_activity_ids": ["ACTIVITY_OIL_GAS_DRILLING_SERVICE", "ACTIVITY_OIL_GAS_PRODUCTION_REFINERY", "ACTIVITY_OIL_GAS_STORAGE_DISTRIBUTION"],
+      "inclusion_rules": ["Exact membership in oil and gas drilling, production, refining, storage or distribution."],
+      "exclusion_rules": ["Coal-only and mixed oil, gas and coal equipment activities are excluded."]
+    },
+    {
+      "id": "THEME_GOLD",
+      "name": "Gold",
+      "parent_category": "Materials",
+      "definition": "Listed issuers classified in the IDXIC Gold activity.",
+      "source_activity_ids": ["ACTIVITY_GOLD"],
+      "inclusion_rules": ["Exact membership in IDXIC Gold."],
+      "exclusion_rules": ["Diversified miners without the Gold activity classification are excluded."]
+    },
+    {
+      "id": "THEME_BASE_METALS",
+      "name": "Copper & base metals",
+      "parent_category": "Materials",
+      "definition": "Listed issuers classified in IDXIC copper, aluminum, iron and steel, or diversified metals and minerals activities.",
+      "source_activity_ids": ["ACTIVITY_COOPER", "ACTIVITY_ALUMINUM", "ACTIVITY_IRON_STEEL", "ACTIVITY_DIVERSIFIED_METALS_MINERALS"],
+      "inclusion_rules": ["Exact membership in one of the listed IDXIC metals activities."],
+      "exclusion_rules": ["The source classification does not identify nickel or battery-material exposure separately; no issuer is assigned on that basis alone."]
+    },
+    {
+      "id": "THEME_ALTERNATIVE_ENERGY_EQUIPMENT",
+      "name": "Alternative energy equipment",
+      "parent_category": "Energy",
+      "definition": "Listed issuers classified in IDXIC Alternative Energy Equipment.",
+      "source_activity_ids": ["ACTIVITY_ALTERNATIVE_ENERGY_EQUIPMENT"],
+      "inclusion_rules": ["Exact membership in IDXIC Alternative Energy Equipment."],
+      "exclusion_rules": ["This is an equipment classification, not a claim about renewable generation revenue."]
+    },
+    {
+      "id": "THEME_ELECTRIC_UTILITIES",
+      "name": "Electric utilities",
+      "parent_category": "Utilities",
+      "definition": "Listed issuers classified in IDXIC Electric Utilities.",
+      "source_activity_ids": ["ACTIVITY_ELECTRIC_UTILITIES"],
+      "inclusion_rules": ["Exact membership in IDXIC Electric Utilities."],
+      "exclusion_rules": ["Gas utilities are kept outside this electric-utilities theme."]
+    },
+    {
+      "id": "THEME_BANKS",
+      "name": "Banks",
+      "parent_category": "Financials",
+      "definition": "Listed issuers classified in IDXIC Banks.",
+      "source_activity_ids": ["ACTIVITY_BANKS"],
+      "inclusion_rules": ["Exact membership in IDXIC Banks."],
+      "exclusion_rules": ["Consumer finance, investment services and financial holdings are excluded."]
+    },
+    {
+      "id": "THEME_INSURANCE",
+      "name": "Insurance",
+      "parent_category": "Financials",
+      "definition": "Listed issuers classified in IDXIC life, general or reinsurance activities.",
+      "source_activity_ids": ["ACTIVITY_LIFE_INSURANCE", "ACTIVITY_GENERAL_INSURANCE", "ACTIVITY_REINSURANCE"],
+      "inclusion_rules": ["Exact membership in an IDXIC insurance activity."],
+      "exclusion_rules": ["Banks, brokers and other financial services are excluded."]
+    },
+    {
+      "id": "THEME_TELECOMMUNICATIONS",
+      "name": "Telecommunications",
+      "parent_category": "Communications",
+      "definition": "Listed issuers classified in IDXIC integrated, wired or wireless telecommunication services.",
+      "source_activity_ids": ["ACTIVITY_INTEGRATED_TELECOMMUNICATION_SERVICE", "ACTIVITY_WIRED_TELECOMMUNICATION_SERVICE", "ACTIVITY_WIRELESS_TELECOMMUNICATION_SERVICES"],
+      "inclusion_rules": ["Exact membership in one of the listed IDXIC telecommunication activities."],
+      "exclusion_rules": ["Cable and satellite and networking equipment remain separate IDXIC activities."]
+    },
+    {
+      "id": "THEME_LOGISTICS_TRANSPORT",
+      "name": "Logistics & transport",
+      "parent_category": "Industrials",
+      "definition": "Listed issuers classified in IDXIC logistics, marine ports, road transportation or airlines activities.",
+      "source_activity_ids": ["ACTIVITY_LOGISTICS_DELIVERIES", "ACTIVITY_MARINE_PORTS_SERVICES", "ACTIVITY_ROAD_TRANSPORTATION", "ACTIVITY_AIRLINES"],
+      "inclusion_rules": ["Exact membership in one of the listed IDXIC transport and logistics activities."],
+      "exclusion_rules": ["Airport operators and travel agencies are excluded from this operating-transport theme."]
+    },
+    {
+      "id": "THEME_CONSTRUCTION_INFRASTRUCTURE",
+      "name": "Construction & infrastructure",
+      "parent_category": "Industrials",
+      "definition": "Listed issuers classified in IDXIC civil construction, highways and railtracks, construction materials, or building products activities.",
+      "source_activity_ids": ["ACTIVITY_HEAVY_CONSTRUCTIONS_CIVIL_ENGINEERING", "ACTIVITY_HIGHWAYS_RAILTRACKS", "ACTIVITY_CONSTRUCTION_MATERIALS", "ACTIVITY_BUILDING_PRODUCTS_FIXTURES"],
+      "inclusion_rules": ["Exact membership in one of the listed IDXIC construction and infrastructure activities."],
+      "exclusion_rules": ["Conglomerate membership or a project announcement alone does not establish theme membership."]
+    },
+    {
+      "id": "THEME_CONSUMER_STAPLES",
+      "name": "Consumer staples",
+      "parent_category": "Consumer",
+      "definition": "Listed issuers classified in IDXIC food, beverage, personal care or tobacco production activities.",
+      "source_activity_ids": ["ACTIVITY_DAIRY_PRODUCTS", "ACTIVITY_FISH_MEAT_POULTRY", "ACTIVITY_PROCESSED_FOODS", "ACTIVITY_SOFT_DRINKS", "ACTIVITY_PERSONAL_CARE_PRODUCTS", "ACTIVITY_LIQUORS", "ACTIVITY_TOBACCO"],
+      "inclusion_rules": ["Exact membership in one of the listed IDXIC consumer-products activities."],
+      "exclusion_rules": ["Plantations and crops are not treated as palm-oil exposure; retail and restaurants remain separate."]
+    },
+    {
+      "id": "THEME_RETAIL",
+      "name": "Retail",
+      "parent_category": "Consumer",
+      "definition": "Listed issuers classified in IDXIC consumer retail and store activities.",
+      "source_activity_ids": ["ACTIVITY_APPAREL_TEXTILE_RETAIL", "ACTIVITY_AUTOMOTIVE_RETAIL", "ACTIVITY_DEPARTMENT_STORES", "ACTIVITY_DRUG_RETAIL_DISTRIBUTORS", "ACTIVITY_ELECTRONICS_RETAIL", "ACTIVITY_HOME_IMPROVEMENT_RETAIL", "ACTIVITY_SUPERMARKETS_CONVENIENCE_STORE"],
+      "inclusion_rules": ["Exact membership in one of the listed IDXIC retail activities."],
+      "exclusion_rules": ["Consumer distributors, restaurants and e-commerce services are excluded unless classified in a listed retail activity."]
+    },
+    {
+      "id": "THEME_HEALTHCARE",
+      "name": "Healthcare",
+      "parent_category": "Healthcare",
+      "definition": "Listed issuers classified in IDXIC healthcare providers, pharmaceuticals, equipment or supplies distribution activities.",
+      "source_activity_ids": ["ACTIVITY_HEALTHCARE_EQUIPMENT", "ACTIVITY_HEALTHCARE_PROVIDERS", "ACTIVITY_HEALTHCARE_SUPPLIES_DISTRIBUTIONS", "ACTIVITY_PHARMACEUTICALS"],
+      "inclusion_rules": ["Exact membership in one of the listed IDXIC healthcare activities."],
+      "exclusion_rules": ["General insurers and non-healthcare consumer goods are excluded."]
+    },
+    {
+      "id": "THEME_PROPERTY",
+      "name": "Property",
+      "parent_category": "Real estate",
+      "definition": "Listed issuers classified in IDXIC real-estate development, management or services activities.",
+      "source_activity_ids": ["ACTIVITY_REAL_ESTATE_DEVELOPMENT_MANAGEMENT", "ACTIVITY_REAL_ESTATE_SERVICES"],
+      "inclusion_rules": ["Exact membership in one of the listed IDXIC real-estate activities."],
+      "exclusion_rules": ["A named property project or indirect property holding does not establish theme membership."]
+    }
+  ],
+  "reviewed_but_not_published": [
+    {"candidate": "Palm oil", "reason": "The dated activity label Plantations & Crops does not isolate palm-oil exposure."},
+    {"candidate": "Nickel and EV batteries", "reason": "The dated activity catalog has no dedicated nickel or battery activity."},
+    {"candidate": "Digital finance", "reason": "Online applications and consumer financing are broader classifications and do not isolate digital finance."},
+    {"candidate": "Data centres", "reason": "The dated activity catalog has no dedicated data-centre activity."}
+  ]
+}

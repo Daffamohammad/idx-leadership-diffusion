@@ -18,26 +18,43 @@ import ThemeToggle from "./ThemeToggle";
 import LocalProfile from "./LocalProfile";
 import TickerSearch from "./TickerSearch";
 import { BrandLockup } from "./BrandMark";
-import { BundleNotices } from "./SnapshotNotices";
 import type { SnapshotContextValue } from "../data/SnapshotContext";
 import { normalizeDataStatus } from "../data/snapshot";
 import { formatDateLabel, formatEnumLabel, formatSnapshotId } from "../data/format";
 
-const navItems = [
-  { path: "/what-changed", label: "What Changed", Icon: ActivityLogIcon },
-  { path: "/overview", label: "Overview", Icon: DashboardIcon },
-  { path: "/heatmap", label: "Stock Heatmap", Icon: GridIcon },
-  { path: "/foreign", label: "Foreign Flow", Icon: BarChartIcon },
-  { path: "/ownership", label: "Ownership", Icon: MixIcon },
-  { path: "/map", label: "Leadership Map", Icon: LayersIcon },
-  { path: "/maps/konglo", label: "Konglo Map", Icon: CubeIcon },
-  { path: "/maps/themes", label: "Themes Map", Icon: GridIcon },
-  { path: "/themes", label: "Themes Catalog", Icon: ArchiveIcon },
-  { path: "/konglo", label: "Konglo Catalog", Icon: MixIcon },
-  { path: "/explorer", label: "Group Explorer", Icon: BarChartIcon },
-  { path: "/groups", label: "All Groups", Icon: TableIcon },
-  { path: "/methodology", label: "Methodology", Icon: FileTextIcon },
-  { path: "/tickers", label: "Ticker Explorer", Icon: MagnifyingGlassIcon },
+const navGroups = [
+  {
+    label: "Research",
+    items: [
+      { path: "/overview", label: "Overview", Icon: DashboardIcon },
+      { path: "/what-changed", label: "What Changed", Icon: ActivityLogIcon },
+      { path: "/movers", label: "Market Movers", Icon: BarChartIcon },
+      { path: "/recorded-sample", label: "Recorded Sectors sample · 66 stocks", Icon: ActivityLogIcon },
+      { path: "/foreign", label: "Foreign Flow", Icon: BarChartIcon },
+      { path: "/ownership", label: "Ownership", Icon: MixIcon },
+    ],
+  },
+  {
+    label: "Map",
+    items: [
+      { path: "/heatmap", label: "Stock Heatmap", Icon: GridIcon },
+      { path: "/map", label: "Leadership Map", Icon: LayersIcon },
+    ],
+  },
+  {
+    label: "Catalog",
+    items: [
+      { path: "/konglo", label: "Konglo Catalog", Icon: MixIcon },
+      { path: "/themes", label: "IDXIC Subindustries", Icon: ArchiveIcon },
+      { path: "/explorer", label: "Group Explorer", Icon: BarChartIcon },
+      { path: "/groups", label: "All Groups", Icon: TableIcon },
+      { path: "/tickers", label: "Ticker Explorer", Icon: MagnifyingGlassIcon },
+    ],
+  },
+  {
+    label: "Guide",
+    items: [{ path: "/methodology", label: "Methodology", Icon: FileTextIcon }],
+  },
 ];
 
 interface Props {
@@ -54,11 +71,11 @@ function formatAsOf(asOf: string | null | undefined): string {
 function formatProviderMode(mode: string | undefined): string {
   switch (mode) {
     case "PUBLIC_PROTOTYPE":
-      return "Public prototype";
+      return "IDX submission release";
     case "DEMO_FIXTURE":
-      return "Demo fixture";
+      return "Recorded sample";
     case "SECTORS_FIXTURE":
-      return "Sectors fixture";
+      return "Recorded sample";
     case "SECTORS_LIVE":
       return "Live Sectors";
     default:
@@ -72,8 +89,9 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
   const asOf = formatAsOf(snap.data?.payload.as_of);
   const providerMode = snap.data?.payload.manifest?.entries?.[0]?.provider_mode;
   const providerLabel = formatProviderMode(providerMode);
+  const hasRecordedSample = Boolean(snap.release?.manifest.additional_files.some(file => file.file_id === "sectors_recorded_sample"));
   const qualityStatus = normalizeDataStatus(snap.data?.payload.quality.status);
-  const statusLabel = qualityStatus ? formatEnumLabel(qualityStatus) : null;
+  const statusLabel = qualityStatus === "READY" ? "Ready" : null;
   const availableTaxonomies = new Set(
     snap.data?.payload.groups.map((group) => group.taxonomy_level.toLowerCase()) ?? [],
   );
@@ -121,36 +139,41 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
             <BrandLockup compact={!sidebarExpanded} />
           </Link>
         </div>
-        <nav style={{ padding: "12px 6px", flex: 1, minHeight: 0, overflowY: "auto", display: "grid", gap: 2, alignContent: "start" }}>
-          {navItems.map((item) => (
-            <Tooltip.Root key={item.path}>
-              <Tooltip.Trigger asChild>
-                <NavLink
-                  to={item.path}
-                  title={sidebarExpanded ? undefined : item.label}
-                  aria-label={item.label}
-                  className="rail-link"
-                >
-                  {({ isActive }) => (
-                    <>
-                      <span className="rail-icon" aria-hidden="true">
-                        <item.Icon width={16} height={16} />
-                      </span>
-                      {sidebarExpanded && <span>{item.label}</span>}
-                      {isActive && <span className="sr-only">(current)</span>}
-                    </>
+        <nav style={{ padding: "12px 6px", flex: 1, minHeight: 0, overflowY: "auto", display: "grid", gap: 10, alignContent: "start" }}>
+          {navGroups.map((group) => (
+            <div key={group.label} role="group" aria-label={group.label} className="rail-nav-group">
+              {sidebarExpanded && <div className="rail-nav-group-label">{group.label}</div>}
+              {group.items.filter(item => item.path !== "/recorded-sample" || hasRecordedSample).map((item) => (
+                <Tooltip.Root key={item.path}>
+                  <Tooltip.Trigger asChild>
+                    <NavLink
+                      to={item.path}
+                      title={sidebarExpanded ? undefined : item.label}
+                      aria-label={item.label}
+                      className="rail-link"
+                    >
+                      {({ isActive }) => (
+                        <>
+                          <span className="rail-icon" aria-hidden="true">
+                            <item.Icon width={16} height={16} />
+                          </span>
+                          {sidebarExpanded && <span>{item.label}</span>}
+                          {isActive && <span className="sr-only">(current)</span>}
+                        </>
+                      )}
+                    </NavLink>
+                  </Tooltip.Trigger>
+                  {!sidebarExpanded && (
+                    <Tooltip.Portal>
+                      <Tooltip.Content side="right" sideOffset={8} style={{ background: "var(--ink)", color: "var(--bg)", fontSize: 12, padding: "6px 10px", borderRadius: 6, zIndex: 100 }}>
+                        {item.label}
+                        <Tooltip.Arrow style={{ fill: "var(--ink)" }} />
+                      </Tooltip.Content>
+                    </Tooltip.Portal>
                   )}
-                </NavLink>
-              </Tooltip.Trigger>
-              {!sidebarExpanded && (
-                <Tooltip.Portal>
-                  <Tooltip.Content side="right" sideOffset={8} style={{ background: "var(--ink)", color: "var(--bg)", fontSize: 12, padding: "6px 10px", borderRadius: 6, zIndex: 100 }}>
-                    {item.label}
-                    <Tooltip.Arrow style={{ fill: "var(--ink)" }} />
-                  </Tooltip.Content>
-                </Tooltip.Portal>
-              )}
-            </Tooltip.Root>
+                </Tooltip.Root>
+              ))}
+            </div>
           ))}
         </nav>
         <div
@@ -192,7 +215,7 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
                 {snap.loading
                   ? "Loading"
                   : snap.error
-                    ? "Unavailable"
+                    ? "Release not loaded"
                     : (statusLabel ?? "Ready")}
               </span>
             )}
@@ -227,13 +250,16 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
             className="desktop-only"
             aria-label={sidebarExpanded ? "Minimize sidebar" : "Expand sidebar"}
             title={sidebarExpanded ? "Minimize sidebar" : "Expand sidebar"}
+            type="button"
             style={{
               border: "1px solid var(--line)",
-              background: "transparent",
-              width: 25,
-              height: 25,
+              borderRadius: 5,
+              background: "var(--surface)",
+              width: 30,
+              height: 30,
               cursor: "pointer",
               fontSize: 13,
+              color: "var(--ink)",
             }}
           >
             {sidebarExpanded ? "‹" : "›"}
@@ -293,17 +319,17 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
             aria-label={
               canToggleTaxonomy
                 ? `Switch taxonomy, currently ${displayedTaxonomy}`
-                : `${displayedTaxonomy} taxonomy; Industry data is not in this snapshot`
+                : `${displayedTaxonomy} taxonomy`
             }
             title={
               canToggleTaxonomy
                 ? "Switch between Sector and Industry"
-                : "Industry data is not in the current snapshot"
+                : "Selected-release taxonomy"
             }
             style={{
               border: 0,
               background: "transparent",
-              cursor: canToggleTaxonomy ? "pointer" : "not-allowed",
+              cursor: canToggleTaxonomy ? "pointer" : "default",
               padding: 0,
               opacity: canToggleTaxonomy ? 1 : 0.65,
             }}
@@ -334,7 +360,7 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
             {snap.loading
               ? "Loading snapshot…"
               : snap.error
-                ? "Snapshot unavailable"
+                ? "Release not loaded"
             : providerLabel + " · " + (statusLabel ?? "Ready") + " · Snapshot " + formatSnapshotId(snap.snapshotId, snap.payload?.as_of)}
           </span>
           <ThemeToggle />
@@ -373,26 +399,30 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
                 gap: 4,
               }}
             >
-              {navItems.map((item) => (
-                <NavLink
-                  key={item.path}
-                  to={item.path}
-                  onClick={() => setMobileNavOpen(false)}
-                  aria-label={item.label}
-                  className="rail-link"
-                  style={{ minHeight: 44 }}
-                >
-                  <span className="rail-icon" aria-hidden="true">
-                    <item.Icon width={16} height={16} />
-                  </span>
-                  {item.label}
-                </NavLink>
+              {navGroups.map((group) => (
+                <div key={group.label} role="group" aria-label={group.label} className="mobile-nav-group">
+                  <div className="rail-nav-group-label">{group.label}</div>
+                  {group.items.filter(item => item.path !== "/recorded-sample" || hasRecordedSample).map((item) => (
+                    <NavLink
+                      key={item.path}
+                      to={item.path}
+                      onClick={() => setMobileNavOpen(false)}
+                      aria-label={item.label}
+                      className="rail-link"
+                      style={{ minHeight: 44 }}
+                    >
+                      <span className="rail-icon" aria-hidden="true">
+                        <item.Icon width={16} height={16} />
+                      </span>
+                      {item.label}
+                    </NavLink>
+                  ))}
+                </div>
               ))}
             </div>
           </nav>
         )}
         <main className="scroll-thin workspace-main" style={{ flex: 1, overflowY: "auto" }}>
-          {!snap.loading && !snap.error && snap.data && <BundleNotices data={snap.data} />}
           {snap.error ? (
             <div
               style={{

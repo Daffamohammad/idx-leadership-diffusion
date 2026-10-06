@@ -62,3 +62,12 @@ def test_multiple_voting_security_is_visible_but_not_a_tradable_stock():
     mvs = next(r for r in result["records"] if r["ticker"] == "GOTOM.JK")
     assert not mvs["analysis_requested"]
     assert mvs["instrument_type"] == "MULTIPLE_VOTING_SHARES"
+
+
+def test_stock_summary_preserves_movers_frequency_in_trades():
+    rows = official_rows()
+    rows[0]["Frequency"] = 125
+    result = normalize_stock_summary(rows, as_of="2026-10-02")
+    stock = next(row for row in result["records"] if row["ticker"] == "BBCA.JK")
+    assert stock["frequency_trades"] == 125
+    assert result["units"]["frequency"] == "trades"

@@ -5,7 +5,7 @@ export type EvidenceKind =
   | "SNAPSHOT"
   | "OFFICIAL_RELEASE"
   | "SAMPLE"
-  | "PROTOTYPE"
+  | "CLASSIFICATION"
   | "CONTEXT";
 
 const EVIDENCE_CONFIG: Record<
@@ -33,12 +33,12 @@ const EVIDENCE_CONFIG: Record<
     border: "#ead39b",
     description: "Real observations with bounded coverage; not a full-universe feed.",
   },
-  PROTOTYPE: {
-    label: "Static research lens",
+  CLASSIFICATION: {
+    label: "Documented classification",
     color: "var(--link)",
     background: "var(--tint-note)",
     border: "#bed7e6",
-    description: "Analyst-defined configuration used for exploration, not official classification.",
+    description: "Dated membership evidence from official classification or disclosed holdings.",
   },
   CONTEXT: {
     label: "Static context",

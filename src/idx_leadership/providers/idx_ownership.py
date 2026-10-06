@@ -8,6 +8,7 @@ import math
 from pathlib import Path
 import re
 from typing import Any, Iterable
+from urllib.parse import urlsplit
 
 ONE_HEADERS = ('DATE', 'SHARE_CODE', 'ISSUER_NAME', 'INVESTOR_NAME', 'INVESTOR_CLASSIFICATION', 'LOCAL_FOREIGN', 'NATIONALITY', 'DOMICILE', 'HOLDINGS_SCRIPLESS', 'HOLDINGS_SCRIP', 'TOTAL_HOLDING_SHARES', 'PERCENTAGE')
 
@@ -148,4 +149,5 @@ def read_five(path: Path, *, as_of: str, previous_as_of: str) -> list[dict[str, 
 
 
 def source(path: Path, url: str, as_of: str) -> dict[str, str]:
-    return dict(filename=path.name, sha256=hashlib.sha256(path.read_bytes()).hexdigest(), url=url, as_of=as_of, publisher='IDX / KSEI')
+    filename = Path(urlsplit(url).path).name or path.name
+    return dict(filename=filename, sha256=hashlib.sha256(path.read_bytes()).hexdigest(), url=url, as_of=as_of, publisher='IDX / KSEI')

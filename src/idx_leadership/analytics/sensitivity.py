@@ -430,6 +430,7 @@ def build_group_size_sensitivity(
                     narrowing_threshold_pp=-float(threshold),
                     fraction=constituent_fraction,
                     minimum_constituents=minimum_constituents,
+                    breadth_change_count=delta_count,
                 )
                 candidate = _conservative_diffusion_state(candidate_v2)
                 row = {

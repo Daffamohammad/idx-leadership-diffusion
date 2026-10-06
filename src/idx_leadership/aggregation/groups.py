@@ -208,8 +208,10 @@ def build_group_snapshots(
         prev_breadth = prev_by_group.get(group_id)
         if prev_breadth is not None and prev_breadth.breadth_outperforming is not None and breadth.benchmark_outperformance_share is not None:
             breadth_delta = float(breadth.benchmark_outperformance_share) - float(prev_breadth.breadth_outperforming)
+            breadth_change_count = breadth.outperforming_count - prev_breadth.breadth_outperforming_count
         else:
             breadth_delta = None
+            breadth_change_count = None
 
         # Concentration
         group_tickers = gdf["ticker"].unique().tolist()
@@ -279,6 +281,7 @@ def build_group_snapshots(
                 fraction=diffusion_constituent_fraction,
                 minimum_constituents=diffusion_minimum_constituents,
                 eligible=eligible_flag,
+                breadth_change_count=breadth_change_count,
             )
             diffusion_state = DiffusionState(to_v1_state(diffusion_state_v2))
         else:

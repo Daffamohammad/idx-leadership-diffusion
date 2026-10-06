@@ -13,6 +13,7 @@ import json
 import sys
 import tempfile
 from collections import defaultdict
+from datetime import date
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -31,6 +32,15 @@ from idx_leadership.taxonomy import (
 from idx_leadership.utils import get_logger, project_root
 
 _log = get_logger(__name__)
+
+
+def _is_taxonomy_point_in_time_eligible(
+    *, source_as_of: date | None, available_on: date | None, snapshot_as_of: str
+) -> bool:
+    endpoint = date.fromisoformat(snapshot_as_of)
+    return (source_as_of is None or source_as_of <= endpoint) and (
+        available_on is None or available_on <= endpoint
+    )
 
 
 def _resolve_universe(path: Path) -> list[str]:
@@ -291,6 +301,7 @@ def build_taxonomy_views(
             as_of=current_as_of,
         )
         definition_as_of = taxonomy.source_as_of.isoformat() if taxonomy.source_as_of else None
+        available_on = taxonomy.available_on.isoformat() if taxonomy.available_on else None
         view.update(
             {
                 "provider_mode": current_entry.get("provider_mode"),
@@ -300,8 +311,11 @@ def build_taxonomy_views(
                 "source_snapshot_price_basis": current_entry.get("price_basis"),
                 "previous_snapshot_id": previous_id,
                 "comparability": comparison,
-                "point_in_time_eligible": bool(
-                    definition_as_of is None or definition_as_of <= current_as_of
+                "membership_available_on": available_on,
+                "point_in_time_eligible": _is_taxonomy_point_in_time_eligible(
+                    source_as_of=taxonomy.source_as_of,
+                    available_on=taxonomy.available_on,
+                    snapshot_as_of=current_as_of,
                 ),
                 "calculation": {
                     "return_horizons": "TRADING_SESSIONS",

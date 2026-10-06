@@ -394,7 +394,6 @@ export default function MasterGroupTable() {
           taxonomyGroups={data.taxonomyGroups}
           taxonomyNames={{ SECTOR: "Sector", KONGLO: "Konglo", THEMES: "Themes" }}
           taxonomyKindsById={Object.fromEntries(Object.entries(data.taxonomyViews).map(([id, v]) => [id, v.taxonomy_kind]))}
-          foreignFlow={data.foreignFlow}
           asOf={data.payload.as_of}
           onSelectGroup={(kind, taxonomyId, groupId) => {
             void taxonomyId;
@@ -606,8 +605,7 @@ export default function MasterGroupTable() {
 
       <p style={{ marginTop: 12, color: "var(--muted)", fontSize: 11, lineHeight: 1.5 }}>
         Concentration column reflects absolute-move top-3 share (equal-weighted group return).
-        Breadth Δ requires a comparable prior snapshot — where comparability is unavailable,
-        diffusion displays as Unconfirmed. Confirmation is a sample-only foreign-flow signal,
+        Breadth change uses matched observations from the historical price replay. Confirmation is a sample-only foreign-flow signal,
         labeled accordingly.
       </p>
     </section>

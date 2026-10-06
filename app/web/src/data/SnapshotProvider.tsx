@@ -5,71 +5,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { adaptSnapshot, type AdaptedSnapshot } from "./adapter";
 import { SnapshotContext, type SnapshotContextValue } from "./SnapshotContext";
 import type { SnapshotPayload } from "./snapshot";
-import { pickLatestEntry, type IndexEntry } from "./snapshotSelection";
-
-export { pickLatestEntry };
-export type { IndexEntry };
-
-async function resolveLatestEntry(): Promise<IndexEntry | null> {
-  const envId =
-    (import.meta.env.VITE_SNAPSHOT_ID as string | undefined)?.trim() || null;
-  if (envId) return { snapshot_id: envId, as_of: "" };
-  try {
-    const res = await fetch("/snapshots/index.json", { cache: "no-store" });
-    if (!res.ok) return null;
-    const raw = await res.json();
-    if (!Array.isArray(raw)) return null;
-    const list = raw.filter(
-      (item): item is IndexEntry =>
-        !!item &&
-        typeof item === "object" &&
-        typeof item.snapshot_id === "string" &&
-        typeof item.as_of === "string",
-    );
-    return pickLatestEntry(list);
-  } catch {
-    return null;
-  }
-}
-
-const DEFAULT_IDX_RELEASE_PATH = "/idx/idx_investor_trading_2026-07.json";
-const DEFAULT_IDX_DAILY_STATISTICS_PATH = "/idx/idx_daily_statistics_latest.json";
-
-async function loadOptionalIDXRelease(snapshotAsOf?: string): Promise<unknown | null> {
-  const path =
-    (import.meta.env.VITE_IDX_RELEASE_PATH as string | undefined)?.trim() ||
-    DEFAULT_IDX_RELEASE_PATH;
-  try {
-    const response = await fetch(path, { cache: "no-store" });
-    if (!response.ok) return null;
-    const payload = await response.json();
-    const latest = payload?.as_of?.max;
-    if (snapshotAsOf && typeof latest === "string" && latest.slice(0, 10) > snapshotAsOf.slice(0, 10)) {
-      return null;
-    }
-    return payload;
-  } catch {
-    return null;
-  }
-}
-
-async function loadOptionalIDXDailyStatistics(snapshotAsOf?: string): Promise<unknown | null> {
-  const path =
-    (import.meta.env.VITE_IDX_DAILY_STATISTICS_PATH as string | undefined)?.trim() ||
-    DEFAULT_IDX_DAILY_STATISTICS_PATH;
-  try {
-    const response = await fetch(path, { cache: "no-store" });
-    if (!response.ok) return null;
-    const payload = await response.json();
-    const asOf = payload?.as_of;
-    if (snapshotAsOf && typeof asOf === "string" && asOf.slice(0, 10) > snapshotAsOf.slice(0, 10)) {
-      return null;
-    }
-    return payload;
-  } catch {
-    return null;
-  }
-}
+import { loadActiveRelease, loadReleaseAsset, loadReleaseAdditionalFile } from "./release";
 
 export function SnapshotProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<SnapshotContextValue>({
@@ -78,53 +14,32 @@ export function SnapshotProvider({ children }: { children: ReactNode }) {
     data: null,
     snapshotId: null,
     payload: null,
+    release: null,
   });
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const indexEntry = await resolveLatestEntry();
-        const id = indexEntry?.snapshot_id;
-        if (!id) {
-          if (!cancelled) {
-            setState({
-              loading: false,
-              error:
-                "No snapshot JSON found. Run `.venv/bin/python -m scripts.export_snapshot_json --latest` " +
-                "to generate app/web/public/snapshots/<id>.json.",
-              data: null,
-              snapshotId: null,
-              payload: null,
-            });
-          }
-          return;
-        }
-        const res = await fetch(`/snapshots/${id}.json`, { cache: "no-store" });
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status} loading /snapshots/${id}.json`);
-        }
-        const payload = (await res.json()) as SnapshotPayload;
-        if (payload.snapshot_id && payload.snapshot_id !== id) {
-          throw new Error(
-            `Snapshot index mismatch: requested ${id}, payload is ${payload.snapshot_id}`,
-          );
-        }
-        if (indexEntry?.as_of && payload.as_of && indexEntry.as_of !== payload.as_of) {
-          throw new Error(
-            `Snapshot date mismatch for ${id}: index=${indexEntry.as_of} payload=${payload.as_of}`,
-          );
+        const release = await loadActiveRelease();
+        const id = release.manifest.snapshot_identity.snapshot_id;
+        const payload = await loadReleaseAsset<SnapshotPayload>(release, release.manifest.families.snapshot);
+        if (payload.snapshot_id !== id || payload.as_of !== release.manifest.target_session) {
+          throw new Error(`Snapshot identity differs from selected release ${release.id}`);
         }
         const payloadMode = payload.manifest?.entries?.[0]?.provider_mode;
-        if (indexEntry?.provider_mode && payloadMode && indexEntry.provider_mode !== payloadMode) {
-          throw new Error(
-            `Snapshot provider mismatch for ${id}: index=${indexEntry.provider_mode} payload=${payloadMode}`,
-          );
+        const snapshotEntry = payload.manifest?.entries?.[0];
+        if (snapshotEntry && (
+          snapshotEntry.provider !== release.manifest.snapshot_identity.provider ||
+          payloadMode !== release.manifest.snapshot_identity.provider_mode ||
+          snapshotEntry.price_basis !== release.manifest.snapshot_identity.price_basis
+        )) {
+          throw new Error(`Snapshot provider or price basis differs from selected release ${release.id}`);
         }
         if (cancelled) return;
         const [idxInvestorRelease, idxDailyStatistics] = await Promise.all([
-          loadOptionalIDXRelease(payload.as_of),
-          loadOptionalIDXDailyStatistics(payload.as_of),
+          loadReleaseAdditionalFile(release, "idx_investor_release"),
+          loadReleaseAdditionalFile(release, "idx_daily_statistics"),
         ]);
         const adapted: AdaptedSnapshot = adaptSnapshot(
           payload,
@@ -137,6 +52,7 @@ export function SnapshotProvider({ children }: { children: ReactNode }) {
           data: adapted,
           snapshotId: id,
           payload,
+          release,
         });
       } catch (err) {
         if (cancelled) return;
@@ -146,6 +62,7 @@ export function SnapshotProvider({ children }: { children: ReactNode }) {
           data: null,
           snapshotId: null,
           payload: null,
+          release: null,
         });
       }
     })();

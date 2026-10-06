@@ -19,7 +19,10 @@ from idx_leadership.taxonomy import (
     build_taxonomy_payload,
     load_registry_from_yaml,
 )
-from scripts.build_taxonomy_views import _compatible_previous
+from scripts.build_taxonomy_views import (
+    _compatible_previous,
+    _is_taxonomy_point_in_time_eligible,
+)
 
 
 def _make_taxonomy(memberships: list[TaxonomyMembership]) -> Taxonomy:
@@ -342,6 +345,7 @@ source_kind: ANALYST_DEFINED
 source_as_of: 2026-08-30
 membership_policy: MULTI
 provider_mode: PUBLIC_PROTOTYPE
+available_on: 2026-08-31
 memberships:
   - ticker: A.JK
     taxonomy_group_id: G1
@@ -354,6 +358,20 @@ memberships:
     smoke = registry.get("smoke")
     assert smoke is not None
     assert smoke.memberships[0].confidence == pytest.approx(0.9)
+    assert smoke.available_on == date(2026, 8, 31)
+
+
+def test_taxonomy_point_in_time_gate_includes_source_availability():
+    assert not _is_taxonomy_point_in_time_eligible(
+        source_as_of=date(2026, 9, 30),
+        available_on=date(2026, 10, 5),
+        snapshot_as_of="2026-10-02",
+    )
+    assert _is_taxonomy_point_in_time_eligible(
+        source_as_of=date(2026, 9, 30),
+        available_on=date(2026, 10, 2),
+        snapshot_as_of="2026-10-02",
+    )
 
 
 def _compatibility_manifest(as_of: str, *, price_basis: str = "adjusted_close"):

@@ -16,6 +16,8 @@ import { useEffect, useRef, useState } from "react";
 interface TradingViewWidgetProps {
   ticker: string;
   exchange?: string;
+  symbolOverride?: "IDX:COMPOSITE";
+  title?: string;
   containerId?: string;
   onUnavailable?: (reason: TradingViewUnavailableReason) => void;
 }
@@ -62,6 +64,8 @@ declare global {
 export default function TradingViewWidget({
   ticker,
   exchange = "IDX",
+  symbolOverride,
+  title,
   containerId,
   onUnavailable,
 }: TradingViewWidgetProps) {
@@ -82,7 +86,7 @@ export default function TradingViewWidget({
   useEffect(() => {
     let cancelled = false;
     setStatus("loading");
-    const symbol = sanitizeTicker(ticker, exchange);
+    const symbol = symbolOverride ?? sanitizeTicker(ticker, exchange);
     if (!symbol) {
       setStatus("unsupported");
       onUnavailableRef.current?.("unsupported");
@@ -108,7 +112,7 @@ export default function TradingViewWidget({
           autosize: true,
           interval: "D",
           timezone: "Asia/Jakarta",
-          theme: "light",
+          theme: document.documentElement.classList.contains("dark") ? "dark" : "light",
           style: "1",
           locale: "en",
           toolbar_bg: "#faf9f6",
@@ -135,7 +139,7 @@ export default function TradingViewWidget({
       }
       widgetRef.current = null;
     };
-  }, [ticker, exchange]);
+  }, [ticker, exchange, symbolOverride]);
 
   return (
     <div
@@ -162,7 +166,7 @@ export default function TradingViewWidget({
         <div>
           <div className="eyebrow-muted">TradingView (context only)</div>
           <h3 style={{ margin: "4px 0 0", fontSize: 16, letterSpacing: "-.01em" }}>
-            Live chart for {ticker}
+            {title ?? `Live chart for ${ticker}`}
           </h3>
         </div>
         <span
@@ -177,7 +181,7 @@ export default function TradingViewWidget({
       </header>
       {(status === "blocked" || status === "unsupported") && (
         <p style={{ margin: 0, fontSize: 12, color: "var(--muted)" }}>
-          The external chart could not be loaded. Use the snapshot chart above for the recorded observation.
+          The external chart could not be loaded. The dated release history remains available in the overview.
         </p>
       )}
       <div

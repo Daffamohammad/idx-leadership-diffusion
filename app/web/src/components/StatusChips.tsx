@@ -44,6 +44,7 @@ const chipBase: React.CSSProperties = {
 };
 
 export function LeadershipChip({ state, small }: { state: LeadershipState; small?: boolean }) {
+  if (state === "UNCONFIRMED") return <span aria-label="No classified leadership state">—</span>;
   const cfg = leadershipCfg[state];
   return (
     <span style={{ ...chipBase, fontSize: small ? 10 : 11, color: cfg.color }}>
@@ -54,6 +55,7 @@ export function LeadershipChip({ state, small }: { state: LeadershipState; small
 }
 
 export function DiffusionChip({ state, small }: { state: DiffusionState; small?: boolean }) {
+  if (state === "UNCONFIRMED") return <span aria-label="No comparable diffusion reading">—</span>;
   const cfg = diffusionCfg[state];
   return (
     <span style={{ ...chipBase, fontSize: small ? 10 : 11, color: cfg.color }}>
@@ -65,10 +67,11 @@ export function DiffusionChip({ state, small }: { state: DiffusionState; small?:
 
 export function DataStatusChip({ status }: { status: DataStatus }) {
   const cfg = dataCfg[status];
+  const label = status === "READY" ? "Ready" : "—";
   return (
-    <span style={{ ...chipBase, fontSize: 11, color: cfg.color }}>
+    <span aria-label={label} style={{ ...chipBase, fontSize: 11, color: cfg.color }}>
       <span style={{ width: 5, height: 5, borderRadius: '50%', background: cfg.dotColor, display: 'inline-block', flexShrink: 0 }} />
-      {formatEnumLabel(status)}
+      {label}
     </span>
   );
 }
