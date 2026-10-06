@@ -43,7 +43,7 @@ def test_context_helpers_keep_web_sources_separate_from_confirmation_metrics():
       crawlCount: getTavilyCrawl(payload).records.length,
     }));'''
     result = subprocess.run(
-        ["bun", "x", "tsx", "-e", script],
+        ["bun", "-e", script],
         capture_output=True,
         text=True,
         cwd=str(REPO_ROOT),

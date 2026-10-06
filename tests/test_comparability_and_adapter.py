@@ -24,7 +24,7 @@ def _classify_map_point(
     """Run the classifyMapPoint helper via Bun/tsx."""
     import subprocess, json
     result = subprocess.run(
-        ["bun", "x", "tsx", "-e",
+        ["bun", "-e",
          f'import {{classifyMapPoint}} from "./app/web/src/data/mapGeometry.ts"; '
          f'const value = {json.dumps(value)}; '
          f'const plot = {json.dumps(plot)}; '
@@ -384,7 +384,7 @@ def test_x_axis_overflow_is_detected():
     """isOutOfXBounds must detect values outside the x-axis domain [-15, 15]."""
     import subprocess, json
     result = subprocess.run(
-        ["bun", "x", "tsx", "-e",
+        ["bun", "-e",
          'import {isOutOfXBounds} from "./app/web/src/data/mapGeometry.ts"; '
          'const plot = {"left": 46, "top": 22, "width": 630, "height": 270}; '
          'const domain = {"xMin": -15, "xMax": 15}; '
@@ -399,7 +399,7 @@ def test_y_axis_overflow_is_detected():
     """isOutOfYBounds must detect y values outside the domain."""
     import subprocess, json
     result = subprocess.run(
-        ["bun", "x", "tsx", "-e",
+        ["bun", "-e",
          'import {isOutOfYBounds} from "./app/web/src/data/mapGeometry.ts"; '
          'const plot = {"left": 46, "top": 22, "width": 630, "height": 270}; '
          'const domain = {"xMin": -15, "xMax": 15, "yMin": -30, "yMax": 30}; '
@@ -582,18 +582,25 @@ def test_prototype_snapshot_explicitly_configured():
     )
 
 
-def test_snapshot_provider_selection_contract():
-    """The SPA resolves the active snapshot by newest as-of, never by
-    provider brand, and keeps the explicit VITE_SNAPSHOT_ID override."""
+def test_snapshot_provider_uses_the_selected_release_contract():
+    """The SPA loads only the immutable release selected by active.json."""
     source = (
         REPO_ROOT / "app" / "web" / "src" / "data" / "SnapshotProvider.tsx"
     ).read_text(encoding="utf-8")
-    assert "VITE_SNAPSHOT_ID" in source, "explicit snapshot selection must be preserved"
-    # The Sectors-preference branch must be gone.
-    assert "const live = list.filter(" not in source, (
-        "provider-mode preference must not override the newest as_of"
-    )
-    assert "pickLatestEntry" in source
+    market = (
+        REPO_ROOT / "app" / "web" / "src" / "data" / "marketWorkspace.ts"
+    ).read_text(encoding="utf-8")
+    release = (
+        REPO_ROOT / "app" / "web" / "src" / "data" / "release.ts"
+    ).read_text(encoding="utf-8")
+    assert "loadActiveRelease" in source
+    assert "loadReleaseAsset" in source
+    assert "loadReleaseAsset" in market
+    assert "VITE_SNAPSHOT_ID" not in source
+    assert '"/snapshots/index.json"' not in source
+    assert '"/market/index.json"' not in market
+    assert '"/idx/idx_daily_statistics_latest.json"' not in source
+    assert "manifest_sha256" in release and "crypto.subtle.digest" in release
 
 
 # ── coverage and history metadata ────────────────────────────────
@@ -693,11 +700,11 @@ def test_label_deduplication_resolves_close_markers():
         {"id": "C", "text": "C", "x": 200, "y": 50, "radius": 8, "priority": 8},
     ])
     result = subprocess.run(
-        ["bun", "x", "tsx", "-e",
+        ["bun", "-e",
          f'import {{placeMapLabels}} from "./app/web/src/data/mapLabels.ts"; '
          f'const candidates = {candidates_json}; '
          'const bounds = {"left": 0, "right": 720, "top": 0, "bottom": 300}; '
-         'const positions = placeMapLabels(candidates, bounds, maxLabels=3); '
+         'const positions = placeMapLabels(candidates, bounds, 3); '
          'console.log(JSON.stringify(positions.map(p => p.id)));'],
         capture_output=True, text=True, cwd=str(REPO_ROOT), timeout=30
     )
@@ -745,7 +752,7 @@ def test_frontend_status_normalization_keeps_data_gap_distinct():
         'normalizeDataStatus("UNAVAILABLE")]));'
     )
     result = subprocess.run(
-        ["bun", "x", "tsx", "-e", script],
+        ["bun", "-e", script],
         capture_output=True,
         text=True,
         cwd=str(REPO_ROOT),
@@ -779,7 +786,7 @@ def test_diffusion_readiness_separates_data_gap_from_method_guardrail():
         '})));'
     )
     result = subprocess.run(
-        ["bun", "x", "tsx", "-e", script],
+        ["bun", "-e", script],
         capture_output=True,
         text=True,
         cwd=str(REPO_ROOT),
@@ -815,6 +822,6 @@ def test_frontend_preserves_dated_expanded_catalog_definitions():
         'const d=adaptSnapshot(p); '
         'console.log(JSON.stringify([d.taxonomyViews.themes.source_as_of,d.taxonomyViews.konglo.source_as_of]));'
     )
-    result=subprocess.run(["bun","x","tsx","-e",script],capture_output=True,text=True,cwd=REPO_ROOT,timeout=30)
+    result=subprocess.run(["bun","-e",script],capture_output=True,text=True,cwd=REPO_ROOT,timeout=30)
     assert result.returncode==0,result.stderr
     assert json.loads(result.stdout.strip())==["2026-08-27","2026-09-30"]

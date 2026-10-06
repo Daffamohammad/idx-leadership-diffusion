@@ -314,7 +314,7 @@ def _run_tsx(script: str) -> str:
     import subprocess
 
     result = subprocess.run(
-        ["bun", "x", "tsx", "-e", script],
+        ["bun", "-e", script],
         capture_output=True,
         text=True,
         cwd=str(REPO_ROOT),
@@ -324,30 +324,87 @@ def _run_tsx(script: str) -> str:
     return result.stdout.strip()
 
 
-def test_pick_latest_entry_prefers_newest_as_of_over_provider_brand() -> None:
-    out = _run_tsx(
-        'import {pickLatestEntry} from "./app/web/src/data/snapshotSelection.ts"; '
-        'const entries = ['
-        '  {snapshot_id: "snap_sectors_2026-08-27", as_of: "2026-08-27", provider_mode: "SECTORS_LIVE"},'
-        '  {snapshot_id: "snap_public_2026-10-02", as_of: "2026-10-02", provider_mode: "PUBLIC_PROTOTYPE"},'
-        ']; '
-        'console.log(JSON.stringify(pickLatestEntry(entries)?.snapshot_id));'
-    )
-    assert out == '"snap_public_2026-10-02"', (
-        f"newest as_of must win regardless of provider mode, got {out}"
-    )
-
-
-def test_pick_latest_entry_tie_breaks_deterministically_and_handles_empty() -> None:
-    out = _run_tsx(
-        'import {pickLatestEntry} from "./app/web/src/data/snapshotSelection.ts"; '
-        'const tie = ['
-        '  {snapshot_id: "snap_b", as_of: "2026-10-02"},'
-        '  {snapshot_id: "snap_a", as_of: "2026-10-02"},'
-        ']; '
-        'console.log(JSON.stringify([pickLatestEntry(tie)?.snapshot_id, pickLatestEntry([])]));'
-    )
-    assert out == '["snap_b",null]', f"tie-break/empty contract changed: {out}"
+def test_release_reader_pins_assets_to_one_verified_manifest() -> None:
+    out = _run_tsx(r'''
+import {createHash} from "node:crypto";
+import {loadActiveRelease, loadReleaseAsset} from "./app/web/src/data/release.ts";
+const hash = (value: string) => createHash("sha256").update(value).digest("hex");
+const canonical = (value: any): string => Array.isArray(value) ? `[${value.map(canonical).join(",")}]` :
+  value && typeof value === "object" ? `{${Object.keys(value).sort().map(k => `${JSON.stringify(k)}:${canonical(value[k])}`).join(",")}}` : JSON.stringify(value);
+const target = "2026-10-02", snapshotId = "snap_public_market_2026-10-02";
+const schemas: Record<string, string> = {snapshot:"web-snapshot-v1",market:"market-workspace-v1",ownership:"idx-ownership-v1",foreign:"idx-foreign-history-v1",rotation:"rotation-history-v1"};
+const bodies: Record<string, string> = {};
+const families: Record<string, any> = {};
+for (const [family, schema] of Object.entries(schemas)) {
+  const as_of = family === "ownership" ? "2026-09-30" : target;
+  const body = JSON.stringify({schema_version:schema,as_of,snapshot_id:snapshotId}); bodies[family] = body;
+  families[family] = {path:`${family}.json`,sha256:hash(body),bytes:new TextEncoder().encode(body).length,schema,observation_date:as_of};
+}
+const identity = {snapshot_id:snapshotId,provider:"yfinance",provider_mode:"PUBLIC_PROTOTYPE",price_basis:"adjusted_close"};
+const contracts = {methodology:"a".repeat(64)};
+const reportInputHashes = {validator_contract:"public-panel-validation-v2",panel_files:{"prices.csv":"b".repeat(64),"benchmark.csv":"c".repeat(64),"source_manifest.json":"d".repeat(64)},
+  official_sources:{composite_workbook:{file_name:"composite.xlsx",sha256:"e".repeat(64)},stock_summary:{file_name:"summary.xlsx",sha256:"f".repeat(64)},daily_statistics_pdfs:{"ds_20261002.pdf":"1".repeat(64)}}};
+const panelReport = {kind:"PUBLIC_PANEL_VALIDATION",status:"PASS",validator_contract:"public-panel-validation-v2",input_hashes:reportInputHashes};
+const sourceEvidence = [{source_id:"validation-report",sha256:hash(`${canonical(panelReport)}\n`),role:"market_panel_validation",file_name:"validation.json"}];
+const validation = {package_status:"PASS",analytical_status:"COVERAGE_REPORTED_IN_FAMILY_ASSETS",validator_contract:"idx-release-validator-v1",
+  contract_fingerprints:contracts,evidence_reports:{market_panel:{status:"PASS",sha256:sourceEvidence[0].sha256,contract:"public-panel-validation-v2",input_hashes:reportInputHashes}},
+  input_hashes:{families:Object.fromEntries(Object.keys(families).sort().map(k=>[k,families[k].sha256])),additional_files:{},source_evidence:{"validation-report":sourceEvidence[0].sha256}}};
+const familyInventory = Object.fromEntries(Object.keys(families).sort().map(k => [k, families[k]]));
+const material = {target_session:target,snapshot_identity:identity,analytical_contracts:contracts,source_evidence:sourceEvidence,validation,
+  families:familyInventory,additional_files:[]};
+const idA = `rel-${hash(canonical(material))}`;
+const manifestA = {schema_version:"idx-release-manifest-v1",release_id:idA,...material};
+const manifestBodyA = `${canonical(manifestA)}\n`;
+const contractsB = {methodology:"2".repeat(64)};
+const validationB = {...validation,contract_fingerprints:contractsB};
+const materialB = {...material,analytical_contracts:contractsB,validation:validationB};
+const idB = `rel-${hash(canonical(materialB))}`;
+const manifestB = {schema_version:"idx-release-manifest-v1",release_id:idB,...materialB};
+const manifestBodyB = `${canonical(manifestB)}\n`;
+const pointerFor = (id:string, body:string) => JSON.stringify({schema_version:"idx-active-release-v1",
+  active:{release_id:id,manifest_path:`${id}/manifest.json`,manifest_sha256:hash(body)},previous:null});
+let activePointer = pointerFor(idA, manifestBodyA);
+const baseA = `/releases/${idA}/`, baseB = `/releases/${idB}/`;
+const files = new Map<string,string>([[`${baseA}manifest.json`,manifestBodyA],[`${baseB}manifest.json`,manifestBodyB],
+  ...Object.entries(families).flatMap(([family, entry]) => [[`${baseA}${entry.path}`,bodies[family]],[`${baseB}${entry.path}`,bodies[family]]])]);
+const requested: string[] = [];
+let unblockFirstMarket: (() => void) | undefined;
+let markFirstMarketStarted: () => void = () => {};
+const firstMarketStarted = new Promise<void>(resolve => {markFirstMarketStarted = resolve;});
+globalThis.fetch = (async (input: RequestInfo | URL) => {
+  const path = String(input); requested.push(path);
+  if (path === "/releases/active.json") return new Response(activePointer, {status:200,headers:{"content-type":"application/json"}});
+  if (path === `${baseA}market.json` && !unblockFirstMarket) {
+    markFirstMarketStarted();
+    await new Promise<void>(resolve => {unblockFirstMarket = resolve;});
+  }
+  const value = files.get(path);
+  return new Response(value ?? "missing", {status:value ? 200 : 404,headers:{"content-type":"application/json"}});
+}) as typeof fetch;
+void (async () => {
+  const selectedA = await loadActiveRelease();
+  const delayedMarketA = loadReleaseAsset<any>(selectedA, selectedA.manifest.families.market);
+  await firstMarketStarted;
+  activePointer = pointerFor(idB, manifestBodyB);
+  const selectedB = await loadActiveRelease();
+  unblockFirstMarket?.();
+  const marketBPromise = loadReleaseAsset<any>(selectedB, selectedB.manifest.families.market);
+  const [marketA, marketB] = await Promise.all([delayedMarketA, marketBPromise]);
+  console.log(JSON.stringify({releaseA:selectedA.id,releaseB:selectedB.id,idA,idB,marketADate:marketA.as_of,marketBDate:marketB.as_of,
+    activeReads:requested.filter(p=>p==="/releases/active.json").length,
+    requestedMarketA:requested.includes(`${baseA}market.json`),requestedMarketB:requested.includes(`${baseB}market.json`),
+    oldIndexRead:requested.some(p=>p.includes("/index.json"))}));
+})();
+''')
+    result = json.loads(out)
+    assert result["releaseA"] == result["idA"]
+    assert result["releaseB"] == result["idB"]
+    assert result["idA"] != result["idB"]
+    assert result["marketADate"] == result["marketBDate"] == "2026-10-02"
+    assert result["activeReads"] == 2
+    assert result["requestedMarketA"] is True
+    assert result["requestedMarketB"] is True
+    assert result["oldIndexRead"] is False
 
 
 def test_build_rotation_tail_requires_three_real_dated_points() -> None:

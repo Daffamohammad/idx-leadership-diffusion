@@ -648,9 +648,10 @@ def test_validator_handles_populated_external_sources_root(
     report = json.loads(out.read_text(encoding="utf-8"))
     reconciliation = report["checks"]["coverage_reconciliation"]
     assert reconciliation["sectors_snapshot_registry_codes"] == 950
-    assert reconciliation["sectors_registry_source"] == str(
-        report_dir / "validation_report.json"
-    ), "outside the repo the registry source must be reported as its abs path"
+    assert reconciliation["sectors_registry_source_file"] == "validation_report.json"
+    assert reconciliation["sectors_registry_source_sha256"] == hashlib.sha256(
+        (report_dir / "validation_report.json").read_bytes()
+    ).hexdigest()
 
 
 def test_fixture_publication_refuses_non_passing_reports(tmp_path: Path) -> None:

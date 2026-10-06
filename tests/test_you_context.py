@@ -50,7 +50,7 @@ def test_you_context_helpers_keep_web_sources_separate_from_confirmation_metrics
       researchAnswer: ctx?.categories.foreign_flow?.research_answer,
     }));'''
     result = subprocess.run(
-        ["bun", "x", "tsx", "-e", script],
+        ["bun", "-e", script],
         capture_output=True,
         text=True,
         cwd=str(REPO_ROOT),
@@ -72,7 +72,7 @@ def test_you_context_normalizer_rejects_quantitative_payload():
     const ctx = normalizeYouContext({ quantitative_use: true, categories: {} });
     console.log(JSON.stringify({ rejected: ctx === null }));'''
     result = subprocess.run(
-        ["bun", "x", "tsx", "-e", script],
+        ["bun", "-e", script],
         capture_output=True,
         text=True,
         cwd=str(REPO_ROOT),
