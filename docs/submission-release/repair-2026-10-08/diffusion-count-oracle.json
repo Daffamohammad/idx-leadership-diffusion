@@ -1,0 +1,15 @@
+{
+  "source_commit": "63d9dced8088f76f2bcfa480a7b778e6d6fc6777",
+  "release_id": "rel-fad218940fcc7e2492d97613681175b6cb2b2e38d387254737fafc0cadfa09dc",
+  "status": "PASS",
+  "groups": 160,
+  "daily_observations": 3360,
+  "weekly_observations": 800,
+  "mismatch_count": 0,
+  "output": [
+    "groups: 160",
+    "daily observations checked: 3360",
+    "weekly observations checked: 800",
+    "mismatches: 0"
+  ]
+}

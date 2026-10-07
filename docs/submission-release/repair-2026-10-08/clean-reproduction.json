@@ -1,0 +1,41 @@
+{
+  "active_release": "rel-fad218940fcc7e2492d97613681175b6cb2b2e38d387254737fafc0cadfa09dc",
+  "analysis_sha256": "4aeea2a1e8417c81fa896351ad09597e206b2e1f8705a8daac275d78e27c82b9",
+  "clean_source": "git archive of committed source",
+  "credentials_required": false,
+  "frontend": {
+    "bundle_hashes": {
+      "assets/index-Do4Kpl2M.js": "504129d819e8d14142f5f664c6a4b939e5d2ad6ee9084230a4e08247701d67b8",
+      "assets/index-kxFI8byS.css": "2e308406c021d1aba3dc59577b5309ee27c5629e7b48f29c4b236806ba146d38"
+    },
+    "compiled_assets_match_workspace_build": true,
+    "dependencies": "Existing locked node_modules reused with clean source archive",
+    "production_build": "PASS",
+    "status": "PASS",
+    "typecheck": "PASS"
+  },
+  "imported_source_inside_clean_checkout": true,
+  "independent_sectors_oracle": {
+    "counts": {
+      "daily_observations": 21,
+      "diffusion_states_and_cohorts": 286,
+      "member_window_values": 5148,
+      "sector_return_aggregates": 858,
+      "weekly_observations": 5,
+      "ytd_contributor_values": 66,
+      "ytd_group_aggregates": 11
+    },
+    "method": "Independent close arithmetic and pure integer-count diffusion thresholds; production helpers and classifiers are not imported.",
+    "mismatch_count": 0,
+    "mismatches": [],
+    "sample_sha256": "9e9c8540e676eed99acd4dbfe4bdf86534e1a3a9a6e6575e3d3ce99281390f20",
+    "status": "PASS",
+    "ytd_status": "PASS"
+  },
+  "network_disabled": true,
+  "paid_requests": 0,
+  "rebuilt_bytes_match_released_asset": true,
+  "rollback_release": "rel-246dd63fa62c1321143334c799f116e686a7602141a94a97aa3cc41d54b0d708",
+  "source_commit": "63d9dced8088f76f2bcfa480a7b778e6d6fc6777",
+  "status": "PASS"
+}

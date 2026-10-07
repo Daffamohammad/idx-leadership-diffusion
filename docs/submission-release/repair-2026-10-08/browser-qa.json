@@ -1,0 +1,1565 @@
+{
+  "schema_version": "diffusion-browser-qa-v1",
+  "status": "PASS",
+  "source_commit": "63d9dced8088f76f2bcfa480a7b778e6d6fc6777",
+  "release_id": "rel-fad218940fcc7e2492d97613681175b6cb2b2e38d387254737fafc0cadfa09dc",
+  "manifest_sha256": "2defade3acf1688eb96e0e40d577189f390eafd03fea69a1175ce5e07aa1f11c",
+  "created_at_utc": "2026-10-07T17:54:40.476Z",
+  "checks": {
+    "sectors_1036x799": {
+      "status": "PASS",
+      "observed": {
+        "alerts": 0,
+        "brand": "The Diffusion · Indonesian Market Intelligence",
+        "coverage": "9 of 11 sectors plotted. Financials: 4 of 6 matched contributors (five required) · Technology: 4 of 6 matched contributors (five required)",
+        "map": {
+          "bottom": 761.25,
+          "height": 320,
+          "left": 239.078125,
+          "right": 666.5703125,
+          "top": 441.25,
+          "width": 427.4921875,
+          "x": 239.078125,
+          "y": 441.25
+        },
+        "marks": 9,
+        "overflow": false,
+        "ranking": {
+          "bottom": 796.75,
+          "height": 386,
+          "left": 688.5703125,
+          "right": 993.921875,
+          "top": 410.75,
+          "width": 305.3515625,
+          "x": 688.5703125,
+          "y": 410.75
+        },
+        "ranks": 11,
+        "viewport": [
+          1036,
+          799
+        ],
+        "interaction": {
+          "date": "2026-09-25",
+          "overflow": false,
+          "rows": 6,
+          "sector": "Healthcare",
+          "viewport": [
+            1036,
+            799
+          ],
+          "ytd_label": "YTD through 2 Oct 2026 · raw / excess"
+        }
+      }
+    },
+    "sectors_1440x900": {
+      "status": "PASS",
+      "observed": {
+        "alerts": 0,
+        "brand": "The Diffusion · Indonesian Market Intelligence",
+        "coverage": "9 of 11 sectors plotted. Financials: 4 of 6 matched contributors (five required) · Technology: 4 of 6 matched contributors (five required)",
+        "map": {
+          "bottom": 715.0625,
+          "height": 320,
+          "left": 248,
+          "right": 900.7421875,
+          "top": 395.0625,
+          "width": 652.7421875,
+          "x": 248,
+          "y": 395.0625
+        },
+        "marks": 9,
+        "overflow": false,
+        "ranking": {
+          "bottom": 781.0625,
+          "height": 386,
+          "left": 922.7421875,
+          "right": 1388.9921875,
+          "top": 395.0625,
+          "width": 466.25,
+          "x": 922.7421875,
+          "y": 395.0625
+        },
+        "ranks": 11,
+        "viewport": [
+          1440,
+          900
+        ]
+      }
+    },
+    "sectors_390x844": {
+      "status": "PASS",
+      "observed": {
+        "alerts": 0,
+        "brand": "The Diffusion · Indonesian Market Intelligence",
+        "coverage": "9 of 11 sectors plotted. Financials: 4 of 6 matched contributors (five required) · Technology: 4 of 6 matched contributors (five required)",
+        "map": {
+          "bottom": 836.359375,
+          "height": 260,
+          "left": 12,
+          "right": 367,
+          "top": 576.359375,
+          "width": 355,
+          "x": 12,
+          "y": 576.359375
+        },
+        "marks": 9,
+        "overflow": false,
+        "ranking": {
+          "bottom": 1352.046875,
+          "height": 386,
+          "left": 12,
+          "right": 367,
+          "top": 966.046875,
+          "width": 355,
+          "x": 12,
+          "y": 966.046875
+        },
+        "ranks": 11,
+        "viewport": [
+          390,
+          844
+        ],
+        "interaction": {
+          "date": "2026-09-25",
+          "overflow": false,
+          "rows": 6,
+          "sector": "Healthcare",
+          "viewport": [
+            390,
+            844
+          ],
+          "ytd_label": "YTD through 2 Oct 2026 · raw / excess"
+        }
+      }
+    },
+    "core_interactions": {
+      "status": "PASS",
+      "observed": {
+        "replay": [
+          {
+            "cadence": "Daily",
+            "alerts": 0,
+            "date": "2026-09-04",
+            "marks": 2,
+            "ranks": 11,
+            "ytd_label": "YTD through 2 Oct 2026 · raw / excess"
+          },
+          {
+            "cadence": "Daily",
+            "alerts": 0,
+            "date": "2026-09-07",
+            "marks": 3,
+            "ranks": 11,
+            "ytd_label": "YTD through 2 Oct 2026 · raw / excess"
+          },
+          {
+            "cadence": "Daily",
+            "alerts": 0,
+            "date": "2026-09-08",
+            "marks": 3,
+            "ranks": 11,
+            "ytd_label": "YTD through 2 Oct 2026 · raw / excess"
+          },
+          {
+            "cadence": "Daily",
+            "alerts": 0,
+            "date": "2026-09-09",
+            "marks": 3,
+            "ranks": 11,
+            "ytd_label": "YTD through 2 Oct 2026 · raw / excess"
+          },
+          {
+            "cadence": "Daily",
+            "alerts": 0,
+            "date": "2026-09-10",
+            "marks": 3,
+            "ranks": 11,
+            "ytd_label": "YTD through 2 Oct 2026 · raw / excess"
+          },
+          {
+            "cadence": "Daily",
+            "alerts": 0,
+            "date": "2026-09-11",
+            "marks": 4,
+            "ranks": 11,
+            "ytd_label": "YTD through 2 Oct 2026 · raw / excess"
+          },
+          {
+            "cadence": "Daily",
+            "alerts": 0,
+            "date": "2026-09-14",
+            "marks": 5,
+            "ranks": 11,
+            "ytd_label": "YTD through 2 Oct 2026 · raw / excess"
+          },
+          {
+            "cadence": "Daily",
+            "alerts": 0,
+            "date": "2026-09-15",
+            "marks": 5,
+            "ranks": 11,
+            "ytd_label": "YTD through 2 Oct 2026 · raw / excess"
+          },
+          {
+            "cadence": "Daily",
+            "alerts": 0,
+            "date": "2026-09-16",
+            "marks": 5,
+            "ranks": 11,
+            "ytd_label": "YTD through 2 Oct 2026 · raw / excess"
+          },
+          {
+            "cadence": "Daily",
+            "alerts": 0,
+            "date": "2026-09-17",
+            "marks": 6,
+            "ranks": 11,
+            "ytd_label": "YTD through 2 Oct 2026 · raw / excess"
+          },
+          {
+            "cadence": "Daily",
+            "alerts": 0,
+            "date": "2026-09-18",
+            "marks": 6,
+            "ranks": 11,
+            "ytd_label": "YTD through 2 Oct 2026 · raw / excess"
+          },
+          {
+            "cadence": "Daily",
+            "alerts": 0,
+            "date": "2026-09-21",
+            "marks": 6,
+            "ranks": 11,
+            "ytd_label": "YTD through 2 Oct 2026 · raw / excess"
+          },
+          {
+            "cadence": "Daily",
+            "alerts": 0,
+            "date": "2026-09-22",
+            "marks": 6,
+            "ranks": 11,
+            "ytd_label": "YTD through 2 Oct 2026 · raw / excess"
+          },
+          {
+            "cadence": "Daily",
+            "alerts": 0,
+            "date": "2026-09-23",
+            "marks": 6,
+            "ranks": 11,
+            "ytd_label": "YTD through 2 Oct 2026 · raw / excess"
+          },
+          {
+            "cadence": "Daily",
+            "alerts": 0,
+            "date": "2026-09-24",
+            "marks": 6,
+            "ranks": 11,
+            "ytd_label": "YTD through 2 Oct 2026 · raw / excess"
+          },
+          {
+            "cadence": "Daily",
+            "alerts": 0,
+            "date": "2026-09-25",
+            "marks": 6,
+            "ranks": 11,
+            "ytd_label": "YTD through 2 Oct 2026 · raw / excess"
+          },
+          {
+            "cadence": "Daily",
+            "alerts": 0,
+            "date": "2026-09-28",
+            "marks": 6,
+            "ranks": 11,
+            "ytd_label": "YTD through 2 Oct 2026 · raw / excess"
+          },
+          {
+            "cadence": "Daily",
+            "alerts": 0,
+            "date": "2026-09-29",
+            "marks": 7,
+            "ranks": 11,
+            "ytd_label": "YTD through 2 Oct 2026 · raw / excess"
+          },
+          {
+            "cadence": "Daily",
+            "alerts": 0,
+            "date": "2026-09-30",
+            "marks": 7,
+            "ranks": 11,
+            "ytd_label": "YTD through 2 Oct 2026 · raw / excess"
+          },
+          {
+            "cadence": "Daily",
+            "alerts": 0,
+            "date": "2026-10-01",
+            "marks": 9,
+            "ranks": 11,
+            "ytd_label": "YTD through 2 Oct 2026 · raw / excess"
+          },
+          {
+            "cadence": "Daily",
+            "alerts": 0,
+            "date": "2026-10-02",
+            "marks": 9,
+            "ranks": 11,
+            "ytd_label": "YTD through 2 Oct 2026 · raw / excess"
+          },
+          {
+            "cadence": "Weekly",
+            "alerts": 0,
+            "date": "2026-09-04",
+            "marks": 2,
+            "ranks": 11,
+            "ytd_label": "YTD through 2 Oct 2026 · raw / excess"
+          },
+          {
+            "cadence": "Weekly",
+            "alerts": 0,
+            "date": "2026-09-11",
+            "marks": 4,
+            "ranks": 11,
+            "ytd_label": "YTD through 2 Oct 2026 · raw / excess"
+          },
+          {
+            "cadence": "Weekly",
+            "alerts": 0,
+            "date": "2026-09-18",
+            "marks": 6,
+            "ranks": 11,
+            "ytd_label": "YTD through 2 Oct 2026 · raw / excess"
+          },
+          {
+            "cadence": "Weekly",
+            "alerts": 0,
+            "date": "2026-09-25",
+            "marks": 6,
+            "ranks": 11,
+            "ytd_label": "YTD through 2 Oct 2026 · raw / excess"
+          },
+          {
+            "cadence": "Weekly",
+            "alerts": 0,
+            "date": "2026-10-02",
+            "marks": 9,
+            "ranks": 11,
+            "ytd_label": "YTD through 2 Oct 2026 · raw / excess"
+          }
+        ],
+        "constituents": [
+          {
+            "rows": [
+              {
+                "eligibility20d": "Action: RIGHT ISSUE 2026-09-22",
+                "eligibility60d": "Action: RIGHT ISSUE 2026-09-22",
+                "ticker": "FORU",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "MAPA",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "MAPI",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "MDIY",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "MGLV",
+                "ytd": "+575.00% / +605.18%",
+                "ytd_eligibility": "Eligible"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "VKTR",
+                "ytd": "−1.18% / +29.00%",
+                "ytd_eligibility": "Eligible"
+              }
+            ],
+            "sector": "Consumer Cyclicals"
+          },
+          {
+            "rows": [
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "ASII",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "IMPC",
+                "ytd": "−65.90% / −35.72%",
+                "ytd_eligibility": "Eligible"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "JTPE",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Action: DIVIDEND 2026-08-14",
+                "ticker": "MARK",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "SMIL",
+                "ytd": "+23.20% / +53.39%",
+                "ytd_eligibility": "Eligible"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "UNTR",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              }
+            ],
+            "sector": "Industrials"
+          },
+          {
+            "rows": [
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Action: DIVIDEND 2026-08-31",
+                "ticker": "BBCA",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "BBNI",
+                "ytd": "−21.74% / +8.45%",
+                "ytd_eligibility": "Eligible"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "BBRI",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Action: DIVIDEND 2026-09-16",
+                "eligibility60d": "Action: DIVIDEND 2026-09-16",
+                "ticker": "BMRI",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "DNET",
+                "ytd": "+8.82% / +39.00%",
+                "ytd_eligibility": "Eligible"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "SMMA",
+                "ytd": "+38.28% / +68.46%",
+                "ytd_eligibility": "Eligible"
+              }
+            ],
+            "sector": "Financials"
+          },
+          {
+            "rows": [
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "CARE",
+                "ytd": "−45.29% / −15.11%",
+                "ytd_eligibility": "Eligible"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "KLBF",
+                "ytd": "−39.83% / −9.65%",
+                "ytd_eligibility": "Eligible"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "MIKA",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "SILO",
+                "ytd": "−27.01% / +3.18%",
+                "ytd_eligibility": "Eligible"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "SOHO",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "TSPC",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              }
+            ],
+            "sector": "Healthcare"
+          },
+          {
+            "rows": [
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "AMRT",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "CPIN",
+                "ytd": "−35.48% / −5.29%",
+                "ytd_eligibility": "Eligible"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "HMSP",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "ICBP",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "INDF",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "UNVR",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              }
+            ],
+            "sector": "Consumer Non-Cyclicals"
+          },
+          {
+            "rows": [
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "AADI",
+                "ytd": "+65.59% / +95.78%",
+                "ytd_eligibility": "Eligible"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "ADRO",
+                "ytd": "+38.12% / +68.31%",
+                "ytd_eligibility": "Eligible"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "BUMI",
+                "ytd": "−52.19% / −22.00%",
+                "ytd_eligibility": "Eligible"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "BYAN",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "CUAN",
+                "ytd": "−63.89% / −33.70%",
+                "ytd_eligibility": "Eligible"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "DSSA",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              }
+            ],
+            "sector": "Energy"
+          },
+          {
+            "rows": [
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "BIRD",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "ELPI",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "HATM",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Action: DIVIDEND 2026-08-10",
+                "ticker": "SMDR",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "TMAS",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "WBSA",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              }
+            ],
+            "sector": "Transportation & Logistic"
+          },
+          {
+            "rows": [
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "AMMN",
+                "ytd": "−34.01% / −3.82%",
+                "ytd_eligibility": "Eligible"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "ANTM",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "BRMS",
+                "ytd": "−48.18% / −18.00%",
+                "ytd_eligibility": "Eligible"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "BRPT",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "EMAS",
+                "ytd": "+38.74% / +68.92%",
+                "ytd_eligibility": "Eligible"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "TPIA",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              }
+            ],
+            "sector": "Basic Materials"
+          },
+          {
+            "rows": [
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "BSDE",
+                "ytd": "−40.88% / −10.70%",
+                "ytd_eligibility": "Eligible"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "CBDK",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "JRPT",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "MKPI",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "PANI",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "PWON",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              }
+            ],
+            "sector": "Properties & Real Estate"
+          },
+          {
+            "rows": [
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "BREN",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Action: DIVIDEND 2026-10-01",
+                "eligibility60d": "Action: DIVIDEND 2026-10-01",
+                "ticker": "CDIA",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "EXCL",
+                "ytd": "−36.53% / −6.35%",
+                "ytd_eligibility": "Eligible"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "ISAT",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "MORA",
+                "ytd": "−62.99% / −32.80%",
+                "ytd_eligibility": "Eligible"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "TLKM",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              }
+            ],
+            "sector": "Infrastructures"
+          },
+          {
+            "rows": [
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "CYBR",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "DCII",
+                "ytd": "+0.45% / +30.63%",
+                "ytd_eligibility": "Eligible"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "EMTK",
+                "ytd": "−64.79% / −34.61%",
+                "ytd_eligibility": "Eligible"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Action: STOCK SPLIT 2026-07-21",
+                "ticker": "MLPT",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Eligible",
+                "ticker": "MTDL",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              },
+              {
+                "eligibility20d": "Eligible",
+                "eligibility60d": "Action: DIVIDEND 2026-07-09",
+                "ticker": "WIFI",
+                "ytd": "— / —",
+                "ytd_eligibility": "no matching 2025 stock baseline"
+              }
+            ],
+            "sector": "Technology"
+          }
+        ],
+        "ytd_supported": 23,
+        "rankSelected": "Healthcare",
+        "mapSelected": "Basic Materials",
+        "disclosures": "Coverage, sources, and methods\nTracked universe\n\nThe 66 names were selected by market capitalization on 2 Oct 2026 and are applied retrospectively. This is not a point-in-time market universe. Returns use raw Sectors closes and native Sectors IHSG closes; prices are not adjusted.\n\nMechanical corporate-action windows and missing matched observations are excluded. Sector signals require at least five contributors. No missing value is filled.\n\nYTD RAW-PRICE COVERAGE\nBaseline · 30 Dec 2025\n\nThrough 2 Oct 2026: native IHSG return −30.18%. 23 of 66 stocks have a matching baseline and action-free window; 0 of 11 sector aggregates meet the five-contributor floor. Mechanical-action and missing-baseline windows remain excluded.\n\nEach diffusion comparison uses the same names at both dates. Its denominator may change between comparisons when a close is missing or an action affects a window.\n\nThe 66 names were selected using market capitalization observed on 2026-10-02 and are replayed retrospectively; this is not a point-in-time universe.\nReturns use raw Sectors daily closes and native Sectors IHSG closes, with shared observed start and end dates. No adjusted-price series is claimed.\nA split, rights issue, bonus, cash dividend, or other listed mechanical corporate action inside a return window excludes that name from the affected window.\nEach replay comparison uses the same eligible names at its paired dates; that cohort may change between date pairs when a price or action window changes eligibility. All 66 names remain listed in the constituent inspector, with exclusion reasons.\nSector returns are equal-weighted across fixed eligible contributors. Leadership and diffusion are unconfirmed below five contributors; missing observations are never filled.\nYTD is shown only when each stock and native IHSG share an observed prior-year baseline date; unsupported baselines remain explicit gaps.\n\nAction-affected windows keep the stock in the 66-name roster but exclude it from that reading. See the acquisition record and source receipts.\n\nBroader market, ownership, foreign-flow, and theme pages are context from the IDX research release, not the Sectors tracked-universe analysis."
+      }
+    },
+    "sources": {
+      "status": "PASS",
+      "observed": {
+        "alerts": 0,
+        "columns": [
+          "Sector",
+          "Ticker",
+          "Company",
+          "Latest close · IDR",
+          "Observed date"
+        ],
+        "first_page": [
+          "AMMN",
+          "ANTM",
+          "BRMS",
+          "BRPT",
+          "EMAS",
+          "TPIA",
+          "FORU",
+          "MAPA",
+          "MAPI",
+          "MDIY",
+          "MGLV",
+          "VKTR",
+          "AMRT",
+          "CPIN",
+          "HMSP",
+          "ICBP",
+          "INDF",
+          "UNVR",
+          "AADI",
+          "ADRO",
+          "BUMI",
+          "BYAN",
+          "CUAN",
+          "DSSA",
+          "BBCA",
+          "BBNI",
+          "BBRI",
+          "BMRI",
+          "DNET",
+          "SMMA",
+          "CARE",
+          "KLBF",
+          "MIKA",
+          "SILO",
+          "SOHO",
+          "TSPC",
+          "ASII",
+          "IMPC",
+          "JTPE",
+          "MARK"
+        ],
+        "heading": "Coverage & sources",
+        "second_page": [
+          "SMIL",
+          "UNTR",
+          "BREN",
+          "CDIA",
+          "EXCL",
+          "ISAT",
+          "MORA",
+          "TLKM",
+          "BSDE",
+          "CBDK",
+          "JRPT",
+          "MKPI",
+          "PANI",
+          "PWON",
+          "CYBR",
+          "DCII",
+          "EMTK",
+          "MLPT",
+          "MTDL",
+          "WIFI",
+          "BIRD",
+          "ELPI",
+          "HATM",
+          "SMDR",
+          "TMAS",
+          "WBSA"
+        ],
+        "redirect": "http://127.0.0.1:5173/sources"
+      }
+    },
+    "overview": {
+      "status": "PASS",
+      "observed": {
+        "alerts": 0,
+        "breadth_curves": [
+          "M50,52.241C50.597,69.777,51.195,87.312,51.792,102.509C52.39,117.705,52.987,137.5,53.585,143.42C54.182,149.34,54.779,150.08,55.377,152.3C55.974,154.52,56.572,156.74,57.169,156.74C57.767,156.74,58.364,99.496,58.962,97.91C59.559,96.324,60.156,95.531,60.754,95.531C61.351,95.531,61.949,100.289,62.546,100.289C63.144,100.289,63.741,87.92,64.338,87.92C64.936,87.92,65.533,122.806,66.131,122.806C66.728,122.806,67.326,117.731,67.923,117.731C68.521,117.731,69.118,145.799,69.715,145.799C70.313,145.799,70.91,131.818,71.508,125.977C72.105,120.136,72.703,115.247,73.3,110.754C73.897,106.261,74.495,99.02,75.092,99.02C75.69,99.02,76.287,154.361,76.885,154.361C77.482,154.361,78.079,151.084,78.677,144.53C79.274,137.976,79.872,120.004,80.469,112.657C81.067,105.31,81.664,100.447,82.262,100.447C82.859,100.447,83.456,135.016,84.054,135.016C84.651,135.016,85.249,134.329,85.846,132.954C86.444,131.58,87.041,117.414,87.638,117.414C88.236,117.414,88.833,134.381,89.431,136.601C90.028,138.821,90.626,139.931,91.223,139.931C91.821,139.931,92.418,137.236,93.015,137.236C93.613,137.236,94.21,143.103,94.808,143.103C95.405,143.103,96.003,91.884,96.6,91.884C97.197,91.884,97.795,113.899,98.392,123.44C98.99,132.981,99.587,139.561,100.185,149.129C100.782,158.696,101.379,180.843,101.977,180.843C102.574,180.843,103.172,163.955,103.769,148.494C104.367,133.034,104.964,88.079,105.562,88.079C106.159,88.079,106.756,186.234,107.354,186.234C107.951,186.234,108.549,66.83,109.146,66.83C109.744,66.83,110.341,76.582,110.938,86.017C111.536,95.452,112.133,123.44,112.731,123.44C113.328,123.44,113.926,95.69,114.523,95.69C115.121,95.69,115.718,120.639,116.315,130.576C116.913,140.513,117.51,155.313,118.108,155.313C118.705,155.313,119.303,114.296,119.9,112.181C120.497,110.067,121.095,109.01,121.692,109.01C122.29,109.01,122.887,109.75,123.485,111.23C124.082,112.71,124.679,133.589,125.277,133.589C125.874,133.589,126.472,112.181,127.069,112.181C127.667,112.181,128.264,151.507,128.862,151.507C129.459,151.507,130.056,136.179,130.654,127.246C131.251,118.313,131.849,97.91,132.446,97.91C133.044,97.91,133.641,125.184,134.238,125.184C134.836,125.184,135.433,110.596,136.031,110.596C136.628,110.596,137.226,135.174,137.823,135.174C138.421,135.174,139.018,120.427,139.615,120.427C140.213,120.427,140.81,122.277,141.408,125.977C142.005,129.677,142.603,154.361,143.2,154.361C143.797,154.361,144.395,105.204,144.992,105.204C145.59,105.204,146.187,143.737,146.785,143.737C147.382,143.737,147.979,113.133,148.577,113.133C149.174,113.133,149.772,118.762,150.369,121.696C150.967,124.629,151.564,130.734,152.162,130.734C152.759,130.734,153.356,111.389,153.954,111.389C154.551,111.389,155.149,133.747,155.746,133.747C156.344,133.747,156.941,131.527,157.538,131.527C158.136,131.527,158.733,137.553,159.331,137.553C159.928,137.553,160.526,137.077,161.123,136.76C161.721,136.443,162.318,136.39,162.915,135.65C163.513,134.91,164.11,105.839,164.708,105.839C165.305,105.839,165.903,121.22,166.5,121.22C167.097,121.22,167.695,117.256,168.292,115.511C168.89,113.767,169.487,112.763,170.085,110.754C170.682,108.746,171.279,103.46,171.877,103.46C172.474,103.46,173.072,149.287,173.669,149.287C174.267,149.287,174.864,147.543,175.462,147.543C176.059,147.543,176.656,167.047,177.254,167.047C177.851,167.047,178.449,141.781,179.046,133.589C179.644,125.396,180.241,121.405,180.838,117.89C181.436,114.375,182.033,114.745,182.631,112.499C183.228,110.252,183.826,104.411,184.423,104.411C185.021,104.411,185.618,133.853,186.215,142.786C186.813,151.719,187.41,158.009,188.008,158.009C188.605,158.009,189.203,149.948,189.8,146.116C190.397,142.284,190.995,135.016,191.592,135.016C192.19,135.016,192.787,140.566,193.385,140.566C193.982,140.566,194.579,78.089,195.177,78.089C195.774,78.089,196.372,115.987,196.969,115.987C197.567,115.987,198.164,76.979,198.762,76.979C199.359,76.979,199.956,86.599,200.554,89.823C201.151,93.047,201.749,91.99,202.346,96.324C202.944,100.659,203.541,124.709,204.138,127.563C204.736,130.417,205.333,131.844,205.931,131.844C206.528,131.844,207.126,117.89,207.723,117.89C208.321,117.89,208.918,150.08,209.515,150.08C210.113,150.08,210.71,131.606,211.308,122.647C211.905,113.688,212.503,96.324,213.1,96.324C213.697,96.324,214.295,120.427,214.892,120.427C215.49,120.427,216.087,100.289,216.685,100.289C217.282,100.289,217.879,105.046,218.477,114.56C219.074,124.074,219.672,170.06,220.269,170.06C220.867,170.06,221.464,111.23,222.062,111.23C222.659,111.23,223.256,157.85,223.854,157.85C224.451,157.85,225.049,144.319,225.646,141.359C226.244,138.399,226.841,136.919,227.438,136.919C228.036,136.919,228.633,219.851,229.231,219.851C229.828,219.851,230.426,182.534,231.023,157.374C231.621,132.214,232.218,68.891,232.815,68.891C233.413,68.891,234.01,210.179,234.608,210.179C235.205,210.179,235.803,43.996,236.4,43.996C236.997,43.996,237.595,134.699,238.192,134.699C238.79,134.699,239.387,122.647,239.985,122.647C240.582,122.647,241.179,191.467,241.777,191.467C242.374,191.467,242.972,115.617,243.569,94.58C244.167,73.543,244.764,63.024,245.362,63.024C245.959,63.024,246.556,63.87,247.154,65.561C247.751,67.253,248.349,125.66,248.946,132.637C249.544,139.614,250.141,143.103,250.738,143.103C251.336,143.103,251.933,86.969,252.531,86.969C253.128,86.969,253.726,115.617,254.323,124.233C254.921,132.849,255.518,138.663,256.115,138.663C256.713,138.663,257.31,86.017,257.908,86.017C258.505,86.017,259.103,183.856,259.7,183.856C260.297,183.856,260.895,117.097,261.492,117.097C262.09,117.097,262.687,179.574,263.285,179.574C263.882,179.574,264.479,118.683,265.077,118.683C265.674,118.683,266.272,198.761,266.869,198.761C267.467,198.761,268.064,117.256,268.662,117.256C269.259,117.256,269.856,213.509,270.454,213.509C271.051,213.509,271.649,55.096,272.246,55.096C272.844,55.096,273.441,148.547,274.038,172.439C274.636,196.33,275.233,208.276,275.831,208.276C276.428,208.276,277.026,73.014,277.623,73.014C278.221,73.014,278.818,111.045,279.415,124.074C280.013,137.104,280.61,139.667,281.208,151.19C281.805,162.713,282.403,193.211,283,193.211C283.597,193.211,284.195,185.336,284.792,169.584C285.39,153.833,285.987,102.191,286.585,84.749C287.182,67.306,287.779,58.584,288.377,58.584C288.974,58.584,289.572,134.699,290.169,134.699C290.767,134.699,291.364,134.223,291.962,134.223C292.559,134.223,293.156,136.813,293.754,137.711C294.351,138.61,294.949,139.614,295.546,139.614C296.144,139.614,296.741,82.37,297.338,82.37C297.936,82.37,298.533,165.779,299.131,165.779C299.728,165.779,300.326,139.297,300.923,139.297C301.521,139.297,302.118,139.773,302.715,139.773C303.313,139.773,303.91,44.63,304.508,44.63C305.105,44.63,305.703,132.796,306.3,132.796C306.897,132.796,307.495,73.331,308.092,73.331C308.69,73.331,309.287,104.411,309.885,104.411C310.482,104.411,311.079,62.866,311.677,62.866C312.274,62.866,312.872,96.641,313.469,103.936C314.067,111.23,314.664,112.869,315.262,114.877C315.859,116.886,316.456,115.881,317.054,117.89C317.651,119.899,318.249,143.579,318.846,143.579C319.444,143.579,320.041,113.767,320.638,105.204C321.236,96.641,321.833,92.201,322.431,92.201C323.028,92.201,323.626,147.781,324.223,165.937C324.821,184.094,325.418,201.14,326.015,201.14C326.613,201.14,327.21,102.984,327.808,102.984C328.405,102.984,329.003,121.696,329.6,121.696C330.197,121.696,330.795,102.984,331.392,102.984C331.99,102.984,332.587,181.001,333.185,181.001C333.782,181.001,334.379,127.034,334.977,121.854C335.574,116.674,336.172,116.225,336.769,114.084C337.367,111.944,337.964,110.226,338.562,109.01C339.159,107.794,339.756,106.79,340.354,106.79C340.951,106.79,341.549,181.953,342.146,181.953C342.744,181.953,343.341,143.261,343.938,143.261C344.536,143.261,345.133,154.679,345.731,154.679C346.328,154.679,346.926,146.591,347.523,146.591C348.121,146.591,348.718,188.666,349.315,190.04C349.913,191.414,350.51,192.101,351.108,192.101C351.705,192.101,352.303,155.947,352.9,155.947C353.497,155.947,354.095,197.493,354.692,197.493C355.29,197.493,355.887,95.161,356.485,91.567C357.082,87.973,357.679,86.176,358.277,86.176C358.874,86.176,359.472,150.08,360.069,150.08C360.667,150.08,361.264,143.182,361.862,140.09C362.459,136.998,363.056,131.527,363.654,131.527C364.251,131.527,364.849,205.421,365.446,205.421C366.044,205.421,366.641,188.454,367.238,188.454C367.836,188.454,368.433,189.961,369.031,192.736C369.628,195.511,370.226,205.104,370.823,205.104C371.421,205.104,372.018,34.006,372.615,34.006C373.213,34.006,373.81,43.388,374.408,60.646C375.005,77.904,375.603,137.553,376.2,137.553C376.797,137.553,377.395,46.057,377.992,46.057C378.59,46.057,379.187,47.061,379.785,49.07C380.382,51.079,380.979,125.131,381.577,131.051C382.174,136.971,382.772,139.931,383.369,139.931C383.967,139.931,384.564,121.061,385.162,121.061C385.759,121.061,386.356,151.507,386.954,151.507C387.551,151.507,388.149,128.99,388.746,128.99C389.344,128.99,389.941,192.26,390.538,192.26C391.136,192.26,391.733,62.866,392.331,62.866C392.928,62.866,393.526,178.781,394.123,178.781C394.721,178.781,395.318,149.287,395.915,149.287C396.513,149.287,397.11,181.953,397.708,181.953C398.305,181.953,398.903,107.794,399.5,101.557C400.097,95.32,400.695,97.54,401.292,92.201C401.89,86.863,402.487,69.526,403.085,69.526C403.682,69.526,404.279,99.337,404.877,99.337C405.474,99.337,406.072,84.114,406.669,84.114C407.267,84.114,407.864,162.766,408.462,162.766C409.059,162.766,409.656,121.061,410.254,112.181C410.851,103.301,411.449,98.861,412.046,98.861C412.644,98.861,413.241,103.936,413.838,103.936C414.436,103.936,415.033,86.651,415.631,86.651C416.228,86.651,416.826,108.693,417.423,108.693C418.021,108.693,418.618,96.641,419.215,96.641C419.813,96.641,420.41,105.204,421.008,105.204C421.605,105.204,422.203,89.294,422.8,89.189C423.397,89.083,423.995,89.03,424.592,89.03C425.19,89.03,425.787,134.381,426.385,134.381C426.982,134.381,427.579,112.499,428.177,112.499C428.774,112.499,429.372,189.247,429.969,189.247C430.567,189.247,431.164,126.929,431.762,126.929C432.359,126.929,432.956,127.933,433.554,129.941C434.151,131.95,434.749,161.18,435.346,161.18C435.944,161.18,436.541,72.856,437.138,72.856C437.736,72.856,438.333,77.084,438.931,85.541C439.528,93.999,440.126,130.1,440.723,130.1C441.321,130.1,441.918,93.629,442.515,92.994C443.113,92.36,443.71,92.043,444.308,92.043C444.905,92.043,445.503,132.796,446.1,132.796C446.697,132.796,447.295,98.703,447.892,98.703C448.49,98.703,449.087,114.454,449.685,127.404C450.282,140.354,450.879,176.403,451.477,176.403C452.074,176.403,452.672,79.04,453.269,79.04C453.867,79.04,454.464,158.643,455.062,158.643C455.659,158.643,456.256,115.353,456.854,106.156C457.451,96.959,458.049,92.36,458.646,92.36C459.244,92.36,459.841,136.126,460.438,136.126C461.036,136.126,461.633,78.406,462.231,78.406C462.828,78.406,463.426,105.469,464.023,114.084C464.621,122.7,465.218,119.423,465.815,130.1C466.413,140.777,467.01,180.684,467.608,180.684C468.205,180.684,468.803,55.413,469.4,55.413C469.997,55.413,470.595,124.55,471.192,124.55C471.79,124.55,472.387,95.109,472.985,94.897C473.582,94.686,474.179,94.58,474.777,94.58C475.374,94.58,475.972,124.233,476.569,124.233C477.167,124.233,477.764,91.409,478.362,91.409C478.959,91.409,479.556,132.32,480.154,132.32C480.751,132.32,481.349,129.545,481.946,124.391C482.544,119.238,483.141,101.399,483.738,101.399C484.336,101.399,484.933,110.305,485.531,122.013C486.128,133.721,486.726,171.646,487.323,171.646C487.921,171.646,488.518,159.832,489.115,155.789C489.713,151.745,490.31,152.987,490.908,147.384C491.505,141.781,492.103,119.159,492.7,119.159C493.297,119.159,493.895,152.459,494.492,152.459C495.09,152.459,495.687,98.386,496.285,98.386C496.882,98.386,497.479,150.08,498.077,150.08C498.674,150.08,499.272,131.686,499.869,131.686C500.467,131.686,501.064,174.183,501.662,174.183C502.259,174.183,502.856,85.066,503.454,85.066C504.051,85.066,504.649,148.019,505.246,161.021C505.844,174.024,506.441,180.526,507.038,180.526C507.636,180.526,508.233,177.724,508.831,172.121C509.428,166.519,510.026,125.501,510.623,123.916C511.221,122.33,511.818,121.537,512.415,121.537C513.013,121.537,513.61,152.141,514.208,152.141C514.805,152.141,515.403,136.76,516,121.379L516,119C515.403,119,514.805,119,514.208,119C513.61,119,513.013,119,512.415,119C511.818,119,511.221,119,510.623,119C510.026,119,509.428,119,508.831,119C508.233,119,507.636,119,507.038,119C506.441,119,505.844,119,505.246,119C504.649,119,504.051,119,503.454,119C502.856,119,502.259,119,501.662,119C501.064,119,500.467,119,499.869,119C499.272,119,498.674,119,498.077,119C497.479,119,496.882,119,496.285,119C495.687,119,495.09,119,494.492,119C493.895,119,493.297,119,492.7,119C492.103,119,491.505,119,490.908,119C490.31,119,489.713,119,489.115,119C488.518,119,487.921,119,487.323,119C486.726,119,486.128,119,485.531,119C484.933,119,484.336,119,483.738,119C483.141,119,482.544,119,481.946,119C481.349,119,480.751,119,480.154,119C479.556,119,478.959,119,478.362,119C477.764,119,477.167,119,476.569,119C475.972,119,475.374,119,474.777,119C474.179,119,473.582,119,472.985,119C472.387,119,471.79,119,471.192,119C470.595,119,469.997,119,469.4,119C468.803,119,468.205,119,467.608,119C467.01,119,466.413,119,465.815,119C465.218,119,464.621,119,464.023,119C463.426,119,462.828,119,462.231,119C461.633,119,461.036,119,460.438,119C459.841,119,459.244,119,458.646,119C458.049,119,457.451,119,456.854,119C456.256,119,455.659,119,455.062,119C454.464,119,453.867,119,453.269,119C452.672,119,452.074,119,451.477,119C450.879,119,450.282,119,449.685,119C449.087,119,448.49,119,447.892,119C447.295,119,446.697,119,446.1,119C445.503,119,444.905,119,444.308,119C443.71,119,443.113,119,442.515,119C441.918,119,441.321,119,440.723,119C440.126,119,439.528,119,438.931,119C438.333,119,437.736,119,437.138,119C436.541,119,435.944,119,435.346,119C434.749,119,434.151,119,433.554,119C432.956,119,432.359,119,431.762,119C431.164,119,430.567,119,429.969,119C429.372,119,428.774,119,428.177,119C427.579,119,426.982,119,426.385,119C425.787,119,425.19,119,424.592,119C423.995,119,423.397,119,422.8,119C422.203,119,421.605,119,421.008,119C420.41,119,419.813,119,419.215,119C418.618,119,418.021,119,417.423,119C416.826,119,416.228,119,415.631,119C415.033,119,414.436,119,413.838,119C413.241,119,412.644,119,412.046,119C411.449,119,410.851,119,410.254,119C409.656,119,409.059,119,408.462,119C407.864,119,407.267,119,406.669,119C406.072,119,405.474,119,404.877,119C404.279,119,403.682,119,403.085,119C402.487,119,401.89,119,401.292,119C400.695,119,400.097,119,399.5,119C398.903,119,398.305,119,397.708,119C397.11,119,396.513,119,395.915,119C395.318,119,394.721,119,394.123,119C393.526,119,392.928,119,392.331,119C391.733,119,391.136,119,390.538,119C389.941,119,389.344,119,388.746,119C388.149,119,387.551,119,386.954,119C386.356,119,385.759,119,385.162,119C384.564,119,383.967,119,383.369,119C382.772,119,382.174,119,381.577,119C380.979,119,380.382,119,379.785,119C379.187,119,378.59,119,377.992,119C377.395,119,376.797,119,376.2,119C375.603,119,375.005,119,374.408,119C373.81,119,373.213,119,372.615,119C372.018,119,371.421,119,370.823,119C370.226,119,369.628,119,369.031,119C368.433,119,367.836,119,367.238,119C366.641,119,366.044,119,365.446,119C364.849,119,364.251,119,363.654,119C363.056,119,362.459,119,361.862,119C361.264,119,360.667,119,360.069,119C359.472,119,358.874,119,358.277,119C357.679,119,357.082,119,356.485,119C355.887,119,355.29,119,354.692,119C354.095,119,353.497,119,352.9,119C352.303,119,351.705,119,351.108,119C350.51,119,349.913,119,349.315,119C348.718,119,348.121,119,347.523,119C346.926,119,346.328,119,345.731,119C345.133,119,344.536,119,343.938,119C343.341,119,342.744,119,342.146,119C341.549,119,340.951,119,340.354,119C339.756,119,339.159,119,338.562,119C337.964,119,337.367,119,336.769,119C336.172,119,335.574,119,334.977,119C334.379,119,333.782,119,333.185,119C332.587,119,331.99,119,331.392,119C330.795,119,330.197,119,329.6,119C329.003,119,328.405,119,327.808,119C327.21,119,326.613,119,326.015,119C325.418,119,324.821,119,324.223,119C323.626,119,323.028,119,322.431,119C321.833,119,321.236,119,320.638,119C320.041,119,319.444,119,318.846,119C318.249,119,317.651,119,317.054,119C316.456,119,315.859,119,315.262,119C314.664,119,314.067,119,313.469,119C312.872,119,312.274,119,311.677,119C311.079,119,310.482,119,309.885,119C309.287,119,308.69,119,308.092,119C307.495,119,306.897,119,306.3,119C305.703,119,305.105,119,304.508,119C303.91,119,303.313,119,302.715,119C302.118,119,301.521,119,300.923,119C300.326,119,299.728,119,299.131,119C298.533,119,297.936,119,297.338,119C296.741,119,296.144,119,295.546,119C294.949,119,294.351,119,293.754,119C293.156,119,292.559,119,291.962,119C291.364,119,290.767,119,290.169,119C289.572,119,288.974,119,288.377,119C287.779,119,287.182,119,286.585,119C285.987,119,285.39,119,284.792,119C284.195,119,283.597,119,283,119C282.403,119,281.805,119,281.208,119C280.61,119,280.013,119,279.415,119C278.818,119,278.221,119,277.623,119C277.026,119,276.428,119,275.831,119C275.233,119,274.636,119,274.038,119C273.441,119,272.844,119,272.246,119C271.649,119,271.051,119,270.454,119C269.856,119,269.259,119,268.662,119C268.064,119,267.467,119,266.869,119C266.272,119,265.674,119,265.077,119C264.479,119,263.882,119,263.285,119C262.687,119,262.09,119,261.492,119C260.895,119,260.297,119,259.7,119C259.103,119,258.505,119,257.908,119C257.31,119,256.713,119,256.115,119C255.518,119,254.921,119,254.323,119C253.726,119,253.128,119,252.531,119C251.933,119,251.336,119,250.738,119C250.141,119,249.544,119,248.946,119C248.349,119,247.751,119,247.154,119C246.556,119,245.959,119,245.362,119C244.764,119,244.167,119,243.569,119C242.972,119,242.374,119,241.777,119C241.179,119,240.582,119,239.985,119C239.387,119,238.79,119,238.192,119C237.595,119,236.997,119,236.4,119C235.803,119,235.205,119,234.608,119C234.01,119,233.413,119,232.815,119C232.218,119,231.621,119,231.023,119C230.426,119,229.828,119,229.231,119C228.633,119,228.036,119,227.438,119C226.841,119,226.244,119,225.646,119C225.049,119,224.451,119,223.854,119C223.256,119,222.659,119,222.062,119C221.464,119,220.867,119,220.269,119C219.672,119,219.074,119,218.477,119C217.879,119,217.282,119,216.685,119C216.087,119,215.49,119,214.892,119C214.295,119,213.697,119,213.1,119C212.503,119,211.905,119,211.308,119C210.71,119,210.113,119,209.515,119C208.918,119,208.321,119,207.723,119C207.126,119,206.528,119,205.931,119C205.333,119,204.736,119,204.138,119C203.541,119,202.944,119,202.346,119C201.749,119,201.151,119,200.554,119C199.956,119,199.359,119,198.762,119C198.164,119,197.567,119,196.969,119C196.372,119,195.774,119,195.177,119C194.579,119,193.982,119,193.385,119C192.787,119,192.19,119,191.592,119C190.995,119,190.397,119,189.8,119C189.203,119,188.605,119,188.008,119C187.41,119,186.813,119,186.215,119C185.618,119,185.021,119,184.423,119C183.826,119,183.228,119,182.631,119C182.033,119,181.436,119,180.838,119C180.241,119,179.644,119,179.046,119C178.449,119,177.851,119,177.254,119C176.656,119,176.059,119,175.462,119C174.864,119,174.267,119,173.669,119C173.072,119,172.474,119,171.877,119C171.279,119,170.682,119,170.085,119C169.487,119,168.89,119,168.292,119C167.695,119,167.097,119,166.5,119C165.903,119,165.305,119,164.708,119C164.11,119,163.513,119,162.915,119C162.318,119,161.721,119,161.123,119C160.526,119,159.928,119,159.331,119C158.733,119,158.136,119,157.538,119C156.941,119,156.344,119,155.746,119C155.149,119,154.551,119,153.954,119C153.356,119,152.759,119,152.162,119C151.564,119,150.967,119,150.369,119C149.772,119,149.174,119,148.577,119C147.979,119,147.382,119,146.785,119C146.187,119,145.59,119,144.992,119C144.395,119,143.797,119,143.2,119C142.603,119,142.005,119,141.408,119C140.81,119,140.213,119,139.615,119C139.018,119,138.421,119,137.823,119C137.226,119,136.628,119,136.031,119C135.433,119,134.836,119,134.238,119C133.641,119,133.044,119,132.446,119C131.849,119,131.251,119,130.654,119C130.056,119,129.459,119,128.862,119C128.264,119,127.667,119,127.069,119C126.472,119,125.874,119,125.277,119C124.679,119,124.082,119,123.485,119C122.887,119,122.29,119,121.692,119C121.095,119,120.497,119,119.9,119C119.303,119,118.705,119,118.108,119C117.51,119,116.913,119,116.315,119C115.718,119,115.121,119,114.523,119C113.926,119,113.328,119,112.731,119C112.133,119,111.536,119,110.938,119C110.341,119,109.744,119,109.146,119C108.549,119,107.951,119,107.354,119C106.756,119,106.159,119,105.562,119C104.964,119,104.367,119,103.769,119C103.172,119,102.574,119,101.977,119C101.379,119,100.782,119,100.185,119C99.587,119,98.99,119,98.392,119C97.795,119,97.197,119,96.6,119C96.003,119,95.405,119,94.808,119C94.21,119,93.613,119,93.015,119C92.418,119,91.821,119,91.223,119C90.626,119,90.028,119,89.431,119C88.833,119,88.236,119,87.638,119C87.041,119,86.444,119,85.846,119C85.249,119,84.651,119,84.054,119C83.456,119,82.859,119,82.262,119C81.664,119,81.067,119,80.469,119C79.872,119,79.274,119,78.677,119C78.079,119,77.482,119,76.885,119C76.287,119,75.69,119,75.092,119C74.495,119,73.897,119,73.3,119C72.703,119,72.105,119,71.508,119C70.91,119,70.313,119,69.715,119C69.118,119,68.521,119,67.923,119C67.326,119,66.728,119,66.131,119C65.533,119,64.936,119,64.338,119C63.741,119,63.144,119,62.546,119C61.949,119,61.351,119,60.754,119C60.156,119,59.559,119,58.962,119C58.364,119,57.767,119,57.169,119C56.572,119,55.974,119,55.377,119C54.779,119,54.182,119,53.585,119C52.987,119,52.39,119,51.792,119C51.195,119,50.597,119,50,119Z",
+          "M50,52.241C50.597,69.777,51.195,87.312,51.792,102.509C52.39,117.705,52.987,137.5,53.585,143.42C54.182,149.34,54.779,150.08,55.377,152.3C55.974,154.52,56.572,156.74,57.169,156.74C57.767,156.74,58.364,99.496,58.962,97.91C59.559,96.324,60.156,95.531,60.754,95.531C61.351,95.531,61.949,100.289,62.546,100.289C63.144,100.289,63.741,87.92,64.338,87.92C64.936,87.92,65.533,122.806,66.131,122.806C66.728,122.806,67.326,117.731,67.923,117.731C68.521,117.731,69.118,145.799,69.715,145.799C70.313,145.799,70.91,131.818,71.508,125.977C72.105,120.136,72.703,115.247,73.3,110.754C73.897,106.261,74.495,99.02,75.092,99.02C75.69,99.02,76.287,154.361,76.885,154.361C77.482,154.361,78.079,151.084,78.677,144.53C79.274,137.976,79.872,120.004,80.469,112.657C81.067,105.31,81.664,100.447,82.262,100.447C82.859,100.447,83.456,135.016,84.054,135.016C84.651,135.016,85.249,134.329,85.846,132.954C86.444,131.58,87.041,117.414,87.638,117.414C88.236,117.414,88.833,134.381,89.431,136.601C90.028,138.821,90.626,139.931,91.223,139.931C91.821,139.931,92.418,137.236,93.015,137.236C93.613,137.236,94.21,143.103,94.808,143.103C95.405,143.103,96.003,91.884,96.6,91.884C97.197,91.884,97.795,113.899,98.392,123.44C98.99,132.981,99.587,139.561,100.185,149.129C100.782,158.696,101.379,180.843,101.977,180.843C102.574,180.843,103.172,163.955,103.769,148.494C104.367,133.034,104.964,88.079,105.562,88.079C106.159,88.079,106.756,186.234,107.354,186.234C107.951,186.234,108.549,66.83,109.146,66.83C109.744,66.83,110.341,76.582,110.938,86.017C111.536,95.452,112.133,123.44,112.731,123.44C113.328,123.44,113.926,95.69,114.523,95.69C115.121,95.69,115.718,120.639,116.315,130.576C116.913,140.513,117.51,155.313,118.108,155.313C118.705,155.313,119.303,114.296,119.9,112.181C120.497,110.067,121.095,109.01,121.692,109.01C122.29,109.01,122.887,109.75,123.485,111.23C124.082,112.71,124.679,133.589,125.277,133.589C125.874,133.589,126.472,112.181,127.069,112.181C127.667,112.181,128.264,151.507,128.862,151.507C129.459,151.507,130.056,136.179,130.654,127.246C131.251,118.313,131.849,97.91,132.446,97.91C133.044,97.91,133.641,125.184,134.238,125.184C134.836,125.184,135.433,110.596,136.031,110.596C136.628,110.596,137.226,135.174,137.823,135.174C138.421,135.174,139.018,120.427,139.615,120.427C140.213,120.427,140.81,122.277,141.408,125.977C142.005,129.677,142.603,154.361,143.2,154.361C143.797,154.361,144.395,105.204,144.992,105.204C145.59,105.204,146.187,143.737,146.785,143.737C147.382,143.737,147.979,113.133,148.577,113.133C149.174,113.133,149.772,118.762,150.369,121.696C150.967,124.629,151.564,130.734,152.162,130.734C152.759,130.734,153.356,111.389,153.954,111.389C154.551,111.389,155.149,133.747,155.746,133.747C156.344,133.747,156.941,131.527,157.538,131.527C158.136,131.527,158.733,137.553,159.331,137.553C159.928,137.553,160.526,137.077,161.123,136.76C161.721,136.443,162.318,136.39,162.915,135.65C163.513,134.91,164.11,105.839,164.708,105.839C165.305,105.839,165.903,121.22,166.5,121.22C167.097,121.22,167.695,117.256,168.292,115.511C168.89,113.767,169.487,112.763,170.085,110.754C170.682,108.746,171.279,103.46,171.877,103.46C172.474,103.46,173.072,149.287,173.669,149.287C174.267,149.287,174.864,147.543,175.462,147.543C176.059,147.543,176.656,167.047,177.254,167.047C177.851,167.047,178.449,141.781,179.046,133.589C179.644,125.396,180.241,121.405,180.838,117.89C181.436,114.375,182.033,114.745,182.631,112.499C183.228,110.252,183.826,104.411,184.423,104.411C185.021,104.411,185.618,133.853,186.215,142.786C186.813,151.719,187.41,158.009,188.008,158.009C188.605,158.009,189.203,149.948,189.8,146.116C190.397,142.284,190.995,135.016,191.592,135.016C192.19,135.016,192.787,140.566,193.385,140.566C193.982,140.566,194.579,78.089,195.177,78.089C195.774,78.089,196.372,115.987,196.969,115.987C197.567,115.987,198.164,76.979,198.762,76.979C199.359,76.979,199.956,86.599,200.554,89.823C201.151,93.047,201.749,91.99,202.346,96.324C202.944,100.659,203.541,124.709,204.138,127.563C204.736,130.417,205.333,131.844,205.931,131.844C206.528,131.844,207.126,117.89,207.723,117.89C208.321,117.89,208.918,150.08,209.515,150.08C210.113,150.08,210.71,131.606,211.308,122.647C211.905,113.688,212.503,96.324,213.1,96.324C213.697,96.324,214.295,120.427,214.892,120.427C215.49,120.427,216.087,100.289,216.685,100.289C217.282,100.289,217.879,105.046,218.477,114.56C219.074,124.074,219.672,170.06,220.269,170.06C220.867,170.06,221.464,111.23,222.062,111.23C222.659,111.23,223.256,157.85,223.854,157.85C224.451,157.85,225.049,144.319,225.646,141.359C226.244,138.399,226.841,136.919,227.438,136.919C228.036,136.919,228.633,219.851,229.231,219.851C229.828,219.851,230.426,182.534,231.023,157.374C231.621,132.214,232.218,68.891,232.815,68.891C233.413,68.891,234.01,210.179,234.608,210.179C235.205,210.179,235.803,43.996,236.4,43.996C236.997,43.996,237.595,134.699,238.192,134.699C238.79,134.699,239.387,122.647,239.985,122.647C240.582,122.647,241.179,191.467,241.777,191.467C242.374,191.467,242.972,115.617,243.569,94.58C244.167,73.543,244.764,63.024,245.362,63.024C245.959,63.024,246.556,63.87,247.154,65.561C247.751,67.253,248.349,125.66,248.946,132.637C249.544,139.614,250.141,143.103,250.738,143.103C251.336,143.103,251.933,86.969,252.531,86.969C253.128,86.969,253.726,115.617,254.323,124.233C254.921,132.849,255.518,138.663,256.115,138.663C256.713,138.663,257.31,86.017,257.908,86.017C258.505,86.017,259.103,183.856,259.7,183.856C260.297,183.856,260.895,117.097,261.492,117.097C262.09,117.097,262.687,179.574,263.285,179.574C263.882,179.574,264.479,118.683,265.077,118.683C265.674,118.683,266.272,198.761,266.869,198.761C267.467,198.761,268.064,117.256,268.662,117.256C269.259,117.256,269.856,213.509,270.454,213.509C271.051,213.509,271.649,55.096,272.246,55.096C272.844,55.096,273.441,148.547,274.038,172.439C274.636,196.33,275.233,208.276,275.831,208.276C276.428,208.276,277.026,73.014,277.623,73.014C278.221,73.014,278.818,111.045,279.415,124.074C280.013,137.104,280.61,139.667,281.208,151.19C281.805,162.713,282.403,193.211,283,193.211C283.597,193.211,284.195,185.336,284.792,169.584C285.39,153.833,285.987,102.191,286.585,84.749C287.182,67.306,287.779,58.584,288.377,58.584C288.974,58.584,289.572,134.699,290.169,134.699C290.767,134.699,291.364,134.223,291.962,134.223C292.559,134.223,293.156,136.813,293.754,137.711C294.351,138.61,294.949,139.614,295.546,139.614C296.144,139.614,296.741,82.37,297.338,82.37C297.936,82.37,298.533,165.779,299.131,165.779C299.728,165.779,300.326,139.297,300.923,139.297C301.521,139.297,302.118,139.773,302.715,139.773C303.313,139.773,303.91,44.63,304.508,44.63C305.105,44.63,305.703,132.796,306.3,132.796C306.897,132.796,307.495,73.331,308.092,73.331C308.69,73.331,309.287,104.411,309.885,104.411C310.482,104.411,311.079,62.866,311.677,62.866C312.274,62.866,312.872,96.641,313.469,103.936C314.067,111.23,314.664,112.869,315.262,114.877C315.859,116.886,316.456,115.881,317.054,117.89C317.651,119.899,318.249,143.579,318.846,143.579C319.444,143.579,320.041,113.767,320.638,105.204C321.236,96.641,321.833,92.201,322.431,92.201C323.028,92.201,323.626,147.781,324.223,165.937C324.821,184.094,325.418,201.14,326.015,201.14C326.613,201.14,327.21,102.984,327.808,102.984C328.405,102.984,329.003,121.696,329.6,121.696C330.197,121.696,330.795,102.984,331.392,102.984C331.99,102.984,332.587,181.001,333.185,181.001C333.782,181.001,334.379,127.034,334.977,121.854C335.574,116.674,336.172,116.225,336.769,114.084C337.367,111.944,337.964,110.226,338.562,109.01C339.159,107.794,339.756,106.79,340.354,106.79C340.951,106.79,341.549,181.953,342.146,181.953C342.744,181.953,343.341,143.261,343.938,143.261C344.536,143.261,345.133,154.679,345.731,154.679C346.328,154.679,346.926,146.591,347.523,146.591C348.121,146.591,348.718,188.666,349.315,190.04C349.913,191.414,350.51,192.101,351.108,192.101C351.705,192.101,352.303,155.947,352.9,155.947C353.497,155.947,354.095,197.493,354.692,197.493C355.29,197.493,355.887,95.161,356.485,91.567C357.082,87.973,357.679,86.176,358.277,86.176C358.874,86.176,359.472,150.08,360.069,150.08C360.667,150.08,361.264,143.182,361.862,140.09C362.459,136.998,363.056,131.527,363.654,131.527C364.251,131.527,364.849,205.421,365.446,205.421C366.044,205.421,366.641,188.454,367.238,188.454C367.836,188.454,368.433,189.961,369.031,192.736C369.628,195.511,370.226,205.104,370.823,205.104C371.421,205.104,372.018,34.006,372.615,34.006C373.213,34.006,373.81,43.388,374.408,60.646C375.005,77.904,375.603,137.553,376.2,137.553C376.797,137.553,377.395,46.057,377.992,46.057C378.59,46.057,379.187,47.061,379.785,49.07C380.382,51.079,380.979,125.131,381.577,131.051C382.174,136.971,382.772,139.931,383.369,139.931C383.967,139.931,384.564,121.061,385.162,121.061C385.759,121.061,386.356,151.507,386.954,151.507C387.551,151.507,388.149,128.99,388.746,128.99C389.344,128.99,389.941,192.26,390.538,192.26C391.136,192.26,391.733,62.866,392.331,62.866C392.928,62.866,393.526,178.781,394.123,178.781C394.721,178.781,395.318,149.287,395.915,149.287C396.513,149.287,397.11,181.953,397.708,181.953C398.305,181.953,398.903,107.794,399.5,101.557C400.097,95.32,400.695,97.54,401.292,92.201C401.89,86.863,402.487,69.526,403.085,69.526C403.682,69.526,404.279,99.337,404.877,99.337C405.474,99.337,406.072,84.114,406.669,84.114C407.267,84.114,407.864,162.766,408.462,162.766C409.059,162.766,409.656,121.061,410.254,112.181C410.851,103.301,411.449,98.861,412.046,98.861C412.644,98.861,413.241,103.936,413.838,103.936C414.436,103.936,415.033,86.651,415.631,86.651C416.228,86.651,416.826,108.693,417.423,108.693C418.021,108.693,418.618,96.641,419.215,96.641C419.813,96.641,420.41,105.204,421.008,105.204C421.605,105.204,422.203,89.294,422.8,89.189C423.397,89.083,423.995,89.03,424.592,89.03C425.19,89.03,425.787,134.381,426.385,134.381C426.982,134.381,427.579,112.499,428.177,112.499C428.774,112.499,429.372,189.247,429.969,189.247C430.567,189.247,431.164,126.929,431.762,126.929C432.359,126.929,432.956,127.933,433.554,129.941C434.151,131.95,434.749,161.18,435.346,161.18C435.944,161.18,436.541,72.856,437.138,72.856C437.736,72.856,438.333,77.084,438.931,85.541C439.528,93.999,440.126,130.1,440.723,130.1C441.321,130.1,441.918,93.629,442.515,92.994C443.113,92.36,443.71,92.043,444.308,92.043C444.905,92.043,445.503,132.796,446.1,132.796C446.697,132.796,447.295,98.703,447.892,98.703C448.49,98.703,449.087,114.454,449.685,127.404C450.282,140.354,450.879,176.403,451.477,176.403C452.074,176.403,452.672,79.04,453.269,79.04C453.867,79.04,454.464,158.643,455.062,158.643C455.659,158.643,456.256,115.353,456.854,106.156C457.451,96.959,458.049,92.36,458.646,92.36C459.244,92.36,459.841,136.126,460.438,136.126C461.036,136.126,461.633,78.406,462.231,78.406C462.828,78.406,463.426,105.469,464.023,114.084C464.621,122.7,465.218,119.423,465.815,130.1C466.413,140.777,467.01,180.684,467.608,180.684C468.205,180.684,468.803,55.413,469.4,55.413C469.997,55.413,470.595,124.55,471.192,124.55C471.79,124.55,472.387,95.109,472.985,94.897C473.582,94.686,474.179,94.58,474.777,94.58C475.374,94.58,475.972,124.233,476.569,124.233C477.167,124.233,477.764,91.409,478.362,91.409C478.959,91.409,479.556,132.32,480.154,132.32C480.751,132.32,481.349,129.545,481.946,124.391C482.544,119.238,483.141,101.399,483.738,101.399C484.336,101.399,484.933,110.305,485.531,122.013C486.128,133.721,486.726,171.646,487.323,171.646C487.921,171.646,488.518,159.832,489.115,155.789C489.713,151.745,490.31,152.987,490.908,147.384C491.505,141.781,492.103,119.159,492.7,119.159C493.297,119.159,493.895,152.459,494.492,152.459C495.09,152.459,495.687,98.386,496.285,98.386C496.882,98.386,497.479,150.08,498.077,150.08C498.674,150.08,499.272,131.686,499.869,131.686C500.467,131.686,501.064,174.183,501.662,174.183C502.259,174.183,502.856,85.066,503.454,85.066C504.051,85.066,504.649,148.019,505.246,161.021C505.844,174.024,506.441,180.526,507.038,180.526C507.636,180.526,508.233,177.724,508.831,172.121C509.428,166.519,510.026,125.501,510.623,123.916C511.221,122.33,511.818,121.537,512.415,121.537C513.013,121.537,513.61,152.141,514.208,152.141C514.805,152.141,515.403,136.76,516,121.379"
+        ],
+        "chart_label": "IHSG end-of-day closes, 9 Jul 2026 to 2 Oct 2026, latest 6036.88818359375",
+        "close": "IHSG 6,036.89",
+        "ihsg_curve": "M54,224.74L57.068,221.713L60.136,192.888L63.203,192.462L66.271,191.839L69.339,175.015L72.407,157.914L75.475,143.628L78.542,116.135L81.61,117.543L84.678,122.411L87.746,152.607L90.814,155.311L93.881,169.331L96.949,179.288L100.017,155.164L103.085,142.524L106.153,142.938L109.22,121.318L112.288,113.311L115.356,115.197L118.424,98.448L121.492,109.695L124.559,134.459L127.627,107.542L130.695,125.852L133.763,100.42L136.831,88.243L139.898,102.392L142.966,75.097L146.034,68.975L149.102,75.077L152.169,99.456L155.237,69.975L158.305,70.897L161.373,69.029L164.441,50.115L167.508,51.173L170.576,32.856L173.644,40.835L176.712,45.103L179.78,28.144L182.847,30.237L185.915,52.808L188.983,64.99L192.051,66.688L195.119,85.367L198.186,91.539L201.254,85.042L204.322,90.446L207.39,104.78L210.458,132.131L213.525,107.272L216.593,126.654L219.661,141.059L222.729,164.944L225.797,171.588L228.864,184.431L231.932,200.087L235,193.13"
+      }
+    },
+    "weekly_comparison": {
+      "status": "PASS",
+      "observed": {
+        "alerts": 0,
+        "cohort": "Basic Materials\n89 STOCKS · 64.0% BREADTH\nConsumer Cyclicals\n118 STOCKS · 53.4% BREADTH\nConsumer Non-Cyclicals\n112 STOCKS · 65.2% BREADTH\nEnergy\n76 STOCKS · 52.6% BREADTH\nFinancials\n94 STOCKS · 64.9% BREADTH\nHealthcare\n36 STOCKS · 72.2% BREADTH\nIndustrials\n46 STOCKS · 76.1% BREADTH\nInfrastructures\n53 STOCKS · 54.7% BREADTH\nProperties & Real Estate\n62 STOCKS · 46.8% BREADTH\nTechnology\n37 STOCKS · 59.5% BREADTH\nTransportation & Logistic\n29 STOCKS · 51.7% BREADTH",
+        "curve": "M45,115.535L170,107.306L295,90.364L420,91.574L545,91.09",
+        "rows": [
+          [
+            "1",
+            "Transportation & Logistic",
+            "Weakening",
+            "NARROWING FIRM",
+            "+10.6%",
+            "+33.6%",
+            "51.7%",
+            "-13.8 pp",
+            "44.6%",
+            "5 obs."
+          ],
+          [
+            "2",
+            "Energy",
+            "Weakening",
+            "STABLE",
+            "+8.4%",
+            "+16.6%",
+            "52.6%",
+            "-5.3 pp",
+            "33.4%",
+            "5 obs."
+          ],
+          [
+            "3",
+            "Industrials",
+            "Weakening",
+            "STABLE",
+            "+7.1%",
+            "+4.2%",
+            "76.1%",
+            "+8.7 pp",
+            "22.7%",
+            "4 obs."
+          ],
+          [
+            "4",
+            "Consumer Non-Cyclicals",
+            "Weakening",
+            "STABLE",
+            "+6.4%",
+            "+14.7%",
+            "65.2%",
+            "0.0 pp",
+            "17.9%",
+            "5 obs."
+          ],
+          [
+            "5",
+            "Healthcare",
+            "Leading",
+            "BROADENING FIRM",
+            "+6.2%",
+            "+0.7%",
+            "72.2%",
+            "+13.9 pp",
+            "30.1%",
+            "1 obs."
+          ],
+          [
+            "6",
+            "Basic Materials",
+            "Weakening",
+            "STABLE",
+            "+5.4%",
+            "+24.6%",
+            "64.0%",
+            "+2.2 pp",
+            "14.4%",
+            "5 obs."
+          ],
+          [
+            "7",
+            "Technology",
+            "Weakening",
+            "STABLE",
+            "+3.5%",
+            "+8.8%",
+            "59.5%",
+            "+2.7 pp",
+            "30.9%",
+            "5 obs."
+          ],
+          [
+            "8",
+            "Consumer Cyclicals",
+            "Weakening",
+            "STABLE",
+            "+3.1%",
+            "+10.1%",
+            "53.4%",
+            "-1.7 pp",
+            "18.3%",
+            "5 obs."
+          ],
+          [
+            "9",
+            "Financials",
+            "Weakening",
+            "STABLE",
+            "+1.7%",
+            "+0.8%",
+            "64.9%",
+            "-3.2 pp",
+            "13.2%",
+            "1 obs."
+          ],
+          [
+            "10",
+            "Properties & Real Estate",
+            "Weakening",
+            "STABLE",
+            "+1.3%",
+            "+1.2%",
+            "46.8%",
+            "-1.6 pp",
+            "21.6%",
+            "5 obs."
+          ],
+          [
+            "11",
+            "Infrastructures",
+            "Weakening",
+            "STABLE",
+            "+0.3%",
+            "+3.2%",
+            "54.7%",
+            "+7.5 pp",
+            "17.3%",
+            "5 obs."
+          ]
+        ],
+        "summary": "MARKET READ\nLeadership\nHealthcare ahead of IHSG by 6.2% over 20 trading sessions\nParticipation\n59.8% of the fixed cohort beat IHSG over 20 sessions\nWeekly move\nHealthcare breadth increased by 13.9 pp since 25 Sep 2026\n\nHISTORICAL PRICE REPLAY USING CURRENT MEMBERSHIP\n\nSECTOR CONTRIBUTORS\n752 stocks\nCOHORT-WEIGHTED BREADTH\n59.8%\nMATERIAL WEEKLY SHIFTS\n5",
+        "source_parity_mismatches": [],
+        "source_contributors": 752,
+        "source_outperformers": 450,
+        "delta_sort_first": "Healthcare"
+      }
+    },
+    "context_map": {
+      "status": "PASS",
+      "observed": {
+        "alerts": 0,
+        "points": [
+          {
+            "label": "Consumer Cyclicals: +25.5% YTD excess, −7.0% relative momentum",
+            "x": 719.404753190914,
+            "y": 399.0071189689699
+          },
+          {
+            "label": "Consumer Non-Cyclicals: +36.2% YTD excess, −8.3% relative momentum",
+            "x": 803.4669475620746,
+            "y": 412.6132707932668
+          },
+          {
+            "label": "Financials: +18.1% YTD excess, +0.9% relative momentum",
+            "x": 661.757615545297,
+            "y": 316.62125756938644
+          },
+          {
+            "label": "Basic Materials: +41.7% YTD excess, −19.2% relative momentum",
+            "x": 846.6643510606967,
+            "y": 524.7661903641891
+          },
+          {
+            "label": "Energy: +31.2% YTD excess, −8.2% relative momentum",
+            "x": 764.3817282989602,
+            "y": 410.5804557205727
+          },
+          {
+            "label": "Properties & Real Estate: +12.7% YTD excess, +0.1% relative momentum",
+            "x": 618.8592784348921,
+            "y": 325.04410194679923
+          },
+          {
+            "label": "Infrastructures: +2.5% YTD excess, −2.9% relative momentum",
+            "x": 538.5427757068194,
+            "y": 355.5993252607448
+          },
+          {
+            "label": "Industrials: +32.8% YTD excess, +2.8% relative momentum",
+            "x": 777.0411206493793,
+            "y": 296.46302816617356
+          },
+          {
+            "label": "Technology: +14.7% YTD excess, −5.3% relative momentum",
+            "x": 634.8602534146708,
+            "y": 381.33853883401355
+          },
+          {
+            "label": "Healthcare: +27.4% YTD excess, +5.4% relative momentum",
+            "x": 734.8137993598144,
+            "y": 269.8277327380911
+          },
+          {
+            "label": "Transportation & Logistic: +28.1% YTD excess, −23.0% relative momentum",
+            "x": 740.2457697037281,
+            "y": 564.4821131411494
+          }
+        ],
+        "trails": 11
+      }
+    },
+    "navigation_smoke": {
+      "status": "PASS",
+      "observed": {
+        "routes": [
+          "/sectors",
+          "/sources",
+          "/overview",
+          "/what-changed",
+          "/movers",
+          "/foreign",
+          "/ownership",
+          "/heatmap",
+          "/map",
+          "/konglo",
+          "/themes",
+          "/explorer",
+          "/groups",
+          "/tickers",
+          "/methodology"
+        ],
+        "results": [
+          {
+            "alerts": [],
+            "heading": "Leadership beneath the index",
+            "overflow": false,
+            "path": "/sectors"
+          },
+          {
+            "alerts": [],
+            "heading": "Coverage & sources",
+            "overflow": false,
+            "path": "/sources"
+          },
+          {
+            "alerts": [],
+            "heading": "IDX leadership & diffusion",
+            "overflow": false,
+            "path": "/overview"
+          },
+          {
+            "alerts": [],
+            "heading": "Weekly market changes",
+            "overflow": false,
+            "path": "/what-changed"
+          },
+          {
+            "alerts": [],
+            "heading": "Market movers",
+            "overflow": false,
+            "path": "/movers"
+          },
+          {
+            "alerts": [],
+            "heading": "Foreign flow",
+            "overflow": false,
+            "path": "/foreign"
+          },
+          {
+            "alerts": [],
+            "heading": "Ownership",
+            "overflow": false,
+            "path": "/ownership"
+          },
+          {
+            "alerts": [],
+            "heading": "Stock heatmap",
+            "overflow": false,
+            "path": "/heatmap"
+          },
+          {
+            "alerts": [],
+            "heading": "Group rotation",
+            "overflow": false,
+            "path": "/map"
+          },
+          {
+            "alerts": [],
+            "heading": "Documented corporate portfolios",
+            "overflow": false,
+            "path": "/konglo"
+          },
+          {
+            "alerts": [],
+            "heading": "IDXIC subindustry classifications",
+            "overflow": false,
+            "path": "/themes"
+          },
+          {
+            "alerts": [],
+            "heading": "Transportation & Logistic",
+            "overflow": false,
+            "path": "/explorer"
+          },
+          {
+            "alerts": [],
+            "heading": "Analytical scanner",
+            "overflow": false,
+            "path": "/groups"
+          },
+          {
+            "alerts": [],
+            "heading": "Ticker Explorer",
+            "overflow": false,
+            "path": "/tickers"
+          },
+          {
+            "alerts": [],
+            "heading": "Methodology & Data Quality",
+            "overflow": false,
+            "path": "/methodology"
+          }
+        ],
+        "console": []
+      }
+    },
+    "loading_state": {
+      "status": "PASS",
+      "observed": {
+        "alerts": 0,
+        "ranks": 0,
+        "status": [
+          "Loading and verifying the selected Sectors release."
+        ]
+      }
+    },
+    "fetch_error_retry": {
+      "status": "PASS",
+      "observed": {
+        "overview_error": {
+          "alerts": [
+            "IHSG closes could not be loaded\n\nRelease file unavailable: /releases/rel-fad218940fcc7e2492d97613681175b6cb2b2e38d387254737fafc0cadfa09dc/assets/market.json (HTTP 503)\n\nRetry",
+            "",
+            "Market movers could not be loaded\n\nRelease file unavailable: /releases/rel-fad218940fcc7e2492d97613681175b6cb2b2e38d387254737fafc0cadfa09dc/assets/market.json (HTTP 503)\n\nRetry",
+            "Market breadth could not be loaded\n\nRelease file unavailable: /releases/rel-fad218940fcc7e2492d97613681175b6cb2b2e38d387254737fafc0cadfa09dc/assets/context/market_breadth.json (HTTP 503)\n\nRetry"
+          ],
+          "ihsg": null,
+          "retry_buttons": [
+            "Retry",
+            "",
+            "Retry",
+            "Retry"
+          ]
+        },
+        "overview_recovery": {
+          "alerts": [],
+          "breadth_curves": 2,
+          "close": "IHSG 6,036.89"
+        },
+        "weekly_error": {
+          "curves": 0,
+          "error": "Weekly comparison could not be loaded\n\nRelease file unavailable: /releases/rel-fad218940fcc7e2492d97613681175b6cb2b2e38d387254737fafc0cadfa09dc/assets/context/historical_comparison.json (HTTP 503)\n\nRetry",
+          "rows": 0
+        },
+        "map_error": {
+          "error": "Rotation replay could not be loaded\n\nRelease file unavailable: /releases/rel-fad218940fcc7e2492d97613681175b6cb2b2e38d387254737fafc0cadfa09dc/assets/context/historical_comparison.json (HTTP 503)\n\nRetry",
+          "marks": 0,
+          "text": "Group rotation\nRotation replay could not be loaded\n\nRelease file unavailable: /releases/rel-fad218940fcc7e2492d97613681175b6cb2b2e38d387254737fafc0cadfa09dc/assets/context/historical_comparison.json (HTTP 503)\n\nRetry"
+        },
+        "map_recovery": {
+          "alerts": 0,
+          "marks": 11
+        },
+        "weekly_recovery": {
+          "alerts": 0,
+          "curves": 1,
+          "rows": 11
+        }
+      }
+    },
+    "absent_asset": {
+      "status": "PASS",
+      "observed": {
+        "analysis": {
+          "alerts": 0,
+          "heading": "Sectors analysis is absent",
+          "message": "This release includes the recording but does not include its verified Sectors analysis asset.",
+          "ranking_rows": 0,
+          "retry": 0
+        },
+        "recording": {
+          "alerts": 0,
+          "ranks": 0,
+          "retries": 0,
+          "text": "SECTORS · PRIMARY WORKFLOW\nSectors recording is absent\n\nThis immutable release does not include the 66-stock Sectors recording required for the primary workflow."
+        },
+        "sources": {
+          "alerts": 0,
+          "rows": 0,
+          "text": "Coverage & sources\n\nThe selected immutable release does not include a Sectors recording."
+        }
+      }
+    },
+    "corrupt_core": {
+      "status": "PASS",
+      "observed": {
+        "error": "Sectors analysis could not be loaded\n\nRelease asset integrity check failed: assets/context/sectors_signal_analysis.json\n\nRetry",
+        "heading": "Sectors analysis could not be verified",
+        "marks": 0,
+        "ranks": 0,
+        "retry": 1
+      }
+    },
+    "missing_selection": {
+      "status": "PASS",
+      "observed": {
+        "error": "Sectors analysis could not be loaded\n\nThe frozen selection-market asset is missing from this release.\n\nRetry",
+        "heading": "Sectors analysis could not be verified",
+        "ranks": 0,
+        "sources_error": "Sectors recording could not be loaded\n\nThe frozen selection-market asset is missing from this release.\n\nRetry"
+      }
+    },
+    "corrupt_ytd": {
+      "status": "PASS",
+      "observed": {
+        "error": "Sectors analysis could not be loaded\n\nRelease asset integrity check failed: assets/context/sectors_ytd_baseline.json\n\nRetry",
+        "heading": "Sectors analysis could not be verified",
+        "marks": 0,
+        "ranks": 0
+      }
+    },
+    "map_without_history": {
+      "status": "PASS",
+      "observed": {
+        "alerts": 0,
+        "basis": "MARKET STRUCTURE · 2 OCT 2026\nGroup rotation\n\nYTD excess versus IHSG on the horizontal axis; 20D minus 60D excess on the vertical axis. Select a point, legend item, or row to inspect its dated path.\n\nCatalog\nMethodology\nSectors11\nKonglo32\nCurated themes0\nIDXIC activities102\nSearch groups\n11 groups on map · 11 listed\nHistorical price replay using current membership\nDated comparison data is not attached to this release.\nReplay basis\nRelative momentum\nUp = 20D excess minus 60D excess\n-47%\n0%\n47%\n26%\n0%\n-26%\nYTD excess return vs IHSG (%)\n20D excess − 60D excess (%)\nConsumer Cyclicals\nImproving\nLeading\nLagging\nWeakening\nConsumer Cyclicals\n+25.5%\nConsumer Non-Cyclicals\n+36.2%\nFinancials\n+18.1%\nBas",
+        "points": [
+          {
+            "label": "Consumer Cyclicals: +25.5% YTD excess, −6.9% relative momentum",
+            "x": 753.4527923423403,
+            "y": 403.42506474719954
+          },
+          {
+            "label": "Consumer Non-Cyclicals: +36.2% YTD excess, −7.6% relative momentum",
+            "x": 851.7968486397814,
+            "y": 411.711396239506
+          },
+          {
+            "label": "Financials: +18.1% YTD excess, +1.0% relative momentum",
+            "x": 686.0116159763821,
+            "y": 314.4528209427374
+          },
+          {
+            "label": "Basic Materials: +41.7% YTD excess, −18.3% relative momentum",
+            "x": 902.3333333333334,
+            "y": 531.2433650748301
+          },
+          {
+            "label": "Energy: +31.2% YTD excess, −7.9% relative momentum",
+            "x": 806.0711912327531,
+            "y": 415.3861576709754
+          },
+          {
+            "label": "Properties & Real Estate: +12.7% YTD excess, +0.1% relative momentum",
+            "x": 635.8250071837497,
+            "y": 325.35567216560656
+          },
+          {
+            "label": "Infrastructures: +2.5% YTD excess, −2.8% relative momentum",
+            "x": 541.8630227567394,
+            "y": 357.6665550396193
+          },
+          {
+            "label": "Industrials: +32.8% YTD excess, +3.3% relative momentum",
+            "x": 820.8813699237165,
+            "y": 288.86959148116597
+          },
+          {
+            "label": "Healthcare: +27.4% YTD excess, +6.7% relative momentum",
+            "x": 771.4797801038379,
+            "y": 250.1257062329746
+          },
+          {
+            "label": "Technology: +14.7% YTD excess, −5.3% relative momentum",
+            "x": 654.5444897016777,
+            "y": 385.6825193034608
+          },
+          {
+            "label": "Transportation & Logistic: +28.1% YTD excess, −22.5% relative momentum",
+            "x": 777.8346197856612,
+            "y": 578.6315789473684
+          }
+        ],
+        "trails": 0
+      }
+    },
+    "server_restart": {
+      "status": "PASS",
+      "observed": {
+        "interrupted": {
+          "alerts": [
+            "IHSG closes could not be loaded\n\nThe recorded release could not be reached. Retry when the connection is available.\n\nRetry",
+            "Market movers could not be loaded\n\nThe recorded release could not be reached. Retry when the connection is available.\n\nRetry",
+            "Market breadth could not be loaded\n\nThe recorded release could not be reached. Retry when the connection is available.\n\nRetry"
+          ],
+          "header": "‹\n⌂ Home\n2 OCT 2026\n|\nSECTOR\n| 11 SECTOR GROUPS | EOD\nRECORDED · 2 OCT 2026\n◐ DARK\nRefresh",
+          "ihsg": null,
+          "path": "/overview"
+        },
+        "recovered": {
+          "alerts": [],
+          "breadth_curves": 2,
+          "close": "IHSG 6,036.89"
+        }
+      }
+    }
+  },
+  "metrics": {
+    "daily_dates": 21,
+    "weekly_dates": 5,
+    "ranking_rows": 11,
+    "sectors_map_marks": 9,
+    "constituents_inspected": 66,
+    "ihsg_close": 6036.88818359375,
+    "context_sector_marks": 11
+  },
+  "screenshots": [
+    {
+      "path": "docs/submission-release/repair-2026-10-08/sectors-1036x799.jpg",
+      "sha256": "87345657bb34e532d96495a00e54288fc06935f6bfd4e741f856f459e9583a91",
+      "viewport": "1036x799"
+    },
+    {
+      "path": "docs/submission-release/repair-2026-10-08/sectors-1440x900.jpg",
+      "sha256": "ef7f9deae9f5d1f057e6883f0d601ebd171a6df799b3608823832b0b56938347",
+      "viewport": "1440x900"
+    },
+    {
+      "path": "docs/submission-release/repair-2026-10-08/sectors-390x844.jpg",
+      "sha256": "4261cc31d96c53d3039721a939ae747d6119369256cbba115b322774fb8efe49",
+      "viewport": "390x844"
+    },
+    {
+      "path": "docs/submission-release/repair-2026-10-08/overview-1440x900.jpg",
+      "sha256": "5b3b56c6419c31441a16837460da8efbe11084c3f2f397c15e5cd5f4c64b284b",
+      "viewport": "1440x900"
+    },
+    {
+      "path": "docs/submission-release/repair-2026-10-08/weekly-breadth-1440x900.jpg",
+      "sha256": "5e7ab36a05f596531fe337bfbb576a1e3f060510c8f2b3d8d9a6e82d9ecfc8a5",
+      "viewport": "1440x900"
+    },
+    {
+      "path": "docs/submission-release/repair-2026-10-08/context-map-1440x900.jpg",
+      "sha256": "728a1840115e9ee14e25eb59d1c75b7762c0970c97b0ba2e26a89185bc502efd",
+      "viewport": "1440x900"
+    },
+    {
+      "path": "docs/submission-release/repair-2026-10-08/loading-1440x900.jpg",
+      "sha256": "cc27dea84a97497069181cff5f6061003b96d57ff903cd7af9b68891cf6fc230",
+      "viewport": "1440x900"
+    },
+    {
+      "path": "docs/submission-release/repair-2026-10-08/fetch-error-1440x900.jpg",
+      "sha256": "ce22eb24a3e64f74096413da24b551a3204af9efe25d917c1f31fca55c2e4747",
+      "viewport": "1440x900"
+    },
+    {
+      "path": "docs/submission-release/repair-2026-10-08/absent-analysis-1440x900.jpg",
+      "sha256": "f618b1f35ffa92a2b04eb78fae97fffd3b53215c87dfe4f105e07892d0815ee8",
+      "viewport": "1440x900"
+    },
+    {
+      "path": "docs/submission-release/repair-2026-10-08/corrupt-core-1440x900.jpg",
+      "sha256": "6555578afad49f00a600fd1d0be34332b6e23a5af46034d871babe266137e6ca",
+      "viewport": "1440x900"
+    },
+    {
+      "path": "docs/submission-release/repair-2026-10-08/map-without-history-1440x900.jpg",
+      "sha256": "a0aa71233a1ea1d614deae2def5286539772bcf54a3cfb7025edf6bf66ffb859",
+      "viewport": "1440x900"
+    },
+    {
+      "path": "docs/submission-release/repair-2026-10-08/server-interrupted-1440x900.jpg",
+      "sha256": "7d687e612d5a91cb616f1d8d28fcc05dcfe63890af2f9600f8b6e3d8071db503",
+      "viewport": "1440x900"
+    }
+  ],
+  "unexpected_console_errors": 0,
+  "unexpected_data_request_failures": 0,
+  "sectors_provider_requests": 0,
+  "completed_at_utc": "2026-10-07T18:04:55.025Z",
+  "fault_test_method": "Separate loopback server with read-only production assets, controlled response failures, and hash-valid virtual manifests for omission tests. Original release and budget files were untouched."
+}

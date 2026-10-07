@@ -1,0 +1,77 @@
+{
+  "scope": "Agent-created isolated read-only localhost fault server; original release bytes were never changed",
+  "status": "PASS",
+  "requests_by_profile_and_status": [
+    {
+      "profile": "absent_analysis",
+      "status": 200,
+      "count": 10
+    },
+    {
+      "profile": "absent_core",
+      "status": 200,
+      "count": 16
+    },
+    {
+      "profile": "corrupt_core",
+      "status": 200,
+      "count": 12
+    },
+    {
+      "profile": "corrupt_ytd",
+      "status": 200,
+      "count": 12
+    },
+    {
+      "profile": "fetch_error",
+      "status": 200,
+      "count": 25
+    },
+    {
+      "profile": "fetch_error",
+      "status": 503,
+      "count": 4
+    },
+    {
+      "profile": "healthy",
+      "status": 200,
+      "count": 51
+    },
+    {
+      "profile": "loading",
+      "status": 200,
+      "count": 12
+    },
+    {
+      "profile": "map_without_history",
+      "status": 200,
+      "count": 9
+    },
+    {
+      "profile": "missing_selection",
+      "status": 200,
+      "count": 16
+    }
+  ],
+  "deliberate_failed_paths": [
+    {
+      "profile": "fetch_error",
+      "path": "/releases/rel-fad218940fcc7e2492d97613681175b6cb2b2e38d387254737fafc0cadfa09dc/assets/context/historical_comparison.json",
+      "status": 503,
+      "count": 2
+    },
+    {
+      "profile": "fetch_error",
+      "path": "/releases/rel-fad218940fcc7e2492d97613681175b6cb2b2e38d387254737fafc0cadfa09dc/assets/context/market_breadth.json",
+      "status": 503,
+      "count": 1
+    },
+    {
+      "profile": "fetch_error",
+      "path": "/releases/rel-fad218940fcc7e2492d97613681175b6cb2b2e38d387254737fafc0cadfa09dc/assets/market.json",
+      "status": 503,
+      "count": 1
+    }
+  ],
+  "paid_provider_requests": 0
+}

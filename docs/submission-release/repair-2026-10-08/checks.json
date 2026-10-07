@@ -1,0 +1,75 @@
+{
+  "schema_version": "diffusion-repair-checks-v1",
+  "created_at_utc": "2026-10-07T18:12:03+00:00",
+  "tested_source_commit": "63d9dced8088f76f2bcfa480a7b778e6d6fc6777",
+  "status": "VERIFIED_LOCAL_BUILD",
+  "python": {
+    "passed": 915,
+    "warnings": 2,
+    "duration_seconds": 47.39,
+    "log": "python-checks.log"
+  },
+  "frontend": {
+    "typecheck": "PASS",
+    "production_build": "PASS",
+    "clean_compiled_assets_match": true,
+    "log": "frontend-checks.log",
+    "warnings": "Existing Vite config-loader and bundle-size warnings"
+  },
+  "browser": {
+    "required_checks": 17,
+    "status": "PASS",
+    "receipt": "browser-qa.json",
+    "unexpected_console_errors": 0
+  },
+  "release_validation": {
+    "status": "PASS",
+    "receipt": "readiness.json"
+  },
+  "clean_reproduction": {
+    "status": "PASS",
+    "receipt": "clean-reproduction.json",
+    "credentials_required": false,
+    "network_disabled": true
+  },
+  "oracles": {
+    "sectors": "PASS, zero mismatches",
+    "diffusion_context_observations": 4160,
+    "diffusion_context_mismatches": 0,
+    "price_breadth_horizons": [
+      "5d",
+      "20d",
+      "60d",
+      "52w"
+    ],
+    "price_breadth_status": "PASS"
+  },
+  "preservation": {
+    "protected_recording_budget_and_pointer_files": 450,
+    "changed_files": [],
+    "requests_and_estimated_credits": 461,
+    "maximum_requests": 500,
+    "maximum_estimated_credits": 500.0,
+    "additional_paid_requests": 0,
+    "paid_calls": "HOLD",
+    "active_and_rollback_release": "unchanged"
+  },
+  "credential_review": {
+    "status": "PASS",
+    "reachable_git_blobs": 1802,
+    "history_commits": 99,
+    "issued_credential_matches": 0,
+    "report": "credential-review.json"
+  },
+  "production_preview": {
+    "url": "http://127.0.0.1:5173/sectors",
+    "detached_process": true,
+    "fresh_load_verified": true,
+    "ranking_rows": 11,
+    "sectors_map_marks": 9,
+    "unexpected_console_errors": 0
+  },
+  "public_hosting": "BLOCKED_MISSING_VERCEL_GITHUB_INTEGRATION",
+  "submission_media": "DEFERRED",
+  "launch_receipt": "launch.json"
+}

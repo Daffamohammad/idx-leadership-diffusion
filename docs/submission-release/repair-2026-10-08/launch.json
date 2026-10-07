@@ -1,0 +1,21 @@
+{
+  "schema_version": "diffusion-launch-receipt-v1",
+  "created_at_utc": "2026-10-07T18:14:28.156Z",
+  "status": "BLOCKED_MISSING_GITHUB_INTEGRATION",
+  "source_commit": "63d9dced8088f76f2bcfa480a7b778e6d6fc6777",
+  "repository": "https://github.com/Daffamohammad/idx-leadership-diffusion",
+  "team": "mohammad-daffa-s-projects",
+  "root_directory": "app/web",
+  "source_push": "PASS",
+  "project_created": false,
+  "deployment_created": false,
+  "public_url": null,
+  "public_url_verified": false,
+  "http_status": 400,
+  "reason": "To link a GitHub repository, you need to install the GitHub integration first.",
+  "attempt": "create_git_project with deploy=true, after source push",
+  "cli_fallback": "Unavailable",
+  "paid_data_requests": 0,
+  "required_user_action": "Install/connect the Vercel GitHub integration with access to the existing repository; then retry the authorized launch.",
+  "raw_error": "{\"error\":{\"message\":\"Failed to create project \\\"idx-leadership-diffusion\\\" for Daffamohammad/idx-leadership-diffusion: {\\\"error\\\":{\\\"message\\\":\\\"Vercel API request failed (400: bad_request). To link a GitHub repository, you need to install the GitHub integration first. Make sure there aren't any typos and that you have access to the repository if it's private.\\\",\\\"recovery\\\":\\\"Check the API message, arguments, target team and resource state. Correct the request before retrying.\\\",\\\"remediation\\\":{\\\"actor\\\":\\\"agent\\\",\\\"action\\\":\\\"correct_request\\\"},\\\"status\\\":400,\\\"code\\\":\\\"bad_request\\\",\\\"requestId\\\":\\\"syd1:sfo1::4mc4j-1791396783654-af07490302e7\\\"}}\",\"recovery\":\"Try an available mapped CLI fallback first for the same authorized action, with the same explicit team/project and the CLI's own credentials. If it succeeds, use its result. If it fails or no CLI fallback is available, No automatic fix is known from this response. Report the error to the user. Do not retry unchanged or assume re-authentication will fix it.\",\"remediation\":{\"actor\":\"unknown\",\"action\":\"none\"},\"operation\":\"create_git_project\"}}"
+}
