@@ -1,0 +1,304 @@
+{
+  "active_release": {
+    "manifest_sha256": "2defade3acf1688eb96e0e40d577189f390eafd03fea69a1175ce5e07aa1f11c",
+    "previous_manifest_sha256": "f2d2a3866ec002e5a9a7f1a7ec4e3bc1b8d4b15f431aaa52af7efccf3471759b",
+    "previous_release_id": "rel-246dd63fa62c1321143334c799f116e686a7602141a94a97aa3cc41d54b0d708",
+    "release_id": "rel-fad218940fcc7e2492d97613681175b6cb2b2e38d387254737fafc0cadfa09dc"
+  },
+  "budget_gate": {
+    "explicit_gaps": 43,
+    "failed_attempts_preserved": 1,
+    "maximum_requests_and_credits": 500,
+    "no_more_paid_calls_authorized_by_this_receipt": true,
+    "original_reservations_carried": 433,
+    "remaining_retry_reserve": 39,
+    "requests_and_estimated_credits_used": 461,
+    "status": "ACQUISITION_VALIDATED_WITHIN_500_CEILING"
+  },
+  "checks": {
+    "browser_workflow": {
+      "checks": [
+        "Desktop /sectors default landing, 20D ranking, 60D map, replay, sector selection, and constituent inspection",
+        "Mobile layout at 415px with no page-level horizontal overflow",
+        "Corrupted analysis and missing frozen selection source block the primary workflow",
+        "Corrupted YTD baseline digest blocks the primary workflow",
+        "Loading, validation error, and genuinely absent sample render distinct states",
+        "Same-date YTD baseline hash, 23 of 66 eligible stock readings, and all 11 below-floor sector aggregates"
+      ],
+      "reviewed": true,
+      "status": "PASS"
+    },
+    "clean_checkout_reproduction": {
+      "analysis_asset_sha256": "4aeea2a1e8417c81fa896351ad09597e206b2e1f8705a8daac275d78e27c82b9",
+      "analysis_build_status": "PASS",
+      "checkout_status": "clean",
+      "credentials_required": false,
+      "independent_oracle": {
+        "diffusion_states_and_cohorts": 286,
+        "member_window_values": 5148,
+        "mismatch_count": 0,
+        "sector_return_aggregates": 858,
+        "status": "PASS",
+        "ytd_contributor_values": 66,
+        "ytd_group_aggregates": 11
+      },
+      "live_requests": 0,
+      "paid_requests": 0,
+      "rebuilt_bytes_match_released_asset": true,
+      "source_commit": "b7f291ef3acf08514b4f4a2b4a41052bc01ebd61",
+      "status": "PASS"
+    },
+    "corporate_action_exclusions": {
+      "analysis_action_window_exclusions_by_type": {
+        "DIVIDEND": 457,
+        "RIGHT_ISSUE": 51,
+        "STOCK_SPLIT": 26
+      },
+      "examples": [
+        {
+          "cadence": "daily",
+          "date": "2026-09-04",
+          "horizon": "60d",
+          "reason": "MECHANICAL_ACTION_DIVIDEND_2026-06-22",
+          "ticker": "ANTM.JK"
+        },
+        {
+          "cadence": "daily",
+          "date": "2026-09-04",
+          "horizon": "60d",
+          "reason": "MECHANICAL_ACTION_DIVIDEND_2026-07-06",
+          "ticker": "BRPT.JK"
+        },
+        {
+          "cadence": "daily",
+          "date": "2026-09-04",
+          "horizon": "60d",
+          "reason": "MECHANICAL_ACTION_DIVIDEND_2026-07-03",
+          "ticker": "MAPA.JK"
+        },
+        {
+          "cadence": "daily",
+          "date": "2026-09-04",
+          "horizon": "60d",
+          "reason": "MECHANICAL_ACTION_DIVIDEND_2026-07-03",
+          "ticker": "MAPI.JK"
+        },
+        {
+          "cadence": "daily",
+          "date": "2026-09-04",
+          "horizon": "60d",
+          "reason": "MECHANICAL_ACTION_DIVIDEND_2026-06-23",
+          "ticker": "MDIY.JK"
+        },
+        {
+          "cadence": "daily",
+          "date": "2026-09-04",
+          "horizon": "60d",
+          "reason": "MECHANICAL_ACTION_DIVIDEND_2026-06-15",
+          "ticker": "AMRT.JK"
+        },
+        {
+          "cadence": "daily",
+          "date": "2026-09-04",
+          "horizon": "60d",
+          "reason": "MECHANICAL_ACTION_DIVIDEND_2026-07-07",
+          "ticker": "ICBP.JK"
+        },
+        {
+          "cadence": "daily",
+          "date": "2026-09-04",
+          "horizon": "60d",
+          "reason": "MECHANICAL_ACTION_DIVIDEND_2026-07-07",
+          "ticker": "INDF.JK"
+        },
+        {
+          "cadence": "daily",
+          "date": "2026-09-04",
+          "horizon": "60d",
+          "reason": "MECHANICAL_ACTION_DIVIDEND_2026-06-15",
+          "ticker": "UNVR.JK"
+        },
+        {
+          "cadence": "daily",
+          "date": "2026-09-04",
+          "horizon": "60d",
+          "reason": "MECHANICAL_ACTION_DIVIDEND_2026-06-22",
+          "ticker": "BYAN.JK"
+        },
+        {
+          "cadence": "daily",
+          "date": "2026-09-04",
+          "horizon": "20d",
+          "reason": "MECHANICAL_ACTION_DIVIDEND_2026-08-31",
+          "ticker": "BBCA.JK"
+        },
+        {
+          "cadence": "daily",
+          "date": "2026-09-04",
+          "horizon": "5d",
+          "reason": "MECHANICAL_ACTION_DIVIDEND_2026-08-31",
+          "ticker": "BBCA.JK"
+        }
+      ],
+      "members_retained": 66,
+      "minimum_contributors": 5,
+      "sample_action_events_by_type": {
+        "bonus": 7,
+        "dividend": 347,
+        "right_issue": 21,
+        "stock_split": 42,
+        "upcoming_dividend": 1
+      },
+      "status": "PASS"
+    },
+    "credential_free_exact_rebuild": {
+      "sha256": "4aeea2a1e8417c81fa896351ad09597e206b2e1f8705a8daac275d78e27c82b9",
+      "status": "PASS"
+    },
+    "existing_market_breadth_price_oracle": {
+      "horizons": {
+        "20d": {
+          "asset_lists_match": true,
+          "eligible_count": 829,
+          "new_high_count": 29,
+          "new_low_count": 149
+        },
+        "52w": {
+          "asset_lists_match": true,
+          "eligible_count": 819,
+          "new_high_count": 11,
+          "new_low_count": 32
+        },
+        "5d": {
+          "asset_lists_match": true,
+          "eligible_count": 829,
+          "new_high_count": 86,
+          "new_low_count": 182
+        },
+        "60d": {
+          "asset_lists_match": true,
+          "eligible_count": 827,
+          "new_high_count": 26,
+          "new_low_count": 77
+        }
+      },
+      "source_record": "docs/submission-release/GIT_HANDOFF-2026-10-06.md",
+      "status": "PASS"
+    },
+    "frontend_production_build": {
+      "advisories": [
+        "Existing Vite config-loader notice for __dirname",
+        "Existing minified bundle-size advisory"
+      ],
+      "command": "npm run build --prefix app/web",
+      "status": "PASS"
+    },
+    "frontend_typecheck": {
+      "command": "npm run typecheck --prefix app/web",
+      "status": "PASS"
+    },
+    "frozen_source_hash_binding": "PASS",
+    "full_python_suite": {
+      "command": ".venv/bin/pytest -q",
+      "status": "PASS",
+      "summary": "896 passed, 2 existing provider deprecation warnings"
+    },
+    "immutable_release_and_asset_hashes": "PASS",
+    "independent_close_and_integer_diffusion_oracle": {
+      "counts": {
+        "daily_observations": 21,
+        "diffusion_states_and_cohorts": 286,
+        "member_window_values": 5148,
+        "sector_return_aggregates": 858,
+        "weekly_observations": 5,
+        "ytd_contributor_values": 66,
+        "ytd_group_aggregates": 11
+      },
+      "method": "Independent close arithmetic and pure integer-count diffusion thresholds; production helpers and classifiers are not imported.",
+      "mismatch_count": 0,
+      "mismatches": [],
+      "sample_sha256": "9e9c8540e676eed99acd4dbfe4bdf86534e1a3a9a6e6575e3d3ce99281390f20",
+      "status": "PASS",
+      "ytd_status": "PASS"
+    },
+    "live_requests_during_readiness": 0,
+    "minimum_five_contributor_floor": "PASS",
+    "mocked_budget_retry_restart_concurrency_and_pre_501_tests": {
+      "command": [
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_acquisition_inventory.py",
+        "tests/test_persistent_budget.py",
+        "tests/test_prepare_sectors_recording.py",
+        "tests/test_prepare_sectors_ytd_baseline.py",
+        "tests/test_sectors_analysis.py"
+      ],
+      "status": "PASS",
+      "summary": [
+        "",
+        "tests/test_acquisition_inventory.py ...                                  [ 13%]",
+        "tests/test_persistent_budget.py .....                                    [ 34%]",
+        "tests/test_prepare_sectors_recording.py ..                               [ 43%]",
+        "tests/test_prepare_sectors_ytd_baseline.py ....                          [ 60%]",
+        "tests/test_sectors_analysis.py .........                                 [100%]",
+        "",
+        "============================= 23 passed in 19.81s =============================="
+      ],
+      "test_files": [
+        "tests/test_acquisition_inventory.py",
+        "tests/test_persistent_budget.py",
+        "tests/test_prepare_sectors_recording.py",
+        "tests/test_prepare_sectors_ytd_baseline.py",
+        "tests/test_sectors_analysis.py"
+      ]
+    },
+    "ytd_acquisition_validation": {
+      "baseline_asset_sha256": "7f954900f67b0f701390c256b60412c60086d5ee5b2e5d09dfaf9ef18a357ff1",
+      "eligible_stock_requests": 24,
+      "explicit_gaps": 43,
+      "failed_attempt_events_preserved": 1,
+      "matched_stock_baselines": 23,
+      "maximum_requests_and_credits": 500,
+      "native_ihsg_baseline_date": "2025-12-30",
+      "original_recording_tree_inventory_sha256": "b53ec0d4f4d2a41cda3fe9b7c7c21e75aed9e116c4eb74adef2fb1c283088743",
+      "original_recording_unchanged": true,
+      "plan_sha256": "e51b2e7297718cdf5cd277ba7ce36bfceeb4424a91cfbda792a1855aa787c1c8",
+      "receipt_status": "PARTIAL_EXPLICIT_GAPS",
+      "remaining_retry_reserve": 39,
+      "request_count_and_estimated_credits": 461,
+      "run_id": "sectors-ytd-e51b2e7297718cdf",
+      "status": "PASS"
+    }
+  },
+  "created_at_utc": "2026-10-07T08:55:33+00:00",
+  "schema_version": "sectors-readiness-receipt-v1",
+  "source_commit": "b7f291ef3acf08514b4f4a2b4a41052bc01ebd61",
+  "source_lineage": {
+    "analysis_sha256": "4aeea2a1e8417c81fa896351ad09597e206b2e1f8705a8daac275d78e27c82b9",
+    "asset_ids": [
+      "sectors_recorded_sample",
+      "sectors_selection_market",
+      "sectors_signal_analysis",
+      "sectors_ytd_baseline"
+    ],
+    "benchmark": "native Sectors IHSG close",
+    "frozen_selection_market_sha256": "f02edbe114d38543a1c13ac64df7b5b469e941e7859b15133d79e3a164cdf1c3",
+    "membership_retrospective": true,
+    "price_basis": "raw Sectors daily close",
+    "recorded_sample_sha256": "9e9c8540e676eed99acd4dbfe4bdf86534e1a3a9a6e6575e3d3ce99281390f20",
+    "sample_sectors": 11,
+    "sample_stocks": 66
+  },
+  "status": "READY_FOR_REPOSITORY_SIGNOFF",
+  "ytd_policy": {
+    "first_request": "one native Sectors IHSG daily baseline request",
+    "paid_call_authorization": "only through the explicit --record --allow-live --allow-credit-spend gate",
+    "stock_baselines": "require each close on the last observed 2025 IHSG date",
+    "unsupported_or_empty_windows": "remain explicit gaps; do not impute",
+    "window": {
+      "end": "2025-12-31",
+      "start": "2025-12-15"
+    }
+  }
+}
