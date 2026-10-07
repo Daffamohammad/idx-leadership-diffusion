@@ -1,0 +1,146 @@
+{
+  "active_asset_integrity": {
+    "foreign": true,
+    "market": true,
+    "ownership": true,
+    "rotation": true
+  },
+  "audit_commit": "46cf739acaeb660aa00595fe61aba7f4471ac59c",
+  "audit_date": "2026-10-05",
+  "baseline_verification": {
+    "fresh_local_clone": {
+      "commit": "46cf739acaeb660aa00595fe61aba7f4471ac59c",
+      "failed": 0,
+      "fresh_dependency_install_verified": false,
+      "installed_dependencies_reused": true,
+      "passed": 832,
+      "seconds": 58.62,
+      "source_tree_changed": false,
+      "warnings": 2
+    },
+    "frontend_build": {
+      "command": "npm run build --prefix app/web",
+      "existing_warnings": [
+        "Vite config uses __dirname under planned native config loader",
+        "JavaScript chunk exceeds 500 kB"
+      ],
+      "status": "PASS"
+    },
+    "frontend_typecheck": {
+      "command": "npm run typecheck --prefix app/web",
+      "status": "PASS"
+    },
+    "restricted_initial_run": {
+      "failed": 26,
+      "failure_cause": "Bun/TSX could not write to its temporary directory",
+      "passed": 806
+    },
+    "working_checkout": {
+      "command": ".venv/bin/python -m pytest -q",
+      "failed": 0,
+      "host_permissions_used_for_bun_tsx": true,
+      "passed": 832,
+      "seconds": 52.48,
+      "warnings": 2
+    }
+  },
+  "future_ownership": {
+    "index_preserved": true,
+    "refused": true
+  },
+  "future_verification_required": [
+    "New release manifest and publisher behavior",
+    "Reader races and cache identity across same-session releases",
+    "Rollback and concurrent publication",
+    "Deterministic complete candidate across dates and staging roots",
+    "Fresh lockfile dependency installation in clean clone",
+    "Desktop/mobile publication and refresh testing"
+  ],
+  "implementation_performed": false,
+  "inspection_findings": [
+    {
+      "evidence_type": "source inspection",
+      "finding": "Separate snapshot/market indexes and per-family index requests permit mixed same-session revisions",
+      "paths": [
+        "app/web/src/data/SnapshotProvider.tsx",
+        "app/web/src/data/marketWorkspace.ts"
+      ],
+      "priority": "P1"
+    },
+    {
+      "evidence_type": "source inspection",
+      "finding": "Mutable IDX context files bypass package selection",
+      "path": "app/web/src/data/SnapshotProvider.tsx",
+      "priority": "P1"
+    },
+    {
+      "evidence_type": "source inspection",
+      "finding": "Fixed official-source filenames, earlier-session fallback, ambient export inputs and wall-clock metadata block repeatable complete refreshes",
+      "priority": "P2"
+    }
+  ],
+  "interrupted_same_session_publication": {
+    "previous_index_unchanged": true,
+    "previous_market_file_overwritten": true,
+    "previous_market_hash_matches": false
+  },
+  "missing_asset": {
+    "index_preserved": true,
+    "refused": true
+  },
+  "ordinary_refresh": {
+    "after": [
+      "foreign",
+      "market",
+      "ownership"
+    ],
+    "before": [
+      "foreign",
+      "market",
+      "ownership",
+      "rotation"
+    ],
+    "rotation_retained": false
+  },
+  "rotation_reproduction": {
+    "command": ".venv/bin/python -m scripts.build_rotation_replay --ledger docs/rotation-history-handoff/SOURCE_LEDGER.json --source-root . --panel data/normalized/market_validated_panel_2026-10-02 --validation data/normalized/market_validated_panel_validation.json --snapshot app/web/public/snapshots/snap_public_market_2026-10-02.json --snapshot-provenance data/snapshots/snap_public_market_2026-10-02/panel_provenance.json --start 2026-09-01 --end 2026-10-02 --out <temporary-output>",
+    "coverage": {
+      "KONGLO": {
+        "daily": 0,
+        "groups": 22,
+        "observations": 0,
+        "weekly": 0
+      },
+      "SECTOR": {
+        "daily": 8,
+        "groups": 11,
+        "observations": 264,
+        "weekly": 8
+      },
+      "THEMES": {
+        "daily": 95,
+        "groups": 102,
+        "observations": 2376,
+        "weekly": 95
+      }
+    },
+    "guarded_input_files": 29,
+    "historical_or_served_files_changed": [],
+    "identical_canonical_publication_bytes": true,
+    "identical_json_content": true,
+    "sha256": "e71d3a145b698e0dadffeaf1e71e0550fc65de0a4a6f035ac76a8785f67a797d"
+  },
+  "served_files_modified": false,
+  "snapshot": {
+    "bytes": 25454416,
+    "id": "snap_public_market_2026-10-02",
+    "sha256": "1963c0d06d6a0d1eb09f18afc9df8f0a2db56d282ebfbedbab7c1e07b27e4b36"
+  },
+  "source_acquisition_performed": false,
+  "stale_validation_reference": {
+    "accepted": true,
+    "snapshot_file_present": false,
+    "validation_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "timezone": "Asia/Jakarta"
+}

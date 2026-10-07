@@ -1,28 +1,57 @@
 # IDX Leadership Diffusion
 
-> A market-wide intelligence system that detects not only where
-> leadership is moving across Indonesian equities, but whether that
-> leadership is broadening, concentrating, or deteriorating beneath
-> the index surface.
+> A Sectors-powered market-intelligence prototype that shows which Indonesian
+> equity sectors lead, whether leadership is broadening, and which constituents
+> drive the signal.
 
-This repository contains both an offline-safe implementation and a
-credentialed live Sectors path. The live path has been exercised against
-the IDX universe and produces reproducible, versioned snapshots with
-coverage, provenance, rate-limit, and data-gap metadata. Tavily is wired as
-an optional qualitative context layer; it never supplies quantitative market
-data.
+## Submission build · 8 October 2026
 
-The hackathon product is intentionally hybrid rather than pretending to be a
-complete production terminal: the market-signal lane is backed by a persisted
-real snapshot, the official IDX investor release is a real market-level lane,
-foreign flow per company remains a bounded source-backed sample, and Konglo,
-Themes, and research context are clearly presented as static or analyst-defined
-research layers. The current section-by-section contract is documented in
-[`docs/HYBRID_PRODUCT_MODEL.md`](docs/HYBRID_PRODUCT_MODEL.md).
-The official IDX source and parser boundary are documented in
-[`docs/IDX_STATISTICS_SOURCE.md`](docs/IDX_STATISTICS_SOURCE.md).
-The taxonomy constituent and YTD rotation contract is documented in
-[`docs/TAXONOMY_ROTATION_RUNBOOK.md`](docs/TAXONOMY_ROTATION_RUNBOOK.md).
+**Problem.** An index-level move can hide sharply different sector and stock
+leadership. This prototype makes those differences inspectable with
+source-bound prices, explicit contributor counts, and replayable calculations.
+
+**Audience.** Market-intelligence reviewers and equity researchers who need to
+inspect sector signals down to their contributing stocks and data limitations.
+
+The primary workflow is `/sectors`: rank 11 sectors by 20-session excess return,
+compare 60-session excess return with relative momentum, replay daily or weekly
+observations, and inspect all 66 selected constituents. The sample has six
+stocks per sector and was selected from a frozen 2 October 2026 market source.
+It is retrospective, not historical point-in-time membership. Returns use raw
+Sectors closes against native Sectors IHSG closes. Listed splits, rights issues,
+bonuses, dividends, and other mechanical changes exclude a stock from the
+affected window; missing prices stay missing, and signals require at least five
+contributors. Each replay comparison uses the same eligible names at both
+dates, while eligibility can change between date pairs.
+
+The `/sectors` page reads released, hash-validated assets and makes no provider
+calls when opened. Broader IDX pages remain supporting context. The immutable
+release, sample boundary, reproduction steps, rollback target, and current
+verification evidence are documented in
+[`docs/submission-release/README.md`](docs/submission-release/README.md).
+
+## Offline reproduction
+
+Resolve the active release ID from `app/web/public/releases/active.json`, then
+rebuild and independently verify the primary analysis using only released
+assets. No credentials or paid requests are required:
+
+```bash
+RELEASE_ID="$(.venv/bin/python -c 'import json; print(json.load(open("app/web/public/releases/active.json"))["active"]["release_id"])')"
+RELEASE_DIR="app/web/public/releases/$RELEASE_ID"
+.venv/bin/python scripts/build_sectors_analysis.py \
+  --sample "$RELEASE_DIR/assets/context/sectors_recorded_sample.json" \
+  --selection-market "$RELEASE_DIR/assets/context/sectors_selection_market.json" \
+  --ytd-baseline "$RELEASE_DIR/assets/context/sectors_ytd_baseline.json" \
+  --out /tmp/sectors_signal_analysis.json
+.venv/bin/python scripts/verify_sectors_analysis_oracle.py \
+  --sample "$RELEASE_DIR/assets/context/sectors_recorded_sample.json" \
+  --analysis /tmp/sectors_signal_analysis.json \
+  --ytd-baseline "$RELEASE_DIR/assets/context/sectors_ytd_baseline.json"
+```
+
+For the full offline regression suite and frontend checks, see
+[`docs/submission-release/README.md`](docs/submission-release/README.md).
 
 **This project is an analytical market-intelligence prototype for
 research and educational purposes. It does not provide investment
@@ -30,37 +59,30 @@ advice or personalized recommendations.**
 
 ## Sections
 
-- [What works now](#what-works-now)
-- [Hybrid product model](#hybrid-product-model)
+- [Submission build](#submission-build--8-october-2026)
+- [Offline reproduction](#offline-reproduction)
+- [Supporting implementation and research tools](#supporting-implementation-and-research-tools)
+- [Earlier broad-universe product model](#earlier-broad-universe-product-model-historical)
 - [Prototype mode](#prototype-mode)
 - [Demo mode](#demo-mode)
-- [Sectors integration status](#sectors-integration-status)
-- [Live Sectors + Tavily refresh](#live-sectors--tavily-refresh)
+- [Earlier Sectors-wide integration audit](#earlier-sectors-wide-integration-audit)
+- [Earlier broad-universe live refresh](#earlier-broad-universe-live-refresh)
 - [Foreign-flow discovery and sample calculation](#foreign-flow-discovery-and-sample-calculation)
 - [Architecture](#architecture)
 - [Methodology](#method-overview)
 - [Known limitations](#known-limitations)
 
-## What this is
+## Supporting implementation and research tools
 
-A clean Python 3.10+ package that:
+The repository also contains earlier broad-universe prototypes, snapshot
+builders, a Streamlit inspection surface, and qualitative context integrations.
+Those remain available as supporting research tools; they are not the primary
+submission workflow. Shared calculation code and offline synthetic-market
+tests provide additional regression coverage.
 
-1. fetches public market data (yfinance) for a prototype IDX universe,
-2. normalizes to canonical schemas (Pydantic),
-3. computes per-security features (returns, excess returns),
-4. aggregates to groups (equal-weight), breadth, and concentration,
-5. classifies leadership and group-size-aware diffusion states (provisional, parameter-driven),
-6. detects transitions and material change,
-7. persists durable point-in-time snapshots with provenance,
-8. exposes a thin Streamlit UI for inspection,
-9. ships a deterministic synthetic-market harness (`tests/synthetic_market.py`,
-   scenarios A–G) and a group-size diffusion grid
- (`scripts/audit_group_size_diffusion.py`) as offline guardrails.
+## Earlier broad-universe product model (historical)
 
-## Hybrid product model
-
-The product separates evidence by what a reviewer can reasonably trust in the
-current build:
+The earlier product model separated evidence by what a reviewer could reasonably trust:
 
 | Product lane | Sections | Contract |
 | --- | --- | --- |
@@ -70,12 +92,9 @@ current build:
 | Static research lens | Konglo Map, Themes Map, Group Explorer for those taxonomies, Themes Explorer | Analyst-defined membership configuration; aggregate metrics may reuse the current snapshot, but the taxonomy is not official IDX data. |
 | Static context | Research Events and optional web-context panels | Persisted descriptive context; never used to create or change quantitative signals. |
 
-This is a deliberate hackathon delivery choice. A repository-local rubric does
-not require full IDX coverage or production deployment; the external event
-rules remain the final authority. The UI labels each lane so a static research
-prototype is not mistaken for live data.
+This table describes a historical prototype design. The active submission workflow and evidence boundary are described above and in the current release notes.
 
-## What works now
+## Supporting implementation inventory
 
 | Capability | Status | Evidence |
 | --- | --- | --- |
@@ -110,7 +129,8 @@ provider connections while rendering.
 
 | Route | Page | Data source |
 | --- | --- | --- |
-| `/` | `PublicHome` | marketing copy (no data dependency) |
+| `/` | redirects to `/sectors` | primary Sectors workflow |
+| `/sectors` | `SectorsDashboard` | immutable Sectors sample, frozen selection source, and signal-analysis assets |
 | `/overview` | `MarketOverview` | real Sector heatmap plus official IDX market-level release, bounded sample, and static context sections |
 | `/what-changed` | `WhatChanged` | real current snapshot; prior comparison is shown only when compatible history exists |
 | `/map` | `LeadershipMap` | YTD excess-return rotation mapping and table; 20D/60D momentum remain diagnostics and null YTD values stay `Not available` |
@@ -316,7 +336,11 @@ recommended artefact for screenshots, demos, and the sidebar
 markdown export. Demo values are deterministic synthetic data and
 must not be quoted as market observations.
 
-## Sectors integration status
+## Earlier Sectors-wide integration audit
+
+This table records the broad-universe provider path exercised in August 2026.
+It is supporting tooling evidence and does not describe the active 66-stock
+submission release.
 
 | Surface | Status | Reference |
 | --- | --- | --- |
@@ -337,7 +361,11 @@ the live bundle and its sanitized validation artifacts are now the evidence
 for the exercised path. Do not treat demo or public prototype payloads as
 live market observations.
 
-## Live Sectors + Tavily refresh
+## Earlier broad-universe live refresh
+
+The commands below belong to the earlier broad-universe research workflow.
+They are not required to run or reproduce the active submission workflow;
+use the offline release instructions above for that build.
 
 ```bash
 # 1. Confirm keys are present (env only; never log them).
@@ -376,7 +404,7 @@ test -n "${TAVILY_API_KEY:-}" && echo "Tavily key present" || echo "Tavily key m
 The runbook (`docs/LIVE_SECTORS_RUNBOOK.md`) covers the same flow with
 failure handling, rollback, and quarantine.
 
-## Quick start
+## Prototype quick start (historical)
 
 ```bash
 git clone <this repo>
@@ -395,7 +423,7 @@ pip install -e .
 streamlit run app/streamlit_app.py
 ```
 
-## Current scope
+## Historical prototype scope (August 2026)
 
 - Live Sectors discovery produced 962 unique company rows in the exercised
   2026-08-27 snapshot. The browser payload now exposes all 962 rows through a
@@ -423,25 +451,6 @@ Provider  →  Raw cache  →  Normalization  →  Canonical data
 ```
 
 See `docs/ARCHITECTURE.md` for the full description.
-
-## Quick start
-
-```bash
-git clone <this repo>
-cd idx-leadership-diffusion
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -e .
-
-# Build a snapshot from the public-data prototype
-.venv/bin/python -m scripts.build_snapshot --provider public --as-of 2026-08-20
-
-# Run the test suite
-.venv/bin/pytest -q
-
-# Launch the exploratory UI
-streamlit run app/streamlit_app.py
-```
 
 ## Prototype data
 
@@ -503,7 +512,7 @@ See `docs/METHODOLOGY.md` for the full specification.
 
 See `docs/KNOWN_GAPS.md` for the full register.
 
-## Sectors operating model
+## Supporting live-provider operating model
 
 The provider abstraction is the seam. `SectorsProvider` is implemented
 against the Sectors v2 HTTP contract and refuses live calls by default.

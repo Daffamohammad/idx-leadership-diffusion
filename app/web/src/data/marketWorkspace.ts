@@ -4,6 +4,7 @@ import { loadReleaseAdditionalFile, loadReleaseAsset, type ReleaseFamily } from 
 
 export interface MarketStock {
   ticker: string; company_name: string; instrument_type: string; analysis_requested: boolean;
+  as_of?: string; last_trade_date?: string;
   close: number | null; previous_close: number | null; return_1d: number | null; return_1w: number | null;
   market_cap: number | null; traded: boolean; signal_eligible: boolean; history_status: string;
   volume_shares: number | null; value_idr: number | null; frequency_trades: number | null;
@@ -177,6 +178,86 @@ export interface RecordedSectorsSample {
   sources: Record<string, unknown>;
   limitations: string[];
 }
+export interface SectorSignalWindow {
+  return_pct: number | null;
+  excess_return_pct: number | null;
+  start_date: string | null;
+  end_date: string | null;
+  exclusion_reason: string | null;
+}
+export interface SectorSignalGroup {
+  sector: string;
+  requested_constituents: number;
+  eligible_contributors: number;
+  contributor_counts: Record<"5d" | "20d" | "60d", number>;
+  comparison_cohorts: {
+    leadership_tickers: string[];
+    map_tickers: string[];
+    diffusion_tickers: string[];
+  };
+  signal_status: string;
+  returns: Record<"5d" | "20d" | "60d", {
+    stock_return_pct: number | null;
+    benchmark_return_pct: number | null;
+    excess_return_pct: number | null;
+    eligible_contributors: number;
+  }>;
+  map: { cohort_tickers: string[]; eligible_contributors: number; x_60d_excess_pct: number; y_relative_momentum_pct: number } | null;
+  diffusion: {
+    outperforming_count: number | null;
+    previous_outperforming_count: number | null;
+    change_count: number | null;
+    eligible_count: number;
+    breadth_pct: number | null;
+    previous_breadth_pct: number | null;
+    state: string;
+  };
+  leadership_state: string;
+  concentration_v2: {
+    top1_abs_share: number | null; top3_abs_share: number | null; top5_abs_share: number | null;
+    hhi: number | null; contributor_count: number; requested_constituent_count: number;
+    missing_constituent_count: number; top_absolute_contributor: string | null;
+    net_signed_return: number | null; gross_absolute_return: number | null; status: string;
+  } | null;
+  contributors: Array<{
+    ticker: string; company_name: string | null; contributes_20d: boolean;
+    contributes_to_leadership: boolean; contributes_to_60d_map: boolean;
+    contributes_to_diffusion_comparison: boolean;
+    returns: Record<"5d" | "20d" | "60d", SectorSignalWindow>;
+  }>;
+}
+export interface SectorsSignalAnalysis {
+  schema_version: "sectors-signal-analysis-v1";
+  as_of: string;
+  label: string;
+  sources: {
+    recorded_sample_sha256: string;
+    selection_market_source_sha256: string;
+    provider: string;
+    price_basis: string;
+    benchmark: string;
+  };
+  selection: {
+    stock_count: number; stocks_per_sector: number; membership_release_session: string;
+    membership_as_of: string; selected_market_cap_date: string; retrospective: boolean;
+  };
+  contract: Record<string, unknown>;
+  corporate_action_exclusions: Record<string, Array<{
+    ticker: string; first_unavailable_date: string; horizon: string; reason: string;
+  }>>;
+  comparison_cohort_rule: string;
+  ytd: {
+    status: string; baseline_date: string | null; source_asset_sha256?: string; reason?: string;
+    end_date?: string; benchmark_return_pct?: number | null;
+    groups?: Array<{ sector: string; eligible_contributors: number; requested_constituents: number;
+      stock_return_pct: number | null; benchmark_return_pct: number | null; excess_return_pct: number | null;
+      status: string; contributors: Array<{ ticker: string; return_pct: number | null;
+        excess_return_pct: number | null; eligible: boolean; exclusion_reason: string | null }> }>;
+  };
+  daily: Array<{ date: string; mode: "daily"; previous_date: string | null; groups: SectorSignalGroup[] }>;
+  weekly: Array<{ date: string; mode: "weekly"; previous_date: string | null; groups: SectorSignalGroup[] }>;
+  methodology: string[];
+}
 export interface Holder {
   row_id: string; ticker: string; issuer: string; holder: string; classification: string;
   local_foreign: string; shares: number; percentage: number; as_of: string;
@@ -294,24 +375,71 @@ export function useRecordedSectorsSample() {
     let cancelled = false;
     const release = snapshot.release;
     const entry = release?.manifest.additional_files.find(file => file.file_id === "sectors_recorded_sample");
-    const requestKey = release && entry ? `${release.id}:${entry.sha256}` : null;
+    const selectionEntry = release?.manifest.additional_files.find(file => file.file_id === "sectors_selection_market");
+    const requestKey = release && entry ? `${release.id}:${entry.sha256}:${selectionEntry?.sha256 ?? "missing-selection"}` : null;
     if (!release || !entry) {
       setState({ data: null, error: null, loading: false, requestKey });
       return;
     }
+    if (!selectionEntry) {
+      setState({ data: null, error: "The frozen selection-market asset is missing from this release.", loading: false, requestKey });
+      return;
+    }
     setState({ data: null, error: null, loading: true, requestKey });
-    loadReleaseAdditionalFile<RecordedSectorsSample>(release, "sectors_recorded_sample").then(async data => {
+    Promise.all([
+      loadReleaseAdditionalFile<RecordedSectorsSample>(release, "sectors_recorded_sample"),
+      loadReleaseAdditionalFile<MarketWorkspace>(release, "sectors_selection_market"),
+    ]).then(async ([data, selectionMarket]) => {
       if (cancelled) return;
       const parentIdHash = data ? await crypto.subtle.digest("SHA-256", new TextEncoder().encode(data.selection.membership_release_id)) : null;
       const parentIdDigest = parentIdHash ? Array.from(new Uint8Array(parentIdHash), byte => byte.toString(16).padStart(2, "0")).join("") : null;
       if (!data || data.schema_version !== "sectors-recorded-sample-v1" ||
+          !selectionMarket || selectionMarket.schema_version !== "market-workspace-v1" ||
           data.label !== "Recorded Sectors sample · 66 stocks" || data.stocks.length !== 66 ||
           Object.values(data.selection.sector_counts).length !== 11 ||
           Object.values(data.selection.sector_counts).some(count => count !== 6) ||
           data.selection.membership_release_session !== release.manifest.target_session ||
-          data.sources.market_release_source_sha256 !== release.manifest.families.market.sha256 ||
+          data.selection.selected_market_cap_date !== selectionMarket.as_of ||
+          data.sources.market_release_source_sha256 !== selectionEntry.sha256 ||
           parentIdDigest !== release.manifest.analytical_contracts.recording_parent_release_id_sha256) {
-        throw new Error("Recorded sample does not match the selected release and frozen 66-stock membership");
+        throw new Error("Recorded sample does not match its hash-bound frozen selection source and 66-stock membership");
+      }
+      const eligibleBySector = new Map<string, MarketStock[]>();
+      for (const row of selectionMarket.records) {
+        const sector = row.taxonomy?.sector;
+        const ticker = row.ticker.toUpperCase();
+        if (!sector || row.instrument_type !== "LISTED_STOCK" || row.signal_eligible !== true ||
+            row.traded !== true || row.last_trade_date !== selectionMarket.as_of ||
+            !Number.isFinite(row.close) || Number(row.close) <= 0 ||
+            !Number.isFinite(row.market_cap) || Number(row.market_cap) <= 0 ||
+            !/^[A-Z]{4,6}\.JK$/.test(ticker)) continue;
+        eligibleBySector.set(sector, [...(eligibleBySector.get(sector) ?? []), row]);
+      }
+      const actualBySector = new Map<string, Set<string>>();
+      for (const stock of data.stocks) {
+        const members = actualBySector.get(stock.sector) ?? new Set<string>();
+        members.add(stock.ticker.toUpperCase());
+        actualBySector.set(stock.sector, members);
+      }
+      if (eligibleBySector.size !== 11 || actualBySector.size !== 11) {
+        throw new Error("Frozen selection source does not contain the 11 recorded sectors");
+      }
+      for (const [sector, rows] of eligibleBySector) {
+        const ranked = [...rows].sort((left, right) =>
+          (Number(right.market_cap) - Number(left.market_cap)) || left.ticker.localeCompare(right.ticker));
+        const selected = new Set(ranked.slice(0, 6).map(row => row.ticker.toUpperCase()));
+        for (const replacement of data.selection.replacements[sector] ?? []) {
+          if (!selected.has(replacement.removed.toUpperCase()) ||
+              !ranked.slice(6).some(row => row.ticker.toUpperCase() === replacement.selected.toUpperCase())) {
+            throw new Error(`Recorded replacement is not supported by frozen market evidence for ${sector}`);
+          }
+          selected.delete(replacement.removed.toUpperCase());
+          selected.add(replacement.selected.toUpperCase());
+        }
+        const actual = actualBySector.get(sector);
+        if (!actual || actual.size !== 6 || [...actual].some(ticker => !selected.has(ticker)) || selected.size !== actual.size) {
+          throw new Error(`Recorded six-stock membership does not match the frozen selection for ${sector}`);
+        }
       }
       setState({ data, error: null, loading: false, requestKey });
     }).catch(error => {
@@ -320,6 +448,75 @@ export function useRecordedSectorsSample() {
     return () => { cancelled = true; };
   }, [snapshot.release]);
   const entry = snapshot.release?.manifest.additional_files.find(file => file.file_id === "sectors_recorded_sample");
-  const selectedKey = snapshot.release && entry ? `${snapshot.release.id}:${entry.sha256}` : null;
+  const selectionEntry = snapshot.release?.manifest.additional_files.find(file => file.file_id === "sectors_selection_market");
+  const selectedKey = snapshot.release && entry ? `${snapshot.release.id}:${entry.sha256}:${selectionEntry?.sha256 ?? "missing-selection"}` : null;
+  return state.requestKey === selectedKey ? state : { data: null, error: null, loading: true, requestKey: selectedKey };
+}
+
+export function useSectorsSignalAnalysis() {
+  const snapshot = useSnapshot();
+  const sampleState = useRecordedSectorsSample();
+  const [state, setState] = useState<{ data: SectorsSignalAnalysis | null; error: string | null; loading: boolean; requestKey: string | null }>({ data: null, error: null, loading: true, requestKey: null });
+  useEffect(() => {
+    let cancelled = false;
+    const release = snapshot.release;
+    const entry = release?.manifest.additional_files.find(file => file.file_id === "sectors_signal_analysis");
+    const sampleEntry = release?.manifest.additional_files.find(file => file.file_id === "sectors_recorded_sample");
+    const selectionEntry = release?.manifest.additional_files.find(file => file.file_id === "sectors_selection_market");
+    const ytdEntry = release?.manifest.additional_files.find(file => file.file_id === "sectors_ytd_baseline");
+    const requestKey = release && entry ? `${release.id}:${entry.sha256}:${sampleEntry?.sha256 ?? "missing-sample"}:${selectionEntry?.sha256 ?? "missing-selection"}:${ytdEntry?.sha256 ?? "no-ytd-baseline"}` : null;
+    if (!release || sampleState.loading) {
+      setState({ data: null, error: null, loading: true, requestKey });
+      return;
+    }
+    if (sampleState.error) {
+      setState({ data: null, error: sampleState.error, loading: false, requestKey });
+      return;
+    }
+    if (!sampleState.data) {
+      setState({ data: null, error: null, loading: false, requestKey });
+      return;
+    }
+    if (!entry || !sampleEntry || !selectionEntry) {
+      setState({ data: null, error: "The Sectors primary analysis or one of its frozen source assets is missing.", loading: false, requestKey });
+      return;
+    }
+    setState({ data: null, error: null, loading: true, requestKey });
+    Promise.all([
+      loadReleaseAdditionalFile<SectorsSignalAnalysis>(release, "sectors_signal_analysis"),
+      ytdEntry ? loadReleaseAdditionalFile<Record<string, unknown>>(release, "sectors_ytd_baseline") : Promise.resolve(null),
+    ]).then(([data, ytdBaseline]) => {
+      if (cancelled) return;
+      if (!data || data.schema_version !== "sectors-signal-analysis-v1" ||
+          data.as_of !== release.manifest.target_session ||
+          data.sources.recorded_sample_sha256 !== sampleEntry.sha256 ||
+          data.sources.selection_market_source_sha256 !== selectionEntry.sha256 ||
+          data.selection.stock_count !== 66 || data.selection.retrospective !== true ||
+          !Array.isArray(data.daily) || !data.daily.length || !Array.isArray(data.weekly) || !data.weekly.length) {
+        throw new Error("Sectors analysis does not match the selected release, sample, and frozen selection source");
+      }
+      if (ytdEntry) {
+        if (!ytdBaseline || ytdBaseline.schema_version !== "sectors-ytd-baseline-v1" ||
+            data.ytd.status === "NOT_AVAILABLE" || data.ytd.source_asset_sha256 !== ytdEntry.sha256 ||
+            data.ytd.baseline_date !== ytdBaseline.baseline_date ||
+            (ytdBaseline.ihsg as Record<string, unknown> | undefined)?.date !== data.ytd.baseline_date) {
+          throw new Error("Sectors YTD analysis does not match its hash-bound native baseline asset");
+        }
+      } else if (data.ytd.status !== "NOT_AVAILABLE" || data.ytd.source_asset_sha256) {
+        throw new Error("Sectors analysis contains YTD readings without a hash-bound baseline asset");
+      }
+      setState({ data, error: null, loading: false, requestKey });
+    }).catch(error => {
+      if (!cancelled) setState({ data: null, error: String(error.message ?? error), loading: false, requestKey });
+    });
+    return () => { cancelled = true; };
+  }, [snapshot.release, sampleState.data, sampleState.error, sampleState.loading]);
+  const entry = snapshot.release?.manifest.additional_files.find(file => file.file_id === "sectors_signal_analysis");
+  const sampleEntry = snapshot.release?.manifest.additional_files.find(file => file.file_id === "sectors_recorded_sample");
+  const selectionEntry = snapshot.release?.manifest.additional_files.find(file => file.file_id === "sectors_selection_market");
+  const ytdEntry = snapshot.release?.manifest.additional_files.find(file => file.file_id === "sectors_ytd_baseline");
+  const selectedKey = snapshot.release && entry
+    ? `${snapshot.release.id}:${entry.sha256}:${sampleEntry?.sha256 ?? "missing-sample"}:${selectionEntry?.sha256 ?? "missing-selection"}:${ytdEntry?.sha256 ?? "no-ytd-baseline"}`
+    : null;
   return state.requestKey === selectedKey ? state : { data: null, error: null, loading: true, requestKey: selectedKey };
 }

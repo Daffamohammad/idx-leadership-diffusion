@@ -1,0 +1,1 @@
+{"request":{"endpoint":"/v2/index-daily/ihsg/","parameters":{"end":"2026-10-02","start":"2026-09-30"}},"response":[{"date":"2026-09-30","index_code":"IHSG","price":6071.138},{"date":"2026-10-01","index_code":"IHSG","price":6009.502},{"date":"2026-10-02","index_code":"IHSG","price":6036.888}],"response_sha256":"5d980d8212d47284d1690bc6f87423170839fb99f3c3cf2de49b28b06524905b"}

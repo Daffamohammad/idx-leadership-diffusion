@@ -1,0 +1,17 @@
+{
+  "baseline_asset_sha256": "7f954900f67b0f701390c256b60412c60086d5ee5b2e5d09dfaf9ef18a357ff1",
+  "eligible_stock_requests": 24,
+  "explicit_gaps": 43,
+  "failed_attempt_events_preserved": 1,
+  "matched_stock_baselines": 23,
+  "maximum_requests_and_credits": 500,
+  "native_ihsg_baseline_date": "2025-12-30",
+  "original_recording_tree_inventory_sha256": "b53ec0d4f4d2a41cda3fe9b7c7c21e75aed9e116c4eb74adef2fb1c283088743",
+  "original_recording_unchanged": true,
+  "plan_sha256": "e51b2e7297718cdf5cd277ba7ce36bfceeb4424a91cfbda792a1855aa787c1c8",
+  "receipt_status": "PARTIAL_EXPLICIT_GAPS",
+  "remaining_retry_reserve": 39,
+  "request_count_and_estimated_credits": 461,
+  "run_id": "sectors-ytd-e51b2e7297718cdf",
+  "status": "PASS"
+}

@@ -16,7 +16,7 @@ import math
 import threading
 import time
 from dataclasses import dataclass, field
-from typing import Any, Mapping, Optional, Sequence
+from typing import Any, Callable, Mapping, Optional, Sequence
 
 from ..data import RawCache
 from ..models import ProviderMode
@@ -151,6 +151,7 @@ class SectorsClient:
         min_request_interval_seconds: float = 0.0,
         max_estimated_credits: float | None = DEFAULT_MAX_ESTIMATED_CREDITS,
         max_http_requests: int | None = DEFAULT_MAX_HTTP_REQUESTS,
+        budget_reserver: Callable[[str, float], None] | None = None,
     ) -> None:
         self.api_key = api_key or ""
         normalized_base_url = (base_url or self.BASE_URL).rstrip("/")
@@ -197,6 +198,7 @@ class SectorsClient:
             if max_http_requests < 0:
                 raise ValueError("max_http_requests must be non-negative or None")
         self.max_http_requests = max_http_requests
+        self._budget_reserver = budget_reserver
         self._budget_lock = threading.Lock()
         self._budget_reserved_credits = 0.0
         self._http_requests_made = 0
@@ -631,6 +633,10 @@ class SectorsClient:
                     f"endpoint={path} reserved={self._budget_reserved_credits:.2f} "
                     f"requested={numeric_cost:.2f} cap={self.max_estimated_credits:.2f}"
                 )
+            if self._budget_reserver is not None:
+                # Persist before sending each attempt so a process restart or
+                # concurrent runner cannot reset the recording ceiling.
+                self._budget_reserver(path, numeric_cost)
             if self.max_estimated_credits is not None:
                 self._budget_reserved_credits = proposed
             self._http_requests_made += 1

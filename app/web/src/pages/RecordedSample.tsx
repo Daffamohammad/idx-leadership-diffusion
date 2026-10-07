@@ -24,10 +24,9 @@ export default function RecordedSample() {
     last_close: [...stock.prices].sort((a, b) => a.date.localeCompare(b.date)).at(-1)?.close ?? null,
   })).sort((a, b) => a.sector.localeCompare(b.sector) || a.ticker.localeCompare(b.ticker)), [sample]);
 
-  if (!sample && (snapshotLoading || sampleState.loading)) return <main className="workspace-page"><p className="meta">Loading the selected release.</p></main>;
-  if (!sample && !snapshotError) return <main className="workspace-page"><h1>Recorded Sectors sample</h1><p className="meta">The selected immutable release does not include a recorded Sectors sample.</p></main>;
-  if (snapshotError || sampleState.error) return <main className="workspace-page"><h1>Recorded Sectors sample</h1><p className="meta">The selected release could not be verified.</p></main>;
-  if (!sample) return null;
+  if (snapshotError || sampleState.error) return <main className="workspace-page"><h1>Recorded Sectors sample</h1><p role="alert" className="meta">The selected release could not be verified: {sampleState.error ?? snapshotError}</p></main>;
+  if (!sample && (snapshotLoading || sampleState.loading)) return <main className="workspace-page"><p className="meta" role="status">Loading the selected release.</p></main>;
+  if (!sample) return <main className="workspace-page"><h1>Recorded Sectors sample</h1><p className="meta">The selected immutable release does not include a recorded Sectors sample.</p></main>;
 
   const quarter = sample.foreign_reconciliation.complete_quarter;
   const ytd = sample.foreign_reconciliation.sectors_ytd;

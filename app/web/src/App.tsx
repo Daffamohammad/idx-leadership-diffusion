@@ -20,6 +20,7 @@ import Ownership from "./pages/Ownership";
 import MarketOverview from "./pages/MarketOverview";
 import MarketMovers from "./pages/MarketMovers";
 import RecordedSample from "./pages/RecordedSample";
+import SectorsDashboard from "./pages/SectorsDashboard";
 import SubmissionRotationMap from "./components/SubmissionRotationMap";
 import MasterGroupTable from "./pages/MasterGroupTable";
 import ThemesExplorer from "./pages/ThemesExplorer";
@@ -108,7 +109,7 @@ function RouteErrorElement() {
 }
 
 const router = createBrowserRouter([
-  { path: "/", element: <Navigate to="/overview" replace />, errorElement: <RouteErrorElement /> },
+  { path: "/", element: <Navigate to="/sectors" replace />, errorElement: <RouteErrorElement /> },
   {
     Component: WorkspaceLayout,
     errorElement: <RouteErrorElement />,
@@ -116,6 +117,7 @@ const router = createBrowserRouter([
       { path: "/what-changed", Component: WhatChanged },
       { path: "/movers", Component: MarketMovers },
       { path: "/recorded-sample", Component: RecordedSample },
+      { path: "/sectors", Component: SectorsDashboard },
       { path: "/overview", Component: MarketOverview },
       { path: "/heatmap", Component: StockHeatmap },
       { path: "/foreign", Component: ForeignFlow },

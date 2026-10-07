@@ -24,12 +24,18 @@ import { formatDateLabel, formatEnumLabel, formatSnapshotId } from "../data/form
 
 const navGroups = [
   {
-    label: "Research",
+    label: "Sectors",
+    items: [
+      { path: "/sectors", label: "Sectors dashboard", Icon: DashboardIcon },
+      { path: "/recorded-sample", label: "Sample & source record", Icon: ActivityLogIcon },
+    ],
+  },
+  {
+    label: "IDX context",
     items: [
       { path: "/overview", label: "Overview", Icon: DashboardIcon },
       { path: "/what-changed", label: "What Changed", Icon: ActivityLogIcon },
       { path: "/movers", label: "Market Movers", Icon: BarChartIcon },
-      { path: "/recorded-sample", label: "Recorded Sectors sample · 66 stocks", Icon: ActivityLogIcon },
       { path: "/foreign", label: "Foreign Flow", Icon: BarChartIcon },
       { path: "/ownership", label: "Ownership", Icon: MixIcon },
     ],
