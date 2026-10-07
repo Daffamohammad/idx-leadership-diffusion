@@ -34,8 +34,8 @@ export interface HistoricalComparison {
   cohort: { count: number; sha256: string; group_cohorts: Record<string, { count: number; sha256: string }> };
   weekly: { as_of: string; groups: Array<{
     group_id: string; name: string; cohort_count: number; cohort_hash: string;
-    excess_return_20d: number; excess_return_60d: number; excess_return_ytd: number;
-    relative_momentum: number; breadth_pct: number; breadth_change_pp: number | null;
+    excess_return_20d: number | null; excess_return_60d: number | null; excess_return_ytd: number | null;
+    relative_momentum: number | null; breadth_pct: number | null; breadth_change_pp: number | null;
     leadership: string; diffusion: string; concentration_top3_pct: number | null;
     concentration_change_pp?: number | null; coverage_pct: number;
     leadership_transition?: string | null; diffusion_transition?: string | null; material_shift?: string | null;
@@ -279,6 +279,13 @@ export interface ForeignHistory {
   daily: { as_of: string; net_foreign_value_idr: number; ytd_net_foreign_value_idr: number; source: { url: string; file: string; sha256: string } }[];
   validation: { session_continuity: boolean; ytd_continuity: boolean; monthly_comparisons: unknown[] }; limitations: string[];
 }
+type WorkspaceAssetState<T> = { data: T | null; error: string | null; loading: boolean; requestKey: string | null };
+
+export function currentWorkspaceState<T>(snapshot: { loading: boolean; error: string | null }, state: WorkspaceAssetState<T>, selectedKey: string | null): WorkspaceAssetState<T> {
+  if (snapshot.error || snapshot.loading) return { data: null, error: snapshot.error, loading: snapshot.loading, requestKey: selectedKey };
+  return state.requestKey === selectedKey ? state : { data: null, error: null, loading: true, requestKey: selectedKey };
+}
+
 export function useWorkspaceAsset<T extends { as_of: string }>(key: ReleaseFamily) {
   const snapshot = useSnapshot();
   const [state, setState] = useState<{ data: T | null; error: string | null; loading: boolean; requestKey: string | null }>({ data: null, error: null, loading: true, requestKey: null });
@@ -307,7 +314,7 @@ export function useWorkspaceAsset<T extends { as_of: string }>(key: ReleaseFamil
     return () => { cancelled = true; };
   }, [key, snapshot.release, snapshot.snapshotId, snapshot.error, snapshot.loading]);
   const selectedKey = snapshot.release ? `${snapshot.release.id}:${snapshot.release.manifest.families[key].sha256}` : null;
-  return state.requestKey === selectedKey ? state : { data: null, error: null, loading: true, requestKey: selectedKey };
+  return currentWorkspaceState(snapshot, state, selectedKey);
 }
 
 export function useHistoricalComparison() {
@@ -319,7 +326,7 @@ export function useHistoricalComparison() {
     const entry = release?.manifest.additional_files.find(file => file.file_id === "historical_comparison");
     const requestKey = release && entry ? `${release.id}:${entry.sha256}` : null;
     if (!release || !entry) {
-      setState({ data: null, error: null, loading: false, requestKey });
+      setState({ data: null, error: snapshot.error, loading: snapshot.loading, requestKey });
       return;
     }
     setState({ data: null, error: null, loading: true, requestKey });
@@ -333,10 +340,10 @@ export function useHistoricalComparison() {
       if (!cancelled) setState({ data: null, error: String(error.message ?? error), loading: false, requestKey });
     });
     return () => { cancelled = true; };
-  }, [snapshot.release]);
+  }, [snapshot.release, snapshot.error, snapshot.loading]);
   const entry = snapshot.release?.manifest.additional_files.find(file => file.file_id === "historical_comparison");
   const selectedKey = snapshot.release && entry ? `${snapshot.release.id}:${entry.sha256}` : null;
-  return state.requestKey === selectedKey ? state : { data: null, error: null, loading: true, requestKey: selectedKey };
+  return currentWorkspaceState(snapshot, state, selectedKey);
 }
 
 export function useMarketBreadth() {
@@ -348,7 +355,7 @@ export function useMarketBreadth() {
     const entry = release?.manifest.additional_files.find(file => file.file_id === "market_breadth");
     const requestKey = release && entry ? `${release.id}:${entry.sha256}` : null;
     if (!release || !entry) {
-      setState({ data: null, error: null, loading: false, requestKey });
+      setState({ data: null, error: snapshot.error, loading: snapshot.loading, requestKey });
       return;
     }
     setState({ data: null, error: null, loading: true, requestKey });
@@ -362,10 +369,10 @@ export function useMarketBreadth() {
       if (!cancelled) setState({ data: null, error: String(error.message ?? error), loading: false, requestKey });
     });
     return () => { cancelled = true; };
-  }, [snapshot.release]);
+  }, [snapshot.release, snapshot.error, snapshot.loading]);
   const entry = snapshot.release?.manifest.additional_files.find(file => file.file_id === "market_breadth");
   const selectedKey = snapshot.release && entry ? `${snapshot.release.id}:${entry.sha256}` : null;
-  return state.requestKey === selectedKey ? state : { data: null, error: null, loading: true, requestKey: selectedKey };
+  return currentWorkspaceState(snapshot, state, selectedKey);
 }
 
 export function useRecordedSectorsSample() {
@@ -450,7 +457,7 @@ export function useRecordedSectorsSample() {
   const entry = snapshot.release?.manifest.additional_files.find(file => file.file_id === "sectors_recorded_sample");
   const selectionEntry = snapshot.release?.manifest.additional_files.find(file => file.file_id === "sectors_selection_market");
   const selectedKey = snapshot.release && entry ? `${snapshot.release.id}:${entry.sha256}:${selectionEntry?.sha256 ?? "missing-selection"}` : null;
-  return state.requestKey === selectedKey ? state : { data: null, error: null, loading: true, requestKey: selectedKey };
+  return currentWorkspaceState(snapshot, state, selectedKey);
 }
 
 export function useSectorsSignalAnalysis() {
@@ -477,8 +484,12 @@ export function useSectorsSignalAnalysis() {
       setState({ data: null, error: null, loading: false, requestKey });
       return;
     }
-    if (!entry || !sampleEntry || !selectionEntry) {
-      setState({ data: null, error: "The Sectors primary analysis or one of its frozen source assets is missing.", loading: false, requestKey });
+    if (!entry) {
+      setState({ data: null, error: null, loading: false, requestKey });
+      return;
+    }
+    if (!sampleEntry || !selectionEntry) {
+      setState({ data: null, error: "One of the Sectors analysis frozen source assets is missing.", loading: false, requestKey });
       return;
     }
     setState({ data: null, error: null, loading: true, requestKey });
@@ -518,5 +529,5 @@ export function useSectorsSignalAnalysis() {
   const selectedKey = snapshot.release && entry
     ? `${snapshot.release.id}:${entry.sha256}:${sampleEntry?.sha256 ?? "missing-sample"}:${selectionEntry?.sha256 ?? "missing-selection"}:${ytdEntry?.sha256 ?? "no-ytd-baseline"}`
     : null;
-  return state.requestKey === selectedKey ? state : { data: null, error: null, loading: true, requestKey: selectedKey };
+  return currentWorkspaceState(snapshot, state, selectedKey);
 }

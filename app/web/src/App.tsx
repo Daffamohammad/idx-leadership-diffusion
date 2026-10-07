@@ -116,7 +116,8 @@ const router = createBrowserRouter([
     children: [
       { path: "/what-changed", Component: WhatChanged },
       { path: "/movers", Component: MarketMovers },
-      { path: "/recorded-sample", Component: RecordedSample },
+      { path: "/sources", Component: RecordedSample },
+      { path: "/recorded-sample", element: <Navigate to="/sources" replace /> },
       { path: "/sectors", Component: SectorsDashboard },
       { path: "/overview", Component: MarketOverview },
       { path: "/heatmap", Component: StockHeatmap },

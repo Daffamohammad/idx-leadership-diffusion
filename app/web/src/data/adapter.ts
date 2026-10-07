@@ -1,3 +1,4 @@
+import type { HistoricalComparison } from "./marketWorkspace";
 // Adapter from real snapshot JSON (SnapshotPayload) into the shapes the
 // Figma-designed pages consume (SectorData, materialChanges, etc.).
 //
@@ -1932,4 +1933,63 @@ export function adaptSnapshot(
     listingRegistry,
     researchEvents,
   };
+}
+
+/** Prefer dated v2 sector readings, including the independent integer diffusion state. */
+export function sectorWeeklyComparison(comparison: HistoricalComparison): HistoricalComparison {
+  const taxonomy = comparison.taxonomies?.SECTOR;
+  if (!taxonomy) return comparison;
+  const groups = Object.values(taxonomy.groups);
+  return {
+    ...comparison,
+    weekly: comparison.comparison_dates.map(as_of => ({ as_of, groups: groups.flatMap(group => {
+      const point = group.weekly.find(row => row.as_of === as_of);
+      return point ? [{ group_id: group.group_id, name: group.name,
+        cohort_count: point.breadth_denominator, cohort_hash: group.cohort.sha256,
+        excess_return_20d: point.excess_return_20d, excess_return_60d: point.excess_return_60d,
+        excess_return_ytd: point.excess_return_ytd, relative_momentum: point.relative_momentum,
+        breadth_pct: point.breadth_pct, breadth_change_pp: point.breadth_change_pp,
+        leadership: point.leadership, diffusion: point.diffusion_v2,
+        concentration_top3_pct: point.concentration_top3_pct, concentration_change_pp: point.concentration_change_pp,
+        coverage_pct: point.coverage_pct, leadership_transition: point.leadership_transition,
+        diffusion_transition: point.diffusion_transition, material_shift: point.material_shift }] : [];
+    }) })),
+    persistence: Object.fromEntries(groups.map(group => [group.group_id, group.persistence])),
+  };
+}
+
+/** Present the same verified weekly cohort used by the change summary. */
+export function weeklySectorReadings(comparison: HistoricalComparison, snapshotRows: SectorData[]): SectorData[] {
+  const latest = comparison.weekly.at(-1);
+  const previous = new Map(comparison.weekly.at(-2)?.groups.map(group => [group.group_id, group]) ?? []);
+  const ordered = [...(latest?.groups ?? [])].sort((a, b) => (b.excess_return_20d ?? -Infinity) - (a.excess_return_20d ?? -Infinity));
+  return ordered.map((group, index) => {
+    const base = snapshotRows.find(row => row.id === group.group_id || row.name === group.name);
+    const prior = previous.get(group.group_id);
+    const comparable = prior?.cohort_hash === group.cohort_hash && prior?.cohort_count === group.cohort_count && group.cohort_count >= 5;
+    const diffusion = comparable ? group.diffusion : "UNCONFIRMED";
+    return {
+      id: group.group_id, name: group.name,
+      leadership: group.leadership as LeadershipState,
+      prevLeadership: comparable ? prior.leadership as LeadershipState : undefined,
+      diffusion: diffusion.startsWith("BROADENING") ? "BROADENING" : diffusion.startsWith("NARROWING") ? "NARROWING" : diffusion === "STABLE" ? "STABLE" : "UNCONFIRMED",
+      diffusionV2: diffusion,
+      excess20d: group.excess_return_20d, excess60d: group.excess_return_60d,
+      excessYtd: group.excess_return_ytd, returnYtd: null, benchmarkYtd: null, ytdStartDate: null, ytdEligible: group.cohort_count,
+      breadth: group.breadth_pct,
+      prevBreadth: comparable && group.breadth_pct !== null && group.breadth_change_pp !== null ? group.breadth_pct - group.breadth_change_pp : undefined,
+      concentration: group.concentration_top3_pct,
+      persistence: comparison.persistence[group.group_id]?.current_leadership_weeks ?? 0,
+      constituents: base?.constituents ?? group.cohort_count, eligibleConstituents: group.cohort_count,
+      missingConstituents: Math.max(0, (base?.constituents ?? group.cohort_count) - group.cohort_count),
+      rank: index + 1, fundamentals: "DATA_GAP", foreignFlow: "DATA_GAP",
+      interpretation: "Weekly fixed-cohort price comparison", contradictions: [], invalidation: [],
+    };
+  });
+}
+
+export function weightedGroupBreadth(groups: Array<{ breadth_pct: number | null; cohort_count: number }>): number | null {
+  const eligible = groups.filter(group => group.cohort_count > 0 && group.breadth_pct !== null && Number.isFinite(group.breadth_pct));
+  const denominator = eligible.reduce((sum, group) => sum + group.cohort_count, 0);
+  return denominator > 0 ? eligible.reduce((sum, group) => sum + group.breadth_pct! * group.cohort_count, 0) / denominator : null;
 }

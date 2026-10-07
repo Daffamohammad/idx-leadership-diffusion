@@ -3,6 +3,8 @@ import { Link, useSearchParams } from "react-router";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { useSnapshot } from "../data/SnapshotProvider";
 import { useHistoricalComparison, useWorkspaceAsset, type HistoricalComparison } from "../data/marketWorkspace";
+import { AssetLoadState } from "./AssetLoadState";
+import { rotationPlotRanges, rotationTrailSegments, validRotationPoint } from "../data/mapGeometry";
 import { replaySelection, type RotationReplay } from "../data/rotationReplay";
 import type { SectorData, TaxonomyGroupData } from "../data/adapter";
 import type { TaxonomyKind } from "../data/snapshot";
@@ -16,7 +18,7 @@ const TAXONOMIES: Array<{ id: ReplayTaxonomy; label: string }> = [
 const COLORS = ["#167f72", "#4278bd", "#d1713d", "#7865b3", "#bd547f", "#219caa", "#b58a21", "#d64b4b", "#637c9a", "#3eaa66", "#728d38", "#a05e8d"];
 const SECTOR_ORDER = ["Basic Materials", "Consumer Cyclicals", "Consumer Non-Cyclicals", "Energy", "Financials", "Healthcare", "Industrials", "Infrastructures", "Properties & Real Estate", "Technology", "Transportation & Logistic"];
 const PLOT = { left: 82, right: 956, top: 38, bottom: 614 };
-type Point = { as_of: string; x: number; y: number; breadth?: number | null; breadthChange?: number | null; leadership?: string; diffusion?: string; rotationPhase?: string; concentration?: number | null; cohort_count?: number };
+type Point = { as_of: string; x: number | null; y: number | null; breadth?: number | null; breadthChange?: number | null; leadership?: string; diffusion?: string; rotationPhase?: string; concentration?: number | null; cohort_count?: number };
 type MemberEvidence = { relationship: string | null; holder: string | null; ownership_percentage: number | null; membership_type: string; source: string | null; source_as_of: string | null; control_source: { owner?: string; ticker?: string; relationship?: string; as_of?: string; source?: string; ultimate_holders?: string[] } | null };
 type Item = { id: string; name: string; kind: ReplayTaxonomy; members: number; memberList: Array<{ ticker: string; name: string; evidence?: MemberEvidence[] }>; x: number | null; y: number | null; excess20d: number | null; excess60d: number | null; breadth: number | null; leadership: string | null; diffusion: string | null; rotationPhase: string | null; concentration: number | null; breadthChange: number | null; definition: string | null; parentCategory: string | null; inclusionRules: string[]; exclusionRules: string[]; cohortCount: number; eligible: boolean; history: Point[]; color: string };
 
@@ -40,12 +42,6 @@ function LeadershipReading({ state }: { state: string | null | undefined }) {
 function DiffusionReading({ state }: { state: string | null | undefined }) {
   if (state === "UNCONFIRMED") return <span aria-label="No comparable diffusion reading">—</span>;
   return <>{formatEnumLabel(state)}</>;
-}
-
-function symmetricRange(values: number[]): [number, number] {
-  const extent = Math.max(1.5, ...values.map(value => Math.abs(value)));
-  const limit = extent * 1.14;
-  return [-limit, limit];
 }
 
 function xScale(value: number, range: [number, number]) { return PLOT.left + (value - range[0]) / (range[1] - range[0]) * (PLOT.right - PLOT.left); }
@@ -111,7 +107,8 @@ function BasketChart({ comparison }: { comparison: HistoricalComparison }) {
 }
 
 export default function SubmissionRotationMap() {
-  const { data } = useSnapshot();
+  const snapshot = useSnapshot();
+  const { data } = snapshot;
   const comparison = useHistoricalComparison();
   const replay = useWorkspaceAsset<RotationReplay>("rotation");
   const [params, setParams] = useSearchParams();
@@ -161,8 +158,8 @@ export default function SubmissionRotationMap() {
         const current = series[activeIndex];
         const history = series.map(point => ({
           as_of: point.as_of,
-          x: point.excess_return_ytd ?? 0,
-          y: point.relative_momentum ?? 0,
+          x: point.excess_return_ytd,
+          y: point.relative_momentum,
           breadth: point.breadth_pct,
           breadthChange: point.breadth_change_pp,
           leadership: point.leadership,
@@ -228,10 +225,7 @@ export default function SubmissionRotationMap() {
   const searched = items.filter(item => !normalizedSearch || `${item.name} ${item.id}`.toLowerCase().includes(normalizedSearch));
   const limited = !showAll && !normalizedSearch && kind !== "SECTOR" ? searched.filter(item => item.eligible).slice(0, 12) : searched;
   const plotted = limited.filter(item => item.eligible && item.x !== null && item.y !== null && Number.isFinite(item.x) && Number.isFinite(item.y));
-  const xValues = plotted.flatMap(item => item.history.map(point => point.x));
-  const yValues = plotted.flatMap(item => item.history.map(point => point.y));
-  const xRange = symmetricRange(xValues.length ? xValues : [-1, 1]);
-  const yRange = symmetricRange(yValues.length ? yValues : [-1, 1]);
+  const { x: xRange, y: yRange } = rotationPlotRanges(plotted);
   const selected = limited.find(item => item.id === selectedId) ?? plotted[0] ?? null;
   const q = (key: string, value: string) => { const next = new URLSearchParams(params); if (value) next.set(key, value); else next.delete(key); setParams(next, { replace: true }); };
   const choose = (id: string) => q("group", id);
@@ -239,6 +233,10 @@ export default function SubmissionRotationMap() {
   const trailLength = 4;
   const dateLabel = currentDate ? formatDateLabel(currentDate) : "";
   const taxonomyCount = taxonomy?.group_count ?? items.length;
+
+  if (!data || snapshot.error || snapshot.loading || comparison.loading || comparison.error || (!comparison.data && kind !== "SECTOR" && (replay.loading || replay.error))) {
+    return <main className="workspace-page"><h1>Group rotation</h1><AssetLoadState label="Rotation replay" loading={snapshot.loading || comparison.loading || replay.loading} error={snapshot.error ?? comparison.error ?? replay.error} absentMessage="No snapshot is included in this release." /></main>;
+  }
 
   return (
     <main className="workspace-page submission-rotation-page">
@@ -273,7 +271,8 @@ export default function SubmissionRotationMap() {
         <div className="submission-map-card">
           <div className="submission-axis-note"><span>Relative momentum</span><span>Up = 20D excess minus 60D excess</span></div>
           <div className="submission-map-scroll">
-            <svg className="submission-map-svg" viewBox="0 0 1000 700" preserveAspectRatio="none" role="img" aria-label={`${kind} rotation plot: YTD excess return versus IHSG against 20D minus 60D excess momentum`}>
+            {plotted.length === 0 && <p className="meta" role="status">No matching eligible groups have both axis readings for this date. Use the table to inspect available readings and coverage.</p>}
+            {plotted.length > 0 && <svg className="submission-map-svg" viewBox="0 0 1000 700" preserveAspectRatio="none" role="img" aria-label={`${kind} rotation plot: YTD excess return versus IHSG against 20D minus 60D excess momentum`}>
               <rect x={PLOT.left} y={PLOT.top} width={xScale(0, xRange) - PLOT.left} height={yScale(0, yRange) - PLOT.top} fill="#e8eff5" />
               <rect x={xScale(0, xRange)} y={PLOT.top} width={PLOT.right - xScale(0, xRange)} height={yScale(0, yRange) - PLOT.top} fill="#e6f1ef" />
               <rect x={PLOT.left} y={yScale(0, yRange)} width={xScale(0, xRange) - PLOT.left} height={PLOT.bottom - yScale(0, yRange)} fill="#f3e9eb" />
@@ -288,12 +287,12 @@ export default function SubmissionRotationMap() {
               <text x="18" y={(PLOT.top + PLOT.bottom) / 2} textAnchor="middle" className="map-axis-title" transform={`rotate(-90 18 ${(PLOT.top + PLOT.bottom) / 2})`}>20D excess − 60D excess (%)</text>
               {plotted.map(item => {
                 const trail = item.history.slice(Math.max(0, activeIndex - trailLength), activeIndex + 1);
-                return trail.length > 1 ? <g key={`trail-${item.id}`}><polyline points={trail.map(point => `${xScale(point.x, xRange)},${yScale(point.y, yRange)}`).join(" ")} fill="none" stroke={item.color} strokeWidth={selected?.id === item.id ? 3 : 1.8} opacity={selected?.id === item.id ? .9 : .3} /><circle cx={xScale(trail[0].x, xRange)} cy={yScale(trail[0].y, yRange)} r="3" fill={item.color} opacity=".36" /></g> : null;
+                return rotationTrailSegments(trail).filter(segment => segment.length > 1).map((segment, index) => <g key={`trail-${item.id}-${index}`}><polyline points={segment.map(point => `${xScale(point.x, xRange)},${yScale(point.y, yRange)}`).join(" ")} fill="none" stroke={item.color} strokeWidth={selected?.id === item.id ? 3 : 1.8} opacity={selected?.id === item.id ? .9 : .3} /><circle cx={xScale(segment[0].x, xRange)} cy={yScale(segment[0].y, yRange)} r="3" fill={item.color} opacity=".36" /></g>);
               })}
               {plotted.map(item => <g key={item.id} role="button" tabIndex={0} aria-label={`${item.name}: ${formatPercent(item.x)} YTD excess, ${formatPercent(item.y)} relative momentum`} onClick={() => choose(item.id)} onKeyDown={event => { if (event.key === "Enter" || event.key === " ") choose(item.id); }} style={{ cursor: "pointer" }}><circle cx={xScale(item.x!, xRange)} cy={yScale(item.y!, yRange)} r={selected?.id === item.id ? 9 : 6.5} fill={item.color} stroke={selected?.id === item.id ? "#17212a" : "#fff"} strokeWidth={selected?.id === item.id ? 2.5 : 1.5} /><title>{item.name} · {formatPercent(item.x)} YTD excess · {formatPercent(item.y)} relative momentum</title></g>)}
-              {selected && selected.x !== null && selected.y !== null && <text x={Math.min(PLOT.right - 6, xScale(selected.x, xRange) + 12)} y={Math.max(PLOT.top + 12, yScale(selected.y, yRange) - 10)} className="selected-point-label">{selected.name}</text>}
+              {selected && plotted.some(item => item.id === selected.id) && validRotationPoint(selected) && <text x={Math.min(PLOT.right - 6, xScale(selected.x, xRange) + 12)} y={Math.max(PLOT.top + 12, yScale(selected.y, yRange) - 10)} className="selected-point-label">{selected.name}</text>}
               <text x={PLOT.left + 12} y={PLOT.top + 19} className="quadrant-label">Improving</text><text x={PLOT.right - 12} y={PLOT.top + 19} textAnchor="end" className="quadrant-label">Leading</text><text x={PLOT.left + 12} y={PLOT.bottom - 12} className="quadrant-label">Lagging</text><text x={PLOT.right - 12} y={PLOT.bottom - 12} textAnchor="end" className="quadrant-label">Weakening</text>
-            </svg>
+            </svg>}
           </div>
           <div className="submission-legend" aria-label="Select a group">
             {plotted.map(item => <button key={item.id} type="button" aria-pressed={selected?.id === item.id} onClick={() => choose(item.id)}><i style={{ background: item.color }} /><span>{item.name}</span><small>{formatPercent(item.x)}</small></button>)}
@@ -315,7 +314,6 @@ export default function SubmissionRotationMap() {
       </section>
       <section className="submission-rotation-table"><h2>Group readings · {dateLabel}</h2><div className="table-scroll"><table><thead><tr><th>Group</th><th>Leadership</th><th>Rotation phase</th><th>YTD excess</th><th>Momentum</th><th>Breadth</th><th>Contributors</th><th>Members</th></tr></thead><tbody>{limited.map(item => <tr key={item.id} onClick={() => choose(item.id)}><td><button type="button" style={{ color: item.color }}>{item.name}</button></td><td><LeadershipReading state={item.leadership} /></td><td>{item.cohortCount >= 5 ? item.rotationPhase ?? "—" : "—"}</td><td>{formatPercent(item.x)}</td><td>{formatPercent(item.y)}</td><td>{item.breadth === null ? "—" : `${item.breadth.toFixed(1)}%`}</td><td>{item.cohortCount.toLocaleString()}</td><td>{item.members.toLocaleString()}</td></tr>)}</tbody></table></div></section>
       {kind === "SECTOR" && comparison.data && <BasketChart comparison={comparison.data} />}
-      {comparison.error && <p role="status">The dated comparison asset could not be loaded for this release.</p>}
     </main>
   );
 }

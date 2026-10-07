@@ -1,4 +1,4 @@
-# Submission release · 8 October 2026
+# The Diffusion · submission release, 8 October 2026
 
 ## Product and evidence boundary
 
@@ -9,7 +9,7 @@ to it.
 
 The primary submission workflow is `/sectors`: sectors ranked by 20-session
 excess return, a 60-session excess-return versus relative-momentum map, daily
-and weekly replay, and a constituent inspector. The fixed retrospective sample
+and weekly replay, and a constituent inspector. The fixed retrospective universe
 contains 66 stocks, six in each of 11 sectors, selected from the frozen market
 source observed on 2 October 2026. The page retains every member and reports
 eligible contributors. Returns use raw Sectors stock closes and native Sectors
@@ -49,6 +49,8 @@ DNS failure, the empty WBSA response, 461 total estimated requests/credits,
 and 39 remaining retry slots under the 500 ceiling. No further paid calls are
 authorized by this sign-off.
 
+The dated 7 October receipts record the preceding acquisition and Sectors checks; they do not establish app-wide browser acceptance. The repair has a separate [browser QA receipt](repair-2026-10-08/browser-qa.json) and [readiness receipt](repair-2026-10-08/readiness.json), bound to its tested source commit and the active data release. See the [repair verification](repair-2026-10-08/VERIFICATION.md) for rendered figures, failure recovery, clean reproduction, and launch status.
+
 The [pre-acquisition readiness receipt](readiness-2026-10-07.json) records the
 offline gate before live baseline collection. The separate [YTD preflight
 record](budget-preflight-2026-10-07.json) documents its read-only plan: 433
@@ -86,15 +88,29 @@ RELEASE_DIR="app/web/public/releases/$RELEASE_ID"
 
 The broader IDX snapshot and price-breadth oracles remain part of the existing
 market release evidence in [the dated 6 October clean-checkout report](GIT_HANDOFF-2026-10-06.md).
-That report describes an earlier release; use this file and the current
-[readiness receipt](readiness-2026-10-07.json) for the Sectors submission build.
+That report describes an earlier release. Use this file and the separate repair evidence above for current browser acceptance.
 
-For local preview, run `npm run dev --prefix app/web`; the root route opens
-`/sectors`. Browser rendering makes no Sectors requests.
+For a production preview, build first, then keep this process running in a terminal:
+
+```sh
+npm run preview --prefix app/web -- --host 127.0.0.1 --port 5173 --strictPort
+```
+
+Open `http://127.0.0.1:5173/sectors`. A stopped preview process makes later data requests fail; cached screen content is not a working preview. The root route opens `/sectors`; `/sources` holds coverage and provenance. Browser rendering makes no Sectors requests.
+
+Readiness requires real browser observations and hashed screenshots for 1036×799, 1440×900, and 390×844, including all visible navigation routes, interrupted serving, corrupt assets, and retry recovery. The verifier rejects failed, incomplete, or stale evidence:
+
+```sh
+.venv/bin/python scripts/verify_sectors_readiness.py \
+  --browser-qa-receipt docs/submission-release/repair-2026-10-08/browser-qa.json \
+  --out /tmp/diffusion-readiness-new.json
+```
+
+Existing dated receipts are never overwritten. Documentation-only commits may follow the tested source commit; any code or released-data change requires fresh evidence.
 
 ## Submission checklist
 
-The repository's core workflow is prepared for the Market Intelligence track. The
+Repository verification, public hosting, and final submission are separate gates. The public launch currently depends on connecting the repository to the existing Vercel GitHub integration; a local readiness receipt does not establish a public deployment. The
 [official track description](https://hackathon.sectors.app/tracks/market-intelligence)
 and [hackathon rules](https://hackathon.sectors.app/rules) govern eligibility
 and delivery. The repository/core workflow is tracked separately from the

@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useSnapshot } from "../data/SnapshotProvider";
-import type { BreadthHistoryPoint, SectorData } from "../data/adapter";
+import { sectorWeeklyComparison, weeklySectorReadings, weightedGroupBreadth, type BreadthHistoryPoint, type SectorData } from "../data/adapter";
 import { LeadershipChip, DiffusionChip } from "../components/StatusChips";
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, CartesianGrid } from "recharts";
-import { formatDateLabel, formatPercent, formatSnapshotId } from "../data/format";
+import { formatDateLabel, formatEnumLabel, formatPercent, formatSnapshotId } from "../data/format";
+import { AssetLoadState } from "../components/AssetLoadState";
 import { EvidenceBadge } from "../components/EvidenceModel";
 import { useHistoricalComparison } from "../data/marketWorkspace";
 
@@ -93,7 +94,7 @@ function diffusionCounts(sectors: SectorData[]) {
   const broadening = sectors.filter((s) => String(s.diffusion).startsWith("BROADENING")).length;
   const stable = sectors.filter((s) => s.diffusion === "STABLE").length;
   const narrowing = sectors.filter((s) => String(s.diffusion).startsWith("NARROWING")).length;
-  return { BROADENING: broadening, STABLE: stable, NARROWING: narrowing };
+  return { BROADENING: broadening, STABLE: stable, NARROWING: narrowing, UNCONFIRMED: sectors.filter(s => s.diffusion === "UNCONFIRMED").length };
 }
 
 function categorizeChanges(sectors: SectorData[]) {
@@ -155,11 +156,12 @@ function ConstituentCoverage({
 }
 
 export default function WhatChanged() {
-  const { data, payload } = useSnapshot();
+  const { data, payload, loading, error } = useSnapshot();
   const historical = useHistoricalComparison();
   const navigate = useNavigate();
   const [sort, setSort] = useState<"rank" | "delta">("rank");
-  const sectors = data?.sectors ?? [];
+  const replay = useMemo(() => historical.data ? sectorWeeklyComparison(historical.data) : null, [historical.data]);
+  const sectors = useMemo(() => replay ? weeklySectorReadings(replay, data?.sectors ?? []) : data?.sectors ?? [], [replay, data]);
   const breadthHistory = data?.breadthHistory ?? [];
   const averageHistory = useMemo(
     () => averageBreadthHistory(breadthHistory),
@@ -178,7 +180,7 @@ export default function WhatChanged() {
       ),
     [sort, sectors],
   );
-  if (!data) return null;
+  if (!data || historical.loading || historical.error) return <main className="workspace-page"><h1>Weekly market changes</h1><AssetLoadState label="Weekly comparison" loading={loading || historical.loading} error={error ?? historical.error} absentMessage="No snapshot is included in this release." /></main>;
   const select = (s: SectorData) => navigate(`/explorer?taxonomy=SECTOR&group=${encodeURIComponent(s.id)}`);
 
   const asOf = formatAsOf(payload?.as_of);
@@ -196,34 +198,19 @@ export default function WhatChanged() {
   const leadCounts = leadershipCounts(sectors);
   const diffCounts = diffusionCounts(sectors);
   const changes = categorizeChanges(sectors);
-  const replay = historical.data;
   const replayCurrent = replay?.weekly.at(-1)?.groups ?? [];
   const replayPrevious = replay?.weekly.at(-2)?.groups ?? [];
-  const replayBreadth = replayCurrent.length
-    ? replayCurrent.reduce((sum, group) => sum + group.breadth_pct * group.cohort_count, 0) /
-      replayCurrent.reduce((sum, group) => sum + group.cohort_count, 0)
-    : null;
-  const largestBreadthMove = [...replayCurrent].filter(group => group.breadth_change_pp !== null)
+  const replayBreadth = weightedGroupBreadth(replayCurrent);
+  const pairedIds = new Set(sectors.filter(row => row.prevBreadth !== undefined).map(row => row.id));
+  const largestBreadthMove = [...replayCurrent].filter(group => pairedIds.has(group.group_id) && group.breadth_change_pp !== null)
     .sort((a, b) => Math.abs(b.breadth_change_pp ?? 0) - Math.abs(a.breadth_change_pp ?? 0))[0];
   const replayLeader = [...replayCurrent]
-    .filter(group => group.leadership === "LEADING")
-    .sort((a, b) => b.excess_return_20d - a.excess_return_20d)[0];
-  const materialShifts = replayCurrent.filter(group => group.material_shift);
+    .filter(group => group.leadership === "LEADING" && group.excess_return_20d !== null)
+    .sort((a, b) => (b.excess_return_20d ?? -Infinity) - (a.excess_return_20d ?? -Infinity))[0];
+  const materialShifts = replayCurrent.filter(group => pairedIds.has(group.group_id) && group.material_shift);
   const replayLeadership = Object.fromEntries(["LEADING", "IMPROVING", "WEAKENING", "LAGGING"].map(state => [state, replayCurrent.filter(group => group.leadership === state).length]));
-  const replayDiffusion = {
-    BROADENING: replayCurrent.filter(group => group.diffusion.startsWith("BROADENING")).length,
-    STABLE: replayCurrent.filter(group => group.diffusion === "STABLE").length,
-    NARROWING: replayCurrent.filter(group => group.diffusion.startsWith("NARROWING")).length,
-  };
-  const replayMeanBreadth = replay?.weekly.map((week) => {
-    const denominator = week.groups.reduce((sum, group) => sum + group.cohort_count, 0);
-    return {
-      as_of: week.as_of,
-      breadth: denominator > 0
-        ? week.groups.reduce((sum, group) => sum + group.breadth_pct * group.cohort_count, 0) / denominator
-        : 0,
-    };
-  }) ?? [];
+  const replayDiffusion = diffCounts;
+  const replayMeanBreadth = replay?.weekly.map(week => ({ as_of: week.as_of, breadth: weightedGroupBreadth(week.groups) })) ?? [];
   const priorById = new Map(replayPrevious.map(group => [group.group_id, group]));
   const mostConcentrated = [...replayCurrent].sort((a, b) => (b.concentration_top3_pct ?? -Infinity) - (a.concentration_top3_pct ?? -Infinity))[0];
 
@@ -255,9 +242,9 @@ export default function WhatChanged() {
         >
           {replay ? (
             <ul className="market-read-bullets">
-              <li><strong>Leadership</strong><span>{replayLeader ? `${replayLeader.name} ahead of IHSG by ${Math.abs(replayLeader.excess_return_20d).toFixed(1)}% over 20 trading sessions` : "No sector ahead of IHSG on the 20D lens"}</span></li>
+              <li><strong>Leadership</strong><span>{replayLeader ? `${replayLeader.name} ahead of IHSG by ${Math.abs(replayLeader.excess_return_20d!).toFixed(1)}% over 20 trading sessions` : "No sector ahead of IHSG on the 20D lens"}</span></li>
               <li><strong>Participation</strong><span>{replayBreadth === null ? "—" : `${replayBreadth.toFixed(1)}% of the fixed cohort beat IHSG over 20 sessions`}</span></li>
-              <li><strong>Weekly move</strong><span>{largestBreadthMove ? `${largestBreadthMove.name} breadth ${largestBreadthMove.breadth_change_pp! >= 0 ? "increased" : "decreased"} by ${Math.abs(largestBreadthMove.breadth_change_pp!).toFixed(1)} pp since ${formatDateLabel(replay.weekly.at(-2)!.as_of)}` : "No weekly breadth change exceeded the reporting threshold"}</span></li>
+              <li><strong>Weekly move</strong><span>{largestBreadthMove ? `${largestBreadthMove.name} breadth ${largestBreadthMove.breadth_change_pp! >= 0 ? "increased" : "decreased"} by ${Math.abs(largestBreadthMove.breadth_change_pp!).toFixed(1)} pp since ${formatDateLabel(replay.weekly.at(-2)?.as_of)}` : "Weekly breadth change is unavailable without a matched prior observation"}</span></li>
             </ul>
           ) : (
             <ul className="market-read-bullets">
@@ -269,7 +256,7 @@ export default function WhatChanged() {
         </div>
         {replay && <p className="eyebrow-muted" style={{ margin: "0 0 8px", color: "#cbd3d3" }}>Historical price replay using current membership</p>}
         <div className="market-read-stats" style={{ display: "grid", gridTemplateColumns: `repeat(${replay ? 3 : 5}, minmax(0, 1fr))`, borderTop: "1px solid #ffffff22" }}>
-          {(replay ? [["Fixed cohort", `${replay.cohort.count.toLocaleString()} stocks`], ["Current mean breadth", replayBreadth === null ? "—" : `${replayBreadth.toFixed(1)}%`], ["Material weekly shifts", String(materialShifts.length)]] as Array<[string, string]> : stats).map(([l, v]) => (
+          {(replay ? [["Sector contributors", `${replayCurrent.reduce((sum, group) => sum + group.cohort_count, 0).toLocaleString()} stocks`], ["Cohort-weighted breadth", replayBreadth === null ? "—" : `${replayBreadth.toFixed(1)}%`], ["Material weekly shifts", String(materialShifts.length)]] as Array<[string, string]> : stats).map(([l, v]) => (
             <div key={l} style={{ padding: "12px 0 15px", borderRight: "1px solid #ffffff18" }}>
               <div className="eyebrow-muted" style={{ color: "#abb2b3" }}>{l}</div>
               <div style={{ fontFamily: "Geist Mono", fontSize: 13, marginTop: 3 }}>{v}</div>
@@ -292,7 +279,7 @@ export default function WhatChanged() {
           <div className="eyebrow-muted" style={{ marginBottom: 8 }}>Diffusion</div>
           {replay ? (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 6, fontFamily: "Geist Mono", fontSize: 11 }}>
-              <span>Broadening <b>{replayDiffusion.BROADENING}</b></span><span>Stable <b>{replayDiffusion.STABLE}</b></span><span>Narrowing <b>{replayDiffusion.NARROWING}</b></span><span>Comparison <b>weekly matched cohort</b></span>
+              <span>Broadening <b>{replayDiffusion.BROADENING}</b></span><span>Stable <b>{replayDiffusion.STABLE}</b></span><span>Narrowing <b>{replayDiffusion.NARROWING}</b></span><span>Unconfirmed <b>{replayDiffusion.UNCONFIRMED}</b></span>
             </div>
           ) : hasComparable ? (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 6, fontFamily: "Geist Mono", fontSize: 11 }}>
@@ -303,7 +290,7 @@ export default function WhatChanged() {
             </div>
           ) : (
             <div style={{ fontSize: 11, lineHeight: 1.45, color: "var(--muted)" }}>
-              Current breadth levels are shown in the sector map and leadership tape. Weekly matched-cohort readings are presented separately above.
+              Current breadth levels are shown in the sector map and leadership tape. Diffusion remains unavailable without a matched prior observation.
             </div>
           )}
         </div>
@@ -316,7 +303,7 @@ export default function WhatChanged() {
       <section className="measured-shifts-panel" style={{ background: "var(--surface)", border: "1px solid var(--line)", padding: "16px 18px", marginBottom: 22 }}>
         <div className="measured-shifts-heading" style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
           <div className="eyebrow-muted">{replay ? "Measured weekly shifts" : hasComparable ? "What changed since prior snapshot" : "Current readings"}</div>
-          <span className="eyebrow-muted">{replay ? `${formatDateLabel(replay.weekly.at(-2)!.as_of)} → ${formatDateLabel(replay.weekly.at(-1)!.as_of)}` : hasComparable ? `vs ${formatSnapshotId(payload?.previous_snapshot_id)}` : "Selected release"}</span>
+          <span className="eyebrow-muted">{replay ? `${formatDateLabel(replay.weekly.at(-2)?.as_of)} → ${formatDateLabel(replay.weekly.at(-1)!.as_of)}` : hasComparable ? `vs ${formatSnapshotId(payload?.previous_snapshot_id)}` : "Selected release"}</span>
         </div>
         {replay ? (
           materialShifts.length ? <div className="replay-shift-list">{materialShifts.map(group => <button key={group.group_id} type="button" onClick={() => navigate(`/map?taxonomy=SECTOR&mode=groups&q=${encodeURIComponent(group.name)}`)}><strong>{group.name}</strong><span>{group.material_shift}</span><small>{group.leadership_transition ?? group.diffusion_transition ?? "Measured movement"}</small></button>)}</div> : <p className="meta">No sector crossed the preserved materiality thresholds in the latest weekly interval.</p>
@@ -328,7 +315,7 @@ export default function WhatChanged() {
             </div>
             <div>
               <div style={{ fontWeight: 600, marginBottom: 4 }}>Historical price replay</div>
-              <div>The weekly matched-cohort analysis is shown in the market read above.</div>
+              <div>Dated comparisons are not included in this release. Current levels remain available.</div>
             </div>
           </div>
         ) : (
@@ -361,7 +348,7 @@ export default function WhatChanged() {
         >
           <div>
           <h2 style={{ fontSize: 18, margin: 0 }}>Current market readings</h2>
-            <span className="eyebrow-muted">Selected release · market-wide view</span>
+            <span className="eyebrow-muted">{replay ? "Verified weekly comparison · broader IDX context" : "Current readings · broader IDX context"}</span>
           </div>
           <button
             type="button"
@@ -413,15 +400,15 @@ export default function WhatChanged() {
                     <LeadershipChip state={s.leadership} small />
                   </td>
                   <td style={{ padding: "10px 8px", textAlign: "right" }}>
-                    <DiffusionChip state={s.diffusion} small />
+                    {s.diffusionV2 && s.diffusionV2 !== "UNCONFIRMED" ? <span className="eyebrow-muted">{formatEnumLabel(s.diffusionV2)}</span> : <DiffusionChip state={s.diffusion} small />}
                   </td>
                   <td style={{ padding: "10px 8px", textAlign: "right" }}>{num(s.excess20d)}</td>
                   <td style={{ padding: "10px 8px", textAlign: "right" }}>{num(s.excess60d)}</td>
-                  <td style={{ padding: "10px 8px", textAlign: "right", fontFamily: "Geist Mono", fontSize: 12 }}>{s.breadth === null ? "—" : `${s.breadth}%`}</td>
+                  <td style={{ padding: "10px 8px", textAlign: "right", fontFamily: "Geist Mono", fontSize: 12 }}>{s.breadth === null ? "—" : `${s.breadth.toFixed(1)}%`}</td>
                   <td style={{ padding: "10px 8px", textAlign: "right" }}>
-                    {num(delta(s)!)}
+                    {num(delta(s), " pp")}
                   </td>
-                  <td style={{ padding: "10px 8px", textAlign: "right", fontFamily: "Geist Mono", fontSize: 12 }}>{s.concentration === null ? "—" : `${s.concentration}%`}</td>
+                  <td style={{ padding: "10px 8px", textAlign: "right", fontFamily: "Geist Mono", fontSize: 12 }}>{s.concentration === null ? "—" : `${s.concentration.toFixed(1)}%`}</td>
                   <td style={{ padding: "10px 8px", textAlign: "right", fontFamily: "Geist Mono", fontSize: 12 }}>{s.persistence} obs.</td>
                 </tr>
               ))}
@@ -433,7 +420,7 @@ export default function WhatChanged() {
         <div className="surface-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 28 }}>
           <div>
             <h2 style={{ margin: 0, fontSize: 18 }}>Under the surface</h2>
-            <div className="eyebrow-muted">Average group breadth history</div>
+            <div className="eyebrow-muted">{replay ? "Cohort-weighted breadth history" : "Average group breadth history"}</div>
             <div style={{ marginTop: 12 }}>
               {replay ? (
                 <ResponsiveContainer width="100%" height={230}>
@@ -441,7 +428,7 @@ export default function WhatChanged() {
                     <CartesianGrid stroke="var(--line)" vertical={false} />
                     <XAxis dataKey="as_of" tickFormatter={(value) => String(value).slice(0, 10)} tick={{ fontFamily: "Geist Mono", fontSize: 9, fill: "var(--muted)" }} axisLine={false} tickLine={false} />
                     <YAxis domain={[0, 100]} tick={{ fontFamily: "Geist Mono", fontSize: 9, fill: "var(--muted)" }} axisLine={false} tickLine={false} />
-                    <Area dataKey="breadth" name="Matched-cohort breadth" stroke="#178477" fill="#178477" fillOpacity={0.12} strokeWidth={2} />
+                    <Area dataKey="breadth" connectNulls={false} isAnimationActive={false} name="Matched-cohort breadth" stroke="#178477" fill="#178477" fillOpacity={0.12} strokeWidth={2} />
                   </AreaChart>
                 </ResponsiveContainer>
               ) : dataSources.breadthHistory && averageHistory.length > 0 ? (
@@ -450,22 +437,22 @@ export default function WhatChanged() {
                     <CartesianGrid stroke="var(--line)" vertical={false} />
                     <XAxis dataKey="as_of" tickFormatter={(value) => String(value).slice(0, 10)} tick={{ fontFamily: "Geist Mono", fontSize: 9, fill: "var(--muted)" }} axisLine={false} tickLine={false} />
                     <YAxis domain={[0, 100]} tick={{ fontFamily: "Geist Mono", fontSize: 9, fill: "var(--muted)" }} axisLine={false} tickLine={false} />
-                    <Area dataKey="breadth" name="Average group breadth" stroke="#178477" fill="#178477" fillOpacity={0.12} strokeWidth={2} />
+                    <Area dataKey="breadth" connectNulls={false} isAnimationActive={false} name="Average group breadth" stroke="#178477" fill="#178477" fillOpacity={0.12} strokeWidth={2} />
                   </AreaChart>
                 </ResponsiveContainer>
               ) : (
-                <div role="img" aria-label="No dated breadth series in this release" style={{ height: 230, display: "grid", placeItems: "center", color: "var(--muted)" }}>—</div>
+                <AssetLoadState label="Breadth history" loading={historical.loading} error={historical.error} absentMessage="This release does not include dated breadth history. Current readings remain available above." />
               )}
             </div>
           </div>
           <div>
-            <div className="eyebrow-muted" style={{ marginTop: 2 }}>Fixed cohort by sector</div>
+            <div className="eyebrow-muted" style={{ marginTop: 2 }}>{replay ? "Fixed cohort by sector" : "Current contributors by sector"}</div>
             {replay ? (
               <div aria-label="Matched stock cohort by sector" style={{ border: "1px solid var(--line)", background: "var(--surface-subtle)", padding: "5px 14px" }}>
                 {replayCurrent.map((group) => (
                   <div key={group.group_id} style={{ display: "flex", justifyContent: "space-between", gap: 12, padding: "7px 0", borderBottom: "1px solid var(--line)", fontSize: 12 }}>
                     <span style={{ fontWeight: 600 }}>{group.name}</span>
-                    <span className="eyebrow-muted">{group.cohort_count} stocks · {group.breadth_pct.toFixed(1)}% breadth</span>
+                    <span className="eyebrow-muted">{group.cohort_count} stocks · {group.breadth_pct?.toFixed(1) ?? "—"}% breadth</span>
                   </div>
                 ))}
               </div>
@@ -480,7 +467,7 @@ export default function WhatChanged() {
           <div style={{ borderTop: "1px solid var(--line)", paddingTop: 12 }}>
             <div className="eyebrow-muted">Confirmation</div>
             <p style={{ margin: "6px 0 8px", fontSize: 12, lineHeight: 1.5, color: "var(--muted)" }}>
-              Official investor flow is a market-level measure. The recorded company-flow sample is reported separately.
+              Official investor flow is a market-level measure. Recorded company-flow coverage is reported separately.
             </p>
             <Link to="/foreign" style={{ fontSize: 12 }}>Open official market flow</Link>
           </div>

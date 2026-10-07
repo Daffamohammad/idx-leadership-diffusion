@@ -1,18 +1,9 @@
 import { useMemo } from "react";
-import { formatDateLabel, formatIdrCompact, formatPercent } from "../data/format";
+import { formatDateLabel, formatIdrCompact } from "../data/format";
 import { useRecordedSectorsSample } from "../data/marketWorkspace";
 import { useSnapshot } from "../data/SnapshotProvider";
+import { AssetLoadState } from "../components/AssetLoadState";
 import { WorkspaceTable } from "../components/WorkspaceTable";
-
-const q3Start = "2026-07-01";
-
-function returnSinceQ3(rows: Array<{ date: string; close: number }>) {
-  const base = [...rows].filter(row => row.date <= q3Start).at(-1)
-    ?? rows.find(row => row.date > q3Start && row.date <= "2026-07-08");
-  const latest = [...rows].sort((a, b) => a.date.localeCompare(b.date)).at(-1);
-  if (!base || !latest || base.close <= 0) return null;
-  return (latest.close / base.close - 1) * 100;
-}
 
 export default function RecordedSample() {
   const { loading: snapshotLoading, error: snapshotError } = useSnapshot();
@@ -20,22 +11,20 @@ export default function RecordedSample() {
   const sample = sampleState.data;
   const rows = useMemo(() => (sample?.stocks ?? []).map(stock => ({
     ...stock,
-    q3_return: returnSinceQ3(stock.prices),
     last_close: [...stock.prices].sort((a, b) => a.date.localeCompare(b.date)).at(-1)?.close ?? null,
   })).sort((a, b) => a.sector.localeCompare(b.sector) || a.ticker.localeCompare(b.ticker)), [sample]);
 
-  if (snapshotError || sampleState.error) return <main className="workspace-page"><h1>Recorded Sectors sample</h1><p role="alert" className="meta">The selected release could not be verified: {sampleState.error ?? snapshotError}</p></main>;
+  if (snapshotError || sampleState.error) return <main className="workspace-page"><h1>Coverage &amp; sources</h1><AssetLoadState label="Sectors recording" loading={false} error={sampleState.error ?? snapshotError} absentMessage="" /></main>;
   if (!sample && (snapshotLoading || sampleState.loading)) return <main className="workspace-page"><p className="meta" role="status">Loading the selected release.</p></main>;
-  if (!sample) return <main className="workspace-page"><h1>Recorded Sectors sample</h1><p className="meta">The selected immutable release does not include a recorded Sectors sample.</p></main>;
+  if (!sample) return <main className="workspace-page"><h1>Coverage &amp; sources</h1><p className="meta">The selected immutable release does not include a Sectors recording.</p></main>;
 
   const quarter = sample.foreign_reconciliation.complete_quarter;
   const ytd = sample.foreign_reconciliation.sectors_ytd;
   const q3Sessions = sample.foreign_flow.complete_quarter.session_check.observed_sessions;
-  const sectorReturns = rows.map(row => row.q3_return).filter((value): value is number => value !== null);
 
   return <main className="content-shell-wide recorded-sample-page">
     <header className="submission-page-heading">
-      <div><div className="eyebrow-muted">Sectors API · recorded acquisition</div><h1>{sample.label}</h1><p>{sample.scope}</p></div>
+      <div><div className="eyebrow-muted">Sectors API · recorded acquisition</div><h1>Coverage &amp; sources</h1><p>66 tracked stocks across 11 IDX sectors, with frozen membership and source-bound observations.</p></div>
       <div className="recorded-session"><span>Observed completed session</span><strong>{formatDateLabel(sample.as_of)}</strong><span>Selection frozen {formatDateLabel(sample.selection.membership_release_session)} · membership reference {formatDateLabel(sample.selection.membership_as_of)}</span></div>
     </header>
     <section className="recorded-summary-grid" aria-label="Recording summary">
@@ -45,14 +34,14 @@ export default function RecordedSample() {
       <article><span>Sectors Q3 market flow</span><strong>{formatIdrCompact(quarter.sectors_sum_idr)}</strong><small>{formatDateLabel(quarter.start)} → {formatDateLabel(quarter.end)} · {q3Sessions} verified sessions</small></article>
     </section>
     <section className="recorded-section">
-      <div className="section-title-row"><div><div className="eyebrow-muted">Computed sample</div><h2>Selected-stock Q3 price readings</h2></div><span className="eyebrow-muted">{sectorReturns.length} of {rows.length} stocks with a Q3 base close</span></div>
-      <p className="meta">Returns compare each selected stock’s last close on or before 1 July 2026 with its latest recorded close. Equal samples describe these 66 names; they are not market-cap weighted. Raw close data are not adjusted for corporate actions.</p>
+      <div className="section-title-row"><div><div className="eyebrow-muted">Recorded prices</div><h2>Tracked stocks and latest closes</h2></div><span className="eyebrow-muted">{rows.length} tracked stocks</span></div>
+      <p className="meta">Latest recorded raw closes are shown with their observation dates. Return calculations and corporate-action exclusions are available in the Sectors dashboard. Membership is selected retrospectively; these stocks do not represent the full market.</p>
       <WorkspaceTable rows={rows} rowKey={row => row.ticker} columns={[
         { label: "Sector", cell: row => row.sector },
         { label: "Ticker", cell: row => row.ticker.replace(".JK", "") },
         { label: "Company", cell: row => row.company_name ?? "—" },
         { label: "Latest close · IDR", cell: row => row.last_close?.toLocaleString("en-US") ?? "—" },
-        { label: "Q3-to-session return", cell: row => row.q3_return === null ? "—" : formatPercent(row.q3_return, 2) },
+        { label: "Observed date", cell: row => formatDateLabel([...row.prices].sort((a, b) => a.date.localeCompare(b.date)).at(-1)?.date) },
       ]} />
     </section>
     <section className="recorded-section">

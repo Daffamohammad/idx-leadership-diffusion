@@ -20,14 +20,14 @@ import TickerSearch from "./TickerSearch";
 import { BrandLockup } from "./BrandMark";
 import type { SnapshotContextValue } from "../data/SnapshotContext";
 import { normalizeDataStatus } from "../data/snapshot";
-import { formatDateLabel, formatEnumLabel, formatSnapshotId } from "../data/format";
+import { formatDateLabel, formatEnumLabel } from "../data/format";
 
 const navGroups = [
   {
     label: "Sectors",
     items: [
       { path: "/sectors", label: "Sectors dashboard", Icon: DashboardIcon },
-      { path: "/recorded-sample", label: "Sample & source record", Icon: ActivityLogIcon },
+      { path: "/sources", label: "Coverage & sources", Icon: ActivityLogIcon },
     ],
   },
   {
@@ -77,11 +77,11 @@ function formatAsOf(asOf: string | null | undefined): string {
 function formatProviderMode(mode: string | undefined): string {
   switch (mode) {
     case "PUBLIC_PROTOTYPE":
-      return "IDX submission release";
+      return "Recorded release";
     case "DEMO_FIXTURE":
-      return "Recorded sample";
+      return "Recorded data";
     case "SECTORS_FIXTURE":
-      return "Recorded sample";
+      return "Recorded data";
     case "SECTORS_LIVE":
       return "Live Sectors";
     default:
@@ -95,9 +95,7 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
   const asOf = formatAsOf(snap.data?.payload.as_of);
   const providerMode = snap.data?.payload.manifest?.entries?.[0]?.provider_mode;
   const providerLabel = formatProviderMode(providerMode);
-  const hasRecordedSample = Boolean(snap.release?.manifest.additional_files.some(file => file.file_id === "sectors_recorded_sample"));
   const qualityStatus = normalizeDataStatus(snap.data?.payload.quality.status);
-  const statusLabel = qualityStatus === "READY" ? "Ready" : null;
   const availableTaxonomies = new Set(
     snap.data?.payload.groups.map((group) => group.taxonomy_level.toLowerCase()) ?? [],
   );
@@ -149,7 +147,7 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
           {navGroups.map((group) => (
             <div key={group.label} role="group" aria-label={group.label} className="rail-nav-group">
               {sidebarExpanded && <div className="rail-nav-group-label">{group.label}</div>}
-              {group.items.filter(item => item.path !== "/recorded-sample" || hasRecordedSample).map((item) => (
+              {group.items.map((item) => (
                 <Tooltip.Root key={item.path}>
                   <Tooltip.Trigger asChild>
                     <NavLink
@@ -222,7 +220,7 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
                   ? "Loading"
                   : snap.error
                     ? "Release not loaded"
-                    : (statusLabel ?? "Ready")}
+                    : "Recorded"}
               </span>
             )}
           </div>
@@ -367,7 +365,7 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
               ? "Loading snapshot…"
               : snap.error
                 ? "Release not loaded"
-            : providerLabel + " · " + (statusLabel ?? "Ready") + " · Snapshot " + formatSnapshotId(snap.snapshotId, snap.payload?.as_of)}
+                : "Recorded · " + asOf}
           </span>
           <ThemeToggle />
           <div className="mobile-only"><LocalProfile compact /></div>
@@ -408,7 +406,7 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
               {navGroups.map((group) => (
                 <div key={group.label} role="group" aria-label={group.label} className="mobile-nav-group">
                   <div className="rail-nav-group-label">{group.label}</div>
-                  {group.items.filter(item => item.path !== "/recorded-sample" || hasRecordedSample).map((item) => (
+                  {group.items.map((item) => (
                     <NavLink
                       key={item.path}
                       to={item.path}

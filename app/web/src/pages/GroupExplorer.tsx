@@ -1306,7 +1306,7 @@ export default function GroupExplorer() {
             <table className="matched-replay-table"><thead><tr><th>As of</th><th>20D excess</th><th>60D excess</th><th>Breadth</th><th>Weekly breadth</th><th>Diffusion</th><th>Phase change</th></tr></thead>
               <tbody>{matchedReplay.map((point) => <tr key={point.as_of}>
                 <td>{formatDateLabel(point.as_of)}</td><td>{formatPercent(point.excess_return_20d)}</td><td>{formatPercent(point.excess_return_60d)}</td>
-                <td>{point.breadth_pct.toFixed(1)}%</td><td>{point.breadth_change_pp === null ? "Baseline" : `${point.breadth_change_pp > 0 ? "+" : ""}${point.breadth_change_pp.toFixed(1)} pp`}</td>
+                <td>{point.breadth_pct === null ? "—" : `${point.breadth_pct.toFixed(1)}%`}</td><td>{point.breadth_change_pp === null ? "Baseline" : `${point.breadth_change_pp > 0 ? "+" : ""}${point.breadth_change_pp.toFixed(1)} pp`}</td>
                 <td>{point.diffusion === "UNCONFIRMED" ? "Baseline observation" : formatEnumLabel(point.diffusion)}</td>
                 <td>{replayTransitionLabel(point.leadership_transition ?? point.diffusion_transition)}</td>
               </tr>)}</tbody>

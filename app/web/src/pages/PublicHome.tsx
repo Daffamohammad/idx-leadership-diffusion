@@ -606,7 +606,7 @@ export default function PublicHome() {
               className="reveal"
               style={{ color: "var(--muted)", lineHeight: 1.65, maxWidth: 440, marginBottom: 28 }}
             >
-              IDX Leadership Diffusion scans the Indonesian equity market to identify emerging
+              The Diffusion scans the Indonesian equity market to identify emerging
               leadership, participation breadth, concentration, and deterioration beneath headline
               performance.
             </p>
@@ -661,7 +661,7 @@ export default function PublicHome() {
             >
               <ImageWithFallback
                 src={leadershipMap}
-                alt="IDX Leadership and Diffusion map showing sector movement across relative leadership and breadth"
+                alt="The Diffusion map showing sector movement across relative leadership and breadth"
                 style={{ width: "100%", height: "100%", display: "block", objectFit: "contain" }}
               />
             </div>
@@ -932,7 +932,7 @@ export default function PublicHome() {
               independently—and can contradict one another.
             </p>
             <div style={{ marginTop: 24 }}>
-              <InteractiveHoverCTA to="/overview" label="Open IDX Leadership Diffusion" />
+              <InteractiveHoverCTA to="/overview" label="Open The Diffusion" />
             </div>
           </div>
         </section>

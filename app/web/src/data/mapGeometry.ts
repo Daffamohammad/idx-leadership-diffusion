@@ -25,6 +25,33 @@ export interface LeadershipDiffusionDomain {
 
 export type MapViewMode = "trajectory" | "current";
 
+type RotationCoordinate = { x: number | null; y: number | null };
+
+export function validRotationPoint<T extends RotationCoordinate>(point: T): point is T & { x: number; y: number } {
+  return point.x !== null && point.y !== null && Number.isFinite(point.x) && Number.isFinite(point.y);
+}
+
+export function rotationPlotRanges(items: Array<RotationCoordinate & { history: RotationCoordinate[] }>): { x: [number, number]; y: [number, number] } {
+  const points = items.flatMap(item => [item, ...item.history]).filter(validRotationPoint);
+  const range = (values: number[]): [number, number] => {
+    const limit = Math.max(1.5, ...values.map(value => Math.abs(value))) * 1.14;
+    return [-limit, limit];
+  };
+  return { x: range(points.map(point => point.x)), y: range(points.map(point => point.y)) };
+}
+
+/** Missing observations break a path; later points must not bridge the gap. */
+export function rotationTrailSegments<T extends RotationCoordinate>(points: T[]): Array<Array<T & { x: number; y: number }>> {
+  const segments: Array<Array<T & { x: number; y: number }>> = [];
+  let segment: Array<T & { x: number; y: number }> = [];
+  for (const point of points) {
+    if (validRotationPoint(point)) segment.push(point);
+    else if (segment.length) { segments.push(segment); segment = []; }
+  }
+  if (segment.length) segments.push(segment);
+  return segments;
+}
+
 export interface MapPointInput {
   excess20d: number | null;
   breadth: number | null;

@@ -6,6 +6,7 @@ import { formatDateLabel, formatPercent } from "../data/format";
 import type { TaxonomyKind } from "../data/snapshot";
 import TradingViewTechnicalAnalysis from "./TradingViewTechnicalAnalysis";
 import TradingViewWidget from "./TradingViewWidget";
+import { AssetLoadState } from "./AssetLoadState";
 
 export interface OverviewRanking {
   id: string;
@@ -58,7 +59,7 @@ export default function MarketDailyDashboard({ rankKind, onRankKindChange, ranki
           <div className="market-level">IHSG {latest.close.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
           <p className={change >= 0 ? "positive" : "negative"}>{change >= 0 ? "+" : ""}{change.toFixed(3)} pts · {formatPercent(change / previous.close * 100, 2)}</p>
           <div className="market-overview-prior">Previous close <strong>{previous.close.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></div>
-        </> : <p className="market-overview-prior" aria-live="polite">{loading ? "Loading the selected release…" : error ?? "No close is available for this release."}</p>}
+        </> : <AssetLoadState label="IHSG closes" loading={loading} error={error} absentMessage="No closing observation is available for this release." />}
         <TradingViewTechnicalAnalysis />
         <details className="official-history-details">
           <summary>Selected-release daily history</summary>
@@ -70,7 +71,7 @@ export default function MarketDailyDashboard({ rankKind, onRankKindChange, ranki
             <div className="breadth-bar" aria-hidden="true"><span style={{ flex: data.breadth.advancers, background: "var(--up)" }}/><span style={{ flex: data.breadth.flat, background: "var(--muted)" }}/><span style={{ flex: data.breadth.decliners, background: "var(--down)" }}/></div>
             <p className="meta">{data.breadth.advancers} up · {data.breadth.flat} flat · {data.breadth.decliners} down. {data.breadth.traded_count} traded stocks; {data.breadth.not_traded_or_unavailable} not traded or outside the stock lane.</p>
             <Link to="/heatmap" className="btn btn-outline">Open stock heatmap →</Link>
-          </> : <p className="meta">Dated closing observations are not available in this release.</p>}
+          </> : <AssetLoadState label="IHSG history" loading={loading} error={error} absentMessage="Dated closing observations are not available in this release." />}
         </details>
       </section>
 
@@ -103,7 +104,7 @@ export default function MarketDailyDashboard({ rankKind, onRankKindChange, ranki
     <section className="dash-card overview-movers-card" aria-labelledby="overview-movers-title">
       <div className="eyebrow-muted">Latest session · {formatDateLabel(data?.as_of ?? null)}</div>
       <h2 id="overview-movers-title">{data?.index_movers.status === "RECONCILED" ? "Index movers" : "Stock movers"}</h2>
-      {!data && <p className="meta" aria-live="polite">{loading ? "Loading market movers…" : error ?? "Market data is unavailable."}</p>}
+      {!data && <AssetLoadState label="Market movers" loading={loading} error={error} absentMessage="Market movers are not included in this release." />}
       {data && <>
         <div className="mover-columns">{(["leaders", "laggards"] as const).map(side => <div key={side}><h3>{side === "leaders" ? "Leaders" : "Laggards"}</h3>{movers[side].map(r => <Link className="mover-row" to={`/ticker/${r.ticker}`} key={r.ticker}><strong>{r.ticker.replace(".JK", "")}</strong><span className={side === "leaders" ? "positive" : "negative"}>{r.points !== null ? `${r.points > 0 ? "+" : ""}${r.points.toFixed(2)} pts` : formatPercent(r.return_1d, 2)}</span><small>{formatPercent(r.return_1d, 2)}</small></Link>)}</div>)}</div>
         <details className="meta overview-calculation-notes"><summary>Calculation and coverage</summary>{data.index_movers.status === "RECONCILED" ? <p>{data.index_movers.method}. Summed contributions: {data.index_movers.calculated_change?.toFixed(6)} pts; official move: {data.index_movers.official_change?.toFixed(3)} pts; residual: {data.index_movers.residual?.toFixed(6)} pts. Calculated from the official workbook; applies to this session only. <a href={data.index_movers.source} target="_blank" rel="noreferrer">IDX index methodology</a>.</p> : <p>{data.index_movers.reason}. Percentage movers are shown instead.</p>}<p>{data.coverage.observed_histories} observed histories of {data.coverage.requested} requested stocks. {data.coverage.signal_eligible} eligible for the sector signal policy. End-of-day observations; chart values are index levels.</p></details>

@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Link, useSearchParams } from "react-router";
 import { useWorkspaceAsset, type MarketStock } from "../data/marketWorkspace";
+import { AssetLoadState } from "../components/AssetLoadState";
 import { formatDateLabel } from "../data/format";
 
 const CATEGORIES = [
@@ -74,8 +75,7 @@ export default function MarketMovers() {
       </nav>
       <section className="dash-card movers-table-card">
         <div className="movers-toolbar"><div><div className="eyebrow-muted">Top 25 · {active.label}</div><h2>{active.label}</h2></div><div className="movers-filters"><input type="search" aria-label="Search ticker or company" placeholder="Search ticker or company…" value={params.get("q") ?? ""} onChange={event => setParam("q", event.target.value)} /><label><span>Board</span><select aria-label="Filter listing board" value={board} onChange={event => setParam("board", event.target.value)}><option value="all">All boards</option>{boards.map(value => <option key={value} value={value}>{value}</option>)}</select></label></div></div>
-        {market.loading && <p role="status">Loading the selected release…</p>}
-        {market.error && <p role="alert">This ranking could not be loaded: {market.error}</p>}
+        {!market.data && <AssetLoadState label="Market ranking" loading={market.loading} error={market.error} absentMessage="No market ranking is included in this release." />}
         {market.data && <>
           <div className="movers-result-count">Top {rows.length} of the filtered ranking · securities must have traded volume and a same-session official close</div>
           <div className="table-scroll"><table><thead><tr><th>#</th><th>Stock</th><th>Company</th><th>Board</th><th>Close</th><th>Daily change</th><th>Value · IDR</th><th>Volume · shares</th><th>Frequency</th><th>Foreign net · shares</th></tr></thead><tbody>{rows.map((row, index) => <tr key={row.ticker}>

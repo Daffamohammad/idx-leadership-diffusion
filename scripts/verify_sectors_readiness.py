@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 import hashlib
 import json
 from pathlib import Path
+import re
 import subprocess
 import sys
 import tempfile
@@ -34,7 +35,17 @@ FOCUSED_TESTS = (
     "tests/test_prepare_sectors_recording.py",
     "tests/test_prepare_sectors_ytd_baseline.py",
     "tests/test_sectors_analysis.py",
+    "tests/test_submission_repair.py",
 )
+SOURCE_PATHS = ("app/web", "src", "scripts", "tests", "pyproject.toml", "requirements.txt")
+REQUIRED_BROWSER_CHECKS = (
+    "sectors_1036x799", "sectors_1440x900", "sectors_390x844", "sources",
+    "overview", "weekly_comparison", "context_map", "navigation_smoke",
+    "core_interactions", "loading_state", "fetch_error_retry", "absent_asset",
+    "corrupt_core", "missing_selection", "corrupt_ytd", "server_restart", "map_without_history",
+)
+REQUIRED_ROUTES = ("/sectors", "/sources", "/overview", "/what-changed", "/movers", "/foreign", "/ownership",
+                   "/heatmap", "/map", "/konglo", "/themes", "/explorer", "/groups", "/tickers", "/methodology")
 
 
 def _sha(raw: bytes) -> str:
@@ -42,6 +53,8 @@ def _sha(raw: bytes) -> str:
 
 
 def _write(path: Path, value: dict[str, Any]) -> None:
+    if path.exists():
+        raise ValueError("readiness output already exists; choose a new path to preserve the dated record")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(canonical_json_bytes(value) + b"\n")
 
@@ -109,9 +122,51 @@ def _run_focused_tests() -> dict[str, Any]:
     }
 
 
-def verify_readiness(*, browser_qa_reviewed: bool) -> dict[str, Any]:
-    if not browser_qa_reviewed:
-        raise ValueError("manual desktop and mobile browser checks must pass before readiness can be issued")
+def verify_browser_receipt(path: Path, *, release_id: str, manifest_sha256: str,
+                           expected_metrics: dict[str, int | float]) -> dict[str, Any]:
+    receipt = json.loads(path.read_text(encoding="utf-8"))
+    if receipt.get("schema_version") != "diffusion-browser-qa-v1" or receipt.get("status") != "PASS":
+        raise ValueError("browser QA receipt is missing a passing supported schema")
+    commit = receipt.get("source_commit", "")
+    if not re.fullmatch(r"[0-9a-f]{40}", commit):
+        raise ValueError("browser QA receipt has no exact source commit")
+    ancestor = subprocess.run(["git", "merge-base", "--is-ancestor", commit, "HEAD"], cwd=ROOT, capture_output=True)
+    changes = subprocess.run(["git", "diff", "--name-only", commit, "--", *SOURCE_PATHS], cwd=ROOT, capture_output=True, text=True)
+    untracked = subprocess.check_output(["git", "ls-files", "--others", "--exclude-standard", "--", *SOURCE_PATHS], cwd=ROOT, text=True)
+    if ancestor.returncode or changes.returncode or changes.stdout.strip() or untracked.strip():
+        raise ValueError("browser QA source commit is stale or the tested source has uncommitted changes")
+    if receipt.get("release_id") != release_id or receipt.get("manifest_sha256") != manifest_sha256:
+        raise ValueError("browser QA receipt belongs to a different release")
+    checks = receipt.get("checks", {})
+    for name in REQUIRED_BROWSER_CHECKS:
+        check = checks.get(name, {})
+        if check.get("status") != "PASS" or not check.get("observed"):
+            raise ValueError(f"browser QA check is missing, failed, or has no observations: {name}")
+    if set(REQUIRED_ROUTES) - set(checks["navigation_smoke"]["observed"].get("routes", [])):
+        raise ValueError("browser QA navigation evidence is incomplete")
+    metrics = receipt.get("metrics", {})
+    for name, expected in expected_metrics.items():
+        if metrics.get(name) != expected:
+            raise ValueError(f"browser QA figure or data count does not match the release: {name}")
+    if receipt.get("unexpected_console_errors") != 0 or receipt.get("unexpected_data_request_failures") != 0 or receipt.get("sectors_provider_requests") != 0:
+        raise ValueError("browser QA contains unexpected errors, failed data requests, or provider calls")
+    viewports = set()
+    screenshots = receipt.get("screenshots", [])
+    for entry in screenshots:
+        screenshot = (ROOT / entry["path"]).resolve()
+        if not screenshot.is_relative_to(ROOT.resolve()) or not screenshot.is_file():
+            raise ValueError("browser QA screenshot is missing or outside the repository")
+        raw = screenshot.read_bytes()
+        if not (raw.startswith(b"\x89PNG\r\n\x1a\n") or raw.startswith(b"\xff\xd8\xff")) or _sha(raw) != entry.get("sha256"):
+            raise ValueError("browser QA screenshot hash does not validate")
+        viewports.add(entry.get("viewport"))
+    if not {"1036x799", "1440x900", "390x844"}.issubset(viewports):
+        raise ValueError("browser QA needs screenshot evidence for every required viewport")
+    return {"status": "PASS", "receipt": str(path.relative_to(ROOT)), "sha256": _sha(path.read_bytes()),
+            "source_commit": commit, "checks": checks, "metrics": metrics, "screenshots": screenshots}
+
+
+def verify_readiness(*, browser_qa_receipt: Path) -> dict[str, Any]:
     pointer, active, previous = _read_active_pointer(RELEASES)
     if pointer is None or active is None:
         raise ValueError("there is no verified active immutable release")
@@ -124,6 +179,11 @@ def verify_readiness(*, browser_qa_reviewed: bool) -> dict[str, Any]:
     analysis_raw = analysis_path.read_bytes()
     sample = json.loads(sample_raw)
     analysis = json.loads(analysis_raw)
+    market = json.loads(active.family_paths["market"].read_text())
+    browser = verify_browser_receipt(browser_qa_receipt, release_id=active.release_id, manifest_sha256=active.manifest_sha256,
+        expected_metrics={"ranking_rows": 11, "sectors_map_marks": sum(group["map"] is not None for group in analysis["daily"][-1]["groups"]),
+                          "constituents_inspected": 66, "daily_dates": len(analysis["daily"]), "weekly_dates": len(analysis["weekly"]),
+                          "context_sector_marks": 11, "ihsg_close": market["benchmark"][-1]["close"]})
     if len(sample.get("stocks", [])) != 66 or len({row.get("ticker") for row in sample["stocks"]}) != 66:
         raise ValueError("released sample must contain all 66 unique selected stocks")
     if len({row.get("sector") for row in sample["stocks"]}) != 11:
@@ -168,8 +228,8 @@ def verify_readiness(*, browser_qa_reviewed: bool) -> dict[str, Any]:
     focused_tests = _run_focused_tests()
 
     return {
-        "schema_version": "sectors-readiness-receipt-v1",
-        "status": "READY_FOR_REPOSITORY_SIGNOFF" if baseline_entry else "READY_FOR_BUDGETED_YTD_ACQUISITION",
+        "schema_version": "sectors-readiness-receipt-v2",
+        "status": "VERIFIED_LOCAL_BUILD",
         "created_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "active_release": {
             "release_id": active.release_id,
@@ -199,19 +259,7 @@ def verify_readiness(*, browser_qa_reviewed: bool) -> dict[str, Any]:
             "corporate_action_exclusions": action_audit,
             "minimum_five_contributor_floor": "PASS",
             "mocked_budget_retry_restart_concurrency_and_pre_501_tests": focused_tests,
-            "browser_workflow": {
-                "status": "PASS",
-                "reviewed": True,
-                "checks": [
-                    "Desktop /sectors default landing, 20D ranking, 60D map, replay, sector selection, and constituent inspection",
-                    "Mobile layout at 415px with no page-level horizontal overflow",
-                    "Corrupted analysis and missing frozen selection source block the primary workflow",
-                    "Corrupted YTD baseline digest blocks the primary workflow",
-                    "Loading, validation error, and genuinely absent sample render distinct states",
-                ] + ([
-                    "Same-date YTD baseline hash, 23 of 66 eligible stock readings, and all 11 below-floor sector aggregates",
-                ] if baseline_entry else []),
-            },
+            "browser_workflow": browser,
             "live_requests_during_readiness": 0,
             **({"ytd_acquisition_validation": acquisition_validation} if acquisition_validation else {}),
         },
@@ -244,13 +292,12 @@ def verify_readiness(*, browser_qa_reviewed: bool) -> dict[str, Any]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--browser-qa-reviewed", action="store_true",
-                        help="confirm desktop, mobile, and blocked-state checks were manually exercised")
-    parser.add_argument("--out", type=Path,
-                        default=ROOT / "docs/submission-release/readiness-2026-10-07.json")
+    parser.add_argument("--browser-qa-receipt", required=True, type=Path,
+                        help="recorded browser checks, figures, and screenshots bound to this source commit and release")
+    parser.add_argument("--out", required=True, type=Path, help="new readiness receipt path; existing dated records are never overwritten")
     args = parser.parse_args()
     try:
-        receipt = verify_readiness(browser_qa_reviewed=args.browser_qa_reviewed)
+        receipt = verify_readiness(browser_qa_receipt=args.browser_qa_receipt.resolve())
         _write(args.out, receipt)
         print(json.dumps({"status": receipt["status"], "receipt": str(args.out),
                           "release_id": receipt["active_release"]["release_id"],

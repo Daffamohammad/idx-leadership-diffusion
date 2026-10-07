@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { Area, AreaChart, CartesianGrid, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { formatDateLabel } from "../data/format";
 import { useMarketBreadth } from "../data/marketWorkspace";
+import { AssetLoadState } from "./AssetLoadState";
 
 const HORIZONS = [
   ["5d", "5D"], ["20d", "20D"], ["60d", "60D"], ["52w", "52 weeks"],
@@ -46,8 +47,7 @@ export default function MarketBreadthPanel() {
   const directionRows = direction && data ? data.official_daily.constituents_by_direction[direction] : [];
   const matchedDirectionRows = directionRows.filter(row => !directionSearch.trim() || `${row.ticker} ${row.company_name}`.toLowerCase().includes(directionSearch.trim().toLowerCase()));
 
-  if (loading) return <section className="dash-card breadth-panel" aria-label="Market breadth"><p>Loading market breadth…</p></section>;
-  if (!data) return error ? <section className="dash-card breadth-panel" aria-label="Market breadth"><h2>Market breadth</h2><p role="status">This release does not include the verified breadth asset.</p></section> : null;
+  if (!data) return <section className="dash-card breadth-panel" aria-label="Market breadth"><h2>Market breadth</h2><AssetLoadState label="Market breadth" loading={loading} error={error} absentMessage="This release does not include a market breadth recording." /></section>;
 
   return (
     <section className="breadth-panel" aria-labelledby="breadth-title">

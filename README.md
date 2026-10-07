@@ -1,13 +1,13 @@
-# IDX Leadership Diffusion
+# The Diffusion
 
-> A Sectors-powered market-intelligence prototype that shows which Indonesian
+> A Sectors-powered market-intelligence workspace that shows which Indonesian
 > equity sectors lead, whether leadership is broadening, and which constituents
 > drive the signal.
 
 ## Submission build · 8 October 2026
 
 **Problem.** An index-level move can hide sharply different sector and stock
-leadership. This prototype makes those differences inspectable with
+leadership. The Diffusion makes those differences inspectable with
 source-bound prices, explicit contributor counts, and replayable calculations.
 
 **Audience.** Market-intelligence reviewers and equity researchers who need to
@@ -15,7 +15,7 @@ inspect sector signals down to their contributing stocks and data limitations.
 
 The primary workflow is `/sectors`: rank 11 sectors by 20-session excess return,
 compare 60-session excess return with relative momentum, replay daily or weekly
-observations, and inspect all 66 selected constituents. The sample has six
+observations, and inspect all 66 selected constituents. The tracked universe contains six
 stocks per sector and was selected from a frozen 2 October 2026 market source.
 It is retrospective, not historical point-in-time membership. Returns use raw
 Sectors closes against native Sectors IHSG closes. Listed splits, rights issues,
@@ -25,8 +25,8 @@ contributors. Each replay comparison uses the same eligible names at both
 dates, while eligibility can change between date pairs.
 
 The `/sectors` page reads released, hash-validated assets and makes no provider
-calls when opened. Broader IDX pages remain supporting context. The immutable
-release, sample boundary, reproduction steps, rollback target, and current
+calls when opened. `/sources` documents coverage and recording provenance; the earlier `/recorded-sample` URL redirects there. Broader IDX pages remain supporting context. The latest supported view has eleven 20D rankings and nine eligible 60D map points. Genuine stock YTD readings are dated separately; no sector currently meets the five-contributor YTD floor. The immutable
+release, universe boundary, reproduction steps, rollback target, and current
 verification evidence are documented in
 [`docs/submission-release/README.md`](docs/submission-release/README.md).
 
