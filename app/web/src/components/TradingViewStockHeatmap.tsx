@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type HeatmapColor = "daily" | "ytd";
 
 export default function TradingViewStockHeatmap({ color }: { color: HeatmapColor }) {
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const frameRef = useRef<HTMLIFrameElement | null>(null);
   const [status, setStatus] = useState<"loading" | "loaded" | "unavailable">("loading");
   const [dark, setDark] = useState(false);
 
@@ -16,20 +16,10 @@ export default function TradingViewStockHeatmap({ color }: { color: HeatmapColor
     return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-    setStatus("loading");
-    container.replaceChildren();
-
-    const widget = document.createElement("div");
-    widget.className = "tradingview-widget-container__widget";
-    container.appendChild(widget);
-
-    const script = document.createElement("script");
-    script.async = true;
-    script.src = "https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js";
-    script.textContent = JSON.stringify({
+  // Navigation or a color change destroys this document, including pending scripts.
+  // A script injected into the app document can execute after its container is removed.
+  const embedDocument = useMemo(() => {
+    const configuration = JSON.stringify({
       exchanges: [],
       dataSource: "AllID",
       grouping: "sector",
@@ -44,21 +34,16 @@ export default function TradingViewStockHeatmap({ color }: { color: HeatmapColor
       width: "100%",
       height: "100%",
     });
-    script.onload = () => setStatus("loaded");
-    script.onerror = () => setStatus("unavailable");
-    container.appendChild(script);
-
-    const timeout = window.setTimeout(() => {
-      if (!container.querySelector("iframe")) setStatus("unavailable");
-    }, 15000);
-
-    return () => {
-      window.clearTimeout(timeout);
-      script.onload = null;
-      script.onerror = null;
-      container.replaceChildren();
-    };
+    return `<!doctype html><html><head><style>html,body,.tradingview-widget-container,.tradingview-widget-container__widget{width:100%;height:100%;margin:0}</style></head><body><div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div><script async src="https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js">${configuration}</script></div></body></html>`;
   }, [color, dark]);
+
+  useEffect(() => {
+    setStatus("loading");
+    const timeout = window.setTimeout(() => {
+      if (!frameRef.current?.contentDocument?.querySelector("iframe")) setStatus("unavailable");
+    }, 15000);
+    return () => window.clearTimeout(timeout);
+  }, [embedDocument]);
 
   return (
     <section className="tradingview-heatmap-card" aria-label="TradingView IDX stock heatmap">
@@ -76,7 +61,7 @@ export default function TradingViewStockHeatmap({ color }: { color: HeatmapColor
           TradingView could not load in this browser. The dated local snapshot heatmap remains available in the Snapshot tab.
         </p>
       )}
-      <div ref={containerRef} className="tradingview-heatmap-frame" />
+      <iframe ref={frameRef} title="TradingView Indonesian stock heatmap" className="tradingview-heatmap-frame" style={{ width: "100%", border: 0 }} sandbox="allow-scripts allow-same-origin" srcDoc={embedDocument} onLoad={() => setStatus(frameRef.current?.contentDocument?.querySelector("iframe") ? "loaded" : "unavailable")} />
       <p className="meta tradingview-heatmap-note">
         TradingView supplies an external end-of-day market view. Its prices, timing, and coverage may differ from this app’s selected release and do not feed leadership or diffusion calculations. (Block size: listed market capitalization.)
       </p>

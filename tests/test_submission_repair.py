@@ -1,6 +1,7 @@
 """Regression checks for the submission UI and evidence-backed readiness gate."""
 import base64
 import hashlib
+from html.parser import HTMLParser
 import json
 from pathlib import Path
 import subprocess
@@ -63,6 +64,34 @@ def test_loading_error_and_absent_markup_have_distinct_states():
     assert "No breadth recording" not in result["error"]
     assert "integrity check failed" in result["corrupt"]
     assert "No breadth recording" in result["absent"] and "Retry" not in result["absent"]
+
+
+def test_external_heatmap_uses_its_own_document_and_preserves_daily_and_ytd_configuration():
+    result = bun('''
+      import React from "./app/web/node_modules/react/index.js";
+      import {renderToStaticMarkup} from "./app/web/node_modules/react-dom/server.js";
+      import Heatmap from "./app/web/src/components/TradingViewStockHeatmap.tsx";
+      console.log(JSON.stringify(["daily","ytd"].map(color=>renderToStaticMarkup(React.createElement(Heatmap,{color})))));
+    ''')
+    class EmbedParser(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.frames, self.scripts = [], []
+        def handle_starttag(self, tag, attrs):
+            if tag == "iframe": self.frames.append(dict(attrs))
+            if tag == "script": self.scripts.append(dict(attrs))
+    for markup, color in zip(result, ("change", "Perf.YTD"), strict=True):
+        page = EmbedParser()
+        page.feed(markup)
+        assert not page.scripts and len(page.frames) == 1
+        frame = page.frames[0]
+        assert frame["title"] == "TradingView Indonesian stock heatmap"
+        assert '"blockColor":"' + color + '"' in frame["srcdoc"]
+        assert '"dataSource":"AllID"' in frame["srcdoc"]
+        embedded = EmbedParser()
+        embedded.feed(frame["srcdoc"])
+        assert len(embedded.scripts) == 1
+        assert embedded.scripts[0]["src"].endswith("embed-widget-stock-heatmap.js")
 
 
 def test_verified_asset_failed_fetch_and_corrupted_digest_can_retry_without_provider_calls():
