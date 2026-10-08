@@ -27,7 +27,7 @@ const LABEL_OVERRIDES: Record<string, string> = {
   PROTOTYPE_CONFIG: "Configured grouping",
   PRIMARY_INDEX: "Primary index",
   PUBLIC_PROTOTYPE: "IDX research data",
-  THIRD_PARTY: "Captured classification source",
+  THIRD_PARTY: "External classification source",
   SECTORS_LIVE: "Live Sectors",
   SECTORS_FIXTURE: "Sectors fixture",
   DEMO_FIXTURE: "Demo fixture",

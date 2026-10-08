@@ -53,7 +53,7 @@ export function useResearch(defaultScope: ResearchScope = "market") {
         leadership: group.leadership_state, diffusion: group.diffusion.state, diffusion_v2: group.diffusion.state,
         concentration_top3_pct: group.concentration_v2?.top3_abs_share != null ? group.concentration_v2.top3_abs_share * 100 : null,
         concentration_change_pp: null, rotation_phase: rotationPhase(map?.x_60d_excess_pct, map?.y_relative_momentum_pct),
-        coverage_pct: group.contributor_counts["20d"] / 6 * 100, contributor_counts: group.contributor_counts}];
+        coverage_pct: group.contributor_counts["20d"] / group.requested_constituents * 100, contributor_counts: group.contributor_counts}];
     });
     for (const group of native.data.daily.at(-1)?.groups ?? []) groups.push({id: group.sector, name: group.sector, taxonomy: "SECTOR", scope,
       members: group.contributors.map(row => ({ticker: row.ticker, name: row.company_name ?? row.ticker})),

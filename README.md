@@ -1,8 +1,9 @@
 # The Diffusion
 
-> A Sectors-powered market-intelligence workspace that shows which Indonesian
-> equity sectors lead, whether leadership is broadening, and which constituents
-> drive the signal.
+> An Indonesian-equities research workspace combining Sectors API prices,
+> official IDX publications, Yahoo Finance prices via the yfinance Python
+> client, and dated IDX/KSEI disclosures. It shows which sectors lead, whether
+> leadership is broadening, and which constituents drive each reading.
 
 ## Submission build · 8 October 2026
 
@@ -15,8 +16,8 @@ inspect sector signals down to their contributing stocks and data limitations.
 
 The primary workflow is **Dashboard** at `/sectors`: eleven 20D sector rankings,
 a 60D excess-return map, daily/weekly playback, actual group and IHSG price
-curves, concentration detail, and all 66 constituent charts. The Diffusion
-chooses six stocks per IDX sector by market-cap ranking on 2 October 2026.
+curves, concentration detail, and all 132 constituent charts. The Diffusion
+chooses 12 stocks per IDX sector by market-cap ranking on 2 October 2026.
 That retrospective choice describes this project's coverage, rather than the
 Sectors API's coverage. Prices are raw Sectors closes against native Sectors
 IHSG observations; mechanical corporate actions exclude affected windows.
@@ -143,7 +144,7 @@ provider connections while rendering.
 | Route | Workflow |
 | --- | --- |
 | `/` | The Diffusion landing page with live market observations and workflow entry points |
-| `/sectors` | Primary 66-stock Dashboard and native IHSG analysis |
+| `/sectors` | Primary 132-stock Dashboard and native IHSG analysis |
 | `/sources` | Coverage choice, stock-chart links, observation dates, IDX flow sources |
 | `/overview` and `/what-changed` | Broader IDX readings and verified weekly comparisons |
 | `/map` | Interactive 60D map; optional YTD; sectors, Konglo, IDXIC, and themes |
@@ -350,7 +351,7 @@ must not be quoted as market observations.
 ## Earlier Sectors-wide integration audit
 
 This table records the broad-universe provider path exercised in August 2026.
-It is supporting tooling evidence and does not describe the active 66-stock
+It is supporting tooling evidence and does not describe the active 132-stock
 submission release.
 
 | Surface | Status | Reference |

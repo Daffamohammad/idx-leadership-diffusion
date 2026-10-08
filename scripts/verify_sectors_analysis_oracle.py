@@ -150,6 +150,10 @@ def _verify_ytd(sample: dict[str, Any], analysis: dict[str, Any], baseline_path:
         if isinstance(row, dict) and row.get("ticker"):
             stock_baselines.setdefault(str(row["ticker"]), []).append(row)
     stocks = {str(row["ticker"]): row for row in sample.get("stocks", [])}
+    ytd_tickers = sample.get("coverage", {}).get("ytd", {}).get("tickers")
+    if isinstance(ytd_tickers, list):
+        ytd_tickers = set(map(str, ytd_tickers))
+        stocks = {ticker: row for ticker, row in stocks.items() if ticker in ytd_tickers}
     groups: dict[str, list[str]] = {}
     for ticker, stock in stocks.items():
         groups.setdefault(str(stock["sector"]), []).append(ticker)
@@ -284,6 +288,12 @@ def verify(*, sample_path: Path, analysis_path: Path,
                 group = group_rows.get(sector)
                 if group is None:
                     continue
+                requested = len(tickers)
+                if group.get("requested_constituents") != requested:
+                    mismatches.append({"cadence": cadence, "date": target, "sector": sector,
+                                       "field": "requested_constituents",
+                                       "actual": group.get("requested_constituents"),
+                                       "expected": requested})
                 member_rows = {str(row["ticker"]): row for row in group.get("contributors", [])}
                 if set(member_rows) != set(tickers):
                     mismatches.append({"cadence": cadence, "date": target, "sector": sector,

@@ -16,8 +16,9 @@ The verified source and evidence are published to both `main` and
 remains available for rollback; see the
 [source-publication receipt](docs/submission-release/final-audit-2026-10-08/publication.json).
 
-Public hosting remains blocked. The
-[fresh launch attempt](docs/submission-release/final-audit-2026-10-08/launch.json)
-returned HTTP 400 because Vercel's GitHub integration is missing. Connect
-repository access before launching `main` and checking the public URL.
+Live deployment is optional under the user's current direction and does not
+block repository sign-off. Deployment work is deferred unless requested again.
+The [historical launch attempt](docs/submission-release/final-audit-2026-10-08/launch.json)
+returned HTTP 400 because Vercel's GitHub integration was missing; its receipt
+remains unchanged. The verified preview is available at `http://localhost:4173/sectors`.
 Videos, social publication and final submission remain deferred.

@@ -14,7 +14,6 @@ import type { ForeignFlowAdapted } from "../data/adapter";
 import { Link } from "react-router";
 import { formatCountLabel, formatDateLabel, formatEnumLabel, formatIdrCompact } from "../data/format";
 import { publicCopy } from "../data/publicCopy";
-import { EvidenceBadge } from "./EvidenceModel";
 
 interface ForeignFlowSampleProps {
   sample: ForeignFlowAdapted | null;
@@ -77,10 +76,9 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
       <header>
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
           <div className="eyebrow-muted">Company foreign flow</div>
-          <EvidenceBadge kind="SAMPLE" compact />
         </div>
         <h2 style={{ margin: "6px 0 4px", fontSize: 22, letterSpacing: "-.02em" }}>
-          Multi-date foreign flow · source-backed top-list
+          Recent company flow alongside market totals
         </h2>
         <div
           style={{
@@ -92,16 +90,16 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
             color: "var(--muted)",
           }}
         >
-          <span>Company-level coverage · provider top list</span>
+          <span>Coverage follows the provider’s company list</span>
           <span>·</span>
           <span>As of {formatDateLabel(sample.asOfMax || asOf) || "n/a"}</span>
           <span>·</span>
           <span>{formatCountLabel(sample.marketDayCount, "market date")}</span>
           <span>·</span>
-          <span>{formatCountLabel(sample.companyObservationCount, "company observation")}</span>
+          <span>{formatCountLabel(sample.companyObservationCount, "company reading")}</span>
           <span>·</span>
           <span>
-            signal eligibility: {sample.signalEligible ? "Eligible" : "Review"}
+            Data status: {sample.signalEligible ? "Eligible" : "Review"}
           </span>
         </div>
       </header>
@@ -164,7 +162,7 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
             {formatEnumLabel(sample.lastSampleDirection)}
           </div>
           <p style={{ margin: "6px 0 0", fontSize: 12, color: "var(--muted)" }}>
-            Top-list company rows. Distinct from market totals by design.
+            Company readings are separate from market totals.
           </p>
         </article>
         <article
@@ -191,7 +189,7 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
       </div>
 
       <div>
-        <h3 style={{ margin: "0 0 8px", fontSize: 14 }}>Observed breadth</h3>
+        <h3 style={{ margin: "0 0 8px", fontSize: 14 }}>Company and market direction</h3>
         <table
           style={{
             width: "100%",
