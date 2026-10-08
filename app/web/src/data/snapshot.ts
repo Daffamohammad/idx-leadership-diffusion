@@ -294,7 +294,7 @@ export interface SnapshotBreadthHistoryPoint {
 export interface SnapshotRotationHistoryPoint {
   group_id: string;
   as_of: string;
-  group_excess_return_ytd: number;
+  group_excess_return_ytd: number | null;
   ytd_start_date?: string | null;
   group_excess_return_20d: number | null;
   group_excess_return_60d: number | null;

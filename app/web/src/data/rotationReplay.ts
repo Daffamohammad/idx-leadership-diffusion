@@ -3,7 +3,7 @@ import type { TaxonomyKind } from "./snapshot";
 
 export interface ReplayPoint {
   as_of: string;
-  group_excess_return_ytd: number;
+  group_excess_return_ytd: number | null;
   group_excess_return_20d: number;
   group_excess_return_60d: number;
   relative_momentum: number;
@@ -33,8 +33,13 @@ export function replaySelection(asset: RotationReplay, kind: TaxonomyKind, group
   const expected = asset.sessions.filter(s => s >= segment.sessions[0] && s <= asset.as_of);
   if (JSON.stringify(expected) !== JSON.stringify(segment.sessions)) return unavailable("History has missing trading sessions");
   const last = segment.points[segment.points.length - 1];
-  if (last.as_of !== asset.as_of || [
-    [last.group_excess_return_ytd, endpoint.relativeStrength],
+  // YTD may stay missing without suppressing return points: it must agree
+  // with the endpoint in availability and, when present, in value.
+  const ytdFinite = Number.isFinite(last.group_excess_return_ytd) && Number.isFinite(endpoint.relativeStrength);
+  const ytdMissing = last.group_excess_return_ytd == null && endpoint.relativeStrength == null;
+  if (last.as_of !== asset.as_of || (!ytdFinite && !ytdMissing)
+    || (ytdFinite && Math.abs((last.group_excess_return_ytd as number) - (endpoint.relativeStrength as number)) > 0.00011)
+    || [
     [last.group_excess_return_20d, endpoint.excess20d],
     [last.group_excess_return_60d, endpoint.excess60d],
   ].some(([a, b]) => a == null || b == null || !Number.isFinite(a) || !Number.isFinite(b) || Math.abs(a - b) > 0.00011)) {

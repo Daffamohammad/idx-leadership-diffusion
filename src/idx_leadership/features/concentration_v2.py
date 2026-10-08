@@ -46,7 +46,7 @@ def compute_concentration_v2(
     group_tickers: list[str],
     horizon: int = 20,
     as_of: Optional[date] = None,
-    signed_denominator_epsilon: float = 1e-8,
+    signed_denominator_epsilon: float = 1e-9,
     signed_min_net_to_gross: float = 0.05,
     price_col: str = "adjusted_close",
 ) -> ConcentrationV2:

@@ -86,7 +86,7 @@ export type RotationInterval = "daily" | "weekly";
  */
 export function sampleRotationHistory<T extends {
   as_of: string;
-  group_excess_return_ytd: number;
+  group_excess_return_ytd: number | null;
   relative_momentum: number | null;
 }>(history: ReadonlyArray<T>, sessions: ReadonlyArray<string>, interval: RotationInterval): T[] {
   if (sessions.length < MIN_ROTATION_TRAIL_POINTS || history.length !== sessions.length) return [];
@@ -120,7 +120,7 @@ export function sampleRotationHistory<T extends {
 export function buildRotationTrail(
   history: ReadonlyArray<{
     as_of: string;
-    group_excess_return_ytd: number;
+    group_excess_return_ytd: number | null;
     relative_momentum: number | null;
   }>,
   tailLength: number,
@@ -140,7 +140,7 @@ export function buildRotationTrail(
   if (dated.length < MIN_ROTATION_TRAIL_POINTS) return [];
   return dated.slice(-(tailLength + 1)).map((point) => ({
     asOf: point.as_of.slice(0, 10),
-    x: point.group_excess_return_ytd,
+    x: point.group_excess_return_ytd as number,
     y: point.relative_momentum as number,
   }));
 }

@@ -32,10 +32,10 @@ const RANK_LABELS: Record<TaxonomyKind, string> = {
   THEMES: "Subindustries",
 };
 
-function catalogPath(kind: TaxonomyKind): string {
-  if (kind === "SECTOR") return "/map?taxonomy=SECTOR&mode=groups";
-  if (kind === "KONGLO") return "/konglo";
-  return "/themes";
+function catalogPath(kind: TaxonomyKind, query: string): string {
+  if (kind === "SECTOR") return `/map?taxonomy=SECTOR&mode=groups&${query}`;
+  if (kind === "KONGLO") return `/konglo?${query}`;
+  return `/themes?${query}`;
 }
 
 export default function MarketDailyDashboard({ rankKind, onRankKindChange, rankings, rankingCounts, asOf, rankingState, rankingQuery = "scope=market&cadence=weekly&horizon=60d" }: Props) {
@@ -100,7 +100,7 @@ export default function MarketDailyDashboard({ rankKind, onRankKindChange, ranki
           })}
           {!rankings.length && <p className="meta">No documented groups are included in the selected data.</p>}
         </div>
-        <Link className="overview-catalog-link" to={catalogPath(rankKind)}>{rankKind === "SECTOR" ? "Open sector rotation" : `Browse all ${rankingCounts[rankKind]} ${rankKind === "KONGLO" ? "Konglo portfolios" : "IDXIC subindustries"}`} →</Link>
+        <Link className="overview-catalog-link" to={catalogPath(rankKind, rankingQuery)}>{rankKind === "SECTOR" ? "Open sector rotation" : `Browse all ${rankingCounts[rankKind]} ${rankKind === "KONGLO" ? "Konglo portfolios" : "IDXIC subindustries"}`} →</Link>
       </section>
     </div>
 

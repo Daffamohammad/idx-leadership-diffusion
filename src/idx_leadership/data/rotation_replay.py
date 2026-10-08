@@ -124,7 +124,15 @@ def replay(*, prices: pd.DataFrame, benchmark: pd.DataFrame, sessions: list[str]
                 features = compute_excess_returns(calculation, benchmark, horizons={"20d": 20, "60d": 60},
                     as_of=day, security_price_col="adjusted_close")
                 ytd = compute_ytd_excess_returns(calculation, benchmark, as_of=day, security_price_col="adjusted_close")
-                features = features.merge(ytd, on="ticker", how="left") if not ytd.empty else pd.DataFrame()
+                # Left-join the YTD frame so a missing baseline leaves a
+                # visible YTD gap instead of discarding valid 20D/60D rows.
+                # An entirely empty YTD frame still yields explicit NaN
+                # YTD columns rather than an empty feature set.
+                if ytd.empty:
+                    for column in ("return_ytd", "benchmark_return_ytd", "excess_return_ytd"):
+                        features[column] = float("nan")
+                else:
+                    features = features.merge(ytd, on="ticker", how="left")
                 if not features.empty:
                     for horizon in (20, 60):
                         features.loc[~features["ticker"].isin(valid[horizon]), f"excess_return_{horizon}d"] = float("nan")
@@ -150,8 +158,13 @@ def replay(*, prices: pd.DataFrame, benchmark: pd.DataFrame, sessions: list[str]
                         observed = values[values[col].map(finite)]
                         contributors[axis] = sorted(observed["ticker"].tolist())
                         axes[axis] = float(observed[col].mean()) if not observed.empty else None
-                    if not all(finite(v) for v in axes.values()):
-                        reason = "YTD baseline or return warm-up unavailable"
+                    # Per-horizon eligibility: a missing YTD baseline must not
+                    # suppress valid 20D/60D return points. Only the return
+                    # axes gate the session; YTD stays missing when unavailable.
+                    if not finite(axes[AXES[1]]) or not finite(axes[AXES[2]]):
+                        reason = "Return warm-up unavailable"
+                    elif not finite(axes[AXES[0]]):
+                        axes[AXES[0]] = None
                 if reason:
                     group["gaps"].append({"as_of": session, "reason": reason})
                     continue
@@ -179,7 +192,14 @@ def replay(*, prices: pd.DataFrame, benchmark: pd.DataFrame, sessions: list[str]
                 group["reason"] = group["gaps"][-1]["reason"] if group["gaps"] else group["reason"]
                 continue
             endpoint = segment["points"][-1]
-            if any(not finite(endpoints[kind][gid][a]) or abs(endpoint[a] - endpoints[kind][gid][a]) > 0.00011 for a in AXES):
+            endpoint_expected = endpoints[kind][gid]
+            ytd_actual, ytd_expected = endpoint[AXES[0]], endpoint_expected[AXES[0]]
+            ytd_match = (finite(ytd_actual) == finite(ytd_expected)) and (
+                not finite(ytd_actual) or abs(ytd_actual - ytd_expected) <= 0.00011
+            )
+            if (not finite(endpoint[AXES[1]]) or not finite(endpoint[AXES[2]]) or not ytd_match
+                    or abs(endpoint[AXES[1]] - endpoint_expected[AXES[1]]) > 0.00011
+                    or abs(endpoint[AXES[2]] - endpoint_expected[AXES[2]]) > 0.00011):
                 raise ValueError(f"rotation endpoint mismatch: {kind}/{gid}")
             group["current_segment_id"] = segment["segment_id"]
             group["daily_available"] = len(segment["sessions"]) >= 3
@@ -217,7 +237,10 @@ def validate_asset(payload: dict, endpoints: dict) -> None:
                     raise ValueError("rotation segment has missing or duplicate sessions")
                 previous_end = dates[-1]; ids.add(segment["segment_id"])
                 for point in segment["points"]:
-                    if (not all(finite(point[a]) for a in AXES) or not finite(point["relative_momentum"])
+                    ytd_point = point[AXES[0]]
+                    if ((ytd_point is not None and not finite(ytd_point))
+                            or not finite(point[AXES[1]]) or not finite(point[AXES[2]])
+                            or not finite(point["relative_momentum"])
                             or abs(point["relative_momentum"] - (point[AXES[1]] - point[AXES[2]])) > 1e-8):
                         raise ValueError("rotation axes invalid")
                     if not point["source_ids"] or any(not source_available(payload["sources"][key], point["as_of"]) for key in point["source_ids"]):
@@ -226,7 +249,15 @@ def validate_asset(payload: dict, endpoints: dict) -> None:
                     current = segment
             if current:
                 last = current["points"][-1]
-                if last["as_of"] != payload["as_of"] or any(not finite(endpoints[kind][gid][a]) or abs(last[a] - endpoints[kind][gid][a]) > 0.00011 for a in AXES):
+                last_expected = endpoints[kind][gid]
+                last_ytd, last_ytd_expected = last[AXES[0]], last_expected[AXES[0]]
+                last_ytd_match = (finite(last_ytd) == finite(last_ytd_expected)) and (
+                    not finite(last_ytd) or abs(last_ytd - last_ytd_expected) <= 0.00011
+                )
+                if (last["as_of"] != payload["as_of"] or not last_ytd_match
+                        or not finite(last[AXES[1]]) or not finite(last[AXES[2]])
+                        or abs(last[AXES[1]] - last_expected[AXES[1]]) > 0.00011
+                        or abs(last[AXES[2]] - last_expected[AXES[2]]) > 0.00011):
                     raise ValueError("rotation endpoint mismatch")
             elif group["current_segment_id"] is not None:
                 raise ValueError("rotation current segment not found")

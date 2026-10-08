@@ -73,7 +73,7 @@ def verify(manifest_path: Path) -> dict:
                         check(label+"/"+h,point["excess_return_"+h],mean([ex(name,day,h) for name in names])); counts["horizon_values"]+=1
                     x = mean([ex(name,day,"60d") for name in shared]); e20 = mean([ex(name,day,"20d") for name in shared]); y = e20-x if x is not None and e20 is not None else None
                     ytdx = mean([ex(name,day,"ytd") for name in ytd_shared]); a=mean([ex(name,day,"20d") for name in ytd_shared]);b=mean([ex(name,day,"60d") for name in ytd_shared]);ytdy=a-b if a is not None and b is not None else None
-                    for key,value in {"map_x_60d":x,"relative_momentum":y,"rotation_phase":phase(x,y),"map_x_ytd":ytdx,"map_y_ytd":ytdy}.items():
+                    for key,value in {"map_x_60d":x,"relative_momentum":y,"rotation_phase":phase(x,y),"rotation_phase_ytd":phase(ytdx,ytdy),"map_x_ytd":ytdx,"map_y_ytd":ytdy}.items():
                         check(label+"/"+key,point[key],value);counts["map_values"]+=1
                     lead="UNCONFIRMED"
                     if len(leadership)>=5:

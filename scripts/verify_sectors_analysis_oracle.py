@@ -254,7 +254,8 @@ def verify(*, sample_path: Path, analysis_path: Path,
     checks = {"member_window_values": 0, "sector_return_aggregates": 0,
               "diffusion_states_and_cohorts": 0, "daily_observations": 0,
               "weekly_observations": 0, "ytd_contributor_values": 0,
-              "ytd_group_aggregates": 0, "concentration_values": 0}
+              "ytd_group_aggregates": 0, "concentration_values": 0,
+              "cohort_lists": 0, "leadership_states": 0, "map_values": 0}
     expected_cache: dict[tuple[str, str, str], dict[str, Any]] = {}
 
     def expected(ticker: str, target: str, horizon: str) -> dict[str, Any]:
@@ -382,6 +383,128 @@ def verify(*, sample_path: Path, analysis_path: Path,
                         mismatches.append({"cadence": cadence, "date": target, "sector": sector,
                                            "field": f"diffusion.{field}",
                                            "actual": actual_diffusion.get(field), "expected": value})
+                # Independent leadership, map, and cohort checks: the builder's
+                # return helpers and signal classifiers are not used here.
+                valid = {horizon: sorted(ticker for ticker in tickers
+                                         if expected(ticker, target, horizon)["exclusion_reason"] is None)
+                         for horizon in HORIZONS}
+                leadership_cohort = sorted(set(valid["5d"]) & set(valid["20d"]) & set(valid["60d"]))
+                map_cohort = sorted(set(valid["20d"]) & set(valid["60d"]))
+                actual_cohorts = group.get("comparison_cohorts", {})
+                for field, value in (("leadership_tickers", leadership_cohort),
+                                     ("map_tickers", map_cohort)):
+                    checks["cohort_lists"] += 1
+                    if actual_cohorts.get(field) != value:
+                        mismatches.append({"cadence": cadence, "date": target, "sector": sector,
+                                           "field": f"comparison_cohorts.{field}",
+                                           "actual": actual_cohorts.get(field), "expected": value})
+                lead_means = {}
+                for horizon in HORIZONS:
+                    readings = [expected(ticker, target, horizon)["excess_return_pct"]
+                                for ticker in leadership_cohort]
+                    lead_means[horizon] = (sum(readings) / len(readings)) if readings else None
+                enough_leadership = len(leadership_cohort) >= 5
+                if not enough_leadership or any(lead_means[h] is None for h in HORIZONS):
+                    expected_leadership = "UNCONFIRMED"
+                elif lead_means["20d"] > 0 and lead_means["5d"] - lead_means["60d"] >= 1.0:
+                    expected_leadership = "LEADING"
+                elif lead_means["20d"] <= 0 and lead_means["5d"] - lead_means["60d"] >= 1.0:
+                    expected_leadership = "IMPROVING"
+                elif lead_means["20d"] <= 0:
+                    expected_leadership = "LAGGING"
+                else:
+                    expected_leadership = "WEAKENING"
+                checks["leadership_states"] += 1
+                if group.get("leadership_state") != expected_leadership:
+                    mismatches.append({"cadence": cadence, "date": target, "sector": sector,
+                                       "field": "leadership_state",
+                                       "actual": group.get("leadership_state"),
+                                       "expected": expected_leadership})
+                if len(map_cohort) >= 5:
+                    map_20 = sum(expected(ticker, target, "20d")["excess_return_pct"]
+                                 for ticker in map_cohort) / len(map_cohort)
+                    map_60 = sum(expected(ticker, target, "60d")["excess_return_pct"]
+                                 for ticker in map_cohort) / len(map_cohort)
+                    expected_map = {
+                        "cohort_tickers": map_cohort,
+                        "eligible_contributors": len(map_cohort),
+                        "x_60d_excess_pct": round(map_60, 8),
+                        "y_relative_momentum_pct": round(map_20 - map_60, 8),
+                    }
+                else:
+                    expected_map = None
+                if map_cohort:
+                    desc_60 = sum(expected(ticker, target, "60d")["excess_return_pct"]
+                                  for ticker in map_cohort) / len(map_cohort)
+                    expected_descriptive = {
+                        "cohort_tickers": map_cohort,
+                        "eligible_contributors": len(map_cohort),
+                        "x_60d_excess_pct": round(desc_60, 8),
+                        "y_relative_momentum_pct": round(sum(
+                            expected(ticker, target, "20d")["excess_return_pct"]
+                            - expected(ticker, target, "60d")["excess_return_pct"]
+                            for ticker in map_cohort) / len(map_cohort), 8),
+                    }
+                else:
+                    expected_descriptive = None
+                checks["map_values"] += 1
+                actual_map = group.get("map")
+                if (actual_map is None) != (expected_map is None):
+                    mismatches.append({"cadence": cadence, "date": target, "sector": sector,
+                                       "field": "map.presence",
+                                       "actual": actual_map is not None, "expected": expected_map is not None})
+                elif expected_map is not None:
+                    for field, value in expected_map.items():
+                        matches = (_close_enough(actual_map.get(field), value)
+                                   if field.endswith("_pct") else actual_map.get(field) == value)
+                        if not matches:
+                            mismatches.append({"cadence": cadence, "date": target, "sector": sector,
+                                               "field": f"map.{field}",
+                                               "actual": actual_map.get(field), "expected": value})
+                checks["map_values"] += 1
+                actual_descriptive = group.get("descriptive_map")
+                if (actual_descriptive is None) != (expected_descriptive is None):
+                    mismatches.append({"cadence": cadence, "date": target, "sector": sector,
+                                       "field": "descriptive_map.presence",
+                                       "actual": actual_descriptive is not None,
+                                       "expected": expected_descriptive is not None})
+                elif expected_descriptive is not None:
+                    for field, value in expected_descriptive.items():
+                        matches = (_close_enough(actual_descriptive.get(field), value)
+                                   if field.endswith("_pct") else actual_descriptive.get(field) == value)
+                        if not matches:
+                            mismatches.append({"cadence": cadence, "date": target, "sector": sector,
+                                               "field": f"descriptive_map.{field}",
+                                               "actual": actual_descriptive.get(field), "expected": value})
+                if len(concentration_names) >= 5:
+                    ordered = sorted(
+                        ((ticker, current20[ticker]["return_pct"]) for ticker in concentration_names),
+                        key=lambda row: (-abs(row[1]), row[0]),
+                    )
+                    signed_gross = sum(abs(value) for _, value in ordered)
+                    signed_net = sum(value for _, value in ordered)
+                    # The released analysis was built with the 1e-8 stability
+                    # epsilon; replicate the builder's parameters here.
+                    stable = abs(signed_net) > 1e-8 and abs(signed_net) / signed_gross >= 0.05
+                    expected_signed = {
+                        "top_absolute_contributor": ordered[0][0],
+                        "top1_signed_share": round(ordered[0][1] / signed_net, 4) if stable else None,
+                        "top3_signed_share": (round(sum(value for _, value in ordered[:3]) / signed_net, 4)
+                                              if stable and len(ordered) >= 3 else None),
+                        "signed_denominator_ratio": round(abs(signed_net) / signed_gross, 8),
+                        "status": "DEFINED",
+                        "signed_attribution_status": "DEFINED" if stable else "UNDEFINED_UNSTABLE_DENOMINATOR",
+                    }
+                    for field, value in expected_signed.items():
+                        checks["concentration_values"] += 1
+                        matches = (_close_enough(concentration.get(field), value)
+                                   if field in {"top1_signed_share", "top3_signed_share", "signed_denominator_ratio"}
+                                   else (concentration or {}).get(field) == value)
+                        if not matches:
+                            mismatches.append({"cadence": cadence, "date": target, "sector": sector,
+                                               "field": f"concentration_v2.{field}",
+                                               "actual": concentration.get(field) if concentration else None,
+                                               "expected": value})
             previous_date = target
 
     ytd_contributors, ytd_groups, ytd_status = _verify_ytd(

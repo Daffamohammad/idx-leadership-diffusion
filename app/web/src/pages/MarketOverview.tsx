@@ -185,7 +185,7 @@ export default function MarketOverview() {
           asOf={asOf}
           onSelectGroup={(kind, taxonomyId, groupId) => {
             void taxonomyId;
-            navigate(`/explorer?taxonomy=${kind}&group=${encodeURIComponent(groupId)}`);
+            navigate(`/explorer?taxonomy=${kind}&group=${encodeURIComponent(groupId)}&scope=market&date=${research.date}&cadence=${research.cadence}&horizon=${research.horizon}`);
           }}
         />
       )}

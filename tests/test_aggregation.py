@@ -229,3 +229,84 @@ def test_leadership_classification_uses_primary_20d_excess_return(
 
     financials = next(s for s in snapshots if s.group_id == "Financials")
     assert financials.leadership_state == LeadershipState.IMPROVING
+
+
+def test_paired_breadth_delta_uses_identical_names(prices_df, benchmark_df, taxonomy_df):
+    """Breadth deltas compare the same names at both dates when stored cohorts exist."""
+    as_of = date(2026, 8, 20)
+    features = compute_excess_returns(
+        prices_df,
+        benchmark_df,
+        horizons={"5d": 5, "20d": 20, "60d": 60},
+        as_of=as_of,
+    )
+    first = build_group_snapshots(
+        features=features,
+        taxonomy=taxonomy_df,
+        snapshot_date=as_of,
+        prices=prices_df,
+        horizons={"5d": 5, "20d": 20, "60d": 60},
+        min_constituents=1,
+        min_coverage_pct=0.0,
+    )
+    base = next(s for s in first if s.group_id == "Financials")
+    assert base.breadth_eligible_tickers
+    assert set(base.breadth_outperforming_tickers) <= set(base.breadth_eligible_tickers)
+
+    # Ragged second run: BBCA.JK loses its 20D reading, so the paired
+    # comparison must exclude it from both ends.
+    ragged = features[features["ticker"] != "BBCA.JK"]
+    second = build_group_snapshots(
+        features=ragged,
+        taxonomy=taxonomy_df,
+        snapshot_date=as_of,
+        prices=prices_df,
+        horizons={"5d": 5, "20d": 20, "60d": 60},
+        min_constituents=1,
+        min_coverage_pct=0.0,
+        previous_groups=first,
+    )
+    current = next(s for s in second if s.group_id == "Financials")
+    assert "BBCA.JK" not in current.breadth_eligible_tickers
+    paired = sorted(set(current.breadth_eligible_tickers) & set(base.breadth_eligible_tickers))
+    assert paired
+    current_count = len(set(current.breadth_outperforming_tickers) & set(paired))
+    previous_count = len(set(base.breadth_outperforming_tickers) & set(paired))
+    expected = round(current_count / len(paired) * 100.0, 2) - round(
+        previous_count / len(paired) * 100.0, 2
+    )
+    assert current.breadth_delta == pytest.approx(expected)
+
+
+def test_concentration_excludes_tickers_without_20d_readings(prices_df, benchmark_df, taxonomy_df):
+    """Concentration runs over the actual 20D return cohort, not all members."""
+    as_of = date(2026, 8, 20)
+    features = compute_excess_returns(
+        prices_df,
+        benchmark_df,
+        horizons={"5d": 5, "20d": 20, "60d": 60},
+        as_of=as_of,
+    )
+    full = build_group_snapshots(
+        features=features,
+        taxonomy=taxonomy_df,
+        snapshot_date=as_of,
+        prices=prices_df,
+        horizons={"5d": 5, "20d": 20, "60d": 60},
+        min_constituents=1,
+        min_coverage_pct=0.0,
+        concentration_mode="absolute_move_v2",
+    )
+    ragged = build_group_snapshots(
+        features=features[features["ticker"] != "BBCA.JK"],
+        taxonomy=taxonomy_df,
+        snapshot_date=as_of,
+        prices=prices_df,
+        horizons={"5d": 5, "20d": 20, "60d": 60},
+        min_constituents=1,
+        min_coverage_pct=0.0,
+        concentration_mode="absolute_move_v2",
+    )
+    before = next(s for s in full if s.group_id == "Financials").concentration.contributor_count
+    after = next(s for s in ragged if s.group_id == "Financials").concentration.contributor_count
+    assert after == before - 1

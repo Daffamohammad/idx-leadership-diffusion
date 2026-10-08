@@ -27,10 +27,10 @@ export default function IDXStatisticsRelease({ release }: IDXStatisticsReleasePr
           background: "var(--surface-subtle)",
         }}
       >
-        <div className="eyebrow-muted" id="idx-release-title">Official IDX release</div>
+        <div className="eyebrow-muted" id="idx-release-title">Official IDX data</div>
         <h2 style={{ margin: "6px 0 8px", fontSize: 22 }}>Investor trading statistics unavailable</h2>
         <p style={{ margin: 0, color: "var(--muted)", fontSize: 13, lineHeight: 1.5 }}>
-          No validated IDX Digital Statistic release is attached to this snapshot.
+          No validated IDX Digital Statistics month is attached to these observations.
         </p>
       </section>
     );
@@ -57,7 +57,7 @@ export default function IDXStatisticsRelease({ release }: IDXStatisticsReleasePr
     >
       <header style={{ display: "grid", gap: 8 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-          <div className="eyebrow-muted" id="idx-release-title">Official IDX release</div>
+          <div className="eyebrow-muted" id="idx-release-title">Official IDX data</div>
           <EvidenceBadge kind="OFFICIAL_RELEASE" compact />
           {!releaseReady && <EvidenceBadge kind="SAMPLE" compact />}
         </div>
@@ -81,7 +81,7 @@ export default function IDXStatisticsRelease({ release }: IDXStatisticsReleasePr
           <span>Published source: Indonesia Stock Exchange</span>
         </div>
         <p style={{ margin: 0, color: "var(--up)", fontSize: 12, lineHeight: 1.5 }}>
-          Real market-level release. It does not contain per-ticker ownership flow and is not used to confirm group leadership.
+          Real market-level data. It does not contain per-ticker ownership flow and is not used to confirm group leadership.
         </p>
       </header>
 
@@ -209,7 +209,7 @@ export default function IDXStatisticsRelease({ release }: IDXStatisticsReleasePr
       >
         <span>Source: Indonesia Stock Exchange</span>
         <span>·</span>
-        <a href={release.source.url} target="_blank" rel="noreferrer">Open official release</a>
+          <a href={release.source.url} target="_blank" rel="noreferrer">Open official table</a>
         <span>·</span>
         <span>{releaseReady ? "Table totals reconcile" : "Table reconciliation needs review"}</span>
       </footer>

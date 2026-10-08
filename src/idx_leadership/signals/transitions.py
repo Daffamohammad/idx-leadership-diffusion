@@ -67,7 +67,22 @@ def compute_transition(
         and current.breadth_outperforming is not None
         and previous.breadth_outperforming is not None
     ):
-        bd = float(current.breadth_outperforming) - float(previous.breadth_outperforming)
+        cur_set = set(current.breadth_eligible_tickers or [])
+        prev_set = set(previous.breadth_eligible_tickers or [])
+        if cur_set and prev_set:
+            # Paired fallback: identical names at both dates when both
+            # snapshots stored their eligible sets.
+            paired = cur_set & prev_set
+            if paired:
+                cur_out = set(current.breadth_outperforming_tickers or []) & paired
+                prev_out = set(previous.breadth_outperforming_tickers or []) & paired
+                bd = round(len(cur_out) / len(paired) * 100.0, 2) - round(
+                    len(prev_out) / len(paired) * 100.0, 2
+                )
+            else:
+                bd = None
+        else:
+            bd = float(current.breadth_outperforming) - float(previous.breadth_outperforming)
     rd = None
     if current.relative_strength_level is not None and previous.relative_strength_level is not None:
         rd = float(current.relative_strength_level) - float(previous.relative_strength_level)

@@ -440,13 +440,13 @@ function normalizeRotationHistory(value: unknown): RotationHistoryPoint[] {
       groupId.length === 0 ||
       typeof asOf !== "string" ||
       asOf.length === 0 ||
-      typeof ytd !== "number" ||
-      !Number.isFinite(ytd)
+      (ytd !== null && ytd !== undefined && (typeof ytd !== "number" || !Number.isFinite(ytd)))
     ) {
       return [];
     }
     const excess20d = safeNullableNumber(candidate.group_excess_return_20d);
     const excess60d = safeNullableNumber(candidate.group_excess_return_60d);
+    const ytdValue = safeNullableNumber(ytd);
     const momentum =
       excess20d !== null && excess60d !== null ? excess20d - excess60d : null;
     const ytdStart =
@@ -455,7 +455,7 @@ function normalizeRotationHistory(value: unknown): RotationHistoryPoint[] {
       {
         group_id: groupId,
         as_of: asOf.slice(0, 10),
-        group_excess_return_ytd: ytd,
+        group_excess_return_ytd: ytdValue,
         ytd_start_date: ytdStart,
         group_excess_return_20d: excess20d,
         group_excess_return_60d: excess60d,

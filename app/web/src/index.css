@@ -728,3 +728,7 @@ html, body { overflow-x: clip; }
   .site-footer-columns { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 16px; }
   .site-footer-bottom { flex-direction: column; align-items: flex-start; }
 }
+
+/* Keyboard focus indicator for focusable SVG chart nodes (rotation map, stock treemap). */
+.research-map g[role="button"]:focus-visible,
+[aria-label="Hierarchical stock heatmap"] g[role="button"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }

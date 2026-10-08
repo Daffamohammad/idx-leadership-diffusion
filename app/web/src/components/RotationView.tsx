@@ -269,7 +269,7 @@ export default function RotationView() {
   // Older bundles retain their real dated tails; no cadence is inferred from
   // sparse snapshots. Analyst taxonomies and stocks have no comparable series.
   const historyByGroup = useMemo(() => {
-    const out = new Map<string, Array<{ as_of: string; group_excess_return_ytd: number; relative_momentum: number | null }>>();
+    const out = new Map<string, Array<{ as_of: string; group_excess_return_ytd: number | null; relative_momentum: number | null }>>();
     if (replay) {
       if (effectiveInterval) for (const [id, selection] of selections) out.set(id, selection[effectiveInterval].points);
       return out;

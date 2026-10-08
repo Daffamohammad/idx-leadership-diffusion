@@ -20,11 +20,11 @@ const EVIDENCE_CONFIG: Record<
     description: "Persisted market observations used for quantitative signals.",
   },
   OFFICIAL_RELEASE: {
-    label: "Official IDX release",
+    label: "Official IDX data",
     color: "var(--up)",
     background: "var(--tint-ok)",
     border: "#a9d9ce",
-    description: "First-party IDX publication parsed from its released table.",
+    description: "First-party IDX publication parsed from its published table.",
   },
   SAMPLE: {
     label: "Source coverage",

@@ -40,7 +40,7 @@ export default function RecordedSample() {
       <p className="meta">Latest raw closes are shown with their observation dates. Return calculations and corporate-action exclusions are available in the dashboard. Membership is selected retrospectively; these stocks do not represent the full market.</p>
       <WorkspaceTable rows={rows} rowKey={row => row.ticker} columns={[
         { label: "Sector", cell: row => <Link to={`/explorer?scope=sectors&taxonomy=SECTOR&group=${encodeURIComponent(row.sector)}&date=${sample.as_of}&cadence=daily&horizon=60d`}>{row.sector}</Link> },
-        { label: "Ticker", cell: row => <Link to={`/ticker/${row.ticker}?scope=sectors`}>{row.ticker.replace(".JK", "")}</Link> },
+        { label: "Ticker", cell: row => <Link to={`/ticker/${row.ticker}?scope=sectors&date=${sample.as_of}&cadence=daily&horizon=60d`}>{row.ticker.replace(".JK", "")}</Link> },
         { label: "Company", cell: row => row.company_name ?? "—" },
         { label: "Latest close · IDR", cell: row => row.last_close?.toLocaleString("en-US") ?? "—" },
         { label: "Observed date", cell: row => formatDateLabel([...row.prices].sort((a, b) => a.date.localeCompare(b.date)).at(-1)?.date) },

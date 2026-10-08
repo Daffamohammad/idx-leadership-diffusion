@@ -58,12 +58,12 @@ export default function TradingViewStockHeatmap({ color }: { color: HeatmapColor
       </div>
       {status === "unavailable" && (
         <p className="tradingview-heatmap-fallback">
-          TradingView could not load in this browser. The dated local snapshot heatmap remains available in the Snapshot tab.
+          TradingView could not load in this browser. The dated local heatmap remains available in the IDX stocks tab.
         </p>
       )}
       <iframe ref={frameRef} title="TradingView Indonesian stock heatmap" className="tradingview-heatmap-frame" style={{ width: "100%", border: 0 }} sandbox="allow-scripts allow-same-origin" srcDoc={embedDocument} onLoad={() => setStatus(frameRef.current?.contentDocument?.querySelector("iframe") ? "loaded" : "unavailable")} />
       <p className="meta tradingview-heatmap-note">
-        TradingView supplies an external end-of-day market view. Its prices, timing, and coverage may differ from this app’s selected release and do not feed leadership or diffusion calculations. (Block size: listed market capitalization.)
+        TradingView supplies an external end-of-day market view. Its prices, timing, and coverage may differ from this app’s attached observations and do not feed leadership or diffusion calculations. (Block size: listed market capitalization.)
       </p>
     </section>
   );

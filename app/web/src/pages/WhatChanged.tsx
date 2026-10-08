@@ -310,11 +310,11 @@ export default function WhatChanged() {
       {/* WHAT CHANGED categorical digest */}
       <section className="measured-shifts-panel" style={{ background: "var(--surface)", border: "1px solid var(--line)", padding: "16px 18px", marginBottom: 22 }}>
         <div className="measured-shifts-heading" style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
-          <div className="eyebrow-muted">{replay ? "Measured weekly shifts" : hasComparable ? "What changed since prior snapshot" : "Current readings"}</div>
+          <div className="eyebrow-muted">{replay ? "Measured weekly shifts" : hasComparable ? "What changed since prior observations" : "Current readings"}</div>
           <span className="eyebrow-muted">{replay ? `${formatDateLabel(replay.weekly.at(-2)?.as_of)} → ${formatDateLabel(replay.weekly.at(-1)!.as_of)}` : hasComparable ? `vs ${formatSnapshotId(payload?.previous_snapshot_id)}` : "Selected observations"}</span>
         </div>
         {replay ? (
-          materialShifts.length ? <div className="replay-shift-list">{materialShifts.map(group => <button key={group.group_id} type="button" onClick={() => navigate(`/map?taxonomy=SECTOR&mode=groups&q=${encodeURIComponent(group.name)}`)}><strong>{group.name}</strong><span>{group.material_shift}</span><small>{group.leadership_transition ?? group.diffusion_transition ?? "Measured movement"}</small></button>)}</div> : <p className="meta">No sector crossed the preserved materiality thresholds in the latest weekly interval.</p>
+          materialShifts.length ? <div className="replay-shift-list">{materialShifts.map(group => <button key={group.group_id} type="button" onClick={() => navigate(`/map?taxonomy=SECTOR&mode=groups&scope=market&date=${replay.weekly.at(-1)?.as_of ?? ""}&cadence=weekly&horizon=60d&q=${encodeURIComponent(group.name)}`)}><strong>{group.name}</strong><span>{group.material_shift}</span><small>{group.leadership_transition ?? group.diffusion_transition ?? "Measured movement"}</small></button>)}</div> : <p className="meta">No sector crossed the preserved materiality thresholds in the latest weekly interval.</p>
         ) : !hasComparable ? (
           <div className="current-levels-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 16, fontSize: 12, lineHeight: 1.5 }}>
             <div>

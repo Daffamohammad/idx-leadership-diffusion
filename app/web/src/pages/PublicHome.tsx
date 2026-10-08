@@ -157,8 +157,8 @@ function RevealText({
         >
           <span className="word-reveal" style={{ animationDelay: `${delay + i * 72}ms` }}>
             {word}
-            {i < words.length - 1 ? " " : ""}
           </span>
+          {i < words.length - 1 ? " " : ""}
         </span>
       ))}
     </span>
@@ -525,16 +525,17 @@ export default function PublicHome() {
             <h2
               style={{ fontSize: 44, maxWidth: 680, letterSpacing: "-.05em", lineHeight: 1.05 }}
             >
-              <RevealText text="66 stocks. 11 sectors. Every contributor visible." delay={60} />
+              <RevealText text="Every contributor visible." delay={60} />
             </h2>
             <p style={{ color: "#cbd0d1", maxWidth: 640, lineHeight: 1.65, marginTop: 18 }}>
-              Six stocks per IDX sector by market-cap ranking on 2 October 2026 — a
-              retrospective project choice, not a limit of the Sectors API. Returns use raw
-              Sectors closes against native Sectors IHSG observations; windows affected by
-              splits, rights issues, dividends, and other listed mechanical events are
-              excluded. Each horizon has its own eligible contributors, and confirmed
-              signals require five. Twenty-three supported stock YTD readings keep their
-              own end date of 2 October 2026.
+              An index move can hide sharp differences between sectors. The Diffusion follows
+              66 Indonesian stocks — six per IDX sector, chosen by market-cap ranking on
+              2 October 2026 — and measures each group against IHSG over 5, 20, and 60
+              trading days. Prices are raw Sectors closes; windows touched by splits,
+              rights issues, dividends, or other listed mechanical events are left out
+              rather than adjusted. Each horizon keeps its own eligible contributors,
+              confirmed signals need five of them, and the 23 supported stock YTD readings
+              hold their 2 October 2026 end date while earlier dates replay.
             </p>
             <div style={{ marginTop: 24 }}>
               <InteractiveHoverCTA to="/sources" label="Coverage & sources" />

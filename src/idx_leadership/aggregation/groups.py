@@ -61,7 +61,7 @@ def build_group_snapshots(
     diffusion_constituent_fraction: float = 0.10,
     diffusion_minimum_constituents: int = 2,
     concentration_mode: str = "absolute_move",
-    concentration_signed_denominator_epsilon: float = 1e-8,
+    concentration_signed_denominator_epsilon: float = 1e-9,
     concentration_signed_min_net_to_gross: float = 0.05,
     concentration_price_col: str = "adjusted_close",
     taxonomy_level: str = "sector",
@@ -179,6 +179,14 @@ def build_group_snapshots(
         ex60 = gdf["excess_return_60d"].dropna()
         g_ex5 = float(ex5.mean()) if not ex5.empty else None
         g_ex60 = float(ex60.mean()) if not ex60.empty else None
+        # Leadership inputs share one cohort: acceleration compares the same
+        # names at 5D, 20D, and 60D instead of three different universes.
+        lead_frame = gdf.dropna(
+            subset=["excess_return_5d", "excess_return_20d", "excess_return_60d"]
+        )
+        lead_ex20 = float(lead_frame["excess_return_20d"].mean()) if not lead_frame.empty else None
+        lead_ex5 = float(lead_frame["excess_return_5d"].mean()) if not lead_frame.empty else None
+        lead_ex60 = float(lead_frame["excess_return_60d"].mean()) if not lead_frame.empty else None
         ytd_features = gdf.dropna(subset=["return_ytd", "excess_return_ytd"])
         group_ytd = (
             float(pd.to_numeric(ytd_features["return_ytd"], errors="coerce").dropna().mean())
@@ -206,15 +214,52 @@ def build_group_snapshots(
         core_breadth = breadth.metric("benchmark_outperformance")
 
         prev_breadth = prev_by_group.get(group_id)
-        if prev_breadth is not None and prev_breadth.breadth_outperforming is not None and breadth.benchmark_outperformance_share is not None:
+        # Paired participation comparison: deltas use identical names at
+        # both dates. The current eligible/outperforming sets back the next
+        # comparison; a previous snapshot without stored sets keeps the
+        # legacy unpaired subtraction.
+        eligible_now = set(gdf.loc[gdf["excess_return_20d"].notna(), "ticker"].tolist())
+        outperform_now = set(
+            gdf.loc[
+                pd.to_numeric(gdf["excess_return_20d"], errors="coerce") > 0, "ticker"
+            ].tolist()
+        )
+        prev_eligible = set(getattr(prev_breadth, "breadth_eligible_tickers", []) or [])
+        prev_outperform = set(getattr(prev_breadth, "breadth_outperforming_tickers", []) or [])
+        paired = sorted(eligible_now & prev_eligible) if prev_breadth is not None and prev_eligible else []
+        if paired:
+            paired_set = set(paired)
+            paired_count = len([t for t in paired if t in outperform_now])
+            paired_prev_count = len([t for t in paired if t in prev_outperform])
+            paired_share = round(paired_count / len(paired) * 100.0, 2)
+            paired_prev_share = round(paired_prev_count / len(paired) * 100.0, 2)
+            breadth_delta = paired_share - paired_prev_share
+            breadth_change_count = paired_count - paired_prev_count
+            diffusion_group_size = len(paired)
+        elif prev_breadth is not None and prev_breadth.breadth_outperforming is not None and breadth.benchmark_outperformance_share is not None:
             breadth_delta = float(breadth.benchmark_outperformance_share) - float(prev_breadth.breadth_outperforming)
             breadth_change_count = breadth.outperforming_count - prev_breadth.breadth_outperforming_count
+            diffusion_group_size = total_constituents
         else:
             breadth_delta = None
             breadth_change_count = None
+            diffusion_group_size = total_constituents
 
-        # Concentration
-        group_tickers = gdf["ticker"].unique().tolist()
+        # Concentration runs over the actual return cohort at the
+        # concentration horizon, so a stale ticker excluded from group
+        # returns cannot leak back in through the price frame. Only an
+        # empty cohort falls back to all group tickers (legacy output).
+        concentration_return_col = f"return_{concentration_horizon}d"
+        if concentration_return_col not in gdf.columns:
+            concentration_return_col = "return_20d"
+        concentration_tickers = (
+            gdf.loc[gdf[concentration_return_col].notna(), "ticker"].unique().tolist()
+        )
+        group_tickers = (
+            concentration_tickers
+            if concentration_tickers
+            else gdf["ticker"].unique().tolist()
+        )
         if concentration_mode == "absolute_move_v2":
             conc_v2 = compute_concentration_v2(
                 prices,
@@ -253,12 +298,13 @@ def build_group_snapshots(
                 convention=conc.convention,
             )
 
-        # Leadership (requires all three horizons; otherwise UNCONFIRMED
-        # by construction in classify_leadership — no silent fallback).
+        # Leadership (requires all three horizons on the shared cohort;
+        # otherwise UNCONFIRMED by construction in classify_leadership —
+        # no silent fallback).
         leadership_state = classify_leadership(
-            excess_return_20d=group_excess,
-            excess_return_5d=g_ex5,
-            excess_return_60d=g_ex60,
+            excess_return_20d=lead_ex20,
+            excess_return_5d=lead_ex5,
+            excess_return_60d=lead_ex60,
             acceleration_threshold_pp=acceleration_threshold_pp,
             excess_return_improving=excess_return_improving,
             excess_return_leading=excess_return_leading,
@@ -275,7 +321,7 @@ def build_group_snapshots(
                     if prev_breadth is not None
                     else None
                 ),
-                group_size=total_constituents,
+                group_size=diffusion_group_size,
                 broadening_threshold_pp=broadening_threshold_pp,
                 narrowing_threshold_pp=narrowing_threshold_pp,
                 fraction=diffusion_constituent_fraction,
@@ -338,6 +384,8 @@ def build_group_snapshots(
             breadth_positive_count=breadth.positive_count,
             breadth_outperforming_count=core_breadth.numerator,
             breadth_improving_count=breadth.improving_count,
+            breadth_eligible_tickers=sorted(eligible_now),
+            breadth_outperforming_tickers=sorted(outperform_now),
             concentration=conc_metrics,
             leadership_state=leadership_state,
             diffusion_state=diffusion_state,

@@ -41,9 +41,9 @@ const defaultColumns: SiteFooterColumn[] = [
     ],
   },
   {
-    title: "Reference",
+    title: "Source data",
     links: [
-      { label: "Arthara conglomerates", href: "https://www.arthara.id/konglo", external: true },
+      { label: "Sectors API", href: "https://docs.sectors.app", external: true },
       { label: "IDX statistics", href: "https://www.idx.co.id/id/data-pasar/laporan-statistik/statistik/", external: true },
     ],
   },

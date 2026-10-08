@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import copy
 import json
+import math
 from pathlib import Path
 
 import pandas as pd
@@ -196,10 +197,18 @@ def test_missing_security_session_breaks_history_and_never_fills(inputs):
     assert group["current_segment_id"] is None and not group["daily_available"]
 
 
-def test_no_ytd_baseline_means_no_rotation_point(inputs):
+def test_missing_ytd_baseline_keeps_return_points_without_ytd(inputs):
     inputs["prices"] = inputs["prices"][inputs["prices"].date != "2025-12-30"]
+    for groups in inputs["endpoints"].values():
+        groups["Test"] = {**groups["Test"], "group_excess_return_ytd": None}
     result = replay(**inputs)
-    assert not result["taxonomies"]["SECTOR"]["Test"]["segments"]
+    segment = result["taxonomies"]["SECTOR"]["Test"]["segments"][0]
+    assert segment["sessions"]
+    last = segment["points"][-1]
+    assert math.isfinite(last["group_excess_return_20d"])
+    assert math.isfinite(last["group_excess_return_60d"])
+    assert last["group_excess_return_ytd"] is None
+    validate_asset(result, inputs["endpoints"])
 
 
 def test_unknown_source_hash_refuses_ledger(tmp_path):

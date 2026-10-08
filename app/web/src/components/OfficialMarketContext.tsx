@@ -45,10 +45,10 @@ export default function OfficialMarketContext({ context }: OfficialMarketContext
           </span>
         </div>
         <h2 id="official-market-context-title" style={{ margin: 0, fontSize: 22, letterSpacing: "-.02em" }}>
-          OJK market snapshot · {formatDateLabel(context.periodEnd)}
+          OJK market observations · {formatDateLabel(context.periodEnd)}
         </h2>
         <p style={{ margin: 0, color: "var(--up)", fontSize: 12, lineHeight: 1.5 }}>
-          Market-level figures parsed from an official OJK release. They are descriptive context only and are not assigned to a ticker, sector, or group.
+          Market-level figures parsed from an official OJK publication. They are descriptive context only and are not assigned to a ticker, sector, or group.
         </p>
       </header>
 

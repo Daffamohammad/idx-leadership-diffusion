@@ -78,7 +78,7 @@ export default function IDXDailyStatistics({ statistics }: IDXDailyStatisticsPro
           <span>{hasWarnings ? "Review warning attached" : "Validation checks passed"}</span>
         </div>
         <p style={{ margin: 0, color: "var(--accent-ink)", fontSize: 12, lineHeight: 1.5 }}>
-          Market-level evidence from the official Daily Statistics release. It does not create per-ticker or group ownership-flow data.
+          Market-level evidence from the official Daily Statistics publication. It does not create per-ticker or group ownership-flow data.
         </p>
       </header>
 

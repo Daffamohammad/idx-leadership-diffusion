@@ -225,15 +225,15 @@ export default function MarketHeatmap({
           No taxonomy groups available
         </h2>
         <p style={{ margin: 0, color: "var(--muted)", lineHeight: 1.5 }}>
-          The exporter did not emit a taxonomy view for this snapshot. The
+          The exporter did not emit a taxonomy view for these observations. The
           heatmap will render once a taxonomy YAML is registered and the
-          snapshot is rebuilt.
+          observations are rebuilt.
         </p>
       </section>
     );
   }
 
-  const asOfLabel = asOf ? formatDateLabel(asOf) : "snapshot";
+  const asOfLabel = asOf ? formatDateLabel(asOf) : "Date unavailable";
   const legend = legendForMetric(metric);
   const evidenceKind = taxonomyKind === "SECTOR" ? "SNAPSHOT" : "CLASSIFICATION";
 
@@ -282,7 +282,7 @@ export default function MarketHeatmap({
             <span>
               {taxonomyKind === "SECTOR"
                 ? "Real persisted market observations"
-                : "Static membership definition · current snapshot aggregates"}
+                : "Static membership definition · current observed aggregates"}
             </span>
             <span>·</span>
             <span>No recommendation language</span>
@@ -413,7 +413,7 @@ export default function MarketHeatmap({
 
       <details className="heatmap-coverage-details">
         <summary>Sources and coverage</summary>
-        <p>{filteredGroups.length} groups are shown from the selected release. Tiles without a calculated value are left blank; membership and source dates are documented in each catalog.</p>
+        <p>{filteredGroups.length} groups are shown from the attached observations. Tiles without a calculated value are left blank; membership and source dates are documented in each catalog.</p>
       </details>
 
       <div

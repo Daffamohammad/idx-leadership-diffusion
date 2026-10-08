@@ -440,7 +440,7 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
                 className="eyebrow-muted"
                 style={{ color: "var(--down)", marginBottom: 8 }}
               >
-                SNAPSHOT UNAVAILABLE
+                OBSERVATIONS UNAVAILABLE
               </div>
               <h1
                 style={{
@@ -449,7 +449,7 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
                   margin: "0 0 12px",
                 }}
               >
-                No snapshot JSON loaded
+                No observation data loaded
               </h1>
               <p style={{ color: "var(--muted)", lineHeight: 1.6 }}>
                 {snap.error}

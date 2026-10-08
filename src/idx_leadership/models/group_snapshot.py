@@ -93,6 +93,11 @@ class GroupSnapshot(BaseModel):
     breadth_positive_count: int = Field(default=0, ge=0)
     breadth_outperforming_count: int = Field(default=0, ge=0)
     breadth_improving_count: int = Field(default=0, ge=0)
+    # Eligible and outperforming ticker sets back the paired breadth
+    # comparison: deltas use identical names at both dates. Snapshots
+    # written before these sets use the legacy unpaired subtraction.
+    breadth_eligible_tickers: list[str] = Field(default_factory=list)
+    breadth_outperforming_tickers: list[str] = Field(default_factory=list)
 
     concentration: ConcentrationMetrics = Field(default_factory=ConcentrationMetrics)
 

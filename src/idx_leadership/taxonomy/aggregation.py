@@ -307,6 +307,14 @@ def aggregate_taxonomy(
         excess_5d = _finite_mean(group_features, "excess_return_5d")
         excess_20d = _finite_mean(eligible_features, "excess_return_20d")
         excess_60d = _finite_mean(group_features, "excess_return_60d")
+        # Leadership inputs share one cohort so acceleration compares the
+        # same names at 5D, 20D, and 60D.
+        leadership_features = group_features.dropna(
+            subset=["excess_return_5d", "excess_return_20d", "excess_return_60d"]
+        )
+        lead_excess_5d = _finite_mean(leadership_features, "excess_return_5d")
+        lead_excess_20d = _finite_mean(leadership_features, "excess_return_20d")
+        lead_excess_60d = _finite_mean(leadership_features, "excess_return_60d")
         ytd_features_group = group_features.dropna(
             subset=["return_ytd", "excess_return_ytd"]
         )
@@ -341,9 +349,9 @@ def aggregate_taxonomy(
             and coverage_pct >= min_coverage_pct
         )
         leadership = classify_leadership(
-            excess_return_20d=excess_20d,
-            excess_return_5d=excess_5d,
-            excess_return_60d=excess_60d,
+            excess_return_20d=lead_excess_20d,
+            excess_return_5d=lead_excess_5d,
+            excess_return_60d=lead_excess_60d,
             eligible=group_is_eligible,
         ).value
         diffusion = to_v1_state(

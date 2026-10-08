@@ -120,3 +120,27 @@ def test_change_digest_buckets_unique():
     assert d["narrowing"] == []
     assert d["lost_leadership"] == []
     assert d["stable"] == []
+
+
+def test_transition_breadth_delta_pairs_stored_cohorts():
+    """The transition fallback compares identical names when cohorts are stored."""
+    from idx_leadership.signals.transitions import compute_transition
+
+    previous = GroupSnapshot(
+        snapshot_date=date(2026, 8, 13),
+        group_id="G",
+        breadth_outperforming=60.0,
+        breadth_eligible_tickers=["A", "B", "C", "D", "E"],
+        breadth_outperforming_tickers=["A", "B", "C"],
+    )
+    current = GroupSnapshot(
+        snapshot_date=date(2026, 8, 20),
+        group_id="G",
+        breadth_outperforming=80.0,
+        breadth_delta=None,
+        breadth_eligible_tickers=["A", "B", "C", "D"],
+        breadth_outperforming_tickers=["A", "B", "C", "D"],
+    )
+    event = compute_transition(current=current, previous=previous)
+    # Paired set is {A, B, C, D}: current 4/4 vs previous 3/4.
+    assert event.breadth_delta == pytest.approx(100.0 - 75.0)

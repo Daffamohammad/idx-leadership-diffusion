@@ -181,7 +181,7 @@ export default function TradingViewWidget({
       </header>
       {(status === "blocked" || status === "unsupported") && (
         <p style={{ margin: 0, fontSize: 12, color: "var(--muted)" }}>
-          The external chart could not be loaded. The dated release history remains available in the overview.
+          The external chart could not be loaded. The dated IHSG history remains available in the overview.
         </p>
       )}
       <div
