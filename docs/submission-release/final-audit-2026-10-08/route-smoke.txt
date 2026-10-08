@@ -1,0 +1,16 @@
+root:200
+sectors:200
+sources:200
+overview:200
+what-changed:200
+movers:200
+foreign:200
+ownership:200
+heatmap:200
+map:200
+konglo:200
+themes:200
+explorer:200
+groups:200
+tickers:200
+methodology:200
