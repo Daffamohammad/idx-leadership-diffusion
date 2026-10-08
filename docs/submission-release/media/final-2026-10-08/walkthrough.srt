@@ -1,0 +1,247 @@
+1
+00:00:00,000 --> 00:00:04,428
+Where is leadership forming, and how many companies move with it?
+
+2
+00:00:04,428 --> 00:00:08,856
+The Diffusion looks beneath IHSG. Follow a sector reading back to
+
+3
+00:00:08,856 --> 00:00:10,869
+its companies, dates, and calculations.
+
+4
+00:00:11,229 --> 00:00:16,584
+The Dashboard tracks 132 stocks across 11 IDX sectors, 12 per
+
+5
+00:00:16,584 --> 00:00:17,334
+sector
+
+6
+00:00:17,334 --> 00:00:21,715
+by market capitalization on 2 October 2026. This retrospective
+
+7
+00:00:21,715 --> 00:00:22,465
+set
+
+8
+00:00:22,465 --> 00:00:25,386
+does not cover every listed company.
+
+9
+00:00:25,219 --> 00:00:29,791
+The main map places 60-day excess return against IHSG on the
+
+10
+00:00:29,791 --> 00:00:33,946
+horizontal axis. The vertical axis is 20-day excess minus 60-day
+
+11
+00:00:33,946 --> 00:00:37,271
+excess. Together, those coordinates show where a sector
+
+12
+00:00:37,271 --> 00:00:38,102
+stands and
+
+13
+00:00:38,102 --> 00:00:41,842
+how its momentum is changing. Leadership uses a separate
+
+14
+00:00:41,842 --> 00:00:45,166
+calculation: 20-day excess and 5-day versus 60-day acceleration.
+
+15
+00:00:45,166 --> 00:00:45,916
+A
+
+16
+00:00:45,916 --> 00:00:49,657
+sector needs at least five eligible contributors before that
+
+17
+00:00:49,657 --> 00:00:50,407
+signal
+
+18
+00:00:50,407 --> 00:00:51,238
+is confirmed.
+
+19
+00:00:50,929 --> 00:00:55,441
+Use the replay controls to move through 21 daily dates or five
+
+20
+00:00:55,441 --> 00:00:59,201
+weekly dates, from 4 September through 2 October. The underlying
+
+21
+00:00:59,201 --> 00:01:02,962
+price history starts on 9 June, providing the observations needed
+
+22
+00:01:02,962 --> 00:01:04,842
+for the displayed return windows.
+
+23
+00:01:05,202 --> 00:01:09,889
+Select a sector to inspect its 20-day and 60-day excess returns,
+
+24
+00:01:09,889 --> 00:01:12,872
+rotation phase, participation, and concentration. The equal-weight
+
+25
+00:01:12,872 --> 00:01:17,133
+basket uses the names available for each horizon and compares
+
+26
+00:01:17,133 --> 00:01:17,883
+their
+
+27
+00:01:17,883 --> 00:01:20,865
+prices with IHSG over the same dates.
+
+28
+00:01:20,901 --> 00:01:24,588
+Coverage varies by stock and horizon. Dividends, splits, rights
+
+29
+00:01:24,588 --> 00:01:27,865
+issues, and other mechanical events remove the affected
+
+30
+00:01:27,865 --> 00:01:28,615
+windows.
+
+31
+00:01:28,615 --> 00:01:33,121
+When an observation is missing, the calculation leaves it out; no
+
+32
+00:01:33,121 --> 00:01:36,397
+missing price is filled. Contributor counts stay beside
+
+33
+00:01:36,397 --> 00:01:37,147
+each
+
+34
+00:01:37,147 --> 00:01:37,897
+reading.
+
+35
+00:01:37,236 --> 00:01:41,177
+For breadth, the dashboard compares the same names at both
+
+36
+00:01:41,177 --> 00:01:41,927
+dates.
+
+37
+00:01:41,927 --> 00:01:45,474
+That paired count matters: a percentage can move as
+
+38
+00:01:45,474 --> 00:01:46,224
+participation
+
+39
+00:01:46,224 --> 00:01:49,376
+changes, while the displayed denominator shows how many
+
+40
+00:01:49,376 --> 00:01:50,126
+companies
+
+41
+00:01:50,126 --> 00:01:51,309
+were actually comparable.
+
+42
+00:01:50,601 --> 00:01:55,099
+Coverage and Sources lists all 132 stocks, their latest closes, and
+
+43
+00:01:55,099 --> 00:01:59,188
+the dates covered by their price histories. Those prices support
+
+44
+00:01:59,188 --> 00:01:59,938
+the
+
+45
+00:01:59,938 --> 00:02:02,801
+daily and weekly replay. Year-to-date readings and
+
+46
+00:02:02,801 --> 00:02:03,551
+company-level
+
+47
+00:02:03,551 --> 00:02:08,458
+flow remain tied to the original 66-stock set: 23 names have an
+
+48
+00:02:08,458 --> 00:02:13,365
+action-free return, and company flow spans 5 July to 2 October. No
+
+49
+00:02:13,365 --> 00:02:15,819
+sector reaches the five-name year-to-date threshold.
+
+50
+00:02:15,497 --> 00:02:20,154
+The other pages combine distinct sources. Market Movers uses the
+
+51
+00:02:20,154 --> 00:02:23,415
+official IDX Stock Summary. Market-level foreign-flow totals
+
+52
+00:02:23,415 --> 00:02:24,165
+come
+
+53
+00:02:24,165 --> 00:02:27,891
+from IDX Daily Statistics, alongside company flow from
+
+54
+00:02:27,891 --> 00:02:28,822
+Sectors API.
+
+55
+00:02:28,822 --> 00:02:32,548
+Broader adjusted-price comparisons use Yahoo Finance data through
+
+56
+00:02:32,548 --> 00:02:37,205
+the yfinance Python client. Ownership uses dated IDX and KSEI
+
+57
+00:02:37,205 --> 00:02:40,931
+disclosures; affiliation alone does not prove legal control.
+
+58
+00:02:41,007 --> 00:02:44,093
+Methodology lays out the formulas, sources, thresholds, and
+
+59
+00:02:44,093 --> 00:02:47,950
+exclusions. Use it to understand what each reading can support,
+
+60
+00:02:47,950 --> 00:02:48,700
+then
+
+61
+00:02:48,700 --> 00:02:53,328
+follow a sector back to its constituents. That is the point: a
+
+62
+00:02:53,328 --> 00:02:56,027
+clearer view of leadership beneath the index.

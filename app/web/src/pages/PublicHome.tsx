@@ -178,8 +178,8 @@ const PREVIEW_W = 360
 const PREVIEW_H = 230
 const PREVIEW_PAD = 30
 
-function DashboardPreview() {
-  const { groups, reading, date, cadence, horizon, loading, error, native } = useResearch("sectors")
+function DashboardPreview({ research }: { research: ReturnType<typeof useResearch> }) {
+  const { groups, reading, date, cadence, horizon, loading, error, native } = research
   const asOf = native?.as_of ?? date
 
   if (loading) {
@@ -336,16 +336,21 @@ const lenses: Array<[string, string, string, string, string]> = [
 ]
 
 const workflows: Array<[string, string, string]> = [
-  ["Dashboard", "Eleven 20D sector rankings, the 60D excess-return map, replay, curves, and all 66 constituent charts.", "/sectors"],
+  ["Dashboard", "Eleven 20D sector rankings, the 60D excess-return map, replay, curves, and constituent charts.", "/sectors"],
   ["Leadership map", "60D excess vs IHSG with rotation phases, trails, and per-horizon cohorts.", "/map"],
   ["Weekly changes", "What changed between comparable weeks, with breadth and diffusion counts.", "/what-changed"],
   ["Ownership", "Issuer, investor, group, and comparison views with dated holder evidence.", "/ownership"],
-  ["Coverage & sources", "The 66-stock coverage choice, observation dates, market flow, and methods.", "/sources"],
+  ["Coverage & sources", "Stock coverage, observation dates, market flow, and methods.", "/sources"],
   ["How to read the research", "Rotation versus leadership, horizons, eligibility, and relationship boundaries.", "/methodology"],
 ]
 
 export default function PublicHome() {
   const [methodHovered, setMethodHovered] = useState(false)
+  const research = useResearch("sectors")
+  const selection = research.native?.selection
+  const stockCoverage = selection
+    ? `${selection.stock_count} Indonesian stocks across 11 IDX sectors, ${selection.stocks_per_sector} per sector by market-cap ranking`
+    : "a dated set of Indonesian stocks across 11 IDX sectors"
 
   // Scroll reveal for non-animated sections
   useEffect(() => {
@@ -447,9 +452,9 @@ export default function PublicHome() {
               className="reveal"
               style={{ color: "var(--muted)", lineHeight: 1.65, maxWidth: 480, marginBottom: 28 }}
             >
-              The Diffusion tracks 66 Indonesian stocks across 11 IDX sectors to show which
-              groups lead IHSG, whether participation is broadening, and which constituents
-              drive the move. Every reading links to its contributors and observation dates.
+              The Diffusion follows {stockCoverage} to show which groups lead IHSG, whether
+              participation is broadening, and which constituents drive the move. Every
+              reading links to its contributors and observation dates.
             </p>
 
             <div className="reveal public-cta-row" style={{ display: "flex", gap: 18, alignItems: "center", flexWrap: "wrap", minWidth: 0, maxWidth: "100%" }}>
@@ -471,11 +476,12 @@ export default function PublicHome() {
             </div>
 
             <div className="eyebrow-muted reveal" style={{ marginTop: 26 }}>
-              End-of-day observations · Source: Sectors API
+              Sector prices: Sectors API · Other views: official IDX data, Yahoo Finance via yfinance, and IDX/KSEI disclosures ·{" "}
+              <Link to="/sources">Coverage &amp; sources</Link>
             </div>
           </div>
 
-          <DashboardPreview />
+          <DashboardPreview research={research} />
         </section>
 
         {/* ── Three lenses ── */}
@@ -538,13 +544,15 @@ export default function PublicHome() {
             </h2>
             <p style={{ color: "#cbd0d1", maxWidth: 640, lineHeight: 1.65, marginTop: 18 }}>
               An index move can hide sharp differences between sectors. The Diffusion follows
-              66 Indonesian stocks — six per IDX sector, chosen by market-cap ranking on
-              2 October 2026 — and measures each group against IHSG over 5, 20, and 60
+              {selection
+                ? ` ${selection.stock_count} Indonesian stocks — ${selection.stocks_per_sector} per IDX sector, ranked by market capitalization on ${formatDateLabel(selection.selected_market_cap_date)} —`
+                : " a dated market-cap-ranked set of Indonesian stocks across 11 IDX sectors —"} and measures each group against IHSG over 5, 20, and 60
               trading days. Prices are raw Sectors closes; windows touched by splits,
               rights issues, dividends, or other listed mechanical events are left out
               rather than adjusted. Each horizon keeps its own eligible contributors,
-              confirmed signals need five of them, and the 23 supported stock YTD readings
-              hold their 2 October 2026 end date while earlier dates replay.
+              confirmed signals need five of them. YTD returns remain tied to the original
+              66-stock set; 23 have an action-free return. Company-level flow for those
+              stocks covers 5 July through 2 October 2026.
             </p>
             <div style={{ marginTop: 24 }}>
               <InteractiveHoverCTA to="/sources" label="Coverage & sources" />

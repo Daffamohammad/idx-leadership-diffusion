@@ -82,9 +82,14 @@ app/web/public/snapshots/*.json
 # rendered by the preview and asserted by the SPA contract tests.
 !app/web/public/snapshots/snap_public_2026-10-02.json
 
-# Keep only the active release and its immediate rollback package in Git.
+# Keep the active release, its immediate rollback, and the established release
+# packages used by existing source tests in Git.
 app/web/public/releases/*
 !app/web/public/releases/active.json
+!app/web/public/releases/rel-f967a4e886c4f5efe9dd32b5940a49c765c8852b56a7223f8e8f610aabafcb61/
+!app/web/public/releases/rel-f967a4e886c4f5efe9dd32b5940a49c765c8852b56a7223f8e8f610aabafcb61/**
+!app/web/public/releases/rel-64026e36d49733009fec952086fc95a3121a86efbb196b1c68d00fd6317f33d2/
+!app/web/public/releases/rel-64026e36d49733009fec952086fc95a3121a86efbb196b1c68d00fd6317f33d2/**
 !app/web/public/releases/rel-514f199a7d88a377ccf623f647e9196bcbbaea3d750b81b550affeefe93520f2/
 !app/web/public/releases/rel-514f199a7d88a377ccf623f647e9196bcbbaea3d750b81b550affeefe93520f2/**
 !app/web/public/releases/rel-48500fc94300469fed51247a129a900cfbe9c541e2d679f7a55ef558212941e7/

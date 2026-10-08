@@ -1,0 +1,34 @@
+{
+  "voice": "Samantha",
+  "speech_rate": 160,
+  "narration_source": "VIDEO_SCRIPTS.md",
+  "videos": [
+    {
+      "file": "teaser-vertical-2026-10-08.mp4",
+      "format": "reels",
+      "duration_seconds": 29.619604166666665,
+      "resolution": "1080x1920",
+      "sha256": "1e61a8cf5738a75b22d5b83f95d9942bd6292624f0959c80eff3ad5b74ca6fbf",
+      "captions_vtt": "teaser.vtt",
+      "captions_srt": "teaser.srt"
+    },
+    {
+      "file": "walkthrough-youtube-2026-10-08.mp4",
+      "format": "youtube",
+      "duration_seconds": 180.0,
+      "resolution": "1920x1080",
+      "sha256": "0017b5fb65dc190cd65a6eac76438d7a2762b892f7e79b825d606826cd5bee63",
+      "captions_vtt": "walkthrough.vtt",
+      "captions_srt": "walkthrough.srt"
+    },
+    {
+      "file": "walkthrough-reels-2026-10-08.mp4",
+      "format": "reels",
+      "duration_seconds": 180.0,
+      "resolution": "1080x1920",
+      "sha256": "7a2cd2de65d2914787fa05dae5542907679133b505cb9b8445dcac71da5b4fa8",
+      "captions_vtt": "walkthrough.vtt",
+      "captions_srt": "walkthrough.srt"
+    }
+  ]
+}

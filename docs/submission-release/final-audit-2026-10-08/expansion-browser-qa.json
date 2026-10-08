@@ -1,0 +1,1204 @@
+{
+  "schema_version": "diffusion-expansion-browser-check-v1",
+  "status": "PASS",
+  "created_at_utc": "2026-10-08T14:48:55.022Z",
+  "preview_url": "http://127.0.0.1:4174",
+  "release_id": "rel-f967a4e886c4f5efe9dd32b5940a49c765c8852b56a7223f8e8f610aabafcb61",
+  "manifest_sha256": "0a7cf1d0fa72e852b099e03281bb061ca6f3b595e8456e0393ce1f11369e0f52",
+  "browser": "Google Chrome headless",
+  "method": "Fresh production-bundle page loads at four explicit viewport sizes; page text, source labels, root overflow, and console exceptions checked.",
+  "findings": {
+    "loads": 64,
+    "routeCount": 16,
+    "viewports": [
+      "1036x799",
+      "1369x799",
+      "1440x900",
+      "390x844"
+    ],
+    "failedLoads": [],
+    "overflow": [],
+    "sourceCopy": {
+      "allViewportsPass": true
+    },
+    "homeCopy": {
+      "allViewportsPass": true
+    },
+    "screenshots": [
+      {
+        "path": "docs/submission-release/final-audit-2026-10-08/screenshots/expanded/landing-1036x799.png",
+        "sha256": "3f12083154577f8fd008fea221f872b58a50a85412f0a19fea3765a327857ace",
+        "viewport": "1036x799",
+        "bytes": 105919
+      },
+      {
+        "path": "docs/submission-release/final-audit-2026-10-08/screenshots/expanded/sectors-1036x799.png",
+        "sha256": "77ea21ea206d40f2daa953383bcb89c8594079f576395a9d62ec5ab686c10a67",
+        "viewport": "1036x799",
+        "bytes": 118167
+      },
+      {
+        "path": "docs/submission-release/final-audit-2026-10-08/screenshots/expanded/sources-1036x799.png",
+        "sha256": "81889e8829845b4048de01be3b9a38dca7ffc8f700be05de44edb20543c99319",
+        "viewport": "1036x799",
+        "bytes": 143916
+      },
+      {
+        "path": "docs/submission-release/final-audit-2026-10-08/screenshots/expanded/landing-1369x799.png",
+        "sha256": "dd1440797c7a054f74333417ce3a09293425309bc996a1c55390d246b36090bf",
+        "viewport": "1369x799",
+        "bytes": 121829
+      },
+      {
+        "path": "docs/submission-release/final-audit-2026-10-08/screenshots/expanded/sectors-1369x799.png",
+        "sha256": "e70c290283ef4eabc7716f8232cdbefeb53291638b0bb3d3d1eadb15b1bf8d1e",
+        "viewport": "1369x799",
+        "bytes": 131849
+      },
+      {
+        "path": "docs/submission-release/final-audit-2026-10-08/screenshots/expanded/sources-1369x799.png",
+        "sha256": "29314d33257371fe558efc2b50e62dd34360178a915bfcda151e392eab6b8e9a",
+        "viewport": "1369x799",
+        "bytes": 152085
+      },
+      {
+        "path": "docs/submission-release/final-audit-2026-10-08/screenshots/expanded/landing-1440x900.png",
+        "sha256": "5b5f5034c087e2505a8a76d8a08327a20b7ceacaef53a241b829ba25ca668858",
+        "viewport": "1440x900",
+        "bytes": 128821
+      },
+      {
+        "path": "docs/submission-release/final-audit-2026-10-08/screenshots/expanded/sectors-1440x900.png",
+        "sha256": "b1b967e54616312fc05c9ca4f465dd4343b393769e3ae678345e7a677db50b42",
+        "viewport": "1440x900",
+        "bytes": 143663
+      },
+      {
+        "path": "docs/submission-release/final-audit-2026-10-08/screenshots/expanded/sources-1440x900.png",
+        "sha256": "5a1b918ac4f6de1db7e6189ca7d2b2924edaae6c115feab89130b2b5a16c7795",
+        "viewport": "1440x900",
+        "bytes": 175265
+      },
+      {
+        "path": "docs/submission-release/final-audit-2026-10-08/screenshots/expanded/landing-390x844.png",
+        "sha256": "72924dea77fb1fdcbbe777d03bad722e4e4df3cfd9ffac9c9a161dd249abf0db",
+        "viewport": "390x844",
+        "bytes": 69898
+      },
+      {
+        "path": "docs/submission-release/final-audit-2026-10-08/screenshots/expanded/sectors-390x844.png",
+        "sha256": "da42ce828b585e72c0279f998680fc7c21e4821675292c30f1fe25005cf6ba4a",
+        "viewport": "390x844",
+        "bytes": 15788
+      },
+      {
+        "path": "docs/submission-release/final-audit-2026-10-08/screenshots/expanded/sources-390x844.png",
+        "sha256": "5f9608c8fb3207154928bb4f7637921e73c3e7ecbc8e14bc693d0429fd93f351",
+        "viewport": "390x844",
+        "bytes": 66540
+      }
+    ],
+    "browserErrors": [],
+    "sourceCopyByViewport": [
+      {
+        "viewport": "1036x799",
+        "width": 1036,
+        "scrollWidth": 1036,
+        "has132": true,
+        "hasSourceCoverage": true,
+        "hasSectors": true,
+        "hasOfficialIdx": true,
+        "hasYahoo": true,
+        "hasYfinance": true,
+        "hasKsei": true,
+        "hasYtd66": true,
+        "bannedTerms": false
+      },
+      {
+        "viewport": "1369x799",
+        "width": 1369,
+        "scrollWidth": 1369,
+        "has132": true,
+        "hasSourceCoverage": true,
+        "hasSectors": true,
+        "hasOfficialIdx": true,
+        "hasYahoo": true,
+        "hasYfinance": true,
+        "hasKsei": true,
+        "hasYtd66": true,
+        "bannedTerms": false
+      },
+      {
+        "viewport": "1440x900",
+        "width": 1440,
+        "scrollWidth": 1440,
+        "has132": true,
+        "hasSourceCoverage": true,
+        "hasSectors": true,
+        "hasOfficialIdx": true,
+        "hasYahoo": true,
+        "hasYfinance": true,
+        "hasKsei": true,
+        "hasYtd66": true,
+        "bannedTerms": false
+      },
+      {
+        "viewport": "390x844",
+        "width": 390,
+        "scrollWidth": 390,
+        "has132": true,
+        "hasSourceCoverage": true,
+        "hasSectors": true,
+        "hasOfficialIdx": true,
+        "hasYahoo": true,
+        "hasYfinance": true,
+        "hasKsei": true,
+        "hasYtd66": true,
+        "bannedTerms": false
+      }
+    ],
+    "homeCopyByViewport": [
+      {
+        "viewport": "1036x799",
+        "width": 1036,
+        "scrollWidth": 1021,
+        "hasSectors": true,
+        "hasOfficialIdx": true,
+        "hasYahoo": true,
+        "hasYfinance": true,
+        "hasKsei": true,
+        "bannedTerms": false
+      },
+      {
+        "viewport": "1369x799",
+        "width": 1369,
+        "scrollWidth": 1354,
+        "hasSectors": true,
+        "hasOfficialIdx": true,
+        "hasYahoo": true,
+        "hasYfinance": true,
+        "hasKsei": true,
+        "bannedTerms": false
+      },
+      {
+        "viewport": "1440x900",
+        "width": 1440,
+        "scrollWidth": 1425,
+        "hasSectors": true,
+        "hasOfficialIdx": true,
+        "hasYahoo": true,
+        "hasYfinance": true,
+        "hasKsei": true,
+        "bannedTerms": false
+      },
+      {
+        "viewport": "390x844",
+        "width": 390,
+        "scrollWidth": 375,
+        "hasSectors": true,
+        "hasOfficialIdx": true,
+        "hasYahoo": true,
+        "hasYfinance": true,
+        "hasKsei": true,
+        "bannedTerms": false
+      }
+    ],
+    "bannedTermsByRoute": [
+      {
+        "route": "/",
+        "bannedTerms": false,
+        "bodyLength": 3520
+      },
+      {
+        "route": "/sectors",
+        "bannedTerms": false,
+        "bodyLength": 7047
+      },
+      {
+        "route": "/sources",
+        "bannedTerms": false,
+        "bodyLength": 5877
+      },
+      {
+        "route": "/overview",
+        "bannedTerms": false,
+        "bodyLength": 6581
+      },
+      {
+        "route": "/what-changed",
+        "bannedTerms": false,
+        "bodyLength": 3407
+      },
+      {
+        "route": "/movers",
+        "bannedTerms": false,
+        "bodyLength": 3524
+      },
+      {
+        "route": "/foreign",
+        "bannedTerms": false,
+        "bodyLength": 4094
+      },
+      {
+        "route": "/ownership",
+        "bannedTerms": false,
+        "bodyLength": 4893
+      },
+      {
+        "route": "/heatmap",
+        "bannedTerms": false,
+        "bodyLength": 5098
+      },
+      {
+        "route": "/map",
+        "bannedTerms": false,
+        "bodyLength": 9820
+      },
+      {
+        "route": "/konglo",
+        "bannedTerms": false,
+        "bodyLength": 8629
+      },
+      {
+        "route": "/themes",
+        "bannedTerms": false,
+        "bodyLength": 5003
+      },
+      {
+        "route": "/explorer",
+        "bannedTerms": false,
+        "bodyLength": 8037
+      },
+      {
+        "route": "/groups",
+        "bannedTerms": false,
+        "bodyLength": 9151
+      },
+      {
+        "route": "/tickers",
+        "bannedTerms": false,
+        "bodyLength": 144212
+      },
+      {
+        "route": "/methodology",
+        "bannedTerms": false,
+        "bodyLength": 6561
+      }
+    ],
+    "readerCopy": {
+      "allRoutesNoBannedTerms": true,
+      "routesChecked": 16
+    },
+    "sourceCheckBrowserErrors": [],
+    "rollback": {
+      "release_id": "rel-64026e36d49733009fec952086fc95a3121a86efbb196b1c68d00fd6317f33d2",
+      "manifest_sha256": "98e2c260c9afae07ce2b1cb5b5436cda8bbff9978a0239d809d909183ad36e4f",
+      "preview_url": "http://127.0.0.1:4175",
+      "checks": [
+        {
+          "route": "/sources",
+          "viewport": "1036x799",
+          "width": 1036,
+          "height": 799,
+          "scrollWidth": 1036,
+          "bodyLength": 5708,
+          "has66": true,
+          "hasSixPerSector": true,
+          "has132": false,
+          "hasYahoo": true,
+          "hasIdx": true,
+          "hasYfinance": true,
+          "hasYtd": true,
+          "banned": false,
+          "ready": true
+        },
+        {
+          "route": "/sectors",
+          "viewport": "1036x799",
+          "width": 1036,
+          "height": 799,
+          "scrollWidth": 1036,
+          "bodyLength": 6451,
+          "has66": true,
+          "hasSixPerSector": false,
+          "has132": false,
+          "hasYahoo": false,
+          "hasIdx": false,
+          "hasYfinance": false,
+          "hasYtd": false,
+          "banned": false,
+          "ready": true
+        },
+        {
+          "route": "/sources",
+          "viewport": "1369x799",
+          "width": 1369,
+          "height": 799,
+          "scrollWidth": 1369,
+          "bodyLength": 5733,
+          "has66": true,
+          "hasSixPerSector": true,
+          "has132": false,
+          "hasYahoo": true,
+          "hasIdx": true,
+          "hasYfinance": true,
+          "hasYtd": true,
+          "banned": false,
+          "ready": true
+        },
+        {
+          "route": "/sectors",
+          "viewport": "1369x799",
+          "width": 1369,
+          "height": 799,
+          "scrollWidth": 1369,
+          "bodyLength": 6522,
+          "has66": true,
+          "hasSixPerSector": false,
+          "has132": false,
+          "hasYahoo": false,
+          "hasIdx": false,
+          "hasYfinance": false,
+          "hasYtd": false,
+          "banned": false,
+          "ready": true
+        },
+        {
+          "route": "/sources",
+          "viewport": "1440x900",
+          "width": 1440,
+          "height": 900,
+          "scrollWidth": 1440,
+          "bodyLength": 5733,
+          "has66": true,
+          "hasSixPerSector": true,
+          "has132": false,
+          "hasYahoo": true,
+          "hasIdx": true,
+          "hasYfinance": true,
+          "hasYtd": true,
+          "banned": false,
+          "ready": true
+        },
+        {
+          "route": "/sectors",
+          "viewport": "1440x900",
+          "width": 1440,
+          "height": 900,
+          "scrollWidth": 1440,
+          "bodyLength": 6523,
+          "has66": true,
+          "hasSixPerSector": false,
+          "has132": false,
+          "hasYahoo": false,
+          "hasIdx": false,
+          "hasYfinance": false,
+          "hasYtd": false,
+          "banned": false,
+          "ready": true
+        },
+        {
+          "route": "/sources",
+          "viewport": "390x844",
+          "width": 390,
+          "height": 844,
+          "scrollWidth": 390,
+          "bodyLength": 5317,
+          "has66": true,
+          "hasSixPerSector": true,
+          "has132": false,
+          "hasYahoo": true,
+          "hasIdx": true,
+          "hasYfinance": true,
+          "hasYtd": true,
+          "banned": false,
+          "ready": true
+        },
+        {
+          "route": "/sectors",
+          "viewport": "390x844",
+          "width": 390,
+          "height": 844,
+          "scrollWidth": 390,
+          "bodyLength": 5988,
+          "has66": true,
+          "hasSixPerSector": false,
+          "has132": false,
+          "hasYahoo": false,
+          "hasIdx": false,
+          "hasYfinance": false,
+          "hasYtd": false,
+          "banned": false,
+          "ready": true
+        }
+      ],
+      "allViewportsPass": true,
+      "browserErrors": [],
+      "readiness_rule": "Coverage page: rendered source and coverage labels plus more than 2,500 characters. Dashboard: 66-stock marker plus more than 4,000 rendered characters. Both require exact viewport width and no document overflow."
+    }
+  },
+  "routes": [
+    {
+      "route": "/",
+      "viewport": {
+        "width": 1036,
+        "height": 799
+      },
+      "bodyLength": 3520,
+      "scrollWidth": 1021,
+      "coverageGrid": null
+    },
+    {
+      "route": "/sectors",
+      "viewport": {
+        "width": 1036,
+        "height": 799
+      },
+      "bodyLength": 6971,
+      "scrollWidth": 1036,
+      "coverageGrid": null
+    },
+    {
+      "route": "/sources",
+      "viewport": {
+        "width": 1036,
+        "height": 799
+      },
+      "bodyLength": 5852,
+      "scrollWidth": 1036,
+      "coverageGrid": "181.203px 181.219px 181.203px 181.219px"
+    },
+    {
+      "route": "/overview",
+      "viewport": {
+        "width": 1036,
+        "height": 799
+      },
+      "bodyLength": 6536,
+      "scrollWidth": 1021,
+      "coverageGrid": null
+    },
+    {
+      "route": "/what-changed",
+      "viewport": {
+        "width": 1036,
+        "height": 799
+      },
+      "bodyLength": 3380,
+      "scrollWidth": 1036,
+      "coverageGrid": null
+    },
+    {
+      "route": "/movers",
+      "viewport": {
+        "width": 1036,
+        "height": 799
+      },
+      "bodyLength": 3499,
+      "scrollWidth": 1036,
+      "coverageGrid": null
+    },
+    {
+      "route": "/foreign",
+      "viewport": {
+        "width": 1036,
+        "height": 799
+      },
+      "bodyLength": 4031,
+      "scrollWidth": 1036,
+      "coverageGrid": null
+    },
+    {
+      "route": "/ownership",
+      "viewport": {
+        "width": 1036,
+        "height": 799
+      },
+      "bodyLength": 4868,
+      "scrollWidth": 1036,
+      "coverageGrid": null
+    },
+    {
+      "route": "/heatmap",
+      "viewport": {
+        "width": 1036,
+        "height": 799
+      },
+      "bodyLength": 4988,
+      "scrollWidth": 1036,
+      "coverageGrid": null
+    },
+    {
+      "route": "/map",
+      "viewport": {
+        "width": 1036,
+        "height": 799
+      },
+      "bodyLength": 9779,
+      "scrollWidth": 1036,
+      "coverageGrid": null
+    },
+    {
+      "route": "/konglo",
+      "viewport": {
+        "width": 1036,
+        "height": 799
+      },
+      "bodyLength": 8588,
+      "scrollWidth": 1036,
+      "coverageGrid": null
+    },
+    {
+      "route": "/themes",
+      "viewport": {
+        "width": 1036,
+        "height": 799
+      },
+      "bodyLength": 4962,
+      "scrollWidth": 1036,
+      "coverageGrid": null
+    },
+    {
+      "route": "/explorer",
+      "viewport": {
+        "width": 1036,
+        "height": 799
+      },
+      "bodyLength": 7985,
+      "scrollWidth": 1036,
+      "coverageGrid": null
+    },
+    {
+      "route": "/groups",
+      "viewport": {
+        "width": 1036,
+        "height": 799
+      },
+      "bodyLength": 9110,
+      "scrollWidth": 1021,
+      "coverageGrid": null
+    },
+    {
+      "route": "/tickers",
+      "viewport": {
+        "width": 1036,
+        "height": 799
+      },
+      "bodyLength": 144187,
+      "scrollWidth": 1021,
+      "coverageGrid": null
+    },
+    {
+      "route": "/methodology",
+      "viewport": {
+        "width": 1036,
+        "height": 799
+      },
+      "bodyLength": 6536,
+      "scrollWidth": 1021,
+      "coverageGrid": null
+    },
+    {
+      "route": "/",
+      "viewport": {
+        "width": 1369,
+        "height": 799
+      },
+      "bodyLength": 3520,
+      "scrollWidth": 1354,
+      "coverageGrid": null
+    },
+    {
+      "route": "/sectors",
+      "viewport": {
+        "width": 1369,
+        "height": 799
+      },
+      "bodyLength": 7042,
+      "scrollWidth": 1369,
+      "coverageGrid": null
+    },
+    {
+      "route": "/sources",
+      "viewport": {
+        "width": 1369,
+        "height": 799
+      },
+      "bodyLength": 5877,
+      "scrollWidth": 1369,
+      "coverageGrid": "260px 260px 260px 260px"
+    },
+    {
+      "route": "/overview",
+      "viewport": {
+        "width": 1369,
+        "height": 799
+      },
+      "bodyLength": 6572,
+      "scrollWidth": 1354,
+      "coverageGrid": null
+    },
+    {
+      "route": "/what-changed",
+      "viewport": {
+        "width": 1369,
+        "height": 799
+      },
+      "bodyLength": 3405,
+      "scrollWidth": 1369,
+      "coverageGrid": null
+    },
+    {
+      "route": "/movers",
+      "viewport": {
+        "width": 1369,
+        "height": 799
+      },
+      "bodyLength": 3524,
+      "scrollWidth": 1369,
+      "coverageGrid": null
+    },
+    {
+      "route": "/foreign",
+      "viewport": {
+        "width": 1369,
+        "height": 799
+      },
+      "bodyLength": 4076,
+      "scrollWidth": 1369,
+      "coverageGrid": null
+    },
+    {
+      "route": "/ownership",
+      "viewport": {
+        "width": 1369,
+        "height": 799
+      },
+      "bodyLength": 4893,
+      "scrollWidth": 1369,
+      "coverageGrid": null
+    },
+    {
+      "route": "/heatmap",
+      "viewport": {
+        "width": 1369,
+        "height": 799
+      },
+      "bodyLength": 5082,
+      "scrollWidth": 1369,
+      "coverageGrid": null
+    },
+    {
+      "route": "/map",
+      "viewport": {
+        "width": 1369,
+        "height": 799
+      },
+      "bodyLength": 9815,
+      "scrollWidth": 1369,
+      "coverageGrid": null
+    },
+    {
+      "route": "/konglo",
+      "viewport": {
+        "width": 1369,
+        "height": 799
+      },
+      "bodyLength": 8624,
+      "scrollWidth": 1369,
+      "coverageGrid": null
+    },
+    {
+      "route": "/themes",
+      "viewport": {
+        "width": 1369,
+        "height": 799
+      },
+      "bodyLength": 4998,
+      "scrollWidth": 1369,
+      "coverageGrid": null
+    },
+    {
+      "route": "/explorer",
+      "viewport": {
+        "width": 1369,
+        "height": 799
+      },
+      "bodyLength": 8032,
+      "scrollWidth": 1369,
+      "coverageGrid": null
+    },
+    {
+      "route": "/groups",
+      "viewport": {
+        "width": 1369,
+        "height": 799
+      },
+      "bodyLength": 9146,
+      "scrollWidth": 1354,
+      "coverageGrid": null
+    },
+    {
+      "route": "/tickers",
+      "viewport": {
+        "width": 1369,
+        "height": 799
+      },
+      "bodyLength": 144212,
+      "scrollWidth": 1354,
+      "coverageGrid": null
+    },
+    {
+      "route": "/methodology",
+      "viewport": {
+        "width": 1369,
+        "height": 799
+      },
+      "bodyLength": 6561,
+      "scrollWidth": 1354,
+      "coverageGrid": null
+    },
+    {
+      "route": "/",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "bodyLength": 3520,
+      "scrollWidth": 1425,
+      "coverageGrid": null
+    },
+    {
+      "route": "/sectors",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "bodyLength": 7043,
+      "scrollWidth": 1440,
+      "coverageGrid": null
+    },
+    {
+      "route": "/sources",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "bodyLength": 5877,
+      "scrollWidth": 1440,
+      "coverageGrid": "277.75px 277.75px 277.75px 277.75px"
+    },
+    {
+      "route": "/overview",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "bodyLength": 6576,
+      "scrollWidth": 1425,
+      "coverageGrid": null
+    },
+    {
+      "route": "/what-changed",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "bodyLength": 3405,
+      "scrollWidth": 1440,
+      "coverageGrid": null
+    },
+    {
+      "route": "/movers",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "bodyLength": 3524,
+      "scrollWidth": 1440,
+      "coverageGrid": null
+    },
+    {
+      "route": "/foreign",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "bodyLength": 4089,
+      "scrollWidth": 1440,
+      "coverageGrid": null
+    },
+    {
+      "route": "/ownership",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "bodyLength": 4893,
+      "scrollWidth": 1440,
+      "coverageGrid": null
+    },
+    {
+      "route": "/heatmap",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "bodyLength": 5098,
+      "scrollWidth": 1440,
+      "coverageGrid": null
+    },
+    {
+      "route": "/map",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "bodyLength": 9816,
+      "scrollWidth": 1440,
+      "coverageGrid": null
+    },
+    {
+      "route": "/konglo",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "bodyLength": 8625,
+      "scrollWidth": 1440,
+      "coverageGrid": null
+    },
+    {
+      "route": "/themes",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "bodyLength": 4999,
+      "scrollWidth": 1440,
+      "coverageGrid": null
+    },
+    {
+      "route": "/explorer",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "bodyLength": 8033,
+      "scrollWidth": 1440,
+      "coverageGrid": null
+    },
+    {
+      "route": "/groups",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "bodyLength": 9147,
+      "scrollWidth": 1440,
+      "coverageGrid": null
+    },
+    {
+      "route": "/tickers",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "bodyLength": 144212,
+      "scrollWidth": 1440,
+      "coverageGrid": null
+    },
+    {
+      "route": "/methodology",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "bodyLength": 6561,
+      "scrollWidth": 1425,
+      "coverageGrid": null
+    },
+    {
+      "route": "/",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "bodyLength": 3520,
+      "scrollWidth": 375,
+      "coverageGrid": null
+    },
+    {
+      "route": "/sectors",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "bodyLength": 83,
+      "scrollWidth": 390,
+      "coverageGrid": null
+    },
+    {
+      "route": "/sources",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "bodyLength": 5461,
+      "scrollWidth": 390,
+      "coverageGrid": "339px"
+    },
+    {
+      "route": "/overview",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "bodyLength": 6138,
+      "scrollWidth": 375,
+      "coverageGrid": null
+    },
+    {
+      "route": "/what-changed",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "bodyLength": 2989,
+      "scrollWidth": 390,
+      "coverageGrid": null
+    },
+    {
+      "route": "/movers",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "bodyLength": 3108,
+      "scrollWidth": 390,
+      "coverageGrid": null
+    },
+    {
+      "route": "/foreign",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "bodyLength": 3620,
+      "scrollWidth": 390,
+      "coverageGrid": null
+    },
+    {
+      "route": "/ownership",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "bodyLength": 4477,
+      "scrollWidth": 390,
+      "coverageGrid": null
+    },
+    {
+      "route": "/heatmap",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "bodyLength": 4494,
+      "scrollWidth": 390,
+      "coverageGrid": null
+    },
+    {
+      "route": "/map",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "bodyLength": 9376,
+      "scrollWidth": 390,
+      "coverageGrid": null
+    },
+    {
+      "route": "/konglo",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "bodyLength": 8185,
+      "scrollWidth": 390,
+      "coverageGrid": null
+    },
+    {
+      "route": "/themes",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "bodyLength": 4559,
+      "scrollWidth": 390,
+      "coverageGrid": null
+    },
+    {
+      "route": "/explorer",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "bodyLength": 7522,
+      "scrollWidth": 390,
+      "coverageGrid": null
+    },
+    {
+      "route": "/groups",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "bodyLength": 8707,
+      "scrollWidth": 390,
+      "coverageGrid": null
+    },
+    {
+      "route": "/tickers",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "bodyLength": 143796,
+      "scrollWidth": 390,
+      "coverageGrid": null
+    },
+    {
+      "route": "/methodology",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "bodyLength": 6145,
+      "scrollWidth": 390,
+      "coverageGrid": null
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/expanded/landing-1036x799.png",
+      "sha256": "3f12083154577f8fd008fea221f872b58a50a85412f0a19fea3765a327857ace",
+      "viewport": "1036x799",
+      "bytes": 105919
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/expanded/sectors-1036x799.png",
+      "sha256": "77ea21ea206d40f2daa953383bcb89c8594079f576395a9d62ec5ab686c10a67",
+      "viewport": "1036x799",
+      "bytes": 118167
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/expanded/sources-1036x799.png",
+      "sha256": "81889e8829845b4048de01be3b9a38dca7ffc8f700be05de44edb20543c99319",
+      "viewport": "1036x799",
+      "bytes": 143916
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/expanded/landing-1369x799.png",
+      "sha256": "dd1440797c7a054f74333417ce3a09293425309bc996a1c55390d246b36090bf",
+      "viewport": "1369x799",
+      "bytes": 121829
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/expanded/sectors-1369x799.png",
+      "sha256": "e70c290283ef4eabc7716f8232cdbefeb53291638b0bb3d3d1eadb15b1bf8d1e",
+      "viewport": "1369x799",
+      "bytes": 131849
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/expanded/sources-1369x799.png",
+      "sha256": "29314d33257371fe558efc2b50e62dd34360178a915bfcda151e392eab6b8e9a",
+      "viewport": "1369x799",
+      "bytes": 152085
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/expanded/landing-1440x900.png",
+      "sha256": "5b5f5034c087e2505a8a76d8a08327a20b7ceacaef53a241b829ba25ca668858",
+      "viewport": "1440x900",
+      "bytes": 128821
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/expanded/sectors-1440x900.png",
+      "sha256": "b1b967e54616312fc05c9ca4f465dd4343b393769e3ae678345e7a677db50b42",
+      "viewport": "1440x900",
+      "bytes": 143663
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/expanded/sources-1440x900.png",
+      "sha256": "5a1b918ac4f6de1db7e6189ca7d2b2924edaae6c115feab89130b2b5a16c7795",
+      "viewport": "1440x900",
+      "bytes": 175265
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/expanded/landing-390x844.png",
+      "sha256": "72924dea77fb1fdcbbe777d03bad722e4e4df3cfd9ffac9c9a161dd249abf0db",
+      "viewport": "390x844",
+      "bytes": 69898
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/expanded/sectors-390x844.png",
+      "sha256": "da42ce828b585e72c0279f998680fc7c21e4821675292c30f1fe25005cf6ba4a",
+      "viewport": "390x844",
+      "bytes": 15788
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/expanded/sources-390x844.png",
+      "sha256": "5f9608c8fb3207154928bb4f7637921e73c3e7ecbc8e14bc693d0429fd93f351",
+      "viewport": "390x844",
+      "bytes": 66540
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/rollback/sources-1036x799.png",
+      "sha256": "867118c721b4699da15f3b4357252fd9115a5ae89a4a61b61c757f3f296d0373",
+      "viewport": "1036x799",
+      "bytes": 144136
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/rollback/sectors-1036x799.png",
+      "sha256": "d550c343ca57e0a7d56b21c064c7af44636a95b495164fde1cfeab4045adc9b5",
+      "viewport": "1036x799",
+      "bytes": 116838
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/rollback/sources-1369x799.png",
+      "sha256": "44397078e58810c5572a073a21a19bca1d87d15fdba457b840cce91c9758d03a",
+      "viewport": "1369x799",
+      "bytes": 152608
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/rollback/sectors-1369x799.png",
+      "sha256": "165f88955a185a72bcd570988859d3081429b966cf7a5bd261387d47f88c14a3",
+      "viewport": "1369x799",
+      "bytes": 129893
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/rollback/sources-1440x900.png",
+      "sha256": "f124ff6e4ba001ae6e98b4a93275d75751fabed6943d5266e5709c278767af46",
+      "viewport": "1440x900",
+      "bytes": 175762
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/rollback/sectors-1440x900.png",
+      "sha256": "eef70b8ec416fe14f48834e5b0afc13705dc91a2760108fa8d32ecfb00d21f13",
+      "viewport": "1440x900",
+      "bytes": 142241
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/rollback/sources-390x844.png",
+      "sha256": "63c22bad0bbe4d51ea5926b93eb8892d231c3fa7c06ecb5d1ce83a87315eb3c1",
+      "viewport": "390x844",
+      "bytes": 66606
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/rollback/sectors-390x844.png",
+      "sha256": "e57197e39ff1419772faa9e7290952f2df4d1579bf145d16e5df6a2bb39f9d54",
+      "viewport": "390x844",
+      "bytes": 59138
+    }
+  ]
+}

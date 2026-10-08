@@ -166,6 +166,7 @@ def _validate_selection(
     selection_plan_path: Path | None,
 ) -> None:
     selection = sample["selection"]
+    stocks_per_sector = int(selection.get("stocks_per_sector", 6))
     replacements = selection.get("replacements", {})
     by_sector: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for row in market.get("records", []):
@@ -190,16 +191,16 @@ def _validate_selection(
         raise ValueError("sample sector inventory differs from the frozen market selection source")
     for sector, eligible in by_sector.items():
         ranked = sorted(eligible, key=lambda row: (-float(row["market_cap"]), str(row["ticker"]).upper()))
-        expected = {str(row["ticker"]).upper() for row in ranked[:6]}
+        expected = {str(row["ticker"]).upper() for row in ranked[:stocks_per_sector]}
         for replacement in replacements.get(sector, []):
             removed = str(replacement.get("removed") or "").upper()
             selected = str(replacement.get("selected") or "").upper()
-            if removed not in expected or selected not in {str(row["ticker"]).upper() for row in ranked[6:]}:
+            if removed not in expected or selected not in {str(row["ticker"]).upper() for row in ranked[stocks_per_sector:]}:
                 raise ValueError(f"sample replacement is not supported by the frozen market source: {sector}")
             expected.remove(removed)
             expected.add(selected)
-        if actual_by_sector[sector] != expected or len(actual_by_sector[sector]) != 6:
-            raise ValueError(f"sample membership does not match the frozen top-six selection: {sector}")
+        if actual_by_sector[sector] != expected or len(actual_by_sector[sector]) != stocks_per_sector:
+            raise ValueError(f"sample membership does not match the frozen top-{stocks_per_sector} selection: {sector}")
 
     if selection_plan_path is None:
         return
@@ -257,7 +258,12 @@ def _baseline_reading(
         if isinstance(row, dict) and row.get("ticker") and row.get("date") == base_date
     }
     result_groups = []
+    coverage = sample.get("coverage", {})
+    ytd_tickers = coverage.get("ytd", {}).get("tickers")
+    ytd_member_set = set(map(str, ytd_tickers)) if isinstance(ytd_tickers, list) else None
     for sector, members in sorted(groups.items()):
+        if ytd_member_set is not None:
+            members = [member for member in members if str(member["ticker"]) in ytd_member_set]
         contributors = []
         for member in members:
             ticker = str(member["ticker"])
@@ -317,8 +323,9 @@ def build(
     source_market_raw = selection_market_path.read_bytes()
     sample = _json(sample_path)
     market = _json(selection_market_path)
-    if sample.get("schema_version") != "sectors-recorded-sample-v1":
-        raise ValueError("recorded Sectors sample has an unsupported schema")
+    sample_schema = sample.get("schema_version")
+    if sample_schema not in {"sectors-recorded-sample-v1", "sectors-expanded-universe-v1"}:
+        raise ValueError("Sectors universe has an unsupported schema")
     if market.get("schema_version") != "market-workspace-v1":
         raise ValueError("frozen selection-market source has an unsupported schema")
     sample_source_hash = sample.get("sources", {}).get("market_release_source_sha256")
@@ -331,15 +338,28 @@ def build(
         raise ValueError("recorded sample and frozen membership session differ")
 
     stocks = sample.get("stocks")
-    if not isinstance(stocks, list) or len(stocks) != 66:
-        raise ValueError("Sectors analysis requires all 66 recorded sample members")
-    if len({row.get("ticker") for row in stocks}) != 66:
-        raise ValueError("recorded Sectors sample contains duplicate stock tickers")
+    selection = sample.get("selection", {})
+    expected_count = int(selection.get("stock_count", 66))
+    stocks_per_sector = int(selection.get("stocks_per_sector", 6))
+    if not isinstance(stocks, list) or len(stocks) != expected_count:
+        raise ValueError(f"Sectors analysis requires all {expected_count} members")
+    if len({row.get("ticker") for row in stocks}) != expected_count:
+        raise ValueError("Sectors universe contains duplicate stock tickers")
     sector_counts: dict[str, int] = defaultdict(int)
     for stock in stocks:
         sector_counts[str(stock.get("sector"))] += 1
-    if len(sector_counts) != 11 or any(value != 6 for value in sector_counts.values()):
-        raise ValueError("recorded Sectors sample must retain six names in each of 11 sectors")
+    if len(sector_counts) != 11 or any(value != stocks_per_sector for value in sector_counts.values()):
+        raise ValueError(f"Sectors universe must retain {stocks_per_sector} names in each of 11 sectors")
+
+    if sample_schema == "sectors-expanded-universe-v1":
+        price_coverage = sample.get("coverage", {}).get("price_history", {})
+        per_stock = price_coverage.get("per_stock", {})
+        if set(per_stock) != {str(row["ticker"]) for row in stocks}:
+            raise ValueError("expanded Sectors coverage must give history dates for all 132 stocks")
+        for ticker, dates in per_stock.items():
+            if (not dates.get("requested_start") or dates.get("requested_end") != sample.get("as_of")
+                    or dates.get("requested_start") > dates.get("requested_end")):
+                raise ValueError(f"expanded price history dates are incomplete for {ticker}")
 
     # Validate the frozen membership against the original hash-bound market
     # rows and the original selection plan where it is available.
@@ -552,7 +572,7 @@ def build(
                     ).to_dict()
                 groups_out.append({
                     "sector": sector,
-                    "requested_constituents": 6,
+                    "requested_constituents": stocks_per_sector,
                     "eligible_contributors": len(valid_by_horizon["20d"]),
                     "contributor_counts": contributor_counts,
                     "comparison_cohorts": {
@@ -599,10 +619,10 @@ def build(
         for sector in sorted(sector_counts)
     })
     methodology = [
-        "The 66 names were selected using market capitalization observed on 2026-10-02 and are replayed retrospectively; this is not a point-in-time universe.",
+        f"The {expected_count} names were selected using market capitalization on 2026-10-02 and are replayed retrospectively; this is not a point-in-time universe.",
         "Returns use raw Sectors daily closes and native Sectors IHSG closes, with shared observed start and end dates. No adjusted-price series is claimed.",
         "A split, rights issue, bonus, cash dividend, or other listed mechanical corporate action inside a return window excludes that name from the affected window.",
-        "Each replay comparison uses the same eligible names at its paired dates; that cohort may change between date pairs when a price or action window changes eligibility. All 66 names remain listed in the constituent inspector, with exclusion reasons.",
+        f"Each replay comparison uses the same eligible names at its paired dates; that cohort may change between date pairs when a price or action window changes eligibility. All {expected_count} names remain listed in the constituent inspector, with exclusion reasons.",
         "Sector returns are equal-weighted across fixed eligible contributors. Leadership and diffusion are unconfirmed below five contributors; missing observations are never filled.",
         "YTD is shown only when each stock and native IHSG share an observed prior-year baseline date; unsupported baselines remain explicit gaps.",
     ]
@@ -610,7 +630,7 @@ def build(
         "schema_version": SCHEMA,
         "action_events": action_map,
         "as_of": as_of,
-        "label": "Sectors leadership and diffusion · recorded 66-stock sample",
+        "label": f"Sectors leadership and diffusion · {expected_count} stocks",
         "sources": {
             "recorded_sample_sha256": _sha(sample_raw),
             "selection_market_source_sha256": market_hash,
@@ -619,13 +639,14 @@ def build(
             "benchmark": "native Sectors IHSG close",
         },
         "selection": {
-            "stock_count": 66,
-            "stocks_per_sector": 6,
+            "stock_count": expected_count,
+            "stocks_per_sector": stocks_per_sector,
             "membership_release_session": sample["selection"]["membership_release_session"],
             "membership_as_of": sample["selection"]["membership_as_of"],
             "selected_market_cap_date": sample["selection"]["selected_market_cap_date"],
             "retrospective": True,
         },
+        "coverage": sample.get("coverage", {}),
         "contract": {
             "horizons_sessions": HORIZONS,
             "replay_calendar_days": REPLAY_CALENDAR_DAYS,
@@ -637,7 +658,7 @@ def build(
             "concentration": "existing concentration_v2 absolute and signed attribution contract",
         },
         "corporate_action_exclusions": cohort_exclusions,
-        "comparison_cohort_rule": "Each replay comparison uses the same eligible names at its paired dates; the 66-name membership itself stays frozen. Missing and action-affected observations are excluded by date and remain disclosed.",
+        "comparison_cohort_rule": f"Each replay comparison uses the same eligible names at its paired dates; the {expected_count}-name membership itself stays fixed. Missing and action-affected observations are excluded by date and remain disclosed.",
         "ytd": ytd,
         "daily": daily,
         "weekly": weekly,
@@ -656,7 +677,8 @@ def build(
         "selection_market_sha256": market_hash,
         "asset_sha256": _sha(raw),
         "asset_bytes": len(raw),
-        "stock_count": 66,
+        "stock_count": expected_count,
+        "stocks_per_sector": stocks_per_sector,
         "sectors": len(sector_counts),
         "daily_replay_dates": len(daily),
         "weekly_replay_dates": len(weekly),

@@ -144,9 +144,9 @@ export interface MarketBreadthAsset {
   coverage: { official_traded_count: number; fixed_price_cohort_count: number; analysis_benchmark_sessions: number; excluded_signal_eligible_incomplete_history: number; limits: string[] };
 }
 export interface RecordedSectorsSample {
-  schema_version: "sectors-recorded-sample-v1";
+  schema_version: "sectors-recorded-sample-v1" | "sectors-expanded-universe-v1";
   as_of: string;
-  label: "Recorded Sectors sample · 66 stocks";
+  label: string;
   scope: string;
   selection: {
     basis: string;
@@ -154,10 +154,12 @@ export interface RecordedSectorsSample {
     membership_release_session: string;
     membership_as_of: string;
     selected_market_cap_date: string;
-    stocks_per_sector: 6;
-    stock_count: 66;
+    stocks_per_sector: number;
+    stock_count: number;
     sector_counts: Record<string, number>;
     replacements: Record<string, Array<{ removed: string; selected: string; reason: string }>>;
+    ytd_tickers?: string[];
+    expansion_plan_sha256?: string;
   };
   price_history: {
     start: string; end: string; basis: string; benchmark: string;
@@ -165,10 +167,12 @@ export interface RecordedSectorsSample {
   };
   foreign_flow: {
     provider: string; scope: string; unit: string;
+    stock_recent_start: string;
     market_ytd: { start: string; end: string; values: Array<{ date: string; net_foreign_inflow_idr: number; reported_cumulative_idr?: number | null }> };
     session_check: { expected_sessions: number; observed_sessions: number; duplicates: number; missing: number; missing_dates: string[]; unexpected: number; unexpected_dates: string[]; ytd_complete: boolean };
     expected_market_sessions: string[];
     complete_quarter: { start: string; end: string; values: Array<{ date: string; net_foreign_inflow_idr: number }>; session_check: { expected_sessions: number; observed_sessions: number; missing: number; missing_dates: string[]; duplicates: number; status: string } };
+    company_flow_coverage?: { stock_count: number; tickers: string[]; start_date: string; end_date: string };
   };
   foreign_reconciliation: {
     official_source: { sha256: string; observation_date: string; provider: string };
@@ -182,8 +186,23 @@ export interface RecordedSectorsSample {
     ticker: string; company_name: string | null; sector: string; membership_as_of: string | null;
     market_cap_as_of: string | null; market_cap_idr: number | null;
     prices: Array<{ date: string; close: number }>;
+    price_sources?: Array<{ window: string[]; path: string; sha256?: string | null }>;
+    history_coverage?: { requested_start: string; requested_end: string; observed_start: string | null; observed_end: string | null; window_count: number; price_windows: Array<{ window: string[]; path: string; sha256?: string | null }> };
     corporate_actions: { response: unknown };
+    foreign_flow?: unknown;
   }>;
+  coverage?: {
+    price_history: {
+      stock_count: number; stocks_per_sector: number; first_replay_date: string;
+      first_required_price_date: string; end_date: string; daily_dates: string[];
+      weekly_dates: string[]; per_stock: Record<string, {
+        requested_start: string; requested_end: string; observed_start: string | null;
+        observed_end: string | null; window_count: number; price_windows: Array<{ window: string[]; path: string; sha256?: string | null }>;
+      }>;
+    };
+    ytd: { stock_count: number; tickers: string[]; baseline_date: string | null; end_date: string; baseline_asset_sha256: string };
+    company_flow: { stock_count: number; tickers: string[]; start_date: string; end_date: string };
+  };
   validation: Record<string, unknown>;
   sources: Record<string, unknown>;
   limitations: string[];
@@ -254,6 +273,7 @@ export interface SectorsSignalAnalysis {
     stock_count: number; stocks_per_sector: number; membership_release_session: string;
     membership_as_of: string; selected_market_cap_date: string; retrospective: boolean;
   };
+  coverage?: Record<string, unknown>;
   contract: Record<string, unknown>;
   corporate_action_exclusions: Record<string, Array<{
     ticker: string; first_unavailable_date: string; horizon: string; reason: string;
@@ -415,16 +435,22 @@ export function useRecordedSectorsSample(enabled = true) {
       if (cancelled) return;
       const parentIdHash = data ? await crypto.subtle.digest("SHA-256", new TextEncoder().encode(data.selection.membership_release_id)) : null;
       const parentIdDigest = parentIdHash ? Array.from(new Uint8Array(parentIdHash), byte => byte.toString(16).padStart(2, "0")).join("") : null;
-      if (!data || data.schema_version !== "sectors-recorded-sample-v1" ||
+      const expectedCount = Number(data?.selection?.stock_count ?? 0);
+      const stocksPerSector = Number(data?.selection?.stocks_per_sector ?? 0);
+      const supportedSchema = data?.schema_version === "sectors-recorded-sample-v1" || data?.schema_version === "sectors-expanded-universe-v1";
+      if (!data || !supportedSchema ||
           !selectionMarket || selectionMarket.schema_version !== "market-workspace-v1" ||
-          data.label !== "Recorded Sectors sample · 66 stocks" || data.stocks.length !== 66 ||
+          ![66, 132].includes(expectedCount) || data.stocks.length !== expectedCount ||
+          stocksPerSector * 11 !== expectedCount ||
+          (data.schema_version === "sectors-recorded-sample-v1" && expectedCount !== 66) ||
+          (data.schema_version === "sectors-expanded-universe-v1" && expectedCount !== 132) ||
           Object.values(data.selection.sector_counts).length !== 11 ||
-          Object.values(data.selection.sector_counts).some(count => count !== 6) ||
+          Object.values(data.selection.sector_counts).some(count => count !== stocksPerSector) ||
           data.selection.membership_release_session !== release.manifest.target_session ||
           data.selection.selected_market_cap_date !== selectionMarket.as_of ||
           data.sources.market_release_source_sha256 !== selectionEntry.sha256 ||
           parentIdDigest !== release.manifest.analytical_contracts.recording_parent_release_id_sha256) {
-        throw new Error("Recorded sample does not match its hash-bound frozen selection source and 66-stock membership");
+        throw new Error("The Sectors stock set does not match its market ranking and source files");
       }
       const eligibleBySector = new Map<string, MarketStock[]>();
       for (const row of selectionMarket.records) {
@@ -444,23 +470,42 @@ export function useRecordedSectorsSample(enabled = true) {
         actualBySector.set(stock.sector, members);
       }
       if (eligibleBySector.size !== 11 || actualBySector.size !== 11) {
-        throw new Error("Frozen selection source does not contain the 11 recorded sectors");
+        throw new Error("The pinned market source does not contain all 11 sectors");
       }
       for (const [sector, rows] of eligibleBySector) {
         const ranked = [...rows].sort((left, right) =>
           (Number(right.market_cap) - Number(left.market_cap)) || left.ticker.localeCompare(right.ticker));
-        const selected = new Set(ranked.slice(0, 6).map(row => row.ticker.toUpperCase()));
+        const selected = new Set(ranked.slice(0, stocksPerSector).map(row => row.ticker.toUpperCase()));
         for (const replacement of data.selection.replacements[sector] ?? []) {
           if (!selected.has(replacement.removed.toUpperCase()) ||
-              !ranked.slice(6).some(row => row.ticker.toUpperCase() === replacement.selected.toUpperCase())) {
-            throw new Error(`Recorded replacement is not supported by frozen market evidence for ${sector}`);
+              !ranked.slice(stocksPerSector).some(row => row.ticker.toUpperCase() === replacement.selected.toUpperCase())) {
+            throw new Error(`The selected replacement is not supported by market evidence for ${sector}`);
           }
           selected.delete(replacement.removed.toUpperCase());
           selected.add(replacement.selected.toUpperCase());
         }
         const actual = actualBySector.get(sector);
-        if (!actual || actual.size !== 6 || [...actual].some(ticker => !selected.has(ticker)) || selected.size !== actual.size) {
-          throw new Error(`Recorded six-stock membership does not match the frozen selection for ${sector}`);
+        if (!actual || actual.size !== stocksPerSector || [...actual].some(ticker => !selected.has(ticker)) || selected.size !== actual.size) {
+          throw new Error(`Stock membership does not match the frozen ${stocksPerSector}-stock selection for ${sector}`);
+        }
+      }
+      if (data.schema_version === "sectors-expanded-universe-v1") {
+        const perStock = data.coverage?.price_history?.per_stock;
+        const stockTickers = new Set(data.stocks.map(stock => stock.ticker));
+        const ytdTickers = new Set(data.coverage?.ytd?.tickers ?? []);
+        const flowTickers = new Set(data.coverage?.company_flow?.tickers ?? []);
+        if (!perStock || Object.keys(perStock).length !== expectedCount ||
+            data.selection.ytd_tickers?.length !== 66 || new Set(data.selection.ytd_tickers).size !== 66 ||
+            data.coverage?.ytd?.stock_count !== 66 || ytdTickers.size !== 66 ||
+            data.coverage?.company_flow?.stock_count !== 66 ||
+            flowTickers.size !== 66 ||
+            data.coverage.price_history.stock_count !== expectedCount ||
+            Object.keys(perStock).some(ticker => !stockTickers.has(ticker)) ||
+            [...stockTickers].some(ticker => !perStock[ticker]) ||
+            [...ytdTickers].some(ticker => !stockTickers.has(ticker)) ||
+            [...flowTickers].some(ticker => !stockTickers.has(ticker)) ||
+            Object.values(perStock).some(dates => !dates.requested_start || dates.requested_end !== data.as_of)) {
+          throw new Error("Expanded coverage dates or the narrower YTD and company-flow coverage are incomplete");
         }
       }
       setState({ data, error: null, loading: false, requestKey });
@@ -487,6 +532,7 @@ export function useSectorsSignalAnalysis(enabled = true) {
     const sampleEntry = release?.manifest.additional_files.find(file => file.file_id === "sectors_recorded_sample");
     const selectionEntry = release?.manifest.additional_files.find(file => file.file_id === "sectors_selection_market");
     const ytdEntry = release?.manifest.additional_files.find(file => file.file_id === "sectors_ytd_baseline");
+    const selectedSample = sampleState.data;
     const requestKey = release && entry ? `${release.id}:${entry.sha256}:${sampleEntry?.sha256 ?? "missing-sample"}:${selectionEntry?.sha256 ?? "missing-selection"}:${ytdEntry?.sha256 ?? "no-ytd-baseline"}` : null;
     if (!release || sampleState.loading) {
       setState({ data: null, error: null, loading: true, requestKey });
@@ -496,7 +542,7 @@ export function useSectorsSignalAnalysis(enabled = true) {
       setState({ data: null, error: sampleState.error, loading: false, requestKey });
       return;
     }
-    if (!sampleState.data) {
+    if (!selectedSample) {
       setState({ data: null, error: null, loading: false, requestKey });
       return;
     }
@@ -518,9 +564,11 @@ export function useSectorsSignalAnalysis(enabled = true) {
           data.as_of !== release.manifest.target_session ||
           data.sources.recorded_sample_sha256 !== sampleEntry.sha256 ||
           data.sources.selection_market_source_sha256 !== selectionEntry.sha256 ||
-          data.selection.stock_count !== 66 || data.selection.retrospective !== true ||
+          data.selection.stock_count !== selectedSample.selection.stock_count ||
+          data.selection.stocks_per_sector !== selectedSample.selection.stocks_per_sector ||
+          data.selection.retrospective !== true ||
           !Array.isArray(data.daily) || !data.daily.length || !Array.isArray(data.weekly) || !data.weekly.length) {
-        throw new Error("Sectors analysis does not match the selected release, sample, and frozen selection source");
+          throw new Error("Sectors analysis does not match the selected release, stock set, and market source");
       }
       if (ytdEntry) {
         if (!ytdBaseline || ytdBaseline.schema_version !== "sectors-ytd-baseline-v1" ||
