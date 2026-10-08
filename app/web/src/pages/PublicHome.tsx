@@ -165,29 +165,34 @@ function RevealText({
   )
 }
 
-// ── Live market observations strip ───────────────────────────────────────────
-// Reads the verified Sectors core through the shared research hook so the
-// figures always match the Dashboard readings.
+// ── Dashboard preview ──────────────────────────────────────────────────────
+// Live preview of the main Dashboard: the 60D rotation map beside the top
+// 20D rankings. Reads the verified Sectors core through the shared research
+// hook so the figures always match the Dashboard readings.
 
-function LiveObservations() {
+const PREVIEW_W = 360
+const PREVIEW_H = 230
+const PREVIEW_PAD = 30
+
+function DashboardPreview() {
   const { groups, reading, date, loading, error, native } = useResearch("sectors")
   const asOf = native?.as_of ?? date
 
   if (loading) {
     return (
-      <section className="dash-card reveal" aria-label="Market observations">
-        <div className="eyebrow-muted">Market observations</div>
-        <p style={{ color: "var(--muted)", margin: "10px 0 0" }}>Loading market observations…</p>
+      <section className="dash-card reveal" aria-label="Dashboard preview">
+        <div className="eyebrow-muted">Dashboard preview</div>
+        <p style={{ color: "var(--muted)", margin: "10px 0 0" }}>Loading the Dashboard preview…</p>
       </section>
     )
   }
 
   if (error || !native || groups.length === 0) {
     return (
-      <section className="dash-card reveal" aria-label="Market observations">
-        <div className="eyebrow-muted">Market observations</div>
+      <section className="dash-card reveal" aria-label="Dashboard preview">
+        <div className="eyebrow-muted">Dashboard preview</div>
         <p style={{ color: "var(--muted)", margin: "10px 0 0" }}>
-          {error ? `Market observations could not be loaded. ${error}` : "Market observations are unavailable."}
+          {error ? `The Dashboard preview could not be loaded. ${error}` : "The Dashboard preview is unavailable."}
         </p>
         <div style={{ marginTop: 14 }}>
           <button
@@ -206,38 +211,109 @@ function LiveObservations() {
     (a, b) => (reading(b)?.excess_return_20d ?? -Infinity) - (reading(a)?.excess_return_20d ?? -Infinity),
   )
   const leader = ranked[0]
-  const leaderReading = leader ? reading(leader) : undefined
-  const confirmed = groups.filter((group) => (reading(group)?.map_contributors ?? 0) >= 5).length
-  const descriptive = groups.length - confirmed
+  const plotted = groups.flatMap((group) => {
+    const point = reading(group)
+    const x = point?.map_x_60d
+    const y = point?.relative_momentum
+    if (x == null || y == null || !Number.isFinite(x) || !Number.isFinite(y)) return []
+    return [{ group, x, y, confirmed: (point?.map_contributors ?? 0) >= 5 }]
+  })
+
+  const span = (values: number[]) => {
+    const lo = Math.min(...values)
+    const hi = Math.max(...values)
+    const pad = Math.max((hi - lo) * 0.2, 1)
+    return [Math.min(lo - pad, 0), Math.max(hi + pad, 0)] as const
+  }
+  const [x0, x1] = plotted.length > 0 ? span(plotted.map((p) => p.x)) : [-1, 1] as const
+  const [y0, y1] = plotted.length > 0 ? span(plotted.map((p) => p.y)) : [-1, 1] as const
+  const px = (v: number) => PREVIEW_PAD + ((v - x0) / (x1 - x0)) * (PREVIEW_W - PREVIEW_PAD * 2)
+  const py = (v: number) => PREVIEW_PAD + ((y1 - v) / (y1 - y0)) * (PREVIEW_H - PREVIEW_PAD * 2)
+  const top = ranked.slice(0, 3)
+  const topAbs = Math.max(...top.map((g) => Math.abs(reading(g)?.excess_return_20d ?? 0)), 1e-9)
 
   return (
-    <section className="dash-card reveal" aria-label="Market observations">
-      <div className="eyebrow-muted">Market observations · Data through {formatDateLabel(asOf)}</div>
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "8px 28px",
-          marginTop: 12,
-          fontFamily: "Geist Mono, monospace",
-          fontSize: 12,
-        }}
-      >
-        <span><strong style={{ fontSize: 18 }}>{groups.length}</strong> <span style={{ color: "var(--muted)" }}>sector groups</span></span>
-        <span><strong style={{ fontSize: 18 }}>66</strong> <span style={{ color: "var(--muted)" }}>tracked stocks</span></span>
-        <span><strong style={{ fontSize: 18 }}>{confirmed}</strong> <span style={{ color: "var(--muted)" }}>confirmed readings</span></span>
-        <span><strong style={{ fontSize: 18 }}>{descriptive}</strong> <span style={{ color: "var(--muted)" }}>descriptive points</span></span>
-      </div>
-      {leader && leaderReading && (
-        <p style={{ margin: "12px 0 0", color: "var(--muted)", lineHeight: 1.6 }}>
-          Current 20D leader: <strong style={{ color: "var(--ink)" }}>{leader.name}</strong>{" "}
-          ({formatPercent(leaderReading.excess_return_20d)} excess vs IHSG).{" "}
-          <Link to={groupHref(leader, date, "daily", "60d")}>Inspect {leader.name} →</Link>
-        </p>
+    <section className="dash-card reveal" aria-label="Dashboard preview">
+      <div className="eyebrow-muted">Dashboard preview · Data through {formatDateLabel(asOf)}</div>
+      {plotted.length > 0 ? (
+        <svg
+          viewBox={`0 0 ${PREVIEW_W} ${PREVIEW_H}`}
+          width="100%"
+          role="img"
+          aria-label="Preview of the 60D rotation map"
+          style={{ display: "block", marginTop: 8 }}
+        >
+          <line x1={px(0)} x2={px(0)} y1={PREVIEW_PAD - 8} y2={PREVIEW_H - PREVIEW_PAD + 8} stroke="var(--line)" />
+          <line x1={PREVIEW_PAD - 8} x2={PREVIEW_W - PREVIEW_PAD + 8} y1={py(0)} y2={py(0)} stroke="var(--line)" />
+          {plotted.map((p) => {
+            const isLeader = leader != null && p.group.id === leader.id
+            return (
+              <g key={p.group.id}>
+                <circle
+                  cx={px(p.x)}
+                  cy={py(p.y)}
+                  r={isLeader ? 7 : 5}
+                  fill={p.confirmed ? "var(--accent-ink)" : "none"}
+                  stroke="var(--accent-ink)"
+                  strokeWidth={p.confirmed ? 0 : 1.5}
+                  opacity={p.confirmed ? 0.9 : 0.8}
+                />
+                {isLeader && (
+                  <text x={px(p.x) + 10} y={py(p.y) + 4} fontSize="10" fill="var(--ink)">
+                    {p.group.name}
+                  </text>
+                )}
+              </g>
+            )
+          })}
+        </svg>
+      ) : (
+        <p style={{ color: "var(--muted)", margin: "10px 0 0" }}>No map points for this date.</p>
       )}
-      <p style={{ margin: "10px 0 0", fontSize: 12, color: "var(--muted)", lineHeight: 1.6 }}>
-        Confirmed readings require five contributors. Smaller groups remain visible as descriptive points.
-      </p>
+      <div style={{ marginTop: 4, fontFamily: "Geist Mono, monospace", fontSize: 9, color: "var(--muted)" }}>
+        60D excess vs IHSG → · Hollow marks have fewer than five contributors
+      </div>
+      <ul style={{ margin: "12px 0 0", padding: 0, listStyle: "none", display: "grid", gap: 8 }}>
+        {top.map((group) => {
+          const value = reading(group)?.excess_return_20d ?? 0
+          return (
+            <li key={group.id} style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", gap: 4, alignItems: "baseline" }}>
+              <Link
+                to={groupHref(group, date, "daily", "60d")}
+                style={{ color: "var(--ink)", fontSize: 13, textDecoration: "none", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+              >
+                {group.name}
+              </Link>
+              <span style={{ fontFamily: "Geist Mono, monospace", fontSize: 12, color: value >= 0 ? "var(--up)" : "var(--down)" }}>
+                {formatPercent(value)}
+              </span>
+              <span
+                aria-hidden="true"
+                style={{
+                  gridColumn: "1 / -1",
+                  height: 4,
+                  background: "var(--line)",
+                  position: "relative",
+                }}
+              >
+                <span
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    width: `${(Math.abs(value) / topAbs) * 100}%`,
+                    background: value >= 0 ? "var(--up)" : "var(--down)",
+                  }}
+                />
+              </span>
+            </li>
+          )
+        })}
+      </ul>
+      <div style={{ marginTop: 14 }}>
+        <Link to="/sectors" style={{ color: "var(--ink)", fontSize: 13, textDecoration: "none", borderBottom: "1px solid var(--line)" }}>
+          Open the Dashboard →
+        </Link>
+      </div>
     </section>
   )
 }
@@ -390,7 +466,7 @@ export default function PublicHome() {
             </div>
           </div>
 
-          <LiveObservations />
+          <DashboardPreview />
         </section>
 
         {/* ── Three lenses ── */}

@@ -1,56 +1,75 @@
-import { useEffect, useRef, useState } from "react";
+// TradingViewTechnicalAnalysis — official free technical-analysis embed.
+//
+// The widget uses TradingView's publicly available technical-analysis embed
+// (s3.tradingview.com), injected lazily with a JSON config. It is for
+// **context only**: dated IHSG history is the source of truth for the
+// overview. TradingView data loads client-side from TradingView's servers;
+// if the user's network blocks TradingView the card renders a distinct
+// unavailable state with a retry action instead.
+//
+// References:
+//   https://www.tradingview.com/widget-docs/widgets/technical-analysis/technical-analysis-gauge/
 
-const SCRIPT_ID = "tradingview-technical-analysis-script";
-const SCRIPT_SRC = "https://www.tradingview-widget.com/w/en/tv-technical-analysis.js";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-let scriptPromise: Promise<boolean> | null = null;
+const SCRIPT_SRC = "https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js";
 
-function loadTechnicalAnalysis(): Promise<boolean> {
-  if (customElements.get("tv-technical-analysis")) return Promise.resolve(true);
-  if (scriptPromise) return scriptPromise;
-  scriptPromise = new Promise((resolve) => {
-    const existing = document.getElementById(SCRIPT_ID) as HTMLScriptElement | null;
-    const script = existing ?? document.createElement("script");
-    script.id = SCRIPT_ID;
-    script.type = "module";
-    script.src = SCRIPT_SRC;
-    script.async = true;
-    script.onload = () => resolve(Boolean(customElements.get("tv-technical-analysis")));
-    script.onerror = () => {
-      script.remove();
-      scriptPromise = null;
-      resolve(false);
-    };
-    if (!existing) document.head.appendChild(script);
-  });
-  return scriptPromise;
+type WidgetStatus = "loading" | "ready" | "unavailable";
+
+function buildConfig(colorTheme: "light" | "dark"): Record<string, unknown> {
+  return {
+    interval: "1D",
+    width: "100%",
+    height: 320,
+    symbol: "IDX:COMPOSITE",
+    showIntervalTabs: true,
+    displayMode: "single",
+    locale: "en",
+    colorTheme,
+    isTransparent: true,
+  };
 }
 
 export default function TradingViewTechnicalAnalysis() {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [status, setStatus] = useState<"loading" | "ready" | "unavailable">("loading");
+  const [status, setStatus] = useState<WidgetStatus>("loading");
+  const [attempt, setAttempt] = useState(0);
+
+  const embed = useCallback(() => {
+    const container = containerRef.current;
+    if (!container) {
+      setStatus("unavailable");
+      return;
+    }
+    setStatus("loading");
+    container.replaceChildren();
+    const script = document.createElement("script");
+    script.src = SCRIPT_SRC;
+    script.async = true;
+    script.textContent = JSON.stringify(
+      buildConfig(document.documentElement.classList.contains("dark") ? "dark" : "light"),
+    );
+    script.onload = () => {
+      // The embed script injects its iframe synchronously on execution; if no
+      // iframe appears the widget was blocked downstream.
+      window.setTimeout(() => {
+        if (container.querySelector("iframe")) setStatus("ready");
+        else {
+          script.remove();
+          setStatus("unavailable");
+        }
+      }, 1500);
+    };
+    script.onerror = () => {
+      script.remove();
+      setStatus("unavailable");
+    };
+    container.appendChild(script);
+  }, []);
 
   useEffect(() => {
-    let cancelled = false;
-    loadTechnicalAnalysis().then((loaded) => {
-      if (cancelled) return;
-      if (!loaded || !containerRef.current) {
-        setStatus("unavailable");
-        return;
-      }
-      const widget = document.createElement("tv-technical-analysis");
-      widget.setAttribute("symbol", "IDX:COMPOSITE");
-      widget.setAttribute("interval", "1D");
-      widget.setAttribute("theme", document.documentElement.classList.contains("dark") ? "dark" : "light");
-      widget.setAttribute("locale", "en");
-      containerRef.current.replaceChildren(widget);
-      setStatus("ready");
-    });
-    return () => {
-      cancelled = true;
-      containerRef.current?.replaceChildren();
-    };
-  }, []);
+    embed();
+  }, [embed, attempt]);
 
   return (
     <section className="tradingview-analysis-card" aria-labelledby="tradingview-analysis-title" data-widget-status={status}>
@@ -64,6 +83,14 @@ export default function TradingViewTechnicalAnalysis() {
       <div ref={containerRef} className="tradingview-analysis-frame" aria-label="TradingView technical analysis for IDX Composite" hidden={status === "unavailable"}>
         {status === "loading" && <p className="tradingview-widget-fallback">Loading the IDX Composite technical summary…</p>}
       </div>
+      {status === "unavailable" && (
+        <div className="tradingview-widget-fallback">
+          <p style={{ margin: "0 0 10px" }}>The external technical summary could not be loaded.</p>
+          <button type="button" className="btn btn-outline" onClick={() => setAttempt((n) => n + 1)}>
+            Retry
+          </button>
+        </div>
+      )}
       <p className="tradingview-widget-note">Third-party market summary; separate from the selected date’s calculated readings.</p>
     </section>
   );
