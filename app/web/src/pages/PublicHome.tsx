@@ -2,6 +2,7 @@ import { Link } from "react-router"
 import { useEffect, useRef, useState } from "react"
 import ThemeToggle from "../components/ThemeToggle"
 import { BrandLockup } from "../components/BrandMark"
+import SiteFooter from "../components/SiteFooter"
 import { groupHref, useResearch } from "../data/research"
 import { formatDateLabel, formatPercent } from "../data/format"
 
@@ -521,27 +522,7 @@ export default function PublicHome() {
         </section>
 
         {/* ── Footer ── */}
-        <footer
-          style={{
-            borderTop: "1px solid var(--line)",
-            padding: "28px 0 48px",
-            display: "flex",
-            justifyContent: "space-between",
-            gap: 16,
-            flexWrap: "wrap",
-          }}
-        >
-          <p style={{ color: "var(--muted)", fontSize: 12, maxWidth: 560, lineHeight: 1.65, margin: 0 }}>
-            The Diffusion is an analytical market-intelligence prototype for research and
-            education. It does not provide investment advice. Pages open verified local
-            data and make no provider calls.
-          </p>
-          <nav aria-label="Footer" style={{ display: "flex", gap: 16, fontSize: 12 }}>
-            <Link to="/sectors" style={{ color: "var(--muted)", textDecoration: "none" }}>Dashboard</Link>
-            <Link to="/sources" style={{ color: "var(--muted)", textDecoration: "none" }}>Coverage &amp; sources</Link>
-            <Link to="/methodology" style={{ color: "var(--muted)", textDecoration: "none" }}>Methodology</Link>
-          </nav>
-        </footer>
+        <SiteFooter />
       </main>
     </div>
   )
