@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "sample_sha256": "9e9c8540e676eed99acd4dbfe4bdf86534e1a3a9a6e6575e3d3ce99281390f20",
+  "counts": {
+    "member_window_values": 5148,
+    "sector_return_aggregates": 858,
+    "diffusion_states_and_cohorts": 286,
+    "daily_observations": 21,
+    "weekly_observations": 5,
+    "ytd_contributor_values": 66,
+    "ytd_group_aggregates": 11,
+    "concentration_values": 2484
+  },
+  "ytd_status": "PASS",
+  "mismatch_count": 0,
+  "mismatches": [],
+  "method": "Independent close arithmetic and pure integer-count diffusion thresholds; production helpers and classifiers are not imported."
+}

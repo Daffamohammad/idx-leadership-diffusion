@@ -1,0 +1,10 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.14.8, pytest-9.1.1, pluggy-1.6.0
+rootdir: /Users/daffa/Hackathon/idx-leadership-diffusion
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 23 items
+
+tests/test_submission_repair.py .......................                  [100%]
+
+============================== 23 passed in 1.81s ==============================

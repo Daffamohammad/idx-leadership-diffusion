@@ -1,134 +1,117 @@
-# The Diffusion · submission release, 8 October 2026
+# The Diffusion · 8 October 2026
 
-## Product and evidence boundary
+The Diffusion helps equity researchers inspect leadership beneath the Indonesian
+index: which sectors outperform IHSG, whether participation changes, and which
+constituents drive the move. Open **Dashboard** at `/sectors`, then select a
+group, replay a date, inspect an individual price path, or compare baskets.
 
-**Problem.** Index performance can conceal different sector leadership and
-constituent breadth. **Audience.** Market-intelligence reviewers and equity
-researchers who want to inspect a sector signal down to the stocks contributing
-to it.
+## Coverage and readings
 
-The primary submission workflow is `/sectors`: sectors ranked by 20-session
-excess return, a 60-session excess-return versus relative-momentum map, daily
-and weekly replay, and a constituent inspector. The fixed retrospective universe
-contains 66 stocks, six in each of 11 sectors, selected from the frozen market
-source observed on 2 October 2026. The page retains every member and reports
-eligible contributors. Returns use raw Sectors stock closes and native Sectors
-IHSG closes. Mechanical corporate actions exclude affected stock windows;
-missing values remain missing, each paired replay comparison uses a common
-cohort, and signals below five contributors are unconfirmed. No adjusted-price
-claim or historical point-in-time membership claim is made.
+The Diffusion chooses **66 tracked stocks across 11 sectors, six per sector by
+market-cap ranking** on 2 October 2026. This is a retrospective project coverage
+choice, not a limit of the Sectors API. Returns use raw Sectors stock closes and
+native Sectors IHSG closes. Splits, rights issues, dividends, and other listed
+mechanical events exclude affected calculation windows. Missing observations
+remain missing. Each horizon has its own eligible contributors; each breadth
+comparison uses identical names at both dates. Concentration uses the actual
+20D contributors. A one-name change in six names is fragile; two names are firm.
 
-Opening the page reads only the active immutable release. If the selected
-release lacks the recorded sample, frozen selection-market source, or analysis,
-the primary workflow blocks and displays a distinct absent or validation-error
-state. Broader IDX views remain supporting context.
+The default map uses **60D excess versus IHSG** and **20D minus 60D excess
+momentum**. Its coordinate signs determine rotation phase. Leadership instead
+uses 20D excess and 5D-minus-60D acceleration with a 1 percentage-point threshold.
+The current core has eleven rankings, nine confirmed points, and two hollow
+descriptive points. Confirmed signals require five contributors. Empty
+quadrants are valid. Twenty-three supported YTD stock readings retain their
+own 2 October end date; no core sector reaches the five-name YTD floor.
 
-## Current release
+The broader IDX workflow uses its separately disclosed Yahoo Finance adjusted
+price panel. The catalogue contains all 34 Arthara reference labels and twelve
+retained portfolio identifiers, 102 IDXIC groups, and fifteen themes. Current
+60D maps contain 11 sector, 46 Konglo, 99 IDXIC, and 15 theme points. Groups
+without coordinates remain visible with their coverage reasons. Basket curves
+use fixed horizon cohorts and equal-weighted prices rebased at the window start;
+missing intermediate prices break the curve rather than changing its membership.
 
-- **Active:** `rel-fad218940fcc7e2492d97613681175b6cb2b2e38d387254737fafc0cadfa09dc`
-- **Active manifest SHA-256:** `2defade3acf1688eb96e0e40d577189f390eafd03fea69a1175ce5e07aa1f11c`
-- **Rollback release:** `rel-246dd63fa62c1321143334c799f116e686a7602141a94a97aa3cc41d54b0d708`
-- **Rollback manifest SHA-256:** `f2d2a3866ec002e5a9a7f1a7ec4e3bc1b8d4b15f431aaa52af7efccf3471759b`
-- **Recorded sample SHA-256:** `9e9c8540e676eed99acd4dbfe4bdf86534e1a3a9a6e6575e3d3ce99281390f20`
-- **Frozen selection-market SHA-256:** `f02edbe114d38543a1c13ac64df7b5b469e941e7859b15133d79e3a164cdf1c3`
-- **Signal-analysis SHA-256:** `4aeea2a1e8417c81fa896351ad09597e206b2e1f8705a8daac275d78e27c82b9`
-- **YTD baseline SHA-256:** `7f954900f67b0f701390c256b60412c60086d5ee5b2e5d09dfaf9ef18a357ff1`
+Business-group membership follows dated IDX holder positions, exact issuer
+legal-name links, and cited issuer evidence. Holdings, affiliation, and legal
+control are separate relationships. The 34-label reconciliation does not claim
+complete Arthara constituent counts, family ownership, or control. Analyst
+lenses and listed anchors are identified; indirect holdings paths require the
+stated ownership threshold and do not establish legal control. Undated issuer
+pages have retrieval and assessment dates, not invented publication dates.
 
-The recorded sample validates against the original frozen selection-market
-bytes whose hash it records, not a later market file. The analysis asset and
-all four Sectors assets are bound by the immutable release manifest.
+Ownership preserves 7,158 prior 1% register rows for genuine share and
+percentage-point comparisons. The current/prior 1% dates are 30 September /
+31 August 2026; the 5% disclosure date is 1 October. Its published prior shares
+remain separate, and prior percentages are not inferred. Ambiguous identities
+and account reconciliation flags remain visible. The default scope excludes
+KSEI composition and scripless-conversion analysis.
 
-The YTD baseline uses the last observed 2025 native IHSG close, 30 December
-2025. Twenty-four eligible stock requests returned 23 matching stock closes;
-WBSA returned no matching baseline and remains an explicit gap. The full YTD
-window excludes 42 constituents with listed mechanical actions. All 11 sector
-aggregates remain unconfirmed because each has fewer than five eligible names;
-the inspector shows only the 23 individual raw-price readings with a shared
-baseline and action-free window. The acquisition receipt records one initial
-DNS failure, the empty WBSA response, 461 total estimated requests/credits,
-and 39 remaining retry slots under the 500 ceiling. No further paid calls are
-authorized by this sign-off.
+## Verified package and rollback
 
-The dated 7 October receipts record the preceding acquisition and Sectors checks; they do not establish app-wide browser acceptance. The repair has a separate [browser QA receipt](repair-2026-10-08/browser-qa.json) and [readiness receipt](repair-2026-10-08/readiness.json), bound to its tested source commit and the active data release. See the [repair verification](repair-2026-10-08/VERIFICATION.md) for rendered figures, failure recovery, clean reproduction, and launch status.
+- Active: `rel-64026e36d49733009fec952086fc95a3121a86efbb196b1c68d00fd6317f33d2`
+- Manifest SHA-256: `98e2c260c9afae07ce2b1cb5b5436cda8bbff9978a0239d809d909183ad36e4f`
+- Tested source: `2e6c516c3254bbae0d380491487181bae1867f7b`
+- Immediate rollback: `rel-fad218940fcc7e2492d97613681175b6cb2b2e38d387254737fafc0cadfa09dc`
+- Rollback manifest SHA-256: `2defade3acf1688eb96e0e40d577189f390eafd03fea69a1175ce5e07aa1f11c`
 
-The subsequent 8 October copy follow-up labels the primary navigation entry
-**Dashboard** and displays **66** in the sources lead line. Its
-[targeted browser checks](label-followup-2026-10-08/qa.json) cover those labels
-on desktop and mobile. The full repair receipts above remain bound to their
-earlier tested source commit; the label receipt does not replace them.
+The original recording, ledgers, previous packages, technical asset identifiers,
+and historical receipts remain intact. The successor is activated through the
+existing immutable publication process. The previous package remains the
+pointer's rollback target; the earlier `rel-246dd63…` package is also retained.
 
-The [pre-acquisition readiness receipt](readiness-2026-10-07.json) records the
-offline gate before live baseline collection. The separate [YTD preflight
-record](budget-preflight-2026-10-07.json) documents its read-only plan: 433
-carried reservations, 25 base requests, and 42 reserved retry slots. The
-[acquisition validation receipt](ytd-acquisition-validation-2026-10-07.json)
-and [repository sign-off receipt](signoff-2026-10-07.json) record the observed
-responses and final release checks.
+**Paid acquisition remains on HOLD.** This repair made zero Sectors calls.
+The original budget retains 461 estimated reservations against its 500 ceiling.
+The user-reported 221 remaining provider calls have not been consumed or
+reconciled with that budget. No further acquisition is authorized by readiness.
 
-## Reproduction and checks
+Current evidence is in [final repair verification](final-repair-2026-10-08/VERIFICATION.md),
+including [browser QA](final-repair-2026-10-08/browser-qa.json),
+[readiness](final-repair-2026-10-08/readiness.json),
+[clean reproduction](final-repair-2026-10-08/clean-reproduction.json), and
+[publication](final-repair-2026-10-08/publication.json). Earlier audit reports
+remain dated records and do not replace these checks.
 
-From a clean checkout with the locked project dependencies installed:
+## Reproduce without credentials
 
-```sh
-.venv/bin/python -m pytest -q
-npm run typecheck --prefix app/web
-npm run build --prefix app/web
-```
-
-Rebuild the Sectors analysis from the active release's sample and frozen source,
-then verify it with the independent close-arithmetic and integer-count oracle:
+Install the locked Python and frontend dependencies, then:
 
 ```sh
 RELEASE_ID="$(.venv/bin/python -c 'import json; print(json.load(open("app/web/public/releases/active.json"))["active"]["release_id"])')"
 RELEASE_DIR="app/web/public/releases/$RELEASE_ID"
-.venv/bin/python scripts/build_sectors_analysis.py \
-  --sample "$RELEASE_DIR/assets/context/sectors_recorded_sample.json" \
-  --selection-market "$RELEASE_DIR/assets/context/sectors_selection_market.json" \
-  --ytd-baseline "$RELEASE_DIR/assets/context/sectors_ytd_baseline.json" \
-  --out /tmp/sectors_signal_analysis.json
-.venv/bin/python scripts/verify_sectors_analysis_oracle.py \
-  --sample "$RELEASE_DIR/assets/context/sectors_recorded_sample.json" \
-  --analysis /tmp/sectors_signal_analysis.json \
-  --ytd-baseline "$RELEASE_DIR/assets/context/sectors_ytd_baseline.json"
-```
-
-The broader IDX snapshot and price-breadth oracles remain part of the existing
-market release evidence in [the dated 6 October clean-checkout report](GIT_HANDOFF-2026-10-06.md).
-That report describes an earlier release. Use this file and the separate repair evidence above for current browser acceptance.
-
-For a production preview, build first, then keep this process running in a terminal:
-
-```sh
+.venv/bin/python -m scripts.prepare_final_repair \
+  --reproduce "$RELEASE_DIR/manifest.json" --destination /tmp/diffusion-reproduction
+.venv/bin/python -m scripts.verify_final_reading_oracle \
+  --manifest "$RELEASE_DIR/manifest.json" --out /tmp/diffusion-reading-oracle.json
+.venv/bin/python -m pytest -q
+npm run typecheck --prefix app/web
+npm run build --prefix app/web
 npm run preview --prefix app/web -- --host 127.0.0.1 --port 5173 --strictPort
 ```
 
-Open `http://127.0.0.1:5173/sectors`. A stopped preview process makes later data requests fail; cached screen content is not a working preview. The root route opens `/sectors`; `/sources` holds coverage and provenance. Browser rendering makes no Sectors requests.
+Open `http://127.0.0.1:5173/sectors`. All inputs needed to rebuild the native core
+and broader group readings are hash-bound in the package. No credentials,
+provider transport, or paid requests are needed. Group/ticker links preserve
+`scope`, `date`, `cadence`, and `horizon`; `/recorded-sample` redirects to `/sources`.
 
-Readiness requires real browser observations and hashed screenshots for 1036×799, 1440×900, and 390×844, including all visible navigation routes, interrupted serving, corrupt assets, and retry recovery. The verifier rejects failed, incomplete, or stale evidence:
+Readiness accepts a browser receipt, not a boolean approval. It rejects missing,
+failed, incomplete, or stale source/release evidence and validates screenshot
+hashes for 1036×799, 1369×799, 1440×900, and 390×844:
 
 ```sh
-.venv/bin/python scripts/verify_sectors_readiness.py \
-  --browser-qa-receipt docs/submission-release/repair-2026-10-08/browser-qa.json \
+.venv/bin/python -m scripts.verify_sectors_readiness \
+  --browser-qa-receipt docs/submission-release/final-repair-2026-10-08/browser-qa.json \
   --out /tmp/diffusion-readiness-new.json
 ```
 
-Existing dated receipts are never overwritten. Documentation-only commits may follow the tested source commit; any code or released-data change requires fresh evidence.
+## Delivery gates
 
-## Submission checklist
+The local application and public repository are separate from public hosting.
+See the dated [launch evidence](final-repair-2026-10-08/launch.json) for the latest
+Vercel result. A public URL must pass fresh-load checks before hosting is accepted.
+Videos, the prescribed social post, and final submission remain deferred; app
+verification alone does not complete the submission.
 
-Repository verification, public hosting, and final submission are separate gates. The public launch currently depends on connecting the repository to the existing Vercel GitHub integration; a local readiness receipt does not establish a public deployment. The
-[official track description](https://hackathon.sectors.app/tracks/market-intelligence)
-and [hackathon rules](https://hackathon.sectors.app/rules) govern eligibility
-and delivery. The repository/core workflow is tracked separately from the
-remaining submission media: a public one-minute teaser, an accessible judging
-video no longer than three minutes, the problem statement, track and team
-details, and the prescribed social post. Submission closes 8 October 2026 at
-23:59 WIB and the project freezes when submitted. Those materials remain to be
-completed after repository sign-off.
-
-## Dated historical records
-
-The 6 October audit, handoff, release verification, source archive inventory,
-and walkthrough remain unchanged as dated evidence of the preceding build.
-They are retained for provenance and rollback history, not as descriptions of
-the active `/sectors` workflow.
+Historical source and acquisition evidence includes the [6 October handoff](GIT_HANDOFF-2026-10-06.md),
+[7 October sign-off](signoff-2026-10-07.json), and the earlier
+[8 October repair](repair-2026-10-08/VERIFICATION.md). These records are preserved.

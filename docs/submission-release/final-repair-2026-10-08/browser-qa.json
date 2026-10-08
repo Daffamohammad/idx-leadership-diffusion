@@ -1,0 +1,626 @@
+{
+  "schema_version": "diffusion-browser-qa-v1",
+  "status": "PASS",
+  "created_at_utc": "2026-10-08T07:43:04.715Z",
+  "source_commit": "2e6c516c3254bbae0d380491487181bae1867f7b",
+  "release_id": "rel-64026e36d49733009fec952086fc95a3121a86efbb196b1c68d00fd6317f33d2",
+  "manifest_sha256": "98e2c260c9afae07ce2b1cb5b5436cda8bbff9978a0239d809d909183ad36e4f",
+  "checks": {
+    "core_interactions": {
+      "status": "PASS",
+      "observed": {
+        "groups": [
+          {
+            "sector": "Basic Materials",
+            "count": 6
+          },
+          {
+            "sector": "Consumer Cyclicals",
+            "count": 6
+          },
+          {
+            "sector": "Consumer Non-Cyclicals",
+            "count": 6
+          },
+          {
+            "sector": "Energy",
+            "count": 6
+          },
+          {
+            "sector": "Financials",
+            "count": 6
+          },
+          {
+            "sector": "Healthcare",
+            "count": 6
+          },
+          {
+            "sector": "Industrials",
+            "count": 6
+          },
+          {
+            "sector": "Infrastructures",
+            "count": 6
+          },
+          {
+            "sector": "Properties & Real Estate",
+            "count": 6
+          },
+          {
+            "sector": "Technology",
+            "count": 6
+          },
+          {
+            "sector": "Transportation & Logistic",
+            "count": 6
+          }
+        ],
+        "total_unique_constituents": 66,
+        "daily_dates": 21,
+        "weekly_dates": 5,
+        "ytd_date_during_replay": "2026-10-02",
+        "playback_progressed_to": "2026-10-02"
+      }
+    },
+    "chart_interactions": {
+      "status": "PASS",
+      "observed": {
+        "comparison_curves": 3,
+        "comparison_window": "identical benchmark sessions",
+        "constituent": "FORU.JK",
+        "corporate_action_mark": "right_issue",
+        "keyboard_tooltip_inspected": true,
+        "context_curve": "Transportation & Logistic 30/40 on both 20D and 60D, matching the reading contract",
+        "mobile": {
+          "selected": "Healthcare",
+          "viewport": "390x844",
+          "table_container": 355,
+          "table_scroll_width": 872,
+          "tooltip": "16 Sep 2026\n\nEqual-weight basket : 2.09%\nIHSG : -3.01%",
+          "overflow": false
+        }
+      }
+    },
+    "server_restart": {
+      "status": "PASS",
+      "observed": {
+        "interrupted_refresh": "connection refused while QA server was stopped",
+        "after_restart_map_marks": 11,
+        "after_restart_rankings": 11,
+        "browser_recovery": "fresh localhost navigation"
+      }
+    },
+    "sectors_1036x799": {
+      "status": "PASS",
+      "observed": {
+        "alerts": 0,
+        "banned": null,
+        "confirmed": 9,
+        "curves": 3,
+        "height": 799,
+        "marks": 11,
+        "overflow": false,
+        "rankings": 11,
+        "width": 1036
+      }
+    },
+    "sectors_1369x799": {
+      "status": "PASS",
+      "observed": {
+        "alerts": 0,
+        "banned": null,
+        "confirmed": 9,
+        "curves": 3,
+        "height": 799,
+        "marks": 11,
+        "overflow": false,
+        "rankings": 11,
+        "width": 1369
+      }
+    },
+    "sectors_1440x900": {
+      "status": "PASS",
+      "observed": {
+        "alerts": 0,
+        "banned": null,
+        "confirmed": 9,
+        "curves": 3,
+        "height": 900,
+        "marks": 11,
+        "overflow": false,
+        "rankings": 11,
+        "width": 1440
+      }
+    },
+    "sectors_390x844": {
+      "status": "PASS",
+      "observed": {
+        "alerts": 0,
+        "banned": null,
+        "confirmed": 9,
+        "curves": 3,
+        "height": 844,
+        "marks": 11,
+        "overflow": false,
+        "rankings": 11,
+        "width": 390
+      }
+    },
+    "context_map": {
+      "status": "PASS",
+      "observed": {
+        "taxonomies": [
+          {
+            "taxonomy": "SECTOR",
+            "confirmed": 11,
+            "curves": 3,
+            "groups": 11,
+            "marks": 11,
+            "overflow": false
+          },
+          {
+            "taxonomy": "KONGLO",
+            "confirmed": 11,
+            "curves": 3,
+            "groups": 46,
+            "marks": 46,
+            "overflow": false
+          },
+          {
+            "taxonomy": "IDXIC",
+            "confirmed": 50,
+            "curves": 3,
+            "groups": 102,
+            "marks": 99,
+            "overflow": false
+          },
+          {
+            "taxonomy": "CURATED_THEMES",
+            "confirmed": 14,
+            "curves": 3,
+            "groups": 15,
+            "marks": 15,
+            "overflow": false
+          }
+        ],
+        "default_axis": "60d",
+        "descriptive_marks_retained": true
+      }
+    },
+    "catalogue_34": {
+      "status": "PASS",
+      "observed": {
+        "reference_entries": 34,
+        "displayed_groups": 46,
+        "missing": [],
+        "reference_names": [
+          "Salim",
+          "TNT \u00b7 Saratoga \u00b7 Adaro",
+          "Sinar Mas",
+          "Lippo",
+          "Bakrie",
+          "Tanoko \u00b7 Tancorp",
+          "Happy Hapsoro \u00b7 Rukun Raharja",
+          "Astra \u00b7 Jardine",
+          "Triputra \u00b7 Adaro",
+          "Panin",
+          "Djarum \u00b7 Hartono",
+          "Barito \u00b7 Prajogo Pangestu",
+          "Gajah Tunggal \u00b7 MAP",
+          "Agung Sedayu",
+          "Haji Isam \u00b7 Jhonlin",
+          "Emtek",
+          "Bayan",
+          "Alfa Corp",
+          "Mayapada",
+          "Artha Graha",
+          "Trakindo",
+          "Rajawali",
+          "Hashim \u00b7 Arsari",
+          "CT Corp",
+          "Sungai Budi",
+          "Pakuwon",
+          "Medco \u00b7 Amman",
+          "Mandiri Coal",
+          "KPN \u00b7 Wilmar",
+          "Harita",
+          "Garudafood",
+          "FKS",
+          "First Resources",
+          "Charoen Pokphand"
+        ]
+      }
+    },
+    "ownership_comparisons": {
+      "status": "PASS",
+      "observed": {
+        "prior_1pct_rows": 7158,
+        "current_1pct_date": "2026-09-30",
+        "prior_1pct_date": "2026-08-31",
+        "five_pct_date": "2026-10-01",
+        "issuer": "BBRI",
+        "one_pct_share_and_pp_differences_visible": true,
+        "five_pct_prior_percentage": "Not comparable",
+        "sourced_relationship_links": true,
+        "bbri_rows": [
+          "BBRIPERUSAHAAN PERSEROAN (PERSERO) PT DANANTARA ASSET MANAGEMENTMatched published name79,804,867,10779,804,867,1070+<0.00001 pp",
+          "BBRIEMPLOYEES PROVIDENT FUND BOARDMatched published name1,889,207,9581,841,958,558-47,249,400-0.03 pp"
+        ],
+        "source_links": 380,
+        "five_percent_rows": [
+          "AADIADARO STRATEGIC INVESTMENTSPublished share comparison3,200,142,8303,200,142,8300Not comparable",
+          "AADIALAMTRI RESOURCES INDONESIA TBK PTPublished share comparison1,197,023,9421,197,023,9420Not comparable",
+          "AADIGARIBALDI THOHIRPublished share comparison454,011,607454,011,6070Not comparable"
+        ]
+      }
+    },
+    "loading_state": {
+      "status": "PASS",
+      "observed": {
+        "message": "Loading and verifying sectors analysis",
+        "delay_seconds": 15,
+        "absent_message_not_shown": true
+      }
+    },
+    "fetch_error_retry": {
+      "status": "PASS",
+      "observed": {
+        "failure": "HTTP 503; plain data error beside the affected workflow",
+        "retry": "Retry restores all eleven rankings and current map points",
+        "alerts": 0
+      }
+    },
+    "absent_asset": {
+      "status": "PASS",
+      "observed": {
+        "message": "Group evidence is unavailable for this universe.",
+        "map_points": 0,
+        "failure_alerts": 0
+      }
+    },
+    "corrupt_core": {
+      "status": "PASS",
+      "observed": {
+        "message": "Sectors analysis could not be loaded\n\nData integrity check failed. The source evidence cannot be verified.\n\nRetry",
+        "marks": 0,
+        "retry_button": 1
+      }
+    },
+    "missing_selection": {
+      "status": "PASS",
+      "observed": {
+        "message": "Sectors analysis could not be loaded\n\nThe frozen selection-market asset is missing from this data package.\n\nRetry",
+        "marks": 0
+      }
+    },
+    "corrupt_ytd": {
+      "status": "PASS",
+      "observed": {
+        "message": "Sectors analysis could not be loaded\n\nData integrity check failed. The source evidence cannot be verified.\n\nRetry",
+        "marks": 0
+      }
+    },
+    "sources": {
+      "status": "PASS",
+      "observed": {
+        "tracked_stocks": 66,
+        "coverage_choice": "The Diffusion chooses six stocks per IDX sector by market cap; provider reach is separate",
+        "flow": "IDX Q3 market flow, Source: Sectors API",
+        "all_stock_names_link_to_charts": true
+      }
+    },
+    "map_without_history": {
+      "status": "PASS",
+      "observed": {
+        "current_points": 11,
+        "trails": 0,
+        "basis": "One dated reading per group; no zero coordinates or fabricated trails"
+      }
+    },
+    "overview": {
+      "status": "PASS",
+      "observed": {
+        "ihsg": "6,036.89 through 2 Oct 2026",
+        "previous_close": "6,009.50",
+        "daily_change": "+27.386 pts; +0.46%",
+        "alerts": 0,
+        "underlying_close": 6036.88818359375,
+        "note": "The immutable benchmark value rounds to the displayed 6,036.89."
+      }
+    },
+    "weekly_comparison": {
+      "status": "PASS",
+      "observed": {
+        "rows": 11,
+        "matched_names": 758,
+        "breadth": "59.5%",
+        "diffusion_counts": {
+          "broadening": 1,
+          "stable": 9,
+          "narrowing": 1
+        },
+        "breadth_curve": "Five dated values; 500 pixel rendered curve",
+        "baseline": "4 Sep has eleven unavailable diffusion comparisons and unavailable deltas",
+        "dates": [
+          "2026-09-04",
+          "2026-09-11",
+          "2026-10-02"
+        ],
+        "persistence": "Earlier date shows 1 observation; no future observations counted"
+      }
+    },
+    "navigation_smoke": {
+      "status": "PASS",
+      "observed": {
+        "routes": [
+          "/sectors",
+          "/sources",
+          "/overview",
+          "/what-changed",
+          "/movers",
+          "/foreign",
+          "/ownership",
+          "/heatmap",
+          "/map",
+          "/konglo",
+          "/themes",
+          "/explorer",
+          "/groups",
+          "/tickers",
+          "/methodology"
+        ],
+        "details": [
+          {
+            "alerts": [],
+            "banned": null,
+            "curves": 3,
+            "h1": "Leadership beneath the index",
+            "marks": 11,
+            "overflow": false,
+            "route": "/sectors"
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "curves": 0,
+            "h1": "Coverage & sources",
+            "marks": 0,
+            "overflow": false,
+            "route": "/sources"
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "curves": 2,
+            "h1": "IDX leadership & diffusion",
+            "marks": 0,
+            "overflow": false,
+            "route": "/overview"
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "curves": 1,
+            "h1": "Weekly market changes",
+            "marks": 0,
+            "overflow": false,
+            "route": "/what-changed"
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "curves": 0,
+            "h1": "Market movers",
+            "marks": 0,
+            "overflow": false,
+            "route": "/movers"
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "curves": 1,
+            "h1": "Foreign flow",
+            "marks": 0,
+            "overflow": false,
+            "route": "/foreign"
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "curves": 0,
+            "h1": "Ownership",
+            "marks": 0,
+            "overflow": false,
+            "route": "/ownership"
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "curves": 0,
+            "h1": "Stock heatmap",
+            "marks": 0,
+            "overflow": false,
+            "route": "/heatmap"
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "curves": 3,
+            "h1": "Leadership map",
+            "marks": 11,
+            "overflow": false,
+            "route": "/map"
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "curves": 3,
+            "h1": "Konglo catalogue",
+            "marks": 0,
+            "overflow": false,
+            "route": "/konglo"
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "curves": 3,
+            "h1": "Group catalogue",
+            "marks": 0,
+            "overflow": false,
+            "route": "/themes"
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "curves": 3,
+            "h1": "Transportation & Logistic",
+            "marks": 0,
+            "overflow": false,
+            "route": "/explorer"
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "curves": 3,
+            "h1": "Group catalogue",
+            "marks": 0,
+            "overflow": false,
+            "route": "/groups"
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "curves": 0,
+            "h1": "Ticker Explorer",
+            "marks": 0,
+            "overflow": false,
+            "route": "/tickers"
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "curves": 0,
+            "h1": "How to read the research",
+            "marks": 0,
+            "overflow": false,
+            "route": "/methodology"
+          }
+        ]
+      }
+    }
+  },
+  "metrics": {
+    "ranking_rows": 11,
+    "sectors_map_marks": 11,
+    "constituents_inspected": 66,
+    "daily_dates": 21,
+    "weekly_dates": 5,
+    "context_sector_marks": 11,
+    "context_idxic_marks": 99,
+    "context_theme_marks": 15,
+    "konglo_groups": 46,
+    "catalogue_reference_groups": 34,
+    "ihsg_close": 6036.88818359375
+  },
+  "unexpected_console_errors": 0,
+  "unexpected_data_request_failures": 0,
+  "sectors_provider_requests": 0,
+  "expected_failure_tests": "Separate no-cache QA origin; deliberate 503 and digest failures are expected. Stopped serving caused connection refusal; restarting and a fresh tab recovered.",
+  "tested_origins": [
+    "http://127.0.0.1:5180",
+    "http://127.0.0.1:5191"
+  ],
+  "normal_console_logs": [],
+  "screenshots": [
+    {
+      "path": "docs/submission-release/final-repair-2026-10-08/screenshots/constituent-mobile-390x844.jpg",
+      "sha256": "f6492493c414410f340dc89a0894faf97881893f39f8db62e5194a13055841d6",
+      "viewport": "390x844",
+      "bytes": 41238
+    },
+    {
+      "path": "docs/submission-release/final-repair-2026-10-08/screenshots/corrupt-core-1440x900.jpg",
+      "sha256": "900a7bc9675e9c9703cce8feae1c3c6cfdb72f7ba7da5807633aa7f0f5441e6e",
+      "viewport": "1280x720",
+      "bytes": 35515
+    },
+    {
+      "path": "docs/submission-release/final-repair-2026-10-08/screenshots/fetch-error-1440x900.jpg",
+      "sha256": "d5423f5c8d576b523a01166e60aeee74d56bec3c5172661042b9f09de8e1fb5f",
+      "viewport": "1280x720",
+      "bytes": 36129
+    },
+    {
+      "path": "docs/submission-release/final-repair-2026-10-08/screenshots/loading-1440x900.jpg",
+      "sha256": "5fdcd33a446f967acccabd9a8d2f564070dc89d0bc0a02c054d00ff4e750fb3b",
+      "viewport": "1280x720",
+      "bytes": 31899
+    },
+    {
+      "path": "docs/submission-release/final-repair-2026-10-08/screenshots/map-curated_themes-1440x900.jpg",
+      "sha256": "eb44ed31a14f62f2fd804d7ff23510834de9081aca76de79f5b6c4893d6be126",
+      "viewport": "1440x900",
+      "bytes": 94074
+    },
+    {
+      "path": "docs/submission-release/final-repair-2026-10-08/screenshots/map-idxic-1440x900.jpg",
+      "sha256": "0b6910606fe2ef81016473c2ac03d9663e983ef7b193024b57025ddef22b7e17",
+      "viewport": "1440x900",
+      "bytes": 97993
+    },
+    {
+      "path": "docs/submission-release/final-repair-2026-10-08/screenshots/map-konglo-1440x900.jpg",
+      "sha256": "d3669ed0d2401196798ef435258af1d9070cf98bf1caf45cc9df86e385867f0b",
+      "viewport": "1440x900",
+      "bytes": 98937
+    },
+    {
+      "path": "docs/submission-release/final-repair-2026-10-08/screenshots/map-sector-1440x900.jpg",
+      "sha256": "dc6073f84cea71b424776b5e6e01af45a022ea12e3f7b1f58b055044f93d2fb3",
+      "viewport": "1440x900",
+      "bytes": 94876
+    },
+    {
+      "path": "docs/submission-release/final-repair-2026-10-08/screenshots/overview-1440x900.jpg",
+      "sha256": "69ff6392b8f5769611cfacac9f24a252b9c526f4e643d6407e8ea9549168117d",
+      "viewport": "1425x891",
+      "bytes": 112462
+    },
+    {
+      "path": "docs/submission-release/final-repair-2026-10-08/screenshots/ownership-compare-1440x900.jpg",
+      "sha256": "da14ebedbe42ecaacd120e2354033fd7d7c2e81dc613fff026367673e690429f",
+      "viewport": "1440x900",
+      "bytes": 96320
+    },
+    {
+      "path": "docs/submission-release/final-repair-2026-10-08/screenshots/sectors-1036x799.jpg",
+      "sha256": "68131678f8fa5f7e2552e1ca320c606275d6fb5864d3423808c6f615f048337c",
+      "viewport": "1036x799",
+      "bytes": 74186
+    },
+    {
+      "path": "docs/submission-release/final-repair-2026-10-08/screenshots/sectors-1369x799.jpg",
+      "sha256": "8e0e1c7d4f7b259b2fbc82c47381163d571769a924d7b2a63e705a947789336e",
+      "viewport": "1369x799",
+      "bytes": 89161
+    },
+    {
+      "path": "docs/submission-release/final-repair-2026-10-08/screenshots/sectors-1440x900.jpg",
+      "sha256": "8a0ccfbf62c8a53f3a0d78182c8b976617147723ed45417d81857df964131ddf",
+      "viewport": "1440x900",
+      "bytes": 97651
+    },
+    {
+      "path": "docs/submission-release/final-repair-2026-10-08/screenshots/sectors-390x844.jpg",
+      "sha256": "bc720616c5687a96ec8ba2d8cbb461551d7eeb419a21e0a6857b9f842369473f",
+      "viewport": "390x844",
+      "bytes": 37306
+    },
+    {
+      "path": "docs/submission-release/final-repair-2026-10-08/screenshots/weekly-1440x900.jpg",
+      "sha256": "f6d017575fc2da1623d6160b5db96616a93fd9e948c622619770ba2739ac3ebf",
+      "viewport": "1440x900",
+      "bytes": 108972
+    }
+  ]
+}

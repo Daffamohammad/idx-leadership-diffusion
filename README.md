@@ -13,45 +13,58 @@ source-bound prices, explicit contributor counts, and replayable calculations.
 **Audience.** Market-intelligence reviewers and equity researchers who need to
 inspect sector signals down to their contributing stocks and data limitations.
 
-The primary workflow is `/sectors`: rank 11 sectors by 20-session excess return,
-compare 60-session excess return with relative momentum, replay daily or weekly
-observations, and inspect all 66 selected constituents. The tracked universe contains six
-stocks per sector and was selected from a frozen 2 October 2026 market source.
-It is retrospective, not historical point-in-time membership. Returns use raw
-Sectors closes against native Sectors IHSG closes. Listed splits, rights issues,
-bonuses, dividends, and other mechanical changes exclude a stock from the
-affected window; missing prices stay missing, and signals require at least five
-contributors. Each replay comparison uses the same eligible names at both
-dates, while eligibility can change between date pairs.
+The primary workflow is **Dashboard** at `/sectors`: eleven 20D sector rankings,
+a 60D excess-return map, daily/weekly playback, actual group and IHSG price
+curves, concentration detail, and all 66 constituent charts. The Diffusion
+chooses six stocks per IDX sector by market-cap ranking on 2 October 2026.
+That retrospective choice describes this project's coverage, rather than the
+Sectors API's coverage. Prices are raw Sectors closes against native Sectors
+IHSG observations; mechanical corporate actions exclude affected windows.
+Eligibility is separate for each horizon. Missing readings stay missing.
+There are nine confirmed map points and two descriptive points below the
+five-contributor floor. Twenty-three supported stock YTD readings retain their
+own end date, 2 October 2026, during earlier replay selections.
 
-The `/sectors` page reads released, hash-validated assets and makes no provider
-calls when opened. `/sources` documents coverage and recording provenance; the earlier `/recorded-sample` URL redirects there. Broader IDX pages remain supporting context. The latest supported view has eleven 20D rankings and nine eligible 60D map points. Genuine stock YTD readings are dated separately; no sector currently meets the five-contributor YTD floor. The immutable
-release, universe boundary, reproduction steps, rollback target, and current
-verification evidence are documented in
-[`docs/submission-release/README.md`](docs/submission-release/README.md).
+The broader IDX research workflow includes sectors, 34 Arthara reference group
+labels plus 12 retained portfolio lenses, 102 IDXIC groups, and 15 themes.
+It uses the separately disclosed Yahoo Finance adjusted-price panel. Maps,
+rankings, details, and weekly summaries share per-horizon reading contracts.
+Ownership includes issuer, named-investor, group, and comparison views, with
+separate 1% and 5% populations and dates. Relationships cite holdings,
+affiliation, or documented-control evidence; catalogue labels do not establish
+complete family ownership or control.
+
+Pages open verified local assets without provider calls. `/sources` explains
+coverage and methods; `/recorded-sample` redirects there. The current
+[evidence and reproduction guide](docs/submission-release/README.md) links the
+browser checks, independent oracles, clean-checkout reproduction, immutable
+successor, and rollback package. **Paid calls remain on HOLD.** The reported
+221 remaining provider calls have not been consumed during this repair or
+reconciled with the original acquisition budget.
 
 ## Offline reproduction
 
-Resolve the active release ID from `app/web/public/releases/active.json`, then
-rebuild and independently verify the primary analysis using only released
-assets. No credentials or paid requests are required:
+With the project dependencies installed, reproduce both analytical assets from
+the active package's hash-bound inputs. No credentials or paid requests are
+required:
 
 ```bash
 RELEASE_ID="$(.venv/bin/python -c 'import json; print(json.load(open("app/web/public/releases/active.json"))["active"]["release_id"])')"
 RELEASE_DIR="app/web/public/releases/$RELEASE_ID"
-.venv/bin/python scripts/build_sectors_analysis.py \
-  --sample "$RELEASE_DIR/assets/context/sectors_recorded_sample.json" \
-  --selection-market "$RELEASE_DIR/assets/context/sectors_selection_market.json" \
-  --ytd-baseline "$RELEASE_DIR/assets/context/sectors_ytd_baseline.json" \
-  --out /tmp/sectors_signal_analysis.json
-.venv/bin/python scripts/verify_sectors_analysis_oracle.py \
-  --sample "$RELEASE_DIR/assets/context/sectors_recorded_sample.json" \
-  --analysis /tmp/sectors_signal_analysis.json \
-  --ytd-baseline "$RELEASE_DIR/assets/context/sectors_ytd_baseline.json"
+.venv/bin/python -m scripts.prepare_final_repair \
+  --reproduce "$RELEASE_DIR/manifest.json" \
+  --destination /tmp/diffusion-reproduction
+.venv/bin/python -m scripts.verify_final_reading_oracle \
+  --manifest "$RELEASE_DIR/manifest.json" \
+  --out /tmp/diffusion-reading-oracle.json
+.venv/bin/python -m pytest -q
+npm run typecheck --prefix app/web
+npm run build --prefix app/web
+npm run preview --prefix app/web -- --host 127.0.0.1 --port 5173 --strictPort
 ```
 
-For the full offline regression suite and frontend checks, see
-[`docs/submission-release/README.md`](docs/submission-release/README.md).
+Open `http://127.0.0.1:5173/sectors`. Public hosting requires a successful Vercel
+launch and fresh public checks; local verification does not complete submission.
 
 **This project is an analytical market-intelligence prototype for
 research and educational purposes. It does not provide investment
@@ -125,31 +138,28 @@ A Vite/React/TypeScript port of the Figma design prototype lives in
 that consume JSON/parquet exported from the snapshot bundle; neither opens
 provider connections while rendering.
 
-### Pages
+### Current routes
 
-| Route | Page | Data source |
-| --- | --- | --- |
-| `/` | redirects to `/sectors` | primary Sectors workflow |
-| `/sectors` | `SectorsDashboard` | immutable Sectors sample, frozen selection source, and signal-analysis assets |
-| `/overview` | `MarketOverview` | real Sector heatmap plus official IDX market-level release, bounded sample, and static context sections |
-| `/what-changed` | `WhatChanged` | real current snapshot; prior comparison is shown only when compatible history exists |
-| `/map` | `LeadershipMap` | YTD excess-return rotation mapping and table; 20D/60D momentum remain diagnostics and null YTD values stay `Not available` |
-| `/maps/konglo` | `TaxonomyMapPage` | static analyst-defined membership lens with current-snapshot aggregates |
-| `/maps/themes` | `TaxonomyMapPage` | static analyst-defined membership lens with current-snapshot aggregates |
-| `/explorer` | `GroupExplorer` | real `features` joined to `security_master` per `group_id` |
-| `/themes` | `ThemesExplorer` | static analyst-defined theme lens with current-snapshot aggregates |
-| `/groups` | `MasterGroupTable` | real group cross-section from the snapshot |
-| `/methodology` | `Methodology` | real `manifest`, `quality`, coverage, warnings, plus static method cards |
+| Route | Workflow |
+| --- | --- |
+| `/` and `/sectors` | Primary 66-stock Dashboard and native IHSG analysis |
+| `/sources` | Coverage choice, stock-chart links, observation dates, IDX flow sources |
+| `/overview` and `/what-changed` | Broader IDX readings and verified weekly comparisons |
+| `/map` | Interactive 60D map; optional YTD; sectors, Konglo, IDXIC, and themes |
+| `/explorer`, `/groups`, `/konglo`, `/themes` | Group details and complete catalogues; actual baskets, breadth, concentration, and evidence |
+| `/ticker/:ticker` and `/tickers` | Constituent/benchmark histories and issuer inspection |
+| `/ownership` | Issuer, named-investor, group, and disclosure comparisons |
+| `/movers`, `/foreign`, `/heatmap` | Dated market context |
+| `/methodology` | Horizon cohorts, rotation versus leadership, exclusions, and relationship boundaries |
 
-The map uses an explicitly labeled current-breadth view when the snapshot has
-no comparable prior. Breadth-delta diffusion and trajectory views remain
-unavailable until compatible history is persisted; no prior or delta is
-fabricated. Prototype snapshots may include persisted per-group breadth
-history, while the canonical live snapshot currently does not. Foreign flow
-Per-ticker/group foreign-flow confirmation and fundamentals remain explicit data
-gaps and never become fabricated neutral values; the official IDX market-level
-release is shown in its own evidence lane. Unsupported views render a one-line
-reason rather than a blank chart.
+Group links preserve `scope`, `date`, `cadence`, and `horizon`. Smaller valid
+groups remain descriptive; confirmed leadership and diffusion require five
+contributors. Missing coordinates are not plotted as zero; curves and trails
+break across gaps. Historical identifiers remain stable internally.
+
+The tooling examples below are retained historical reference, rather than the
+submission reproduction path. They do not authorize provider calls while HOLD
+is in force.
 
 ### Run it
 

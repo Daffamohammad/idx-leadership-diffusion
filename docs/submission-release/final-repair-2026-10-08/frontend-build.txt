@@ -1,0 +1,27 @@
+
+> idx-leadership-web@0.1.0 build
+> tsc -b && vite build
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - `__dirname` (vite.config.ts:12:25). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+vite v8.2.2 building client environment for production...
+transforming...
+✓ 670 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                     0.83 kB │ gzip:   0.51 kB
+dist/assets/index-CXyhMv9F.css     67.36 kB │ gzip:  13.87 kB
+dist/assets/index-DVUafJZQ.js   1,031.28 kB │ gzip: 298.50 kB │ map: 4,866.81 kB
+
+✓ built in 3.96s
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+[33m[PLUGIN_TIMINGS] [0mYour build spent 96% of 4.0s inside plugin hooks (3.8s).
+Measured inside the callback, so queue time is excluded and time the callback itself awaited is not:
+  - vite:prepare-out-dir renderStart (75%, 3.0s, 1 call)
+See https://rolldown.rs/reference/InputOptions.checks#plugintimings for more details.
+

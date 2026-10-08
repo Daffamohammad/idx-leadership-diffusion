@@ -1,0 +1,14 @@
+{
+  "matches": {
+    "historical_comparison": true,
+    "sectors_signal_analysis": true
+  },
+  "provider_calls": 0,
+  "release_id": "rel-64026e36d49733009fec952086fc95a3121a86efbb196b1c68d00fd6317f33d2",
+  "status": "PASS",
+  "schema_version": "diffusion-clean-reproduction-v2",
+  "source_commit": "2e6c516c3254bbae0d380491487181bae1867f7b",
+  "checkout": "git archive of exact source commit",
+  "credentials": "Provider credential environment variables unset; no live transport or paid requests",
+  "manifest_sha256": "98e2c260c9afae07ce2b1cb5b5436cda8bbff9978a0239d809d909183ad36e4f"
+}

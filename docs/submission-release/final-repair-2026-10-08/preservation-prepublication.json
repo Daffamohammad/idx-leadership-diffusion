@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "protected_files": 479,
+  "acquisition_files": 449,
+  "changed": [],
+  "paid_provider_requests": 0,
+  "reported_remaining_calls": 221,
+  "allowance_reconciliation": "HOLD; user-reported provider allowance has not been queried or reconciled with 461 reserved estimated credits in the original 500 ceiling"
+}
