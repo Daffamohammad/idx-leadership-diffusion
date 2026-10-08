@@ -1,8 +1,9 @@
 # The Diffusion
 
-> A Sectors-powered market-intelligence workspace that shows which Indonesian
-> equity sectors lead, whether leadership is broadening, and which constituents
-> drive the signal.
+> An Indonesian-equities research workspace combining Sectors API prices,
+> official IDX publications, Yahoo Finance prices via the yfinance Python
+> client, and dated IDX/KSEI disclosures. It shows which sectors lead, whether
+> leadership is broadening, and which constituents drive each reading.
 
 ## Submission build · 8 October 2026
 

@@ -38,7 +38,7 @@ export default function RecordedSample() {
 
   return <main className="content-shell-wide recorded-sample-page">
     <header className="submission-page-heading">
-      <div><div className="eyebrow-muted">IDX prices · Source: Sectors API</div><h1>Coverage &amp; sources</h1><p>{stockCount} stocks across 11 IDX sectors, {stocksPerSector} per sector by market-cap ranking. Data through {formatDateLabel(sample.as_of)}. This set defines the project’s research coverage; it does not represent every listed company.</p></div>
+      <div><div className="eyebrow-muted">Sources · Sectors API · Official IDX · Yahoo Finance · IDX/KSEI</div><h1>Coverage &amp; sources</h1><p>{stockCount} stocks across 11 IDX sectors, {stocksPerSector} per sector by market-cap ranking. Data through {formatDateLabel(sample.as_of)}. Sector prices come from Sectors API; other views use official IDX publications, Yahoo Finance prices via the yfinance Python client, and dated IDX/KSEI disclosures. Each source supports a specific view.</p></div>
       <div className="recorded-session"><span>Data through</span><strong>{formatDateLabel(sample.as_of)}</strong><span>Market-cap ranking: {formatDateLabel(sample.selection.selected_market_cap_date)} · membership reference: {formatDateLabel(sample.selection.membership_as_of)}</span></div>
     </header>
     <section className="recorded-summary-grid" aria-label="Coverage summary">
