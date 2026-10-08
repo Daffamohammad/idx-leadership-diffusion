@@ -1,22 +1,9 @@
 import { Link } from "react-router"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import ThemeToggle from "../components/ThemeToggle"
-import ImageWithFallback from "../components/ImageWithFallback"
-import leadershipMap from "../imports/image.png"
-import { useSnapshot } from "../data/SnapshotProvider"
-import {
-  mapX,
-  mapY,
-  mapViewDomain,
-  mapViewLabels,
-  mapYBaseline,
-  mapYValue,
-  type MapViewMode,
-  type MapPlotBounds,
-} from "../data/mapGeometry"
 import { BrandLockup } from "../components/BrandMark"
-import { placeMapLabels } from "../data/mapLabels"
-import { EvidenceBadge } from "../components/EvidenceModel"
+import { groupHref, useResearch } from "../data/research"
+import { formatDateLabel, formatPercent } from "../data/format"
 
 // ── Dia text reveal ──────────────────────────────────────────────────────────
 // Gradient band sweeps left-to-right; text settles from muted → brand sweep → final color.
@@ -79,91 +66,6 @@ function DiaTextReveal({
       }}
     >
       {text}
-    </span>
-  )
-}
-
-// ── Text scramble ────────────────────────────────────────────────────────────
-// RAF loop resolves random glyphs left-to-right into the real text.
-// Inspired by beui.dev TextScramble — respects the same timing formula.
-
-const GLYPHS = "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789#%&@$?/"
-
-function TextScrambleLine({
-  text,
-  sectionRef,
-  delay = 0,
-  style,
-}: {
-  text: string
-  sectionRef: { current: HTMLElement | null }
-  delay?: number
-  style?: React.CSSProperties
-}) {
-  const [phase, setPhase] = useState<"idle" | "scrambling" | "done">("idle")
-  const [display, setDisplay] = useState(text)
-
-  useEffect(() => {
-    const el = sectionRef.current
-    if (!el) return
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          const t = setTimeout(() => setPhase("scrambling"), delay)
-          observer.disconnect()
-          return () => clearTimeout(t)
-        }
-      },
-      { threshold: 0.2 },
-    )
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [delay, sectionRef])
-
-  useEffect(() => {
-    if (phase !== "scrambling") return
-    const duration = Math.min(760, Math.max(420, text.replace(/\s/g, "").length * 32))
-    const start = performance.now()
-    let lastUpdate = 0
-    let raf: number
-
-    const tick = (now: number) => {
-      const progress = Math.min(1, (now - start) / duration)
-      const resolvedCount = Math.floor(progress * text.length)
-
-      if (now - lastUpdate >= 40) {
-        const chars = text.split("").map((ch, i) => {
-          if (ch === " " || i < resolvedCount) return ch
-          return GLYPHS[Math.floor(Math.random() * GLYPHS.length)]
-        })
-        setDisplay(chars.join(""))
-        lastUpdate = now
-      }
-
-      if (progress < 1) {
-        raf = requestAnimationFrame(tick)
-      } else {
-        setDisplay(text)
-        setPhase("done")
-      }
-    }
-
-    raf = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(raf)
-  }, [phase, text])
-
-  return (
-    <span
-      aria-label={text}
-      style={{
-        display: "inline",
-        opacity: phase === "idle" ? 0.18 : 1,
-        transition: "opacity 0.15s ease",
-        fontFamily: phase === "scrambling" ? "'Geist Mono', monospace" : "inherit",
-        ...style,
-      }}
-    >
-      <span aria-hidden>{display}</span>
     </span>
   )
 }
@@ -231,7 +133,7 @@ function InteractiveHoverCTA({
   )
 }
 
-// ── Word-by-word reveal (kept for other h2s) ─────────────────────────────────
+// ── Word-by-word reveal ──────────────────────────────────────────────────────
 
 function RevealText({
   text,
@@ -262,256 +164,101 @@ function RevealText({
   )
 }
 
-// ── Staggered dot field ──────────────────────────────────────────────────────
+// ── Live market observations strip ───────────────────────────────────────────
+// Reads the verified Sectors core through the shared research hook so the
+// figures always match the Dashboard readings.
 
-const DotField = ({ narrow = false }: { narrow?: boolean }) => (
-  <div style={{ display: "grid", gridTemplateColumns: "repeat(12, 1fr)", gap: 5, marginTop: 18 }}>
-    {Array.from({ length: 36 }, (_, i) => (
-      <span
-        key={i}
-        style={{
-          height: 8,
-          background: narrow ? (i < 12 ? "#7fb0d8" : "var(--line)") : i < 28 ? "#178477" : "var(--line)",
-          opacity: narrow && i < 4 ? 1 : 0.75,
-          transformOrigin: "bottom",
-          animation: `bar-in 0.45s cubic-bezier(0.23, 1, 0.32, 1) ${i * 20}ms both`,
-        }}
-      />
-    ))}
-  </div>
-)
+function LiveObservations() {
+  const { groups, reading, date, loading, error, native } = useResearch("sectors")
+  const asOf = native?.as_of ?? date
 
-// ── Mini map (homepage variant) ──────────────────────────────────────────────
+  if (loading) {
+    return (
+      <section className="dash-card reveal" aria-label="Market observations">
+        <div className="eyebrow-muted">Market observations</div>
+        <p style={{ color: "var(--muted)", margin: "10px 0 0" }}>Loading market observations…</p>
+      </section>
+    )
+  }
 
-function MiniMap() {
-  const { data } = useSnapshot()
-  const sectors = data?.sectors ?? []
-  const dataSources = data?.dataSources ?? { breadthHistory: false, constituents: false, fundamentals: false, foreignFlow: false, trajectory: false }
-  const mapMode: MapViewMode = dataSources.trajectory ? "trajectory" : "current"
-  const axisLabels = mapViewLabels(mapMode)
-  const plot: MapPlotBounds = { left: 36, top: 24, width: 320, height: 180 }
-  const domain = mapViewDomain(mapMode)
-  const yBaseline = mapYBaseline(mapMode)
-  const plottable = sectors.filter(
-    (s) =>
-      s.excess20d !== null &&
-      mapYValue(s, mapMode) !== null,
+  if (error || !native || groups.length === 0) {
+    return (
+      <section className="dash-card reveal" aria-label="Market observations">
+        <div className="eyebrow-muted">Market observations</div>
+        <p style={{ color: "var(--muted)", margin: "10px 0 0" }}>
+          {error ? `Market observations could not be loaded. ${error}` : "Market observations are unavailable."}
+        </p>
+        <div style={{ marginTop: 14 }}>
+          <button
+            type="button"
+            className="btn btn-outline"
+            onClick={() => window.location.reload()}
+          >
+            Retry
+          </button>
+        </div>
+      </section>
+    )
+  }
+
+  const ranked = [...groups].sort(
+    (a, b) => (reading(b)?.excess_return_20d ?? -Infinity) - (reading(a)?.excess_return_20d ?? -Infinity),
   )
-  const coverage = data?.coverageHonest
-  const listedCoverage = data?.payload.coverage
-  const gateMet = coverage?.coverage_gate_60pct_met ?? false
-  const labelPositions = useMemo(
-    () =>
-      placeMapLabels(
-        plottable.map((s) => {
-          const yValue = mapYValue(s, mapMode) ?? yBaseline
-          return {
-            id: s.id,
-            text: s.name,
-            x: mapX(s.excess20d ?? 0, plot, domain),
-            y: mapY(yValue, plot, domain),
-            radius: 4,
-            priority: Math.abs(s.excess20d ?? 0) + Math.abs(yValue - yBaseline) * 0.5,
-          }
-        }),
-        { left: plot.left + 2, right: plot.left + plot.width - 2, top: plot.top + 2, bottom: plot.top + plot.height - 2 },
-        4,
-      ),
-    [domain, mapMode, plottable, yBaseline],
-  )
+  const leader = ranked[0]
+  const leaderReading = leader ? reading(leader) : undefined
+  const confirmed = groups.filter((group) => (reading(group)?.map_contributors ?? 0) >= 5).length
+  const descriptive = groups.length - confirmed
+
   return (
-    <div
-      style={{
-        background: "#121619",
-        color: "#fff",
-        padding: 20,
-        minHeight: 330,
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
-      <div className="eyebrow" style={{ color: "#b8bdc0" }}>
-        {axisLabels.title}
-      </div>
-      <div
-        style={{
-          fontSize: 10,
-          color: "#9aa4ac",
-          marginTop: 2,
-          marginBottom: 6,
-        }}
-      >
-        {axisLabels.subtitle}
-      </div>
-      <svg
-        viewBox={`0 0 ${plot.left + plot.width + 12} ${plot.top + plot.height + 28}`}
-        width="100%"
-        height={plot.top + plot.height + 28}
-        aria-label={axisLabels.title}
-        style={{ display: "block" }}
-      >
-        {/* Quadrant fills */}
-        <rect
-          x={mapX(0, plot, domain)}
-          y={plot.top}
-          width={plot.left + plot.width - mapX(0, plot, domain)}
-          height={mapY(yBaseline, plot, domain) - plot.top}
-          fill="#1a2426"
-        />
-        <rect
-          x={plot.left}
-          y={mapY(yBaseline, plot, domain)}
-          width={mapX(0, plot, domain) - plot.left}
-          height={plot.top + plot.height - mapY(yBaseline, plot, domain)}
-          fill="#1a2426"
-        />
-        {/* Axes */}
-        <line
-          x1={mapX(0, plot, domain)}
-          x2={mapX(0, plot, domain)}
-          y1={plot.top}
-          y2={plot.top + plot.height}
-          stroke="#ffffff33"
-        />
-        <line
-          x1={plot.left}
-          x2={plot.left + plot.width}
-          y1={mapY(yBaseline, plot, domain)}
-          y2={mapY(yBaseline, plot, domain)}
-          stroke="#ffffff33"
-        />
-        {/* Axis labels */}
-        <text x={plot.left + 4} y={plot.top + 10} fill="#9aa4ac" fontSize="9">
-          {axisLabels.y}
-        </text>
-        <text
-          x={plot.left + plot.width - 4}
-          y={plot.top + plot.height - 4}
-          fill="#9aa4ac"
-          fontSize="9"
-          textAnchor="end"
-        >
-          {axisLabels.x}
-        </text>
-        {/* Dots */}
-        {plottable.map((s) => {
-          const x = s.excess20d ?? 0
-          const y = mapYValue(s, mapMode) ?? yBaseline
-          const fill =
-            s.leadership === "LEADING"
-              ? "#6fc7bb"
-              : s.leadership === "IMPROVING"
-                ? "#7fb0d8"
-                : s.leadership === "WEAKENING"
-                  ? "#d9b47c"
-                  : s.leadership === "LAGGING"
-                    ? "#e0a3a1"
-                    : "#9aa4ac"
-          return (
-            <circle
-              key={s.id}
-              cx={mapX(x, plot, domain)}
-              cy={mapY(y, plot, domain)}
-              r={4}
-              fill={fill}
-              opacity={s.leadership === "UNCONFIRMED" ? 0.4 : 0.9}
-            />
-          )
-        })}
-        {/* Labels only for selected material points */}
-        {labelPositions.map((label) => {
-          return (
-            <text
-              key={`lbl-${label.id}`}
-              x={label.x}
-              y={label.y}
-              textAnchor={label.textAnchor}
-              fill="#9aa4ac"
-              fontSize="9"
-              pointerEvents="none"
-            >
-              {label.text}
-            </text>
-          )
-        })}
-      </svg>
-      <div
-        style={{
-          marginTop: 4,
-          fontFamily: "Geist Mono",
-          fontSize: 9,
-          color: "#9aa4ac",
-        }}
-      >
-        {mapMode === "current"
-          ? "Current breadth view · diffusion change awaits comparable prior"
-          : "Comparable breadth-delta view"}
-      </div>
-      {/* Honest coverage strip */}
+    <section className="dash-card reveal" aria-label="Market observations">
+      <div className="eyebrow-muted">Market observations · Data through {formatDateLabel(asOf)}</div>
       <div
         style={{
           display: "flex",
-          gap: 10,
-          fontSize: 10,
-          color: "#9aa4ac",
-          marginTop: 6,
           flexWrap: "wrap",
+          gap: "8px 28px",
+          marginTop: 12,
+          fontFamily: "Geist Mono, monospace",
+          fontSize: 12,
         }}
-        aria-label="Snapshot coverage"
       >
-        <span>
-          Listed <strong style={{ color: "#e8edf2" }}>{listedCoverage?.security_master_total ?? listedCoverage?.discovered_count ?? 0}</strong>
-        </span>
-        <span>
-          Sample raw <strong style={{ color: "#e8edf2" }}>{coverage?.raw_candidate_constituents ?? 0}</strong>
-        </span>
-        <span>
-          Policy-elig{" "}
-          <strong style={{ color: "#e8edf2" }}>
-            {coverage?.policy_eligible_constituents ?? 0}
-          </strong>
-        </span>
-        <span>
-          Observed{" "}
-          <strong style={{ color: "#e8edf2" }}>
-            {coverage?.observed_eligible_features ?? 0}
-          </strong>
-        </span>
-        <span>
-          Acq-fail{" "}
-          <strong style={{ color: "#e8edf2" }}>
-            {coverage?.acquisition_failed_constituents ?? 0}
-          </strong>
-        </span>
-        <span
-          style={{
-            color: gateMet ? "#6fc7bb" : "#e0a3a1",
-            fontWeight: 600,
-          }}
-        >
-          {gateMet ? "60% gate met" : "60% gate not met"}
-        </span>
+        <span><strong style={{ fontSize: 18 }}>{groups.length}</strong> <span style={{ color: "var(--muted)" }}>sector groups</span></span>
+        <span><strong style={{ fontSize: 18 }}>66</strong> <span style={{ color: "var(--muted)" }}>tracked stocks</span></span>
+        <span><strong style={{ fontSize: 18 }}>{confirmed}</strong> <span style={{ color: "var(--muted)" }}>confirmed readings</span></span>
+        <span><strong style={{ fontSize: 18 }}>{descriptive}</strong> <span style={{ color: "var(--muted)" }}>descriptive points</span></span>
       </div>
-    </div>
+      {leader && leaderReading && (
+        <p style={{ margin: "12px 0 0", color: "var(--muted)", lineHeight: 1.6 }}>
+          Current 20D leader: <strong style={{ color: "var(--ink)" }}>{leader.name}</strong>{" "}
+          ({formatPercent(leaderReading.excess_return_20d)} excess vs IHSG).{" "}
+          <Link to={groupHref(leader, date, "daily", "60d")}>Inspect {leader.name} →</Link>
+        </p>
+      )}
+      <p style={{ margin: "10px 0 0", fontSize: 12, color: "var(--muted)", lineHeight: 1.6 }}>
+        Confirmed readings require five contributors. Smaller groups remain visible as descriptive points.
+      </p>
+    </section>
   )
 }
 
-// ── Ticker items ─────────────────────────────────────────────────────────────
-
-const tickerItems = [
-  { label: "TELCO", value: "LEADING", color: "var(--link)" },
-  { label: "COAL", value: "NARROWING", color: "var(--down)" },
-  { label: "HEALTH", value: "BROADENING", color: "var(--up)" },
-  { label: "OIL & GAS", value: "LEADING", color: "var(--accent-ink)" },
-  { label: "BANKS", value: "STABLE", color: "var(--muted)" },
-  { label: "INFRA", value: "IMPROVING", color: "var(--color-improving)" },
-  { label: "TECH", value: "WEAKENING", color: "var(--color-weakening)" },
-]
-
 // ── Main page ────────────────────────────────────────────────────────────────
 
+const lenses: Array<[string, string, string, string, string]> = [
+  ["01", "Leadership", "Which groups outperform IHSG, and whether momentum is improving.", "Open the Dashboard", "/sectors"],
+  ["02", "Diffusion", "How many constituents outperform, and whether participation is broadening or narrowing.", "Open the leadership map", "/map"],
+  ["03", "Confirmation", "Concentration, persistence, and foreign flow — measured separately, so they can disagree.", "How to read the research", "/methodology"],
+]
+
+const workflows: Array<[string, string, string]> = [
+  ["Dashboard", "Eleven 20D sector rankings, the 60D excess-return map, replay, curves, and all 66 constituent charts.", "/sectors"],
+  ["Leadership map", "60D excess vs IHSG with rotation phases, trails, and per-horizon cohorts.", "/map"],
+  ["Weekly changes", "What changed between comparable weeks, with breadth and diffusion counts.", "/what-changed"],
+  ["Ownership", "Issuer, investor, group, and comparison views with dated holder evidence.", "/ownership"],
+  ["Coverage & sources", "The 66-stock coverage choice, observation dates, market flow, and methods.", "/sources"],
+  ["How to read the research", "Rotation versus leadership, horizons, eligibility, and relationship boundaries.", "/methodology"],
+]
+
 export default function PublicHome() {
-  const h2ScrambleRef = useRef<HTMLHeadingElement>(null)
   const [methodHovered, setMethodHovered] = useState(false)
 
   // Scroll reveal for non-animated sections
@@ -531,8 +278,6 @@ export default function PublicHome() {
     return () => observer.disconnect()
   }, [])
 
-  const doubled = [...tickerItems, ...tickerItems]
-
   return (
     <div style={{ background: "var(--surface)", minHeight: "100%" }}>
       {/* ── Header ── */}
@@ -544,20 +289,30 @@ export default function PublicHome() {
           padding: "16px 40px",
           display: "flex",
           justifyContent: "space-between",
+          alignItems: "center",
           borderBottom: "1px solid var(--line)",
+          gap: 16,
+          flexWrap: "wrap",
         }}
       >
-        <BrandLockup />
-        <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
-          <ThemeToggle />
-          <Link
-            to="/overview"
-            className="link-slide"
-            style={{ color: "var(--ink)", fontSize: 12, textDecoration: "none" }}
-          >
-            Open workspace ↗
+        <Link to="/" style={{ textDecoration: "none" }} aria-label="The Diffusion home">
+          <BrandLockup />
+        </Link>
+        <nav
+          aria-label="Landing page sections"
+          style={{ display: "flex", gap: 18, alignItems: "center", flexWrap: "wrap" }}
+        >
+          <Link to="/sectors" style={{ color: "var(--ink)", fontSize: 12, textDecoration: "none" }}>
+            Dashboard
           </Link>
-        </div>
+          <Link to="/map" style={{ color: "var(--muted)", fontSize: 12, textDecoration: "none" }}>
+            Leadership map
+          </Link>
+          <Link to="/sources" style={{ color: "var(--muted)", fontSize: 12, textDecoration: "none" }}>
+            Coverage &amp; sources
+          </Link>
+          <ThemeToggle />
+        </nav>
       </header>
 
       <main className="public-main" style={{ maxWidth: 1440, margin: "auto", padding: "0 40px" }}>
@@ -566,17 +321,17 @@ export default function PublicHome() {
           className="public-grid public-hero"
           style={{
             display: "grid",
-            gridTemplateColumns: "minmax(0, .72fr) minmax(0, 1.28fr)",
+            gridTemplateColumns: "minmax(0, 1.05fr) minmax(0, .95fr)",
             gap: 50,
-            padding: "90px 0 110px",
-            alignItems: "center",
+            padding: "90px 0 70px",
+            alignItems: "start",
             minWidth: 0,
             maxWidth: "100%",
           }}
         >
           <div style={{ minWidth: 0, maxWidth: "100%", overflowWrap: "anywhere" }}>
             <div className="eyebrow-muted reveal" style={{ marginBottom: 24 }}>
-              Indonesian equity market intelligence
+              The Diffusion · Indonesian equity market intelligence
             </div>
 
             {/* Dia-text-reveal headline */}
@@ -604,15 +359,15 @@ export default function PublicHome() {
 
             <p
               className="reveal"
-              style={{ color: "var(--muted)", lineHeight: 1.65, maxWidth: 440, marginBottom: 28 }}
+              style={{ color: "var(--muted)", lineHeight: 1.65, maxWidth: 480, marginBottom: 28 }}
             >
-              The Diffusion scans the Indonesian equity market to identify emerging
-              leadership, participation breadth, concentration, and deterioration beneath headline
-              performance.
+              The Diffusion tracks 66 Indonesian stocks across 11 IDX sectors to show which
+              groups lead IHSG, whether participation is broadening, and which constituents
+              drive the move. Every reading links to its contributors and observation dates.
             </p>
 
             <div className="reveal public-cta-row" style={{ display: "flex", gap: 18, alignItems: "center", flexWrap: "wrap", minWidth: 0, maxWidth: "100%" }}>
-              <ShimmerCTAButton to="/overview">Explore the market →</ShimmerCTAButton>
+              <ShimmerCTAButton to="/sectors">Open the Dashboard →</ShimmerCTAButton>
               <Link
                 to="/methodology"
                 onMouseEnter={() => setMethodHovered(true)}
@@ -625,217 +380,22 @@ export default function PublicHome() {
                   transition: "border-color 0.25s ease",
                 }}
               >
-                View methodology
+                How to read the research
               </Link>
             </div>
 
             <div className="eyebrow-muted reveal" style={{ marginTop: 26 }}>
-              Snapshot-driven research · End-of-day
-            </div>
-            <div
-              className="reveal"
-              style={{ display: "flex", flexWrap: "wrap", gap: 7, marginTop: 12, alignItems: "center" }}
-              aria-label="Hybrid product evidence model"
-            >
-              <EvidenceBadge kind="SNAPSHOT" compact />
-              <EvidenceBadge kind="SAMPLE" compact />
-              <EvidenceBadge kind="CLASSIFICATION" compact />
-              <EvidenceBadge kind="CONTEXT" compact />
+              End-of-day observations · Source: Sectors API
             </div>
           </div>
 
-          {/* ── Hero image column ── */}
-          <div style={{ position: "relative", minWidth: 0, maxWidth: "100%" }}>
-            <div className="eyebrow-muted" style={{ marginBottom: 8, color: "var(--accent-ink)" }}>
-              Illustrative product view · sample values
-            </div>
-            <div
-              style={{
-                background: "var(--surface)",
-                border: "1px solid var(--line)",
-                overflow: "hidden",
-                aspectRatio: "835 / 454",
-                minWidth: 0,
-                maxWidth: "100%",
-              }}
-            >
-              <ImageWithFallback
-                src={leadershipMap}
-                alt="The Diffusion map showing sector movement across relative leadership and breadth"
-                style={{ width: "100%", height: "100%", display: "block", objectFit: "contain" }}
-              />
-            </div>
-
-            {/* Floating detail card */}
-            <div
-              className="hero-card-float"
-              style={{
-                background: "var(--surface-subtle)",
-                border: "1px solid var(--line)",
-                padding: 16,
-                position: "absolute",
-                right: 0,
-                top: 36,
-                width: 205,
-                maxWidth: "calc(100% - 20px)",
-                boxShadow: "0 12px 28px #12161918",
-                boxSizing: "border-box",
-              }}
-            >
-              <div className="eyebrow-muted">Oil & Gas</div>
-              <div style={{ margin: "9px 0", fontSize: 13, fontWeight: 600 }}>
-                IMPROVING <span style={{ color: "var(--accent-ink)" }}>→</span> LEADING
-              </div>
-              <div className="eyebrow-muted">
-                Stable <span style={{ color: "var(--accent-ink)" }}>→</span> Broadening
-              </div>
-              <div
-                style={{
-                  borderTop: "1px solid var(--line)",
-                  marginTop: 12,
-                  paddingTop: 10,
-                  fontFamily: "Geist Mono",
-                  fontSize: 11,
-                }}
-              >
-                Breadth <b style={{ float: "right" }}>54% → 72%</b>
-                <br />
-                20D excess <b style={{ float: "right", color: "var(--up)" }}>+7.4%</b>
-              </div>
-            </div>
-
-            {/* Marquee ticker */}
-            <div
-              className="marquee-wrap"
-              style={{
-                marginTop: 10,
-                background: "var(--surface-subtle)",
-                border: "1px solid var(--line)",
-                padding: "10px 0",
-              }}
-            >
-              <div className="marquee-track">
-                {doubled.map((item, i) => (
-                  <span
-                    key={i}
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 6,
-                      padding: "0 20px",
-                      fontFamily: "Geist Mono",
-                      fontSize: 10,
-                      borderRight: "1px solid var(--line)",
-                    }}
-                  >
-                    <span style={{ color: "var(--muted)" }}>{item.label}</span>
-                    <b style={{ color: item.color }}>{item.value}</b>
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── Market fingerprint ── */}
-        <section style={{ borderTop: "1px solid var(--line)", padding: "78px 0" }}>
-          <div className="eyebrow-muted reveal">Market fingerprint / illustrative</div>
-
-          {/* TextScramble headline */}
-          <h2
-            ref={h2ScrambleRef}
-            style={{
-              maxWidth: 700,
-              fontSize: 42,
-              letterSpacing: "-.05em",
-              lineHeight: 1.05,
-              fontWeight: 500,
-            }}
-          >
-            <TextScrambleLine
-              text="Performance tells you what moved."
-              sectionRef={h2ScrambleRef}
-              delay={0}
-            />
-            <br />
-            <TextScrambleLine
-              text="Diffusion tells you how it moved."
-              sectionRef={h2ScrambleRef}
-              delay={380}
-              style={{ color: "var(--muted)" }}
-            />
-          </h2>
-
-          <div
-            className="public-grid reveal"
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-              gap: 1,
-              background: "var(--line)",
-              border: "1px solid var(--line)",
-              marginTop: 40,
-              minWidth: 0,
-              maxWidth: "100%",
-            }}
-          >
-            <div style={{ background: "var(--surface-subtle)", padding: 28 }}>
-              <div className="eyebrow-muted">Illustrative · sample values — Broad leadership</div>
-              <div style={{ fontSize: 28, margin: "10px 0" }}>
-                +6.8%{" "}
-                <span style={{ fontSize: 13, color: "var(--muted)" }}>20D excess</span>
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontFamily: "Geist Mono",
-                  fontSize: 11,
-                }}
-              >
-                <span>Breadth 76%</span>
-                <span>Top-3 34%</span>
-                <span style={{ color: "var(--up)" }}>BROADENING</span>
-              </div>
-              <DotField />
-            </div>
-            <div style={{ background: "#121619", color: "white", padding: 28 }}>
-              <div className="eyebrow-muted" style={{ color: "#9aa4ac" }}>
-                Illustrative · sample values — Narrow leadership
-              </div>
-              <div style={{ fontSize: 28, margin: "10px 0" }}>
-                +8.1%{" "}
-                <span style={{ fontSize: 13, color: "#9aa4ac" }}>20D excess</span>
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontFamily: "Geist Mono",
-                  fontSize: 11,
-                }}
-              >
-                <span>Breadth 38%</span>
-                <span>Top-3 71%</span>
-                <span style={{ color: "#e8a88f" }}>NARROWING</span>
-              </div>
-              <DotField narrow />
-            </div>
-          </div>
-          <p className="reveal" style={{ fontSize: 21, marginTop: 22 }}>
-            Similar headline returns.{" "}
-            <span style={{ color: "var(--muted)" }}>Very different market structure.</span>
-          </p>
+          <LiveObservations />
         </section>
 
         {/* ── Three lenses ── */}
         <section style={{ borderTop: "1px solid var(--line)", padding: "72px 0" }}>
           <div className="eyebrow-muted reveal">Three intelligence lenses</div>
-          {[
-            ["01", "Leadership", "Where relative strength is migrating."],
-            ["02", "Diffusion", "Whether participation is spreading or narrowing."],
-            ["03", "Confirmation", "What supports or contradicts the move."],
-          ].map(([n, t, d], idx) => (
+          {lenses.map(([n, t, d, cta, to], idx) => (
             <div
               key={n}
               className="reveal lenses-grid"
@@ -855,24 +415,17 @@ export default function PublicHome() {
                 <h3 style={{ fontSize: 22, margin: 0 }}>{t}</h3>
                 <p style={{ color: "var(--muted)", margin: "6px 0" }}>{d}</p>
               </div>
-              <div
-                style={{
-                  alignSelf: "center",
-                  fontFamily: "Geist Mono",
-                  fontSize: 11,
-                  color: "var(--muted)",
-                  whiteSpace: "pre-line",
-                  minWidth: 0,
-                  maxWidth: "100%",
-                  overflowWrap: "anywhere",
-                }}
-              >
-                {t === "Confirmation"
-                  ? "Fundamentals  SUPPORTIVE\nForeign Flow   CONFIRMING\nConcentration  ELEVATED"
-                  : "····●  →  ····●\nRelative leadership / breadth"}
+              <div style={{ alignSelf: "center", minWidth: 0 }}>
+                <Link to={to} style={{ color: "var(--ink)", fontSize: 13, textDecoration: "none", borderBottom: "1px solid var(--line)" }}>
+                  {cta} →
+                </Link>
               </div>
             </div>
           ))}
+          <p className="reveal" style={{ color: "var(--muted)", marginTop: 22, maxWidth: 640, lineHeight: 1.65 }}>
+            The map&apos;s coordinates set rotation phase; leadership is classified separately from
+            20D excess and 5D-minus-60D acceleration. Empty quadrants are a valid result.
+          </p>
         </section>
 
         {/* ── Dark CTA band with grain ── */}
@@ -890,36 +443,66 @@ export default function PublicHome() {
         >
           <div className="reveal" style={{ maxWidth: 1360, margin: "auto" }}>
             <div className="eyebrow-muted" style={{ color: "#9aa4ac" }}>
-              Sectors data / Research architecture
+              Coverage · The Diffusion chooses this coverage
             </div>
             <h2
-              style={{ fontSize: 44, maxWidth: 640, letterSpacing: "-.05em", lineHeight: 1.05 }}
+              style={{ fontSize: 44, maxWidth: 680, letterSpacing: "-.05em", lineHeight: 1.05 }}
             >
-              <RevealText text="Built on the structure beneath IDX." delay={60} />
+              <RevealText text="66 stocks. 11 sectors. Every contributor visible." delay={60} />
             </h2>
-            <div
-              style={{
-                display: "flex",
-                gap: 12,
-                flexWrap: "wrap",
-                fontFamily: "Geist Mono",
-                fontSize: 12,
-                color: "#cbd0d1",
-                marginTop: 24,
-              }}
-            >
-              {["SECTORS DATA", "↓", "IDX UNIVERSE", "↓", "SECTOR / INDUSTRY TAXONOMY", "↓"].map(
-                (s, i) => (
-                  <span key={i}>{s}</span>
-                ),
-              )}
-              <span style={{ color: "#f26a3d" }}>LEADERSHIP INTELLIGENCE</span>
+            <p style={{ color: "#cbd0d1", maxWidth: 640, lineHeight: 1.65, marginTop: 18 }}>
+              Six stocks per IDX sector by market-cap ranking on 2 October 2026 — a
+              retrospective project choice, not a limit of the Sectors API. Returns use raw
+              Sectors closes against native Sectors IHSG observations; windows affected by
+              splits, rights issues, dividends, and other listed mechanical events are
+              excluded. Each horizon has its own eligible contributors, and confirmed
+              signals require five. Twenty-three supported stock YTD readings keep their
+              own end date of 2 October 2026.
+            </p>
+            <div style={{ marginTop: 24 }}>
+              <InteractiveHoverCTA to="/sources" label="Coverage & sources" />
             </div>
           </div>
         </section>
 
+        {/* ── Workflows ── */}
+        <section style={{ padding: "80px 0 40px" }}>
+          <div className="reveal">
+            <div className="eyebrow-muted">Research workflows</div>
+            <h2
+              style={{ fontSize: 42, letterSpacing: "-.05em", marginBottom: 18, fontWeight: 500 }}
+            >
+              <RevealText text="Start from the question." delay={60} />
+            </h2>
+          </div>
+          <div
+            className="public-grid reveal"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+              gap: 1,
+              background: "var(--line)",
+              border: "1px solid var(--line)",
+              marginTop: 32,
+              minWidth: 0,
+              maxWidth: "100%",
+            }}
+          >
+            {workflows.map(([title, desc, to]) => (
+              <Link
+                key={to + title}
+                to={to}
+                style={{ background: "var(--surface-subtle)", padding: 24, textDecoration: "none" }}
+              >
+                <h3 style={{ fontSize: 17, margin: "0 0 8px", color: "var(--ink)" }}>{title} →</h3>
+                <p style={{ color: "var(--muted)", margin: 0, fontSize: 13, lineHeight: 1.6 }}>{desc}</p>
+              </Link>
+            ))}
+          </div>
+        </section>
+
         {/* ── Methodology callout ── */}
-        <section style={{ padding: "80px 0 100px" }}>
+        <section style={{ padding: "60px 0 100px" }}>
           <div className="reveal">
             <div className="eyebrow-muted">Methodology / Transparent by design</div>
             <h2
@@ -929,13 +512,36 @@ export default function PublicHome() {
             </h2>
             <p style={{ color: "var(--muted)", maxWidth: 580 }}>
               Leadership, diffusion, concentration, persistence, and confirmation are measured
-              independently—and can contradict one another.
+              independently — and can contradict one another.
             </p>
             <div style={{ marginTop: 24 }}>
-              <InteractiveHoverCTA to="/overview" label="Open The Diffusion" />
+              <InteractiveHoverCTA to="/sectors" label="Open The Diffusion" />
             </div>
           </div>
         </section>
+
+        {/* ── Footer ── */}
+        <footer
+          style={{
+            borderTop: "1px solid var(--line)",
+            padding: "28px 0 48px",
+            display: "flex",
+            justifyContent: "space-between",
+            gap: 16,
+            flexWrap: "wrap",
+          }}
+        >
+          <p style={{ color: "var(--muted)", fontSize: 12, maxWidth: 560, lineHeight: 1.65, margin: 0 }}>
+            The Diffusion is an analytical market-intelligence prototype for research and
+            education. It does not provide investment advice. Pages open verified local
+            data and make no provider calls.
+          </p>
+          <nav aria-label="Footer" style={{ display: "flex", gap: 16, fontSize: 12 }}>
+            <Link to="/sectors" style={{ color: "var(--muted)", textDecoration: "none" }}>Dashboard</Link>
+            <Link to="/sources" style={{ color: "var(--muted)", textDecoration: "none" }}>Coverage &amp; sources</Link>
+            <Link to="/methodology" style={{ color: "var(--muted)", textDecoration: "none" }}>Methodology</Link>
+          </nav>
+        </footer>
       </main>
     </div>
   )

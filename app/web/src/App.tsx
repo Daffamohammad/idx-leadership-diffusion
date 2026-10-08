@@ -20,6 +20,7 @@ import Ownership from "./pages/Ownership";
 import MarketOverview from "./pages/MarketOverview";
 import MarketMovers from "./pages/MarketMovers";
 import RecordedSample from "./pages/RecordedSample";
+import PublicHome from "./pages/PublicHome";
 import SectorsDashboard from "./pages/SectorsDashboard";
 import SubmissionRotationMap from "./components/SubmissionRotationMap";
 import MasterGroupTable from "./pages/MasterGroupTable";
@@ -109,7 +110,7 @@ function RouteErrorElement() {
 }
 
 const router = createBrowserRouter([
-  { path: "/", element: <Navigate to="/sectors" replace />, errorElement: <RouteErrorElement /> },
+  { path: "/", Component: PublicHome, errorElement: <RouteErrorElement /> },
   {
     Component: WorkspaceLayout,
     errorElement: <RouteErrorElement />,

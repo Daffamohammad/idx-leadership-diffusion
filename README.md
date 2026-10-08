@@ -142,7 +142,8 @@ provider connections while rendering.
 
 | Route | Workflow |
 | --- | --- |
-| `/` and `/sectors` | Primary 66-stock Dashboard and native IHSG analysis |
+| `/` | The Diffusion landing page with live market observations and workflow entry points |
+| `/sectors` | Primary 66-stock Dashboard and native IHSG analysis |
 | `/sources` | Coverage choice, stock-chart links, observation dates, IDX flow sources |
 | `/overview` and `/what-changed` | Broader IDX readings and verified weekly comparisons |
 | `/map` | Interactive 60D map; optional YTD; sectors, Konglo, IDXIC, and themes |
