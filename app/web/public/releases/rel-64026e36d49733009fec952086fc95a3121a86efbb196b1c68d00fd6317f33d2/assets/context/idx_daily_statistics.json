@@ -1,0 +1,78 @@
+{
+  "as_of": "2026-10-02",
+  "limitations": [
+    "This artifact promotes only validated market cards from the first two parsed pages; other PDF tables remain in the raw parse audit output.",
+    "Net foreign is market-level and does not establish per-ticker or per-group ownership flow.",
+    "A missing YTD label in the markdown output is handled with the fixed IDX card layout and remains an explicit warning.",
+    "LlamaParse credit usage is provider-reported when present; the client estimate is not a billing guarantee."
+  ],
+  "llama": {
+    "actual_credit_cost": 20.0,
+    "actual_credit_cost_known": true,
+    "estimated_credit_cost": 26.0,
+    "file_id": "cdb8ef3c-f93a-404a-b313-e341b0d1f5f7",
+    "job_id": "pjb-31hfxd4doqon765zjxb35fv8cswn",
+    "tier": "agentic",
+    "version": "latest"
+  },
+  "metrics": {
+    "fundamental": {
+      "market_pbv": 1.61,
+      "market_per": 12.41
+    },
+    "ihsg": {
+      "change": 27.386,
+      "change_pct": 0.46,
+      "close": 6036.888,
+      "previous": 6009.502,
+      "raw_change": "+27.386"
+    },
+    "net_foreign": {
+      "today": {
+        "direction": "NET_SELL",
+        "idr_billion": -1272.93,
+        "usd_approximate": true,
+        "usd_million": -71.12
+      },
+      "ytd": {
+        "direction": "NET_SELL",
+        "idr_billion": -82553.51,
+        "usd_approximate": false,
+        "usd_million": -4612.44
+      }
+    }
+  },
+  "provider": "IDX",
+  "provider_mode": "IDX_OFFICIAL_DAILY_STATISTICS",
+  "quality": {
+    "checks": {
+      "fundamental_values_found": true,
+      "ihsg_change_reconciles": true,
+      "ihsg_percentage_reconciles": true,
+      "net_foreign_column_labels_preserved": true,
+      "net_foreign_four_values_found": true,
+      "net_foreign_units_found": true
+    },
+    "markdown_sha256": "a20a8cb35935ec317cdf181e79b2b5548145e8cc11e826fe03ff969e476bb139",
+    "parsed_page_count": 2,
+    "parsed_page_numbers": [
+      1,
+      2
+    ],
+    "warning_count": 0,
+    "warnings": []
+  },
+  "quantitative_use": true,
+  "schema_version": "idx-daily-statistics-v1",
+  "scope": "DAILY_STATISTICS_TARGET_METRICS",
+  "source": {
+    "file_name": "ds_261002.pdf",
+    "parser": "llamaparse_v2_daily_statistics",
+    "parser_version": "latest",
+    "publisher": "Indonesia Stock Exchange",
+    "retrieved_at": "2026-10-04T00:12:02.622205+00:00",
+    "tier": "agentic",
+    "url": null
+  },
+  "status": "READY"
+}
