@@ -68,9 +68,24 @@ def test_group_snapshot_preserves_taxonomy_path_when_features_include_taxonomy(
 def test_rank_groups_assigns_ranks(prices_df, benchmark_df, taxonomy_df):
     as_of = date(2026, 8, 20)
     features = compute_excess_returns(prices_df, benchmark_df, horizons={"5d": 5, "20d": 20, "60d": 60}, as_of=as_of)
+    # Confirmed leadership needs five shared contributors: widen the fixture
+    # groups with synthetic names so ranks have confirmed groups to order.
+    extra = pd.DataFrame(
+        [
+            {"ticker": f"EXTRA{i}.JK", "return_20d": 1.0 + i, "excess_return_20d": 1.0 + i,
+             "return_5d": 1.0, "excess_return_5d": 2.0 + i, "return_60d": 0.5,
+             "excess_return_60d": 0.0}
+            for i in range(6)
+        ]
+    )
+    features = pd.concat([features, extra], ignore_index=True)
+    taxonomy = pd.concat(
+        [taxonomy_df, pd.DataFrame([{"ticker": f"EXTRA{i}.JK", "group_id": "Financials"} for i in range(6)])],
+        ignore_index=True,
+    )
     snaps = build_group_snapshots(
         features=features,
-        taxonomy=taxonomy_df,
+        taxonomy=taxonomy,
         snapshot_date=as_of,
         prices=prices_df,
         horizons={"5d": 5, "20d": 20, "60d": 60},
@@ -206,20 +221,30 @@ def test_leadership_classification_uses_primary_20d_excess_return(
     prices_df, taxonomy_df
 ):
     """A negative 20D return with positive acceleration is IMPROVING, not LEADING."""
+    shared = {
+        "return_20d": 1.0,
+        "excess_return_20d": -2.0,
+        "excess_return_5d": 5.0,
+        "excess_return_60d": 0.0,
+    }
     features = pd.DataFrame(
         [
-            {
-                "ticker": "BBCA.JK",
-                "return_20d": 1.0,
-                "excess_return_20d": -2.0,
-                "excess_return_5d": 5.0,
-                "excess_return_60d": 0.0,
-            }
+            {"ticker": "BBCA.JK", **shared},
+            *({"ticker": f"FILLER{i}.JK", **shared} for i in range(4)),
         ]
+    )
+    taxonomy = pd.concat(
+        [
+            taxonomy_df,
+            pd.DataFrame(
+                [{"ticker": f"FILLER{i}.JK", "group_id": "Financials"} for i in range(4)]
+            ),
+        ],
+        ignore_index=True,
     )
     snapshots = build_group_snapshots(
         features=features,
-        taxonomy=taxonomy_df,
+        taxonomy=taxonomy,
         snapshot_date=date(2026, 8, 20),
         prices=prices_df,
         horizons={"5d": 5, "20d": 20, "60d": 60},
@@ -310,3 +335,66 @@ def test_concentration_excludes_tickers_without_20d_readings(prices_df, benchmar
     before = next(s for s in full if s.group_id == "Financials").concentration.contributor_count
     after = next(s for s in ragged if s.group_id == "Financials").concentration.contributor_count
     assert after == before - 1
+
+
+def test_breadth_ticker_sets_survive_pipeline_round_trip(prices_df, benchmark_df, taxonomy_df):
+    """Paired comparisons must survive snapshot persistence, including legacy rows."""
+    from idx_leadership.pipeline import _row_to_group_snapshot, _snapshots_to_df
+
+    as_of = date(2026, 8, 20)
+    features = compute_excess_returns(
+        prices_df, benchmark_df, horizons={"5d": 5, "20d": 20, "60d": 60}, as_of=as_of,
+    )
+    snaps = build_group_snapshots(
+        features=features, taxonomy=taxonomy_df, snapshot_date=as_of, prices=prices_df,
+        horizons={"5d": 5, "20d": 20, "60d": 60}, min_constituents=1, min_coverage_pct=0.0,
+    )
+    frame = _snapshots_to_df(snaps)
+    restored = [_row_to_group_snapshot(row) for _, row in frame.iterrows()]
+    original = next(s for s in snaps if s.group_id == "Financials")
+    revived = next(s for s in restored if s.group_id == "Financials")
+    assert revived.breadth_eligible_tickers == original.breadth_eligible_tickers != []
+    assert revived.breadth_outperforming_tickers == original.breadth_outperforming_tickers
+    legacy = frame.drop(columns=["breadth_eligible_tickers", "breadth_outperforming_tickers"])
+    legacy_restored = [_row_to_group_snapshot(row) for _, row in legacy.iterrows()]
+    assert all(s.breadth_eligible_tickers == [] and s.breadth_outperforming_tickers == [] for s in legacy_restored)
+
+
+def test_disjoint_universes_yield_no_breadth_delta(prices_df, benchmark_df, taxonomy_df):
+    """Universes with no shared names must not produce a delta."""
+    from idx_leadership.models import GroupSnapshot
+
+    as_of = date(2026, 8, 20)
+    features = compute_excess_returns(
+        prices_df, benchmark_df, horizons={"5d": 5, "20d": 20, "60d": 60}, as_of=as_of,
+    )
+    previous = [
+        GroupSnapshot(
+            snapshot_date=date(2026, 8, 13),
+            group_id="Financials",
+            breadth_outperforming=100.0,
+            breadth_eligible_tickers=["ZZZ.JK"],
+            breadth_outperforming_tickers=["ZZZ.JK"],
+        )
+    ]
+    snaps = build_group_snapshots(
+        features=features, taxonomy=taxonomy_df, snapshot_date=as_of, prices=prices_df,
+        horizons={"5d": 5, "20d": 20, "60d": 60}, min_constituents=1, min_coverage_pct=0.0,
+        previous_groups=previous,
+    )
+    financials = next(s for s in snaps if s.group_id == "Financials")
+    assert financials.breadth_delta is None
+
+
+def test_leadership_requires_five_shared_contributors(prices_df, benchmark_df, taxonomy_df):
+    """A small shared cohort cannot confirm leadership even when eligible."""
+    as_of = date(2026, 8, 20)
+    features = compute_excess_returns(
+        prices_df, benchmark_df, horizons={"5d": 5, "20d": 20, "60d": 60}, as_of=as_of,
+    )
+    snaps = build_group_snapshots(
+        features=features, taxonomy=taxonomy_df, snapshot_date=as_of, prices=prices_df,
+        horizons={"5d": 5, "20d": 20, "60d": 60}, min_constituents=1, min_coverage_pct=0.0,
+    )
+    # Fixture groups carry four names at most: below the five-contributor floor.
+    assert all(s.leadership_state == LeadershipState.UNCONFIRMED for s in snaps)

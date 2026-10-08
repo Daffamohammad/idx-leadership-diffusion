@@ -62,6 +62,30 @@ def _none_if_nan_str(v):
         if math.isnan(v):
             return None
     return v
+
+
+def _ticker_set_or_empty(value) -> list[str]:
+    """Restore a persisted eligible/outperforming ticker set; legacy rows yield []."""
+    if value is None:
+        return []
+    if isinstance(value, list):
+        return sorted({str(ticker) for ticker in value})
+    if isinstance(value, float):
+        import math
+        if math.isnan(value):
+            return []
+        return []
+    if isinstance(value, str):
+        if not value.strip():
+            return []
+        try:
+            parsed = json.loads(value)
+        except (json.JSONDecodeError, ValueError):
+            return []
+        if isinstance(parsed, list):
+            return sorted({str(ticker) for ticker in parsed})
+        return []
+    return []
 def _none_if_nan_int(v):
     import math
     if v is None:
@@ -383,7 +407,7 @@ def build_snapshot(
         ),
         concentration_mode=str(concentration_cfg.get("mode", "absolute_move")),
         concentration_signed_denominator_epsilon=float(
-            concentration_cfg.get("signed_denominator_epsilon", 1e-8)
+            concentration_cfg.get("signed_denominator_epsilon", 1e-9)
         ),
         concentration_signed_min_net_to_gross=float(
             concentration_cfg.get("signed_min_net_to_gross", 0.05)
@@ -923,6 +947,8 @@ def _row_to_group_snapshot(row: pd.Series):
             _none_if_nan_int(row.get("breadth_outperforming_count")) or 0
         ),
         breadth_improving_count=_none_if_nan_int(row.get("breadth_improving_count")) or 0,
+        breadth_eligible_tickers=_ticker_set_or_empty(row.get("breadth_eligible_tickers")),
+        breadth_outperforming_tickers=_ticker_set_or_empty(row.get("breadth_outperforming_tickers")),
         concentration=concentration,
         leadership_state=LeadershipState(
             _none_if_nan_str(row.get("leadership_state")) or "UNCONFIRMED"
@@ -1108,6 +1134,8 @@ def _snapshots_to_df(snapshots) -> pd.DataFrame:
                 "breadth_positive_count": s.breadth_positive_count,
                 "breadth_outperforming_count": s.breadth_outperforming_count,
                 "breadth_improving_count": s.breadth_improving_count,
+                "breadth_eligible_tickers": json.dumps(sorted(s.breadth_eligible_tickers)),
+                "breadth_outperforming_tickers": json.dumps(sorted(s.breadth_outperforming_tickers)),
                 "top1_contribution_share": s.concentration.top1_contribution_share,
                 "top3_contribution_share": s.concentration.top3_contribution_share,
                 "top5_contribution_share": s.concentration.top5_contribution_share,

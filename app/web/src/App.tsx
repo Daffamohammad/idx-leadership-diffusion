@@ -133,7 +133,6 @@ const router = createBrowserRouter([
       { path: "/explorer", Component: GroupExplorer },
       { path: "/groups", Component: MasterGroupTable },
       { path: "/methodology", Component: Methodology },
-      { path: "/chart-demo", element: <Navigate to="/map" replace /> },
       { path: "/ticker/:ticker", Component: TickerAnalysis },
     ],
   },

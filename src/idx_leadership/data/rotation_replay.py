@@ -25,6 +25,18 @@ def fingerprint(value) -> str:
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
 
 
+def segment_contract(members_eligible, members, contributors, taxonomy_version) -> str:
+    """The comparability contract covers the return axes only: a YTD-only
+    cohort change must not split 20D/60D trail continuity."""
+    return fingerprint({
+        "eligible": members_eligible,
+        "members": members,
+        "contributors": {axis: contributors[axis] for axis in AXES[1:]},
+        "method": METHOD,
+        "taxonomy_version": taxonomy_version,
+    })
+
+
 def finite(value) -> bool:
     return isinstance(value, (float, int)) and not isinstance(value, bool) and math.isfinite(value)
 
@@ -169,8 +181,12 @@ def replay(*, prices: pd.DataFrame, benchmark: pd.DataFrame, sessions: list[str]
                     group["gaps"].append({"as_of": session, "reason": reason})
                     continue
                 cohort = fingerprint(members_eligible)
-                contract = fingerprint({"eligible": cohort, "members": members, "contributors": contributors,
-                                        "method": METHOD, "taxonomy_version": version["method_version"]})
+                contract = segment_contract(
+                    members_eligible=cohort,
+                    members=members,
+                    contributors=contributors,
+                    taxonomy_version=version["method_version"],
+                )
                 previous = group["segments"][-1] if group["segments"] else None
                 prior_session = sessions[sessions.index(session) - 1] if session != sessions[0] else None
                 if previous is None or previous["contract_hash"] != contract or previous["sessions"][-1] != prior_session:

@@ -209,7 +209,7 @@ export default function IDXStatisticsRelease({ release }: IDXStatisticsReleasePr
       >
         <span>Source: Indonesia Stock Exchange</span>
         <span>·</span>
-          <a href={release.source.url} target="_blank" rel="noreferrer">Open official table</a>
+          <a href={release.source.url} target="_blank" rel="noreferrer noopener">Open official table</a>
         <span>·</span>
         <span>{releaseReady ? "Table totals reconcile" : "Table reconciliation needs review"}</span>
       </footer>

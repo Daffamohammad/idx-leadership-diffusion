@@ -225,6 +225,7 @@ html.dark .cursor-ring.cursor-hover { border-color: #f26a3d; }
 
 /* ── Float (hero card) ─────────────────────────────────── */
 @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+/* The infinite loop is user-requested (8 October feedback); do not revert to a single pass. */
 .hero-card-float { animation: float 5.5s ease-in-out infinite; }
 
 /* ── DotField bar entrance ─────────────────────────────── */

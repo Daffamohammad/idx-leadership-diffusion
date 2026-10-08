@@ -342,12 +342,20 @@ def aggregate_taxonomy(
         )
         breadth_delta: float | None = None
         if breadth is not None and prev_breadth_value is not None:
+            # Scope note: this delta is an unpaired difference of participation
+            # shares. The release-published breadth pairing rule (only names
+            # present at both dates) is enforced by aggregation.groups; this
+            # taxonomy view intentionally reports the raw share difference.
             breadth_delta = breadth - prev_breadth_value
 
         group_is_eligible = (
             eligible_count >= min_eligible_constituents
             and coverage_pct >= min_coverage_pct
         )
+        # Scope note: leadership here is gated on group eligibility only. The
+        # five-contributor shared-cohort floor for confirmed signals is
+        # enforced in aggregation.groups; this view keeps the legacy scoping
+        # so its outputs stay unchanged.
         leadership = classify_leadership(
             excess_return_20d=lead_excess_20d,
             excess_return_5d=lead_excess_5d,

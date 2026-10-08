@@ -236,6 +236,12 @@ def build_group_snapshots(
             breadth_delta = paired_share - paired_prev_share
             breadth_change_count = paired_count - paired_prev_count
             diffusion_group_size = len(paired)
+        elif prev_breadth is not None and prev_eligible and not (eligible_now & prev_eligible):
+            # Disjoint universes share no comparable names: no delta rather
+            # than an unpaired subtraction.
+            breadth_delta = None
+            breadth_change_count = None
+            diffusion_group_size = total_constituents
         elif prev_breadth is not None and prev_breadth.breadth_outperforming is not None and breadth.benchmark_outperformance_share is not None:
             breadth_delta = float(breadth.benchmark_outperformance_share) - float(prev_breadth.breadth_outperforming)
             breadth_change_count = breadth.outperforming_count - prev_breadth.breadth_outperforming_count
@@ -247,19 +253,15 @@ def build_group_snapshots(
 
         # Concentration runs over the actual return cohort at the
         # concentration horizon, so a stale ticker excluded from group
-        # returns cannot leak back in through the price frame. Only an
-        # empty cohort falls back to all group tickers (legacy output).
+        # returns cannot leak back in through the price frame. An empty
+        # cohort stays undefined rather than measuring other tickers.
         concentration_return_col = f"return_{concentration_horizon}d"
         if concentration_return_col not in gdf.columns:
             concentration_return_col = "return_20d"
         concentration_tickers = (
             gdf.loc[gdf[concentration_return_col].notna(), "ticker"].unique().tolist()
         )
-        group_tickers = (
-            concentration_tickers
-            if concentration_tickers
-            else gdf["ticker"].unique().tolist()
-        )
+        group_tickers = concentration_tickers
         if concentration_mode == "absolute_move_v2":
             conc_v2 = compute_concentration_v2(
                 prices,
@@ -298,9 +300,9 @@ def build_group_snapshots(
                 convention=conc.convention,
             )
 
-        # Leadership (requires all three horizons on the shared cohort;
-        # otherwise UNCONFIRMED by construction in classify_leadership —
-        # no silent fallback).
+        # Leadership (requires all three horizons on a shared cohort of at
+        # least five; otherwise UNCONFIRMED by construction in
+        # classify_leadership — no silent fallback).
         leadership_state = classify_leadership(
             excess_return_20d=lead_ex20,
             excess_return_5d=lead_ex5,
@@ -308,7 +310,7 @@ def build_group_snapshots(
             acceleration_threshold_pp=acceleration_threshold_pp,
             excess_return_improving=excess_return_improving,
             excess_return_leading=excess_return_leading,
-            eligible=eligible_flag,
+            eligible=eligible_flag and len(lead_frame) >= 5,
         )
         # Diffusion. Keep the v1 projection for existing consumers, while
         # retaining the richer v2 state when the configured mode enables it.

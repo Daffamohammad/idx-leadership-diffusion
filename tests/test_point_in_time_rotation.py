@@ -9,7 +9,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from idx_leadership.data.rotation_replay import AXES, KINDS, replay, validate_asset
+from idx_leadership.data.rotation_replay import AXES, KINDS, replay, segment_contract, validate_asset
 from scripts.build_rotation_replay import load_ledger, publish, sha
 from tests.test_public_refresh_chain import _run_tsx
 
@@ -209,6 +209,17 @@ def test_missing_ytd_baseline_keeps_return_points_without_ytd(inputs):
     assert math.isfinite(last["group_excess_return_60d"])
     assert last["group_excess_return_ytd"] is None
     validate_asset(result, inputs["endpoints"])
+
+
+def test_segment_contract_ignores_ytd_only_contributor_changes():
+    """A YTD-only cohort change must not split 20D/60D trail continuity."""
+    members = ["AAA.JK", "BBB.JK"]
+    contributors = {AXES[0]: ["AAA.JK"], AXES[1]: members, AXES[2]: members}
+    base = segment_contract(members, members, contributors, "test-v1")
+    assert segment_contract(members, members, {**contributors, AXES[0]: []}, "test-v1") == base
+    assert segment_contract(members, members, {**contributors, AXES[0]: ["BBB.JK"]}, "test-v1") == base
+    drifted = segment_contract(members, members, {**contributors, AXES[1]: ["AAA.JK"]}, "test-v1")
+    assert drifted != base
 
 
 def test_unknown_source_hash_refuses_ledger(tmp_path):

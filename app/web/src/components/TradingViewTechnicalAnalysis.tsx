@@ -32,8 +32,15 @@ function buildConfig(colorTheme: "light" | "dark"): Record<string, unknown> {
 
 export default function TradingViewTechnicalAnalysis() {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const probeTimerRef = useRef<number | null>(null);
   const [status, setStatus] = useState<WidgetStatus>("loading");
   const [attempt, setAttempt] = useState(0);
+
+  // The embed's load probe fires 1.5s after the script resolves; track it so
+  // an unmount before the probe cannot call setState on a dead component.
+  useEffect(() => () => {
+    if (probeTimerRef.current !== null) window.clearTimeout(probeTimerRef.current);
+  }, []);
 
   const embed = useCallback(() => {
     const container = containerRef.current;
@@ -52,8 +59,10 @@ export default function TradingViewTechnicalAnalysis() {
     script.onload = () => {
       // The embed script injects its iframe synchronously on execution; if no
       // iframe appears the widget was blocked downstream.
-      window.setTimeout(() => {
-        if (container.querySelector("iframe")) setStatus("ready");
+      if (probeTimerRef.current !== null) window.clearTimeout(probeTimerRef.current);
+      probeTimerRef.current = window.setTimeout(() => {
+        if (!containerRef.current) return;
+        if (containerRef.current.querySelector("iframe")) setStatus("ready");
         else {
           script.remove();
           setStatus("unavailable");
@@ -78,7 +87,7 @@ export default function TradingViewTechnicalAnalysis() {
           <div className="eyebrow-muted">TradingView · external context</div>
           <h3 id="tradingview-analysis-title">Technical analysis</h3>
         </div>
-        <a href="https://www.tradingview.com/symbols/IDX-COMPOSITE/" target="_blank" rel="noreferrer">Open ↗</a>
+        <a href="https://www.tradingview.com/symbols/IDX-COMPOSITE/" target="_blank" rel="noreferrer noopener">Open ↗</a>
       </div>
       <div className="tradingview-analysis-frame" aria-label="TradingView technical analysis for IDX Composite" hidden={status === "unavailable"}>
         {status === "loading" && <p className="tradingview-widget-fallback">Loading the IDX Composite technical summary…</p>}

@@ -290,7 +290,7 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
                 paddingBottom: 6,
               }}
             >
-              <a href={row.sourceUrl} target="_blank" rel="noreferrer">
+              <a href={row.sourceUrl} target="_blank" rel="noreferrer noopener">
                 {row.sourceName}
               </a>
               <span

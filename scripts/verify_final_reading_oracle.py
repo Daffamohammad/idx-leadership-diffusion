@@ -53,7 +53,8 @@ def verify(manifest_path: Path) -> dict:
     def mean(values):
         return sum(values)/len(values) if values else None
     def phase(x,y):
-        return "UNAVAILABLE" if x is None or y is None else ("LEADING" if x >= 0 else "IMPROVING") if y >= 0 else ("WEAKENING" if x >= 0 else "LAGGING")
+        if x is None or y is None or not math.isfinite(x) or not math.isfinite(y): return "UNAVAILABLE"
+        return ("LEADING" if x >= 0 else "IMPROVING") if y >= 0 else ("WEAKENING" if x >= 0 else "LAGGING")
     for kind,taxonomy in analysis["taxonomies"].items():
         for gid,group in taxonomy["groups"].items():
             cohorts = {}

@@ -40,7 +40,7 @@ export type PriceBasis = "close" | "adjusted_close" | "open" | "high" | "low";
 export type ChartRange = "1M" | "3M" | "6M" | "1Y" | "YTD" | "2Y" | "5Y" | "ALL";
 
 // Every period the product offers. Availability is decided from the persisted
-// series; anything the snapshot cannot support renders disabled with a reason
+// series; anything the persisted history cannot support renders disabled with a reason
 // instead of silently disappearing.
 export const CHART_PERIODS: ChartRange[] = ["1M", "3M", "6M", "1Y", "YTD", "2Y", "5Y", "ALL"];
 
@@ -100,9 +100,9 @@ function formatCompactDate(date: string): string {
 }
 
 // Source context shared by every disabled-period explanation: this app reads
-// persisted snapshot history only, and Sectors API refreshes stay on hold.
+// persisted market observations only, and Sectors API refreshes stay on hold.
 const PERIOD_SOURCE_NOTE =
-  "Only persisted snapshot prices are used here — Sectors API refreshes are on hold and were not attempted to extend the window.";
+  "Only persisted market observations are used here — Sectors API refreshes are on hold and were not attempted to extend the window.";
 
 function spanDays(dates: string[]): number {
   if (dates.length === 0) return 0;
@@ -136,7 +136,7 @@ export function periodDisabledReason(period: ChartRange, dates: string[]): strin
   const minDays = PERIOD_MIN_DAYS[period];
   if (days >= minDays) return null;
   const actual = days < 1 ? "under a day" : `${Math.floor(days)} days`;
-  return `Needs at least ${minDays} days of history; this snapshot holds ${actual}. ${PERIOD_SOURCE_NOTE}`;
+  return `Needs at least ${minDays} days of history; the persisted series holds ${actual}. ${PERIOD_SOURCE_NOTE}`;
 }
 
 function getAvailableRanges(dates: string[]): ChartRange[] {
@@ -242,13 +242,13 @@ function CustomTooltip({ active, payload, label, metricLabel, ticker, groupName,
   const rows = point
     ? [
         { name: metricLabel || ticker || groupName || "Price", value: point.price, color: "var(--accent-ink)" },
-        { name: "IHSG (^JKSE)", value: point.bench, color: "var(--color-leading)" },
+        { name: "IHSG (^JKSE, rebased)", value: point.bench, color: "var(--color-leading)" },
         ...(showOHLC
           ? [
-              { name: "Open (index)", value: point.open ?? null, color: "var(--up)" },
-              { name: "High (index)", value: point.high ?? null, color: "var(--up)" },
-              { name: "Low (index)", value: point.low ?? null, color: "var(--accent-ink)" },
-              { name: "Close (index)", value: point.close ?? null, color: "var(--accent-ink)" },
+              { name: "Open (rebased)", value: point.open ?? null, color: "var(--up)" },
+              { name: "High (rebased)", value: point.high ?? null, color: "var(--up)" },
+              { name: "Low (rebased)", value: point.low ?? null, color: "var(--accent-ink)" },
+              { name: "Close (rebased)", value: point.close ?? null, color: "var(--accent-ink)" },
             ]
           : []),
         ...(showVolume && point.volume !== null && point.volume !== undefined
@@ -324,10 +324,10 @@ function PriceTable({
           <th style={{ textAlign: "right", padding: "6px 8px", fontWeight: 600, color: "var(--muted)", fontSize: 10 }}>{metricLabel}</th>
           <th style={{ textAlign: "right", padding: "6px 8px", fontWeight: 600, color: "var(--muted)", fontSize: 10 }}>Benchmark</th>
           {showOHLC && <>
-            <th style={{ textAlign: "right", padding: "6px 8px", fontWeight: 600, color: "var(--muted)", fontSize: 10 }}>Open (index)</th>
-            <th style={{ textAlign: "right", padding: "6px 8px", fontWeight: 600, color: "var(--muted)", fontSize: 10 }}>High (index)</th>
-            <th style={{ textAlign: "right", padding: "6px 8px", fontWeight: 600, color: "var(--muted)", fontSize: 10 }}>Low (index)</th>
-            <th style={{ textAlign: "right", padding: "6px 8px", fontWeight: 600, color: "var(--muted)", fontSize: 10 }}>Close (index)</th>
+            <th style={{ textAlign: "right", padding: "6px 8px", fontWeight: 600, color: "var(--muted)", fontSize: 10 }}>Open (rebased)</th>
+            <th style={{ textAlign: "right", padding: "6px 8px", fontWeight: 600, color: "var(--muted)", fontSize: 10 }}>High (rebased)</th>
+            <th style={{ textAlign: "right", padding: "6px 8px", fontWeight: 600, color: "var(--muted)", fontSize: 10 }}>Low (rebased)</th>
+            <th style={{ textAlign: "right", padding: "6px 8px", fontWeight: 600, color: "var(--muted)", fontSize: 10 }}>Close (rebased)</th>
           </>}
           {showVolume && <th style={{ textAlign: "right", padding: "6px 8px", fontWeight: 600, color: "var(--muted)", fontSize: 10 }}>Volume</th>}
         </tr>
@@ -370,8 +370,8 @@ export default function PriceChart({
   benchmarkPoints = [],
   groupPoints = [],
   asOf,
-  source = "yfinance (cached)",
-  metricLabel = "Adjusted close",
+  source = "Persisted market observations (rebased)",
+  metricLabel = "Rebased close (start = 100)",
   referenceValue = 0,
   height = 320,
   providerMode,
@@ -577,7 +577,7 @@ export default function PriceChart({
         <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", minWidth: 0, fontSize: 10, color: "var(--muted)", fontFamily: "Geist Mono" }}>
           <span>As of {formatDateLabel(asOf)}</span>
           <span>Source: {source}</span>
-          {hasOHLC && <span>OHLC (index) available</span>}
+          {hasOHLC && <span>OHLC (rebased) available</span>}
           {hasVolume && <span>Volume available</span>}
         </div>
       </div>
@@ -751,7 +751,7 @@ export default function PriceChart({
               type="monotone"
               dataKey="bench"
               yAxisId="left"
-              name="IHSG (^JKSE)"
+              name="IHSG (^JKSE, rebased)"
               stroke="var(--color-leading)"
               strokeWidth={1.5}
               strokeDasharray="4 2"

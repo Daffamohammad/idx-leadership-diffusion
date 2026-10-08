@@ -1247,7 +1247,7 @@ def _group_kwargs(
         "diffusion_minimum_constituents": int(floor.get("minimum", 2)),
         "concentration_mode": str(concentration.get("mode", "absolute_move")),
         "concentration_signed_denominator_epsilon": float(
-            concentration.get("signed_denominator_epsilon", 1e-8)
+            concentration.get("signed_denominator_epsilon", 1e-9)
         ),
         "concentration_signed_min_net_to_gross": float(
             concentration.get("signed_min_net_to_gross", 0.05)
@@ -1396,6 +1396,8 @@ def _groups_from_frame(frame: pd.DataFrame) -> list[GroupSnapshot]:
                     _clean(row.get("breadth_outperforming_count")) or 0
                 ),
                 breadth_improving_count=int(_clean(row.get("breadth_improving_count")) or 0),
+                breadth_eligible_tickers=_ticker_set_or_empty(row.get("breadth_eligible_tickers")),
+                breadth_outperforming_tickers=_ticker_set_or_empty(row.get("breadth_outperforming_tickers")),
                 concentration=concentration,
                 leadership_state=leadership,
                 diffusion_state=diffusion,
@@ -2353,6 +2355,8 @@ def _snapshots_to_df(snapshots: Iterable[GroupSnapshot]) -> pd.DataFrame:
                 "breadth_positive_count": item.breadth_positive_count,
                 "breadth_outperforming_count": item.breadth_outperforming_count,
                 "breadth_improving_count": item.breadth_improving_count,
+                "breadth_eligible_tickers": sorted(item.breadth_eligible_tickers),
+                "breadth_outperforming_tickers": sorted(item.breadth_outperforming_tickers),
                 "leadership_rank": item.leadership_rank,
                 "change_rank": item.change_rank,
                 "leadership_persistence": item.leadership_persistence,
@@ -2435,6 +2439,25 @@ def _float_or_none(value: Any) -> float | None:
     except (TypeError, ValueError):
         return None
     return result if pd.notna(result) else None
+
+
+def _ticker_set_or_empty(value: Any) -> list[str]:
+    """Restore a persisted eligible/outperforming ticker set; legacy rows yield []."""
+    value = _clean(value)
+    if value is None:
+        return []
+    if isinstance(value, list):
+        return sorted({str(ticker) for ticker in value})
+    if isinstance(value, str):
+        if not value.strip():
+            return []
+        try:
+            parsed = json.loads(value)
+        except (json.JSONDecodeError, ValueError):
+            return []
+        if isinstance(parsed, list):
+            return sorted({str(ticker) for ticker in parsed})
+    return []
 
 
 def _int_or_none(value: Any) -> int | None:

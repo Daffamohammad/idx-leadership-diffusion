@@ -199,7 +199,7 @@ export default function ForeignFlow() {
                 { label: "Session", cell: (row) => formatDateLabel(row.as_of) },
                 { label: "Daily net · IDR", cell: (row) => formatIdrCompact(row.net_foreign_value_idr) },
                 { label: "YTD net · IDR", cell: (row) => formatIdrCompact(row.ytd_net_foreign_value_idr) },
-                { label: "Official source", cell: (row) => <a href={row.source.url} target="_blank" rel="noreferrer">IDX Daily Statistics</a> },
+                { label: "Official source", cell: (row) => <a href={row.source.url} target="_blank" rel="noreferrer noopener">IDX Daily Statistics</a> },
               ]} />
             </details>
           </>

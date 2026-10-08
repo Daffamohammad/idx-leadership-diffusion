@@ -483,9 +483,9 @@ def verify(*, sample_path: Path, analysis_path: Path,
                     )
                     signed_gross = sum(abs(value) for _, value in ordered)
                     signed_net = sum(value for _, value in ordered)
-                    # The released analysis was built with the 1e-8 stability
-                    # epsilon; replicate the builder's parameters here.
-                    stable = abs(signed_net) > 1e-8 and abs(signed_net) / signed_gross >= 0.05
+                    # The builder uses the 1e-9 stability epsilon from
+                    # config/methodology.yaml; replicate it here.
+                    stable = abs(signed_net) > 1e-9 and abs(signed_net) / signed_gross >= 0.05
                     expected_signed = {
                         "top_absolute_contributor": ordered[0][0],
                         "top1_signed_share": round(ordered[0][1] / signed_net, 4) if stable else None,

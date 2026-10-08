@@ -4,6 +4,7 @@ import ThemeToggle from "../components/ThemeToggle"
 import { BrandLockup } from "../components/BrandMark"
 import SiteFooter from "../components/SiteFooter"
 import { groupHref, useResearch } from "../data/research"
+import { publicErrorText } from "../data/publicCopy"
 import { formatDateLabel, formatPercent } from "../data/format"
 
 // ── Dia text reveal ──────────────────────────────────────────────────────────
@@ -27,18 +28,21 @@ function DiaTextReveal({
   useEffect(() => {
     const el = ref.current
     if (!el) return
+    let pending: number | undefined
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          const t = setTimeout(() => setActive(true), delay)
+          pending = window.setTimeout(() => setActive(true), delay)
           observer.disconnect()
-          return () => clearTimeout(t)
         }
       },
       { threshold: 0.1 },
     )
     observer.observe(el)
-    return () => observer.disconnect()
+    return () => {
+      if (pending !== undefined) window.clearTimeout(pending)
+      observer.disconnect()
+    }
   }, [delay])
 
   const gradient = [
@@ -175,7 +179,7 @@ const PREVIEW_H = 230
 const PREVIEW_PAD = 30
 
 function DashboardPreview() {
-  const { groups, reading, date, loading, error, native } = useResearch("sectors")
+  const { groups, reading, date, cadence, horizon, loading, error, native } = useResearch("sectors")
   const asOf = native?.as_of ?? date
 
   if (loading) {
@@ -192,7 +196,7 @@ function DashboardPreview() {
       <section className="dash-card reveal" aria-label="Dashboard preview">
         <div className="eyebrow-muted">Dashboard preview</div>
         <p style={{ color: "var(--muted)", margin: "10px 0 0" }}>
-          {error ? `The Dashboard preview could not be loaded. ${error}` : "The Dashboard preview is unavailable."}
+          {error ? `The Dashboard preview could not be loaded. ${publicErrorText(error)}` : "The Dashboard preview is unavailable."}
         </p>
         <div style={{ marginTop: 14 }}>
           <button
@@ -259,7 +263,12 @@ function DashboardPreview() {
                   opacity={p.confirmed ? 0.9 : 0.8}
                 />
                 {isLeader && (
-                  <text x={px(p.x) + 10} y={py(p.y) + 4} fontSize="10" fill="var(--ink)">
+                  <text
+                    x={Math.min(px(p.x) + 10, PREVIEW_W - 4 - Math.max(18, p.group.name.length * 5.6))}
+                    y={py(p.y) + 4}
+                    fontSize="10"
+                    fill="var(--ink)"
+                  >
                     {p.group.name}
                   </text>
                 )}
@@ -279,7 +288,7 @@ function DashboardPreview() {
           return (
             <li key={group.id} style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", gap: 4, alignItems: "baseline" }}>
               <Link
-                to={groupHref(group, date, "daily", "60d")}
+                to={groupHref(group, date, cadence, horizon)}
                 style={{ color: "var(--ink)", fontSize: 13, textDecoration: "none", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
               >
                 {group.name}
