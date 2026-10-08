@@ -98,10 +98,16 @@ including the active pointer, prior packages and acquisition/budget evidence.
 The ledger remains 461 estimated reservations against 500; the reported 221
 remaining calls are unused and still require reconciliation before acquisition.
 
-[Current Vercel check](launch-check.json) finds no linked project for this
-repository. The integration-status query returned HTTP 403 and no CLI fallback
-is installed. The previous launch's missing-GitHub-integration failure is
-preserved. Repository access must be connected before launch can proceed;
-deploy the verified branch rather than the older remote main. No public URL
-has been accepted. Videos, social publication and final submission remain
-deferred; this receipt does not declare the submission complete.
+[Source publication](publication.json) confirms an atomic fast-forward of both
+`main` and `codex/final-diffusion-repair` to `10e8bd2`, containing the verified
+source and fresh evidence. The prior main commit `8c34fed` remains in history
+for source rollback. No application code changed after browser verification.
+
+[The fresh Vercel launch attempt](launch.json), made after source publication,
+returned HTTP 400: the GitHub integration must be installed before this
+repository can be linked. No CLI fallback is installed. The earlier
+[read-only check](launch-check.json) and all historical failures are preserved.
+Connect repository access, then launch the verified `main` branch and check
+fresh public loads. No public URL has been accepted. Videos, social publication
+and final submission remain deferred; this receipt does not declare the
+submission complete.

@@ -72,7 +72,11 @@ including [fresh browser QA](final-audit-2026-10-08/browser-qa.json),
 [clean reproduction at the fix commit](final-audit-2026-10-08/clean-reproduction.json).
 Browser QA covers 64 fresh loads: all sixteen navigation routes at four sizes.
 The data package is unchanged, so its [original publication receipt](final-repair-2026-10-08/publication.json)
-remains applicable. Earlier audit reports and receipts remain dated records.
+remains applicable. The [verified source publication](final-audit-2026-10-08/publication.json)
+fast-forwards both `main` and `codex/final-diffusion-repair` to `10e8bd2`, with
+no application changes after browser verification. Prior main commit `8c34fed`
+remains in history for source rollback. Earlier audit reports and receipts
+remain dated records.
 
 ## Reproduce without credentials
 
@@ -110,12 +114,12 @@ hashes for 1036×799, 1369×799, 1440×900, and 390×844:
 ## Delivery gates
 
 The local application and public repository are separate from public hosting.
-See the [current launch check](final-audit-2026-10-08/launch-check.json).
-Vercel has no project linked to this repository; the integration-status check
-was denied, and the earlier launch was blocked by missing GitHub integration.
-Connect repository access and deploy the verified `codex/final-diffusion-repair`
-branch. The remote `main` branch has an older application and is not this tested
-source. A public URL must pass fresh-load checks before hosting is accepted.
+See the [fresh launch attempt](final-audit-2026-10-08/launch.json), made after
+verified source publication. Vercel returned HTTP 400 because its GitHub
+integration must be installed before this repository can be linked. The
+[earlier read-only check](final-audit-2026-10-08/launch-check.json) is retained.
+Connect repository access and deploy the verified `main` branch. A public URL
+must pass fresh-load checks before hosting is accepted.
 Videos, the prescribed social post, and final submission remain deferred; app
 verification alone does not complete the submission.
 

@@ -11,8 +11,13 @@ See [verification and evidence](docs/submission-release/final-audit-2026-10-08/V
 - Zero paid calls. Original ledgers and historical receipts remain unchanged.
   Paid acquisition stays on HOLD; the reported 221 remaining calls are unused.
 
-Public hosting remains blocked. Vercel has no project linked to this repository,
-and checking its integration permissions returned HTTP 403. Connect repository
-access before deploying `codex/final-diffusion-repair` and checking the public URL.
-The older remote main is not the source verified here. Videos, social publication
-and final submission remain deferred.
+The verified source and evidence are published to both `main` and
+`codex/final-diffusion-repair` at `10e8bd2`. The prior main commit `8c34fed`
+remains available for rollback; see the
+[source-publication receipt](docs/submission-release/final-audit-2026-10-08/publication.json).
+
+Public hosting remains blocked. The
+[fresh launch attempt](docs/submission-release/final-audit-2026-10-08/launch.json)
+returned HTTP 400 because Vercel's GitHub integration is missing. Connect
+repository access before launching `main` and checking the public URL.
+Videos, social publication and final submission remain deferred.
