@@ -1,0 +1,4 @@
+groups: 174
+daily observations checked: 3654
+weekly observations checked: 870
+mismatches: 0
