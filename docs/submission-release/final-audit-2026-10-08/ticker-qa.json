@@ -1,0 +1,58 @@
+{
+  "checks": [
+    {
+      "banned": null,
+      "chart_labels": [],
+      "curves": 2,
+      "dates": 21,
+      "header": "AMMN.JK \u00b7 RAW SECTORS CLOSES\nAmman Mineral Internasional Tbk.\n\nThrough 2 Oct 2026 \u00b7 178 observed closes. Corporate-action windows are excluded from signal readings; the price curve retains the observed closes.\n\nGroup research",
+      "url": "http://localhost:4173/ticker/AMMN.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+      "viewport": [
+        390,
+        844
+      ]
+    }
+  ],
+  "console_errors": [],
+  "context": {
+    "banned": null,
+    "curves": 2,
+    "header": "SAME.JK \u00b7 YAHOO FINANCE ADJUSTED CLOSES\nSarana Meditama Metropolitan Tbk.\n\nThrough 2 Oct 2026 \u00b7 266 observed closes. Broader IDX research context.\n\nGroup research",
+    "missing": [
+      ""
+    ],
+    "url": "http://localhost:4173/ticker/SAME.JK?scope=market&date=2026-10-02&cadence=weekly&horizon=60d"
+  },
+  "context_tooltip": [
+    "9 Jul 2026\n\nIHSG : 0.67%\nSAME.JK : -4.37%"
+  ],
+  "context_tooltip_before": [],
+  "core_tooltip": [
+    "22 Jul 2026\n\nAMMN.JK : 23.88%\nIHSG : 7.85%"
+  ],
+  "core_weekly": {
+    "curves": 3,
+    "date": "2026-09-25",
+    "group_links": [
+      "/sectors",
+      "/explorer?taxonomy=SECTOR&group=Basic+Materials&scope=sectors&horizon=60d&date=2026-09-25&cadence=weekly",
+      "/ownership?view=stocks&search=AMMN"
+    ],
+    "header": "AMMN.JK \u00b7 RAW SECTORS CLOSES\nAmman Mineral Internasional Tbk.\n\nThrough 25 Sep 2026 \u00b7 173 observed closes. Corporate-action windows are excluded from signal readings; the price curve retains the observed closes.\n\nGroup research",
+    "url": "http://localhost:4173/ticker/AMMN.JK?scope=sectors&date=2026-09-25&cadence=weekly&horizon=60d"
+  },
+  "manifest_sha256": "98e2c260c9afae07ce2b1cb5b5436cda8bbff9978a0239d809d909183ad36e4f",
+  "release_id": "rel-64026e36d49733009fec952086fc95a3121a86efbb196b1c68d00fd6317f33d2",
+  "screenshot": {
+    "path": "docs/submission-release/final-audit-2026-10-08/screenshots/ticker-core-390x844.jpg",
+    "physical_dimensions": [
+      390,
+      844
+    ],
+    "sha256": "08b5d201be94b8a6f4832e21777566a8014dfd860cd308528432cd7917515bec",
+    "viewport": "390x844"
+  },
+  "sectors_provider_requests": 0,
+  "source_commit": "d1a223f212e69dce9cf5478f2cd2f67093746597",
+  "status": "PASS"
+}

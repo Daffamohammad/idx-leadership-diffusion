@@ -1,0 +1,31 @@
+{
+  "cli_fallback": "Not installed",
+  "created_at_utc": "2026-10-08T11:58:57+00:00",
+  "git_deployment_context": {
+    "existing_other_linked_projects": 2,
+    "status": "PASS",
+    "this_repository_linked": false
+  },
+  "integration_status_query": {
+    "http_status": 403,
+    "message": "The connector does not have permission to list the integration configuration.",
+    "status": "PERMISSION_DENIED"
+  },
+  "main_before_publication": "8c34fedfa4ed0bb2c751ac4c56fd387d0e86488d",
+  "previous_failed_launch": "docs/submission-release/final-repair-2026-10-08/launch.json",
+  "previous_failed_launch_sha256": "7be90ac271b519aa694e9ac89a0561ec01d95e19b2432d570fd2029b47c29e29",
+  "provider_calls": 0,
+  "public_url": null,
+  "public_url_verified": false,
+  "repository": "https://github.com/Daffamohammad/idx-leadership-diffusion",
+  "repository_project_query": {
+    "linked_projects": 0,
+    "status": "PASS"
+  },
+  "required_action": "Connect GitHub repository access for Vercel, then deploy verified source and check fresh public loads.",
+  "schema_version": "diffusion-launch-check-v1",
+  "source_branch": "codex/final-diffusion-repair",
+  "source_commit": "d1a223f212e69dce9cf5478f2cd2f67093746597",
+  "status": "BLOCKED_NO_LINKED_PROJECT",
+  "team_id": "team_bPccwWtEeVLj6cS2QZhOmzas"
+}

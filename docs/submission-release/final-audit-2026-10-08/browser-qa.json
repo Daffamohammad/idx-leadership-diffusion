@@ -1,0 +1,2747 @@
+{
+  "checks": {
+    "absent_asset": {
+      "observed": {
+        "alerts": [],
+        "map_marks": 0,
+        "rankings": 0,
+        "statuses": [
+          "Group evidence is unavailable for this universe."
+        ],
+        "text": "Dashboard\nGroup evidence is unavailable for this universe."
+      },
+      "status": "PASS"
+    },
+    "catalogue_34": {
+      "observed": {
+        "catalogue_asset_sha256": "5490b89dbbd6b293f47b320e0e0d72c58d2989546acdb2cd491cb4b740be9304",
+        "first_page": [
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_JHONLIN&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Haji Isam \u00b7 Jhonlin"
+          },
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_KALBE&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Kalbe Farma corporate holdings"
+          },
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_MANDIRI_COAL&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Mandiri Coal"
+          },
+          {
+            "coverage": "Signal eligible",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_ASTRA&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Astra \u00b7 Jardine"
+          },
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_MAYAPADA_KARUNIA&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Mayapada"
+          },
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_VICTORIA&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Victoria Investama holdings"
+          },
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_ADARO&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Adaro Strategic Investments holdings"
+          },
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_BAKRIE_BROTHERS&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Bakrie"
+          },
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_CIPUTRA_CORPORA&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Ciputra Corpora disclosed holdings"
+          },
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_FKS&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "FKS"
+          },
+          {
+            "coverage": "Signal eligible",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_SARATOGA&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "TNT \u00b7 Saratoga \u00b7 Adaro"
+          },
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_BUDI&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Sungai Budi"
+          },
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_GARUDAFOOD&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Garudafood"
+          },
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_JARDINE&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Jardine Cycle & Carriage disclosed holdings"
+          },
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_MEDCO&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Medco \u00b7 Amman"
+          },
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_FIRST_RESOURCES&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "First Resources"
+          },
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_PAKUWON_ARTHANIAGA&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Pakuwon"
+          },
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_MEGA&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "CT Corp"
+          },
+          {
+            "coverage": "Signal eligible",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_GAJAH_TUNGGAL_MAP&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Gajah Tunggal \u00b7 MAP"
+          },
+          {
+            "coverage": "Signal eligible",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_TRIPUTRA_IA&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Triputra \u00b7 Adaro"
+          },
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_HARITA&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Harita"
+          },
+          {
+            "coverage": "Signal eligible",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_SINARMAS&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Sinar Mas"
+          },
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_ALFA&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Alfa Corp"
+          },
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_TRAKINDO&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Trakindo"
+          },
+          {
+            "coverage": "Signal eligible",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_INDOFOOD&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Salim"
+          },
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_RUKUN_RAHARJA&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Rukun Raharja corporate holdings"
+          },
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_CHAROEN_POKPHAND&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Charoen Pokphand"
+          },
+          {
+            "coverage": "Signal eligible",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_HARTONO&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Djarum \u00b7 Hartono"
+          },
+          {
+            "coverage": "Signal eligible",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_EMTEK&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Emtek"
+          },
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_APP&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "APP Purinusa disclosed holdings"
+          },
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_KAWAN_LAMA&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Kawan Lama Sejahtera disclosed holdings"
+          },
+          {
+            "coverage": "Signal eligible",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_TANCORP&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Tanoko \u00b7 Tancorp"
+          },
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_KPN_WILMAR&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "KPN \u00b7 Wilmar"
+          },
+          {
+            "coverage": "Signal eligible",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_PANIN&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Panin"
+          },
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_BAYAN&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Bayan"
+          },
+          {
+            "coverage": "Signal eligible",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_BARITO&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Barito \u00b7 Prajogo Pangestu"
+          },
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_RAJAWALI_KAPITAL_EMAS&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Rajawali"
+          },
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_PRAJOGO&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Prajogo Pangestu disclosed holdings"
+          },
+          {
+            "coverage": "Signal eligible",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_MULTIPOLAR&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Lippo"
+          },
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_ARTHA_GRAHA&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Artha Graha"
+          }
+        ],
+        "missing_reference_groups": [],
+        "reference_count": 34,
+        "reference_groups_verified_against_asset": [
+          "KONGLO_INDOFOOD",
+          "KONGLO_SARATOGA",
+          "KONGLO_SINARMAS",
+          "KONGLO_MULTIPOLAR",
+          "KONGLO_BAKRIE_BROTHERS",
+          "KONGLO_TANCORP",
+          "KONGLO_HAPSORO",
+          "KONGLO_ASTRA",
+          "KONGLO_TRIPUTRA_IA",
+          "KONGLO_PANIN",
+          "KONGLO_HARTONO",
+          "KONGLO_BARITO",
+          "KONGLO_GAJAH_TUNGGAL_MAP",
+          "KONGLO_AGUNG_SEDAYU",
+          "KONGLO_JHONLIN",
+          "KONGLO_EMTEK",
+          "KONGLO_BAYAN",
+          "KONGLO_ALFA",
+          "KONGLO_MAYAPADA_KARUNIA",
+          "KONGLO_ARTHA_GRAHA",
+          "KONGLO_TRAKINDO",
+          "KONGLO_RAJAWALI_KAPITAL_EMAS",
+          "KONGLO_ARSARI",
+          "KONGLO_MEGA",
+          "KONGLO_BUDI",
+          "KONGLO_PAKUWON_ARTHANIAGA",
+          "KONGLO_MEDCO",
+          "KONGLO_MANDIRI_COAL",
+          "KONGLO_KPN_WILMAR",
+          "KONGLO_HARITA",
+          "KONGLO_GARUDAFOOD",
+          "KONGLO_FKS",
+          "KONGLO_FIRST_RESOURCES",
+          "KONGLO_CHAROEN_POKPHAND"
+        ],
+        "second_page": [
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_BSDE&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Paraga / Ekacentra disclosed holdings"
+          },
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_PROTELINDO&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Protelindo disclosed holdings"
+          },
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_ARSARI&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Hashim \u00b7 Arsari"
+          },
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_AGUNG_SEDAYU&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Agung Sedayu"
+          },
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_HAPSORO&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "Happy Hapsoro \u00b7 Rukun Raharja"
+          },
+          {
+            "coverage": "Descriptive \u00b7 signal below five",
+            "href": "/explorer?taxonomy=KONGLO&group=KONGLO_MNC&scope=market&horizon=60d&date=2026-10-02&cadence=weekly",
+            "name": "MNC Asia corporate holdings"
+          }
+        ],
+        "total_groups": 46
+      },
+      "status": "PASS"
+    },
+    "chart_interactions": {
+      "observed": {
+        "compare_group": "Energy",
+        "constituent_note": "Price performance vs IHSG\nWindow \n20 sessions\n60 sessions\nAvailable history\nConstituent \nGroup basket\nCYBR.JK\nDCII.JK\nEMTK.JK\nMLPT.JK\nMTDL.JK\nWIFI.JK\n\n1 of 1 contributors \u00b7 prices rebased at the window\u2019s starting close \u00b7 through 2 Oct 2026. IHSG uses the same dates. Individual price path; corporate-action markers do not adjust the underlying closes.\n\nComparison: Energy \u00b7 6 / 6 fixed contributors over the identical window.\n\n7 Sep 2026\n\nDCII.JK : -0.10%\nEnergy : 0.90%\nIHSG : -0.25%\nDCII.JKEnergyIHSG\n15 Sep 2026\n2 Oct 2026\n-12%\n-8%\n-4%\n0%\n4%",
+        "curves": 5,
+        "mobile_table_scroll": [
+          {
+            "overflow": "auto",
+            "parent_width": 366,
+            "table_width": 872
+          }
+        ],
+        "selected_constituent": "DCII.JK",
+        "selected_window": "20",
+        "tooltip": [
+          "9 Jul 2026\n\nEnergy : 0.76%\nEqual-weight basket : 0.94%\nIHSG : 0.67%"
+        ]
+      },
+      "status": "PASS"
+    },
+    "context_map": {
+      "observed": {
+        "taxonomies": [
+          {
+            "axis": "60d",
+            "banned": null,
+            "finite": true,
+            "groups": 11,
+            "hollow": 0,
+            "points": 11,
+            "reason_paragraphs": [
+              "Up = 20D excess \u2212 60D excess. 11 points \u00b7 11 groups. Hollow marks have fewer than five contributors.",
+              "Leading 4 \u00b7 Improving 0 \u00b7 Lagging 0 \u00b7 Weakening 7. Empty quadrants reflect the data.",
+              "Integer counts, with identical names at both ends of each comparison. A missing first comparison remains unavailable."
+            ],
+            "taxonomy": "SECTOR",
+            "url": "http://localhost:4173/map"
+          },
+          {
+            "axis": "60d",
+            "banned": null,
+            "finite": true,
+            "groups": 46,
+            "hollow": 35,
+            "points": 46,
+            "reason_paragraphs": [
+              "Up = 20D excess \u2212 60D excess. 46 points \u00b7 46 groups. Hollow marks have fewer than five contributors.",
+              "Leading 6 \u00b7 Improving 16 \u00b7 Lagging 4 \u00b7 Weakening 20. Empty quadrants reflect the data.",
+              "Integer counts, with identical names at both ends of each comparison. A missing first comparison remains unavailable."
+            ],
+            "taxonomy": "KONGLO",
+            "url": "http://localhost:4173/map?taxonomy=KONGLO&scope=market&date=2026-10-02&cadence=weekly&horizon=60d"
+          },
+          {
+            "axis": "60d",
+            "banned": null,
+            "finite": true,
+            "groups": 102,
+            "hollow": 49,
+            "points": 99,
+            "reason_paragraphs": [
+              "Up = 20D excess \u2212 60D excess. 99 points \u00b7 102 groups. Hollow marks have fewer than five contributors.",
+              "Leading 14 \u00b7 Improving 30 \u00b7 Lagging 3 \u00b7 Weakening 52. Empty quadrants reflect the data.",
+              "Integer counts, with identical names at both ends of each comparison. A missing first comparison remains unavailable."
+            ],
+            "taxonomy": "IDXIC",
+            "url": "http://localhost:4173/map?taxonomy=IDXIC&scope=market&date=2026-10-02&cadence=weekly&horizon=60d"
+          },
+          {
+            "axis": "60d",
+            "banned": null,
+            "finite": true,
+            "groups": 15,
+            "hollow": 1,
+            "points": 15,
+            "reason_paragraphs": [
+              "Up = 20D excess \u2212 60D excess. 15 points \u00b7 15 groups. Hollow marks have fewer than five contributors.",
+              "Leading 2 \u00b7 Improving 2 \u00b7 Lagging 1 \u00b7 Weakening 10. Empty quadrants reflect the data.",
+              "Integer counts, with identical names at both ends of each comparison. A missing first comparison remains unavailable."
+            ],
+            "taxonomy": "CURATED_THEMES",
+            "url": "http://localhost:4173/map?taxonomy=CURATED_THEMES&scope=market&date=2026-10-02&cadence=weekly&horizon=60d"
+          }
+        ]
+      },
+      "status": "PASS"
+    },
+    "core_interactions": {
+      "observed": {
+        "daily_dates": 21,
+        "groups": [
+          {
+            "group": "Consumer Cyclicals",
+            "members": [
+              {
+                "link": "/ticker/FORU.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "20D: MECHANICAL ACTION RIGHT ISSUE 2026-09-22; 60D: MECHANICAL ACTION RIGHT ISSUE 2026-09-22",
+                "ticker": "FORU"
+              },
+              {
+                "link": "/ticker/MAPA.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "MAPA"
+              },
+              {
+                "link": "/ticker/MAPI.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "MAPI"
+              },
+              {
+                "link": "/ticker/MDIY.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "MDIY"
+              },
+              {
+                "link": "/ticker/MGLV.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "MGLV"
+              },
+              {
+                "link": "/ticker/VKTR.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "VKTR"
+              }
+            ]
+          },
+          {
+            "group": "Industrials",
+            "members": [
+              {
+                "link": "/ticker/ASII.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "ASII"
+              },
+              {
+                "link": "/ticker/IMPC.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "IMPC"
+              },
+              {
+                "link": "/ticker/JTPE.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "JTPE"
+              },
+              {
+                "link": "/ticker/MARK.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "60D: MECHANICAL ACTION DIVIDEND 2026-08-14",
+                "ticker": "MARK"
+              },
+              {
+                "link": "/ticker/SMIL.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "SMIL"
+              },
+              {
+                "link": "/ticker/UNTR.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "UNTR"
+              }
+            ]
+          },
+          {
+            "group": "Financials",
+            "members": [
+              {
+                "link": "/ticker/BBCA.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "60D: MECHANICAL ACTION DIVIDEND 2026-08-31",
+                "ticker": "BBCA"
+              },
+              {
+                "link": "/ticker/BBNI.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "BBNI"
+              },
+              {
+                "link": "/ticker/BBRI.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "BBRI"
+              },
+              {
+                "link": "/ticker/BMRI.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "20D: MECHANICAL ACTION DIVIDEND 2026-09-16; 60D: MECHANICAL ACTION DIVIDEND 2026-09-16",
+                "ticker": "BMRI"
+              },
+              {
+                "link": "/ticker/DNET.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "DNET"
+              },
+              {
+                "link": "/ticker/SMMA.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "SMMA"
+              }
+            ]
+          },
+          {
+            "group": "Healthcare",
+            "members": [
+              {
+                "link": "/ticker/CARE.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "CARE"
+              },
+              {
+                "link": "/ticker/KLBF.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "KLBF"
+              },
+              {
+                "link": "/ticker/MIKA.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "MIKA"
+              },
+              {
+                "link": "/ticker/SILO.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "SILO"
+              },
+              {
+                "link": "/ticker/SOHO.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "SOHO"
+              },
+              {
+                "link": "/ticker/TSPC.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "TSPC"
+              }
+            ]
+          },
+          {
+            "group": "Consumer Non-Cyclicals",
+            "members": [
+              {
+                "link": "/ticker/AMRT.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "AMRT"
+              },
+              {
+                "link": "/ticker/CPIN.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "CPIN"
+              },
+              {
+                "link": "/ticker/HMSP.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "HMSP"
+              },
+              {
+                "link": "/ticker/ICBP.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "ICBP"
+              },
+              {
+                "link": "/ticker/INDF.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "INDF"
+              },
+              {
+                "link": "/ticker/UNVR.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "UNVR"
+              }
+            ]
+          },
+          {
+            "group": "Energy",
+            "members": [
+              {
+                "link": "/ticker/AADI.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "AADI"
+              },
+              {
+                "link": "/ticker/ADRO.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "ADRO"
+              },
+              {
+                "link": "/ticker/BUMI.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "BUMI"
+              },
+              {
+                "link": "/ticker/BYAN.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "BYAN"
+              },
+              {
+                "link": "/ticker/CUAN.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "CUAN"
+              },
+              {
+                "link": "/ticker/DSSA.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "DSSA"
+              }
+            ]
+          },
+          {
+            "group": "Transportation & Logistic",
+            "members": [
+              {
+                "link": "/ticker/BIRD.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "BIRD"
+              },
+              {
+                "link": "/ticker/ELPI.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "ELPI"
+              },
+              {
+                "link": "/ticker/HATM.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "HATM"
+              },
+              {
+                "link": "/ticker/SMDR.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "60D: MECHANICAL ACTION DIVIDEND 2026-08-10",
+                "ticker": "SMDR"
+              },
+              {
+                "link": "/ticker/TMAS.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "TMAS"
+              },
+              {
+                "link": "/ticker/WBSA.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "WBSA"
+              }
+            ]
+          },
+          {
+            "group": "Basic Materials",
+            "members": [
+              {
+                "link": "/ticker/AMMN.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "AMMN"
+              },
+              {
+                "link": "/ticker/ANTM.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "ANTM"
+              },
+              {
+                "link": "/ticker/BRMS.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "BRMS"
+              },
+              {
+                "link": "/ticker/BRPT.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "BRPT"
+              },
+              {
+                "link": "/ticker/EMAS.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "EMAS"
+              },
+              {
+                "link": "/ticker/TPIA.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "TPIA"
+              }
+            ]
+          },
+          {
+            "group": "Properties & Real Estate",
+            "members": [
+              {
+                "link": "/ticker/BSDE.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "BSDE"
+              },
+              {
+                "link": "/ticker/CBDK.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "CBDK"
+              },
+              {
+                "link": "/ticker/JRPT.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "JRPT"
+              },
+              {
+                "link": "/ticker/MKPI.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "MKPI"
+              },
+              {
+                "link": "/ticker/PANI.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "PANI"
+              },
+              {
+                "link": "/ticker/PWON.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "PWON"
+              }
+            ]
+          },
+          {
+            "group": "Infrastructures",
+            "members": [
+              {
+                "link": "/ticker/BREN.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "BREN"
+              },
+              {
+                "link": "/ticker/CDIA.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "5D: MECHANICAL ACTION DIVIDEND 2026-10-01; 20D: MECHANICAL ACTION DIVIDEND 2026-10-01; 60D: MECHANICAL ACTION DIVIDEND 2026-10-01",
+                "ticker": "CDIA"
+              },
+              {
+                "link": "/ticker/EXCL.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "EXCL"
+              },
+              {
+                "link": "/ticker/ISAT.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "ISAT"
+              },
+              {
+                "link": "/ticker/MORA.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "MORA"
+              },
+              {
+                "link": "/ticker/TLKM.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "TLKM"
+              }
+            ]
+          },
+          {
+            "group": "Technology",
+            "members": [
+              {
+                "link": "/ticker/CYBR.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "CYBR"
+              },
+              {
+                "link": "/ticker/DCII.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "DCII"
+              },
+              {
+                "link": "/ticker/EMTK.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "EMTK"
+              },
+              {
+                "link": "/ticker/MLPT.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "60D: MECHANICAL ACTION STOCK SPLIT 2026-07-21",
+                "ticker": "MLPT"
+              },
+              {
+                "link": "/ticker/MTDL.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "Matched observations",
+                "ticker": "MTDL"
+              },
+              {
+                "link": "/ticker/WIFI.JK?scope=sectors&date=2026-10-02&cadence=weekly&horizon=60d",
+                "reason": "60D: MECHANICAL ACTION DIVIDEND 2026-07-09",
+                "ticker": "WIFI"
+              }
+            ]
+          }
+        ],
+        "playback": {
+          "observed_after": "2026-10-02",
+          "start": "2026-09-04"
+        },
+        "weekly_dates": 5
+      },
+      "status": "PASS"
+    },
+    "corrupt_core": {
+      "observed": {
+        "alert": "Sectors analysis could not be loaded\n\nData integrity check failed. The source evidence cannot be verified.\n\nRetry",
+        "banned": null,
+        "landing": "DASHBOARD PREVIEW\n\nThe Dashboard preview could not be loaded. Data integrity check failed. The source evidence cannot be verified.\n\nRetry",
+        "landing_banned": null,
+        "landing_retry_recovery": {
+          "marks": 11,
+          "text": "DASHBOARD PREVIEW \u00b7 DATA THROUGH 2 OCT 2026\nConsumer Cyclicals\n60D excess vs IHSG \u2192 \u00b7 Hollow marks have fewer than five contributors\nConsumer Cyclicals\n+11.6%\nIndustrials\n+8.3%\nFinancials\n+2.5%\nOpen the Dashboard \u2192"
+        },
+        "map_marks": 0,
+        "rankings": 0
+      },
+      "status": "PASS"
+    },
+    "corrupt_ytd": {
+      "observed": {
+        "alert": "Sectors analysis could not be loaded\n\nData integrity check failed. The source evidence cannot be verified.\n\nRetry",
+        "map_marks": 0,
+        "rankings": 0
+      },
+      "status": "PASS"
+    },
+    "fetch_error_retry": {
+      "observed": {
+        "failed": {
+          "alerts": [
+            "Sectors analysis could not be loaded\n\nThe data could not be reached (HTTP 503). Retry when the connection is available.\n\nRetry"
+          ],
+          "banned": null,
+          "map_marks": 0,
+          "rankings": 0,
+          "retry": 1
+        },
+        "retry_recovery": {
+          "alerts": 0,
+          "map_marks": 11,
+          "ranking_rows": 11
+        }
+      },
+      "status": "PASS"
+    },
+    "landing": {
+      "observed": {
+        "footer": "RESEARCH\nDashboard\nLeadership map\nWeekly changes\nStock heatmap\nCOVERAGE\nCoverage & sources\nOwnership\nForeign flow\nHow to read the research\nSOURCE DATA\nSectors API\n\u2197\nIDX statistics\n\u2197",
+        "preview": "DASHBOARD PREVIEW \u00b7 DATA THROUGH 2 OCT 2026\nConsumer Cyclicals\n60D excess vs IHSG \u2192 \u00b7 Hollow marks have fewer than five contributors\nConsumer Cyclicals\n+11.6%\nIndustrials\n+8.3%\nFinancials\n+2.5%\nOpen the Dashboard \u2192",
+        "viewports": [
+          {
+            "banned": null,
+            "document_width": 390,
+            "footer_links": 12,
+            "preview_marks": 11,
+            "viewport": [
+              390,
+              844
+            ]
+          },
+          {
+            "banned": null,
+            "document_width": 1036,
+            "footer_links": 12,
+            "preview_marks": 11,
+            "viewport": [
+              1036,
+              799
+            ]
+          },
+          {
+            "banned": null,
+            "document_width": 1369,
+            "footer_links": 12,
+            "preview_marks": 11,
+            "viewport": [
+              1369,
+              799
+            ]
+          },
+          {
+            "banned": null,
+            "document_width": 1440,
+            "footer_links": 12,
+            "preview_marks": 11,
+            "viewport": [
+              1440,
+              900
+            ]
+          }
+        ]
+      },
+      "status": "PASS"
+    },
+    "loading_state": {
+      "observed": {
+        "alerts": 0,
+        "map_marks": 0,
+        "rankings": 0,
+        "statuses": [
+          "Loading and verifying market data\u2026"
+        ],
+        "url": "http://127.0.0.1:5192/sectors"
+      },
+      "status": "PASS"
+    },
+    "map_without_history": {
+      "observed": {
+        "alerts": 0,
+        "axis": "60d",
+        "mark_coordinates": [
+          {
+            "label": null,
+            "x": "639.8229709146536",
+            "y": "378.5624930815251"
+          },
+          {
+            "label": null,
+            "x": "503.91160844421677",
+            "y": "286.1489721404273"
+          },
+          {
+            "label": null,
+            "x": "547.1597774620698",
+            "y": "296.14739517736945"
+          },
+          {
+            "label": null,
+            "x": "564.8436950674604",
+            "y": "294.65358963152994"
+          },
+          {
+            "label": null,
+            "x": "416.40367982652367",
+            "y": "225.60807085010316"
+          },
+          {
+            "label": null,
+            "x": "416.0101944443969",
+            "y": "191.22204732966316"
+          },
+          {
+            "label": null,
+            "x": "448.7151596283659",
+            "y": "210.79488135672014"
+          },
+          {
+            "label": null,
+            "x": "439.0350610750377",
+            "y": "254.25093879494239"
+          },
+          {
+            "label": null,
+            "x": "420.14026603042925",
+            "y": "231.79756236447224"
+          },
+          {
+            "label": null,
+            "x": "491.5817365176925",
+            "y": "273.16529086649473"
+          },
+          {
+            "label": null,
+            "x": "711.6315789473684",
+            "y": "401.359649122807"
+          }
+        ],
+        "marks": 11,
+        "trails": []
+      },
+      "status": "PASS"
+    },
+    "missing_selection": {
+      "observed": {
+        "alert": "Sectors analysis could not be loaded\n\nThe frozen selection-market asset is missing from this data package.\n\nRetry",
+        "banned": null,
+        "map_marks": 0,
+        "rankings": 0
+      },
+      "status": "PASS"
+    },
+    "navigation_smoke": {
+      "observed": {
+        "fresh_loads": [
+          {
+            "alerts": [],
+            "banned": null,
+            "curves": 0,
+            "document_width": 1440,
+            "heading": "See where leadership is moving.\nSee whether the market agrees.",
+            "marks": 0,
+            "route": "/",
+            "url": "http://localhost:4173/",
+            "viewport": [
+              1440,
+              900
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "curves": 3,
+            "document_width": 1440,
+            "heading": "Leadership beneath the index",
+            "marks": 11,
+            "route": "/sectors",
+            "url": "http://localhost:4173/sectors",
+            "viewport": [
+              1440,
+              900
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "curves": 0,
+            "document_width": 1440,
+            "heading": "Coverage & sources",
+            "marks": 0,
+            "route": "/sources",
+            "url": "http://localhost:4173/sources",
+            "viewport": [
+              1440,
+              900
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "curves": 3,
+            "document_width": 1440,
+            "heading": "IDX leadership & diffusion",
+            "marks": 0,
+            "route": "/overview",
+            "url": "http://localhost:4173/overview",
+            "viewport": [
+              1440,
+              900
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "curves": 2,
+            "document_width": 1440,
+            "heading": "Weekly market changes",
+            "marks": 0,
+            "route": "/what-changed",
+            "url": "http://localhost:4173/what-changed",
+            "viewport": [
+              1440,
+              900
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "curves": 0,
+            "document_width": 1440,
+            "heading": "Market movers",
+            "marks": 0,
+            "route": "/movers",
+            "url": "http://localhost:4173/movers",
+            "viewport": [
+              1440,
+              900
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "curves": 1,
+            "document_width": 1440,
+            "heading": "Foreign flow",
+            "marks": 0,
+            "route": "/foreign",
+            "url": "http://localhost:4173/foreign",
+            "viewport": [
+              1440,
+              900
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "curves": 0,
+            "document_width": 1440,
+            "heading": "Ownership",
+            "marks": 0,
+            "route": "/ownership",
+            "url": "http://localhost:4173/ownership",
+            "viewport": [
+              1440,
+              900
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "curves": 0,
+            "document_width": 1440,
+            "heading": "Stock heatmap",
+            "marks": 0,
+            "route": "/heatmap",
+            "url": "http://localhost:4173/heatmap",
+            "viewport": [
+              1440,
+              900
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "curves": 3,
+            "document_width": 1440,
+            "heading": "Leadership map",
+            "marks": 11,
+            "route": "/map",
+            "url": "http://localhost:4173/map",
+            "viewport": [
+              1440,
+              900
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "curves": 3,
+            "document_width": 1440,
+            "heading": "Konglo catalogue",
+            "marks": 0,
+            "route": "/konglo",
+            "url": "http://localhost:4173/konglo",
+            "viewport": [
+              1440,
+              900
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "curves": 3,
+            "document_width": 1440,
+            "heading": "Group catalogue",
+            "marks": 0,
+            "route": "/themes",
+            "url": "http://localhost:4173/themes",
+            "viewport": [
+              1440,
+              900
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "curves": 3,
+            "document_width": 1440,
+            "heading": "Transportation & Logistic",
+            "marks": 0,
+            "route": "/explorer",
+            "url": "http://localhost:4173/explorer",
+            "viewport": [
+              1440,
+              900
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "curves": 3,
+            "document_width": 1440,
+            "heading": "Group catalogue",
+            "marks": 0,
+            "route": "/groups",
+            "url": "http://localhost:4173/groups",
+            "viewport": [
+              1440,
+              900
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "curves": 0,
+            "document_width": 1440,
+            "heading": "Ticker Explorer",
+            "marks": 0,
+            "route": "/tickers",
+            "url": "http://localhost:4173/tickers",
+            "viewport": [
+              1440,
+              900
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "curves": 0,
+            "document_width": 1440,
+            "heading": "How to read the research",
+            "marks": 0,
+            "route": "/methodology",
+            "url": "http://localhost:4173/methodology",
+            "viewport": [
+              1440,
+              900
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 0,
+            "document_width": 1036,
+            "heading": "See where leadership is moving.\nSee whether the market agrees.",
+            "marks": 0,
+            "route": "/",
+            "url": "http://localhost:4173/",
+            "viewport": [
+              1036,
+              799
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 3,
+            "document_width": 1036,
+            "heading": "Leadership beneath the index",
+            "marks": 11,
+            "route": "/sectors",
+            "url": "http://localhost:4173/sectors",
+            "viewport": [
+              1036,
+              799
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 0,
+            "document_width": 1036,
+            "heading": "Coverage & sources",
+            "marks": 0,
+            "route": "/sources",
+            "url": "http://localhost:4173/sources",
+            "viewport": [
+              1036,
+              799
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 3,
+            "document_width": 1036,
+            "heading": "IDX leadership & diffusion",
+            "marks": 0,
+            "route": "/overview",
+            "url": "http://localhost:4173/overview",
+            "viewport": [
+              1036,
+              799
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 2,
+            "document_width": 1036,
+            "heading": "Weekly market changes",
+            "marks": 0,
+            "route": "/what-changed",
+            "url": "http://localhost:4173/what-changed",
+            "viewport": [
+              1036,
+              799
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 0,
+            "document_width": 1036,
+            "heading": "Market movers",
+            "marks": 0,
+            "route": "/movers",
+            "url": "http://localhost:4173/movers",
+            "viewport": [
+              1036,
+              799
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 1,
+            "document_width": 1036,
+            "heading": "Foreign flow",
+            "marks": 0,
+            "route": "/foreign",
+            "url": "http://localhost:4173/foreign",
+            "viewport": [
+              1036,
+              799
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 0,
+            "document_width": 1036,
+            "heading": "Ownership",
+            "marks": 0,
+            "route": "/ownership",
+            "url": "http://localhost:4173/ownership",
+            "viewport": [
+              1036,
+              799
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 0,
+            "document_width": 1036,
+            "heading": "Stock heatmap",
+            "marks": 0,
+            "route": "/heatmap",
+            "url": "http://localhost:4173/heatmap",
+            "viewport": [
+              1036,
+              799
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 3,
+            "document_width": 1036,
+            "heading": "Leadership map",
+            "marks": 11,
+            "route": "/map",
+            "url": "http://localhost:4173/map",
+            "viewport": [
+              1036,
+              799
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 3,
+            "document_width": 1036,
+            "heading": "Konglo catalogue",
+            "marks": 0,
+            "route": "/konglo",
+            "url": "http://localhost:4173/konglo",
+            "viewport": [
+              1036,
+              799
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 3,
+            "document_width": 1036,
+            "heading": "Group catalogue",
+            "marks": 0,
+            "route": "/themes",
+            "url": "http://localhost:4173/themes",
+            "viewport": [
+              1036,
+              799
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 3,
+            "document_width": 1036,
+            "heading": "Transportation & Logistic",
+            "marks": 0,
+            "route": "/explorer",
+            "url": "http://localhost:4173/explorer",
+            "viewport": [
+              1036,
+              799
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 3,
+            "document_width": 1036,
+            "heading": "Group catalogue",
+            "marks": 0,
+            "route": "/groups",
+            "url": "http://localhost:4173/groups",
+            "viewport": [
+              1036,
+              799
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 0,
+            "document_width": 1036,
+            "heading": "Ticker Explorer",
+            "marks": 0,
+            "route": "/tickers",
+            "url": "http://localhost:4173/tickers",
+            "viewport": [
+              1036,
+              799
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 0,
+            "document_width": 1036,
+            "heading": "How to read the research",
+            "marks": 0,
+            "route": "/methodology",
+            "url": "http://localhost:4173/methodology",
+            "viewport": [
+              1036,
+              799
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 0,
+            "document_width": 1369,
+            "heading": "See where leadership is moving.\nSee whether the market agrees.",
+            "marks": 0,
+            "route": "/",
+            "url": "http://localhost:4173/",
+            "viewport": [
+              1369,
+              799
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 3,
+            "document_width": 1369,
+            "heading": "Leadership beneath the index",
+            "marks": 11,
+            "route": "/sectors",
+            "url": "http://localhost:4173/sectors",
+            "viewport": [
+              1369,
+              799
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 0,
+            "document_width": 1369,
+            "heading": "Coverage & sources",
+            "marks": 0,
+            "route": "/sources",
+            "url": "http://localhost:4173/sources",
+            "viewport": [
+              1369,
+              799
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 3,
+            "document_width": 1369,
+            "heading": "IDX leadership & diffusion",
+            "marks": 0,
+            "route": "/overview",
+            "url": "http://localhost:4173/overview",
+            "viewport": [
+              1369,
+              799
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 2,
+            "document_width": 1369,
+            "heading": "Weekly market changes",
+            "marks": 0,
+            "route": "/what-changed",
+            "url": "http://localhost:4173/what-changed",
+            "viewport": [
+              1369,
+              799
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 0,
+            "document_width": 1369,
+            "heading": "Market movers",
+            "marks": 0,
+            "route": "/movers",
+            "url": "http://localhost:4173/movers",
+            "viewport": [
+              1369,
+              799
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 1,
+            "document_width": 1369,
+            "heading": "Foreign flow",
+            "marks": 0,
+            "route": "/foreign",
+            "url": "http://localhost:4173/foreign",
+            "viewport": [
+              1369,
+              799
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 0,
+            "document_width": 1369,
+            "heading": "Ownership",
+            "marks": 0,
+            "route": "/ownership",
+            "url": "http://localhost:4173/ownership",
+            "viewport": [
+              1369,
+              799
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 0,
+            "document_width": 1369,
+            "heading": "Stock heatmap",
+            "marks": 0,
+            "route": "/heatmap",
+            "url": "http://localhost:4173/heatmap",
+            "viewport": [
+              1369,
+              799
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 3,
+            "document_width": 1369,
+            "heading": "Leadership map",
+            "marks": 11,
+            "route": "/map",
+            "url": "http://localhost:4173/map",
+            "viewport": [
+              1369,
+              799
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 3,
+            "document_width": 1369,
+            "heading": "Konglo catalogue",
+            "marks": 0,
+            "route": "/konglo",
+            "url": "http://localhost:4173/konglo",
+            "viewport": [
+              1369,
+              799
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 3,
+            "document_width": 1369,
+            "heading": "Group catalogue",
+            "marks": 0,
+            "route": "/themes",
+            "url": "http://localhost:4173/themes",
+            "viewport": [
+              1369,
+              799
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 3,
+            "document_width": 1369,
+            "heading": "Transportation & Logistic",
+            "marks": 0,
+            "route": "/explorer",
+            "url": "http://localhost:4173/explorer",
+            "viewport": [
+              1369,
+              799
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 3,
+            "document_width": 1369,
+            "heading": "Group catalogue",
+            "marks": 0,
+            "route": "/groups",
+            "url": "http://localhost:4173/groups",
+            "viewport": [
+              1369,
+              799
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 0,
+            "document_width": 1369,
+            "heading": "Ticker Explorer",
+            "marks": 0,
+            "route": "/tickers",
+            "url": "http://localhost:4173/tickers",
+            "viewport": [
+              1369,
+              799
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 0,
+            "document_width": 1369,
+            "heading": "How to read the research",
+            "marks": 0,
+            "route": "/methodology",
+            "url": "http://localhost:4173/methodology",
+            "viewport": [
+              1369,
+              799
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 0,
+            "document_width": 390,
+            "heading": "See where leadership is moving.\nSee whether the market agrees.",
+            "marks": 0,
+            "route": "/",
+            "url": "http://localhost:4173/",
+            "viewport": [
+              390,
+              844
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 3,
+            "document_width": 390,
+            "heading": "Leadership beneath the index",
+            "marks": 11,
+            "route": "/sectors",
+            "url": "http://localhost:4173/sectors",
+            "viewport": [
+              390,
+              844
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 0,
+            "document_width": 390,
+            "heading": "Coverage & sources",
+            "marks": 0,
+            "route": "/sources",
+            "url": "http://localhost:4173/sources",
+            "viewport": [
+              390,
+              844
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 3,
+            "document_width": 390,
+            "heading": "IDX leadership & diffusion",
+            "marks": 0,
+            "route": "/overview",
+            "url": "http://localhost:4173/overview",
+            "viewport": [
+              390,
+              844
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 2,
+            "document_width": 390,
+            "heading": "Weekly market changes",
+            "marks": 0,
+            "route": "/what-changed",
+            "url": "http://localhost:4173/what-changed",
+            "viewport": [
+              390,
+              844
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 0,
+            "document_width": 390,
+            "heading": "Market movers",
+            "marks": 0,
+            "route": "/movers",
+            "url": "http://localhost:4173/movers",
+            "viewport": [
+              390,
+              844
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 1,
+            "document_width": 390,
+            "heading": "Foreign flow",
+            "marks": 0,
+            "route": "/foreign",
+            "url": "http://localhost:4173/foreign",
+            "viewport": [
+              390,
+              844
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 0,
+            "document_width": 390,
+            "heading": "Ownership",
+            "marks": 0,
+            "route": "/ownership",
+            "url": "http://localhost:4173/ownership",
+            "viewport": [
+              390,
+              844
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 0,
+            "document_width": 390,
+            "heading": "Stock heatmap",
+            "marks": 0,
+            "route": "/heatmap",
+            "url": "http://localhost:4173/heatmap",
+            "viewport": [
+              390,
+              844
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 3,
+            "document_width": 390,
+            "heading": "Leadership map",
+            "marks": 11,
+            "route": "/map",
+            "url": "http://localhost:4173/map",
+            "viewport": [
+              390,
+              844
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 3,
+            "document_width": 390,
+            "heading": "Konglo catalogue",
+            "marks": 0,
+            "route": "/konglo",
+            "url": "http://localhost:4173/konglo",
+            "viewport": [
+              390,
+              844
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 3,
+            "document_width": 390,
+            "heading": "Group catalogue",
+            "marks": 0,
+            "route": "/themes",
+            "url": "http://localhost:4173/themes",
+            "viewport": [
+              390,
+              844
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 3,
+            "document_width": 390,
+            "heading": "Transportation & Logistic",
+            "marks": 0,
+            "route": "/explorer",
+            "url": "http://localhost:4173/explorer",
+            "viewport": [
+              390,
+              844
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 3,
+            "document_width": 390,
+            "heading": "Group catalogue",
+            "marks": 0,
+            "route": "/groups",
+            "url": "http://localhost:4173/groups",
+            "viewport": [
+              390,
+              844
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 0,
+            "document_width": 390,
+            "heading": "Ticker Explorer",
+            "marks": 0,
+            "route": "/tickers",
+            "url": "http://localhost:4173/tickers",
+            "viewport": [
+              390,
+              844
+            ]
+          },
+          {
+            "alerts": [],
+            "banned": null,
+            "console": [],
+            "curves": 0,
+            "document_width": 390,
+            "heading": "How to read the research",
+            "marks": 0,
+            "route": "/methodology",
+            "url": "http://localhost:4173/methodology",
+            "viewport": [
+              390,
+              844
+            ]
+          }
+        ],
+        "routes": [
+          "/",
+          "/sectors",
+          "/sources",
+          "/overview",
+          "/what-changed",
+          "/movers",
+          "/foreign",
+          "/ownership",
+          "/heatmap",
+          "/map",
+          "/konglo",
+          "/themes",
+          "/explorer",
+          "/groups",
+          "/tickers",
+          "/methodology"
+        ]
+      },
+      "status": "PASS"
+    },
+    "overview": {
+      "observed": {
+        "ihsg_region": "OFFICIAL CLOSE \u00b7 2 OCT 2026\nJakarta Composite Index\nIHSG 6,036.89\n\n+27.386 pts \u00b7 +0.46%\n\nPrevious close 6,009.50\nTRADINGVIEW \u00b7 EXTERNAL CONTEXT\nTechnical analysis\nOpen \u2197\n\nThird-party market summary; separate from the selected date\u2019s calculated readings.\n\nDaily IHSG history\n1M\n3M\n6M\nAvailable history\n18 Aug\n2 Oct\n5750\n6000\n6250\n6500\n6750\n\n332 up \u00b7 140 flat \u00b7 357 down. 829 traded stocks; 134 not traded or outside the stock lane.\n\nOpen stock heatmap \u2192",
+        "source_close_full_precision": 6036.88818359375,
+        "widgets": {
+          "banned": null,
+          "curves": 3,
+          "frames": [
+            {
+              "height": 320,
+              "src": "https://www.tradingview-widget.com/embed-widget/technical-analysis/?locale=en#%7B%22interval%22%3A%221D%22%2C%22width%22%3A%22100%25%22%2C%22height%22%3A320%2C%22symbol%22%3A%22IDX%3ACOMPOSITE%22%2C%22showIntervalTabs%22%3Atrue%2C%22displayMode%22%3A%22single%22%2C%22colorTheme%22%3A%22light%22%2C%22isTransparent%22%3Atrue%2C%22utm_source%22%3A%22localhost%22%2C%22utm_medium%22%3A%22widget%22%2C%22utm_campaign%22%3A%22technical-analysis%22%2C%22page-uri%22%3A%22localhost%3A4173%2Foverview%22%7D",
+              "title": "technical analysis TradingView widget",
+              "width": 208.3515625
+            },
+            {
+              "height": 560,
+              "src": "https://s.tradingview.com/widgetembed/?hideideas=1&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&locale=en#%7B%22symbol%22%3A%22IDX%3ACOMPOSITE%22%2C%22frameElementId%22%3A%22tradingview_d89fb%22%2C%22interval%22%3A%22D%22%2C%22allow_symbol_change%22%3A%221%22%2C%22save_image%22%3A%220%22%2C%22studies%22%3A%22%5B%5D%22%2C%22theme%22%3A%22light%22%2C%22style%22%3A%221%22%2C%22timezone%22%3A%22Asia%2FJakarta%22%2C%22studies_overrides%22%3A%22%7B%7D%22%2C%22utm_source%22%3A%22localhost%22%2C%22utm_medium%22%3A%22widget%22%2C%22utm_campaign%22%3A%22chart%22%2C%22utm_term%22%3A%22IDX%3ACOMPOSITE%22%2C%22page-uri%22%3A%22localhost%3A4173%2Foverview%22%7D",
+              "title": "advanced chart TradingView widget",
+              "width": 398.3984375
+            }
+          ],
+          "technical_status": "ready"
+        }
+      },
+      "status": "PASS"
+    },
+    "ownership_comparisons": {
+      "observed": {
+        "five_percent_comparison": {
+          "first_rows": [
+            "AADI\tADARO STRATEGIC INVESTMENTS\tPublished share comparison\t3,200,142,830\t3,200,142,830\t0\tNot comparable",
+            "AADI\tALAMTRI RESOURCES INDONESIA TBK PT\tPublished share comparison\t1,197,023,942\t1,197,023,942\t0\tNot comparable",
+            "AADI\tGARIBALDI THOHIR\tPublished share comparison\t454,011,607\t454,011,607\t0\tNot comparable",
+            "ABBA\tPT BEYOND MEDIA\tPublished share comparison\t1,592,831,618\t1,592,831,618\t0\tNot comparable",
+            "ABBA\tSOLIC KREASI BARU PT\tPublished share comparison\t542,042,122\t542,042,122\t0\tNot comparable"
+          ],
+          "notes": [
+            "Selected register: 5% \u00b7 1 Oct 2026 \u00b7 1,915 published investor-position rows. Custody accounts are consolidated using the published investor total, once per block. No address or account identifier is displayed.",
+            "76 investor blocks have custody-account cells that do not reconcile. The official published investor total is retained and each affected row is flagged.",
+            "5% register: previous shares are the values published in the selected disclosure. A complete prior register and prior percentages are not inferred."
+          ],
+          "prior_percentages_all_unavailable": true,
+          "url": "http://localhost:4173/ownership?view=compare&include-unchanged=true&register=five"
+        },
+        "include_unchanged": {
+          "checked": true,
+          "rows": [
+            "BBRIPERUSAHAAN PERSEROAN (PERSERO) PT DANANTARA ASSET MANAGEMENTMatched published name79,804,867,10779,804,867,1070+<0.00001 pp",
+            "BBRIDJS KETENAGAKERJAAN PROGRAM JAMINAN HARI TUAUnchanged position1,650,917,5141,650,917,51400.00 pp",
+            "BBRIINDONESIA INVESTMENT AUTHORITYUnchanged position5,498,021,8345,498,021,83400.00 pp",
+            "BBRIEMPLOYEES PROVIDENT FUND BOARDMatched published name1,889,207,9581,841,958,558-47,249,400-0.03 pp"
+          ]
+        },
+        "one_percent_comparison": {
+          "notes": [
+            "Selected register: 1% \u00b7 30 Sep 2026 \u00b7 7,154 published investor-position rows. Scripless and certificated holdings are retained separately. Public names do not identify unique SID holders.",
+            "31 Aug 2026 \u2192 30 Sep 2026 \u00b7 identical published names are matched; ambiguous identities are excluded. Missing values remain undisclosed.",
+            "7,158 prior holder rows retained with their original source date. Entry and exit can be threshold crossings, transfers, or corrections; they do not establish trades."
+          ],
+          "rows": [
+            "BBRI\tPERUSAHAAN PERSEROAN (PERSERO) PT DANANTARA ASSET MANAGEMENT\tMatched published name\t79,804,867,107\t79,804,867,107\t0\t+<0.00001 pp",
+            "BBRI\tEMPLOYEES PROVIDENT FUND BOARD\tMatched published name\t1,889,207,958\t1,841,958,558\t-47,249,400\t-0.03 pp"
+          ],
+          "url": "http://localhost:4173/ownership?view=compare&search=BBRI"
+        },
+        "overview": {
+          "register": "Selected register: 1% \u00b7 30 Sep 2026 \u00b7 7,154 published investor-position rows. Scripless and certificated holdings are retained separately. Public names do not identify unique SID holders.",
+          "stats": [
+            "Issuers in selected register\n961",
+            "Disclosed positions\n7,154",
+            "Distinct published names\n5,166",
+            "Names across multiple issuers\n801",
+            "Local positions\n5,353",
+            "Foreign positions\n1,592",
+            "Disclosure entry\n500",
+            "Disclosure exit\n504",
+            "Increase\n389",
+            "Decrease\n419",
+            "Percentage change\n25"
+          ]
+        },
+        "views": [
+          {
+            "banned": null,
+            "connections": 0,
+            "first_evidence": [],
+            "first_rows": [
+              "AADI\tPT PERSADA CAPITAL INVESTAMA\t119,887,170\t1.54%\tCorporate\tLocal\tPublished name\t119,887,170 / 0",
+              "AADI\tSARATOGA INVESTAMA SEDAYA TBK\t340,897,429\t4.38%\tPrivate Bank\tLocal\tPublished name\t340,897,429 / 0"
+            ],
+            "rows": 40,
+            "url": "http://localhost:4173/ownership?view=stocks&include-unchanged=true&register=one",
+            "view": "Stocks"
+          },
+          {
+            "banned": null,
+            "connections": 0,
+            "first_evidence": [],
+            "first_rows": [
+              "UOB KAY HIAN PRIVATE LIMITED\tAEGSARTABGTGBINABISIBKSWBOLABOLTBPFIBPIIBSMLBUDICASSCENTCFINCITACPINCPRICPROCTTHDADADAYADILDDSNGDSSAELPIENVYEXCLFOREGLOBGLVAINPCINPPINRUIPACJASTKINOMAINMAPBMASBMCORMICEMORAMTWIPBSAPORTRAAMRISERSCHSMLESOHOSRTGTALFTBLATCPITKIMTOPSTRIMTRIOTUGUUCIDWICOWINEZONE\t64\tExact published-name match only",
+              "BANK OF SINGAPORE LIMITED\tAMARARIIBAYUBBLDBLTABMHSCARECBUTDILDDMMXELPIELTYENAKESSAETWAGGRPHYGNINDRINDXINKPKMTRMAINMAPIMCASMGLVMLPLMREINFCXPBSAPTSPSPTOTFASVIVAYULE\t34\tExact published-name match only"
+            ],
+            "rows": 40,
+            "url": "http://localhost:4173/ownership?view=investors&include-unchanged=true&register=one",
+            "view": "Investors"
+          },
+          {
+            "banned": null,
+            "connections": 376,
+            "first_evidence": [
+              {
+                "links": [
+                  "/ownership?view=investors&register=one&search=PT%20ASTRA%20INTERNATIONAL%20TBK",
+                  "/ownership?view=stocks&search=AALI",
+                  "/explorer?taxonomy=KONGLO&scope=market&group=KONGLO_ASTRA&cadence=weekly&horizon=60d",
+                  "https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx"
+                ],
+                "text": "PT ASTRA INTERNATIONAL TBK\n79.68% \u2192\nDisclosed shareholding\nAALI\nAstra corporate holdings\nHolding: 30 Sep 2026 \u00b7 Relationship source"
+              },
+              {
+                "links": [
+                  "/ownership?view=investors&register=one&search=PT%20ASTRA%20INTERNATIONAL%20TBK",
+                  "/ownership?view=stocks&search=ASGR",
+                  "/explorer?taxonomy=KONGLO&scope=market&group=KONGLO_ASTRA&cadence=weekly&horizon=60d",
+                  "https://www.idx.co.id/Media/yqjhhsee/peng-2026-09-00024-satu-persen.xlsx"
+                ],
+                "text": "PT ASTRA INTERNATIONAL TBK\n76.87% \u2192\nDisclosed shareholding\nASGR\nAstra corporate holdings\nHolding: 30 Sep 2026 \u00b7 Relationship source"
+              }
+            ],
+            "first_rows": [],
+            "rows": 0,
+            "url": "http://localhost:4173/ownership?view=groups&include-unchanged=true&register=one",
+            "view": "Groups"
+          },
+          {
+            "banned": null,
+            "connections": 0,
+            "first_evidence": [],
+            "first_rows": [
+              "FORU\tIMR ASIA HOLDING PTE LTD\tIncrease\t357,342,600\t165,574,097,766\t165,216,755,166\t76.81 / 98.37",
+              "GOTO\tMORGAN STANLEY AND CO INTERNATIONAL PLC\tIncrease\t54,433,645,448\t63,788,060,674\t9,354,415,226\t4.57 / 5.36"
+            ],
+            "rows": 40,
+            "url": "http://localhost:4173/ownership?view=changes&include-unchanged=true&register=one",
+            "view": "Changes"
+          }
+        ]
+      },
+      "status": "PASS"
+    },
+    "sectors_1036x799": {
+      "observed": {
+        "banned_copy": null,
+        "document_width": 1036,
+        "map_marks": 11,
+        "ranking_rows": 11,
+        "viewport": [
+          1036,
+          799
+        ]
+      },
+      "status": "PASS"
+    },
+    "sectors_1369x799": {
+      "observed": {
+        "banned_copy": null,
+        "curves": 3,
+        "document_width": 1369,
+        "map_marks": 11,
+        "ranking_rows": 11,
+        "viewport": [
+          1369,
+          799
+        ]
+      },
+      "status": "PASS"
+    },
+    "sectors_1440x900": {
+      "observed": {
+        "banned_copy": null,
+        "chart_curves": 3,
+        "hollow_marks": 2,
+        "map_marks": 11,
+        "ranking_rows": 11,
+        "viewport": [
+          1440,
+          900
+        ]
+      },
+      "status": "PASS"
+    },
+    "sectors_390x844": {
+      "observed": {
+        "banned_copy": null,
+        "document_width": 390,
+        "map_marks": 11,
+        "ranking_rows": 11,
+        "table_scrollers": [
+          {
+            "overflow": "auto",
+            "parent_width": 366,
+            "table_width": 877
+          }
+        ],
+        "viewport": [
+          390,
+          844
+        ]
+      },
+      "status": "PASS"
+    },
+    "server_restart": {
+      "observed": {
+        "after": {
+          "alerts": 0,
+          "marks": 11,
+          "ranks": 11
+        },
+        "before": {
+          "marks": 11,
+          "ranks": 11
+        },
+        "interruption": "reload completed",
+        "outage": {
+          "observation": "The initial browser DOM showed \u201cThis site can\u2019t be reached\u201d and \u201c127.0.0.1 refused to connect.\u201d",
+          "observed_error": "ERR_CONNECTION_REFUSED",
+          "screenshot_not_captured": "Browser URL policy blocked further inspection of its generated data URL."
+        },
+        "recovery_method": "Fresh navigation after restarting the isolated server; the persistent review preview was untouched."
+      },
+      "status": "PASS"
+    },
+    "sources": {
+      "observed": {
+        "banned_copy": null,
+        "coverage_copy": "IDX MARKET DATA \u00b7 SOURCE: SECTORS API\nCoverage & sources\n\n66 tracked stocks across 11 IDX sectors, six per sector chosen by market-cap ranking. The Diffusion sets this research coverage; it does not describe the reach of the Sectors API.\n\nOBSERVED COMPLETED SESSION\n2 Oct 2026\nSELECTION FROZEN 2 OCT 2026 \u00b7 MEMBERSHIP REFERENCE 27 AUG 2026\nSELECTED STOCKS\n66\n6 per sector \u00b7 market-cap order pinned to 2 Oct 2026\nPRICE OBSERVATIONS\n31 Dec 2025 \u2192 2 Oct 2026\nRaw Sectors closes \u00b7 affected signal windows are excluded\nOFFICIAL IDX FOREIGN FLOW\n\u221282.55T IDR\nYTD through 2 Oct 2026 \u00b7 IDR net flow\nIDX Q3 MARKET FLOW\n\u221220.09T IDR\n1 Jul 2026 \u2192 30 Sep 2026 \u00b7 64 verified sessions \u00b7 Source: Sectors API\nSTOCK CLOSES\nTracked stocks and latest closes\n66 TRACKED STOCKS\n\nLatest raw closes are shown with their observation dates. Return calculations and corporate-action exclusions are available in the dashboard. Membership is selected retrospectively; these stocks do not represent the full market.\n\nSector\tTicker\tCompany\tLatest close \u00b7 IDR\tObserved date\nBasic Materials\tAMMN\tAmman Mineral Internasional Tbk.\t4,240\t2 Oct 2026\nBasic Materials\tANTM\tANTAM (Persero) Tbk.\t3,140\t2 Oct 2026\nBasic Materials\tBRMS\tBumi Res",
+        "distinct_tickers": 66,
+        "first_page": [
+          {
+            "href": "/ticker/AMMN.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "AMMN"
+          },
+          {
+            "href": "/ticker/ANTM.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "ANTM"
+          },
+          {
+            "href": "/ticker/BRMS.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "BRMS"
+          },
+          {
+            "href": "/ticker/BRPT.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "BRPT"
+          },
+          {
+            "href": "/ticker/EMAS.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "EMAS"
+          },
+          {
+            "href": "/ticker/TPIA.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "TPIA"
+          },
+          {
+            "href": "/ticker/FORU.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "FORU"
+          },
+          {
+            "href": "/ticker/MAPA.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "MAPA"
+          },
+          {
+            "href": "/ticker/MAPI.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "MAPI"
+          },
+          {
+            "href": "/ticker/MDIY.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "MDIY"
+          },
+          {
+            "href": "/ticker/MGLV.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "MGLV"
+          },
+          {
+            "href": "/ticker/VKTR.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "VKTR"
+          },
+          {
+            "href": "/ticker/AMRT.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "AMRT"
+          },
+          {
+            "href": "/ticker/CPIN.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "CPIN"
+          },
+          {
+            "href": "/ticker/HMSP.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "HMSP"
+          },
+          {
+            "href": "/ticker/ICBP.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "ICBP"
+          },
+          {
+            "href": "/ticker/INDF.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "INDF"
+          },
+          {
+            "href": "/ticker/UNVR.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "UNVR"
+          },
+          {
+            "href": "/ticker/AADI.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "AADI"
+          },
+          {
+            "href": "/ticker/ADRO.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "ADRO"
+          },
+          {
+            "href": "/ticker/BUMI.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "BUMI"
+          },
+          {
+            "href": "/ticker/BYAN.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "BYAN"
+          },
+          {
+            "href": "/ticker/CUAN.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "CUAN"
+          },
+          {
+            "href": "/ticker/DSSA.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "DSSA"
+          },
+          {
+            "href": "/ticker/BBCA.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "BBCA"
+          },
+          {
+            "href": "/ticker/BBNI.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "BBNI"
+          },
+          {
+            "href": "/ticker/BBRI.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "BBRI"
+          },
+          {
+            "href": "/ticker/BMRI.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "BMRI"
+          },
+          {
+            "href": "/ticker/DNET.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "DNET"
+          },
+          {
+            "href": "/ticker/SMMA.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "SMMA"
+          },
+          {
+            "href": "/ticker/CARE.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "CARE"
+          },
+          {
+            "href": "/ticker/KLBF.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "KLBF"
+          },
+          {
+            "href": "/ticker/MIKA.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "MIKA"
+          },
+          {
+            "href": "/ticker/SILO.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "SILO"
+          },
+          {
+            "href": "/ticker/SOHO.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "SOHO"
+          },
+          {
+            "href": "/ticker/TSPC.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "TSPC"
+          },
+          {
+            "href": "/ticker/ASII.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "ASII"
+          },
+          {
+            "href": "/ticker/IMPC.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "IMPC"
+          },
+          {
+            "href": "/ticker/JTPE.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "JTPE"
+          },
+          {
+            "href": "/ticker/MARK.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "MARK"
+          }
+        ],
+        "second_page": [
+          {
+            "href": "/ticker/SMIL.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "SMIL"
+          },
+          {
+            "href": "/ticker/UNTR.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "UNTR"
+          },
+          {
+            "href": "/ticker/BREN.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "BREN"
+          },
+          {
+            "href": "/ticker/CDIA.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "CDIA"
+          },
+          {
+            "href": "/ticker/EXCL.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "EXCL"
+          },
+          {
+            "href": "/ticker/ISAT.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "ISAT"
+          },
+          {
+            "href": "/ticker/MORA.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "MORA"
+          },
+          {
+            "href": "/ticker/TLKM.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "TLKM"
+          },
+          {
+            "href": "/ticker/BSDE.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "BSDE"
+          },
+          {
+            "href": "/ticker/CBDK.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "CBDK"
+          },
+          {
+            "href": "/ticker/JRPT.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "JRPT"
+          },
+          {
+            "href": "/ticker/MKPI.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "MKPI"
+          },
+          {
+            "href": "/ticker/PANI.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "PANI"
+          },
+          {
+            "href": "/ticker/PWON.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "PWON"
+          },
+          {
+            "href": "/ticker/CYBR.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "CYBR"
+          },
+          {
+            "href": "/ticker/DCII.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "DCII"
+          },
+          {
+            "href": "/ticker/EMTK.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "EMTK"
+          },
+          {
+            "href": "/ticker/MLPT.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "MLPT"
+          },
+          {
+            "href": "/ticker/MTDL.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "MTDL"
+          },
+          {
+            "href": "/ticker/WIFI.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "WIFI"
+          },
+          {
+            "href": "/ticker/BIRD.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "BIRD"
+          },
+          {
+            "href": "/ticker/ELPI.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "ELPI"
+          },
+          {
+            "href": "/ticker/HATM.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "HATM"
+          },
+          {
+            "href": "/ticker/SMDR.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "SMDR"
+          },
+          {
+            "href": "/ticker/TMAS.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "TMAS"
+          },
+          {
+            "href": "/ticker/WBSA.JK?scope=sectors&date=2026-10-02&cadence=daily&horizon=60d",
+            "ticker": "WBSA"
+          }
+        ],
+        "second_page_label": "66 records \u00b7 Page 2 of 2",
+        "total": 66
+      },
+      "status": "PASS"
+    },
+    "tradingview_heatmap": {
+      "observed": {
+        "daily_widget_dom": "- banner:\n  - button \"Open navigation menu\": \u2630\n  - link \"\u2302 Home\":\n    - /url: /\n  - combobox \"Search ticker or company\"\n  - button \"Sector taxonomy\" [disabled]: Sector\n  - button \"Switch to dark mode\": \u25d0 DARK\n  - button \"Open local profile\":\n    - generic: ME\n  - button \"Refresh\"\n- main:\n  - main:\n    - heading \"Stock heatmap\" [level=1]\n    - paragraph: Compare TradingView\u2019s Indonesia market view with the app\u2019s dated IDX observations.\n    - group \"Heatmap source\":\n      - button \"TradingView\" [active] [pressed]\n      - button \"IDX stocks\"\n    - group \"TradingView heatmap color period\":\n      - button \"Daily change\" [pressed]\n      - button \"YTD performance\"\n    - region \"TradingView IDX stock heatmap\":\n      - generic: External market context\n      - heading \"Indonesia stocks by sector\" [level=2]\n      - status: TradingView widget\n      - iframe:\n        - iframe:\n          - generic \"Heatmap legend\":\n            - button \"Heatmap legend button\":\n              - generic: \u22128%\n            - button \"Heatmap legend button\":\n              - generic: \u22125%\n            - button \"Heatmap legend button\":\n              - generic: \u22122%\n            - button \"Heatmap legend button\":\n              - generic: 0%\n            - button \"Heatmap legend button\":\n              - generic: 2%\n            - button \"Heatmap legend button\":\n              - generic: 5%\n            - button \"Heatmap legend button\":\n              - generic: 8%\n          - generic: E\n          - link \"Visit TradingView \u2014 financial charting platform and trading community\":\n            - /url: https://www.tradingview.com?utm_medium=widget&utm_campaign=stock-heatmap-logo\n      - paragraph: \"TradingView supplies an external end-of-day market view. Its prices, timing, and coverage may differ from this app\u2019s attached observations and do not feed leadership or diffusion calculations. (Block size: listed market capitalization.)\"",
+        "errors": [],
+        "visual_confirmation": "Rendered stock cells and price-performance colours are visible in both the daily and YTD frame; canvas cells are not represented in the accessibility tree.",
+        "ytd_period": {
+          "frame_size": [
+            [
+              340,
+              390
+            ]
+          ],
+          "selected": [
+            {
+              "label": "Daily change",
+              "pressed": "false"
+            },
+            {
+              "label": "YTD performance",
+              "pressed": "true"
+            }
+          ]
+        }
+      },
+      "status": "PASS"
+    },
+    "weekly_comparison": {
+      "observed": {
+        "banned": null,
+        "cohorts": "Basic Materials\n89 STOCKS \u00b7 64.0% BREADTH\nConsumer Cyclicals\n118 STOCKS \u00b7 53.4% BREADTH\nConsumer Non-Cyclicals\n113 STOCKS \u00b7 64.6% BREADTH\nEnergy\n76 STOCKS \u00b7 52.6% BREADTH\nFinancials\n94 STOCKS \u00b7 64.9% BREADTH\nHealthcare\n39 STOCKS \u00b7 69.2% BREADTH\nIndustrials\n47 STOCKS \u00b7 74.5% BREADTH\nInfrastructures\n53 STOCKS \u00b7 54.7% BREADTH\nProperties & Real Estate\n62 STOCKS \u00b7 46.8% BREADTH\nTechnology\n37 STOCKS \u00b7 59.5% BREADTH\nTransportation & Logistic\n30 STOCKS \u00b7 50.0% BREADTH",
+        "curves": 2,
+        "date": "2026-10-02",
+        "dates": 5,
+        "detail": {
+          "curves": 3,
+          "heading": "Transportation & Logistic \u00b7 2 Oct 2026",
+          "readings": [],
+          "replay_rows": [
+            "4 Sep 2026+10.7%+27.6%+70.0%21 / 30Comparison unavailableWeakening\u2014",
+            "11 Sep 2026+9.9%+22.9%+63.3%19 / 30-6.7 ppWeakeningStable",
+            "18 Sep 2026+12.7%+26.5%+66.7%20 / 303.3 ppWeakeningStable",
+            "25 Sep 2026+15.2%+35.3%+63.3%19 / 30-3.3 ppWeakeningStable",
+            "2 Oct 2026+10.1%+32.2%+50.0%15 / 30-13.3 ppWeakeningNarrowing Firm"
+          ],
+          "url": "http://localhost:4173/explorer?taxonomy=SECTOR&scope=market&group=Transportation%20%26%20Logistic&date=2026-10-02&cadence=weekly&horizon=60d"
+        },
+        "rows": [
+          "1\tTransportation & Logistic\t\nWeakening\tNARROWING FIRM\t+10.1%\t+32.2%\t50.0%\t-13.3 pp\t43.5%\t5 obs.",
+          "2\tEnergy\t\nWeakening\tSTABLE\t+8.4%\t+16.6%\t52.6%\t-5.3 pp\t33.4%\t5 obs.",
+          "3\tIndustrials\t\nWeakening\tSTABLE\t+6.6%\t+4.2%\t74.5%\t+8.5 pp\t21.5%\t4 obs.",
+          "4\tHealthcare\t\nLeading\tBROADENING FIRM\t+6.1%\t+0.7%\t69.2%\t+10.3 pp\t28.4%\t1 obs.",
+          "5\tConsumer Non-Cyclicals\t\nWeakening\tSTABLE\t+6.1%\t+14.7%\t64.6%\t0.0 pp\t17.5%\t5 obs.",
+          "6\tBasic Materials\t\nWeakening\tSTABLE\t+5.4%\t+24.6%\t64.0%\t+2.2 pp\t14.4%\t5 obs.",
+          "7\tTechnology\t\nWeakening\tSTABLE\t+3.5%\t+8.8%\t59.5%\t+2.7 pp\t30.9%\t5 obs.",
+          "8\tConsumer Cyclicals\t\nWeakening\tSTABLE\t+3.1%\t+10.1%\t53.4%\t-1.7 pp\t18.3%\t5 obs.",
+          "9\tFinancials\t\nWeakening\tSTABLE\t+1.7%\t+0.8%\t64.9%\t-3.2 pp\t13.2%\t1 obs.",
+          "10\tProperties & Real Estate\t\nWeakening\tSTABLE\t+1.3%\t+1.2%\t46.8%\t-1.6 pp\t21.6%\t5 obs.",
+          "11\tInfrastructures\t\nWeakening\tSTABLE\t+0.3%\t+3.2%\t54.7%\t+7.5 pp\t17.3%\t5 obs."
+        ],
+        "tooltip": [
+          "11 Sep 2026\n\nMatched-cohort breadth : 50.7%"
+        ]
+      },
+      "status": "PASS"
+    }
+  },
+  "created_at_utc": "2026-10-08T11:42:09+00:00",
+  "expected_faults": {
+    "absent_asset": {
+      "alerts": [],
+      "map_marks": 0,
+      "rankings": 0,
+      "statuses": [
+        "Group evidence is unavailable for this universe."
+      ],
+      "text": "Dashboard\nGroup evidence is unavailable for this universe."
+    },
+    "corrupt_core": {
+      "alert": "Sectors analysis could not be loaded\n\nData integrity check failed. The source evidence cannot be verified.\n\nRetry",
+      "banned": null,
+      "landing": "DASHBOARD PREVIEW\n\nThe Dashboard preview could not be loaded. Data integrity check failed. The source evidence cannot be verified.\n\nRetry",
+      "landing_banned": null,
+      "landing_retry_recovery": {
+        "marks": 11,
+        "text": "DASHBOARD PREVIEW \u00b7 DATA THROUGH 2 OCT 2026\nConsumer Cyclicals\n60D excess vs IHSG \u2192 \u00b7 Hollow marks have fewer than five contributors\nConsumer Cyclicals\n+11.6%\nIndustrials\n+8.3%\nFinancials\n+2.5%\nOpen the Dashboard \u2192"
+      },
+      "map_marks": 0,
+      "rankings": 0
+    },
+    "corrupt_ytd": {
+      "alert": "Sectors analysis could not be loaded\n\nData integrity check failed. The source evidence cannot be verified.\n\nRetry",
+      "map_marks": 0,
+      "rankings": 0
+    },
+    "fetch_error_retry": {
+      "failed": {
+        "alerts": [
+          "Sectors analysis could not be loaded\n\nThe data could not be reached (HTTP 503). Retry when the connection is available.\n\nRetry"
+        ],
+        "banned": null,
+        "map_marks": 0,
+        "rankings": 0,
+        "retry": 1
+      },
+      "retry_recovery": {
+        "alerts": 0,
+        "map_marks": 11,
+        "ranking_rows": 11
+      }
+    },
+    "missing_selection": {
+      "alert": "Sectors analysis could not be loaded\n\nThe frozen selection-market asset is missing from this data package.\n\nRetry",
+      "banned": null,
+      "map_marks": 0,
+      "rankings": 0
+    },
+    "server_restart": {
+      "after": {
+        "alerts": 0,
+        "marks": 11,
+        "ranks": 11
+      },
+      "before": {
+        "marks": 11,
+        "ranks": 11
+      },
+      "interruption": "reload completed",
+      "outage": {
+        "observation": "The initial browser DOM showed \u201cThis site can\u2019t be reached\u201d and \u201c127.0.0.1 refused to connect.\u201d",
+        "observed_error": "ERR_CONNECTION_REFUSED",
+        "screenshot_not_captured": "Browser URL policy blocked further inspection of its generated data URL."
+      },
+      "recovery_method": "Fresh navigation after restarting the isolated server; the persistent review preview was untouched."
+    }
+  },
+  "limitations": [
+    "The generated browser connection-error data URL could be inspected once; further screenshot access was blocked by browser URL policy. Recovery was verified through a new fresh navigation.",
+    "Canvas-based TradingView heatmap cells were verified visually; its accessibility tree describes the legend only."
+  ],
+  "manifest_sha256": "98e2c260c9afae07ce2b1cb5b5436cda8bbff9978a0239d809d909183ad36e4f",
+  "method": "Fresh production-bundle browser loads, DOM and rendered-figure inspection, actual UI controls, and isolated static-server fault fixtures. No provider transport was initialized.",
+  "metrics": {
+    "catalogue_reference_groups": 34,
+    "constituents_inspected": 66,
+    "context_idxic_marks": 99,
+    "context_sector_marks": 11,
+    "context_theme_marks": 15,
+    "daily_dates": 21,
+    "ihsg_close": 6036.88818359375,
+    "konglo_groups": 46,
+    "ranking_rows": 11,
+    "sectors_map_marks": 11,
+    "weekly_dates": 5
+  },
+  "normal_logs": [],
+  "preview_url": "http://localhost:4173",
+  "release_id": "rel-64026e36d49733009fec952086fc95a3121a86efbb196b1c68d00fd6317f33d2",
+  "routes": [],
+  "schema_version": "diffusion-browser-qa-v1",
+  "screenshots": [
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/sectors-1440x900.jpg",
+      "physical_dimensions": [
+        1440,
+        900
+      ],
+      "sha256": "3e32932e9b53ce72ee2e73cf576dbc50320c93e85996907839e72e10827a2913",
+      "viewport": "1440x900"
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/sectors-1036x799.jpg",
+      "physical_dimensions": [
+        1036,
+        799
+      ],
+      "sha256": "904e7183fdb0785547a4081564fe53a044c80a6ec0257c27994da1b4c3296cc6",
+      "viewport": "1036x799"
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/sectors-1369x799.jpg",
+      "physical_dimensions": [
+        1369,
+        799
+      ],
+      "sha256": "f2942fdaf7da95c6f6a796641a0af2481954526a3757b6ac455a53f328b835cd",
+      "viewport": "1369x799"
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/sectors-390x844.jpg",
+      "physical_dimensions": [
+        390,
+        844
+      ],
+      "sha256": "1ebc181d3a53462999a4995382fe7403902f2bf18b11c7fdfdfce02b193513f3",
+      "viewport": "390x844"
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/landing-390x844.jpg",
+      "physical_dimensions": [
+        390,
+        844
+      ],
+      "sha256": "de53e1b5d8b9168d0e177f4aa2dc147b31dd449685d9728d28e7f4af5b4660b0",
+      "viewport": "390x844"
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/landing-1036x799.jpg",
+      "physical_dimensions": [
+        1036,
+        799
+      ],
+      "sha256": "023f13e36245c7cf559b42dc736d971668f208c4da7ea60d65be6ec41ee83d6c",
+      "viewport": "1036x799"
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/landing-1369x799.jpg",
+      "physical_dimensions": [
+        1369,
+        799
+      ],
+      "sha256": "a0f1debf1c88ac3258043fbe0094f50eb5360440d35b9dfc43eee044d0418a7a",
+      "viewport": "1369x799"
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/landing-1440x900.jpg",
+      "physical_dimensions": [
+        1440,
+        900
+      ],
+      "sha256": "cfe645b7a3c8eb6f4630e7d10e9525f5b88b8b3ca40f724227668cb83bed2bc1",
+      "viewport": "1440x900"
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/overview-1280x720.jpg",
+      "physical_dimensions": [
+        1280,
+        720
+      ],
+      "sha256": "5fc62c5ba1494d96f35d2e510b990b37ca86d75e9cb301e18bb62676de4caae0",
+      "viewport": "1280x720"
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/tradingview-heatmap-390x844.jpg",
+      "physical_dimensions": [
+        390,
+        844
+      ],
+      "sha256": "539190ac72df0aaca868af0be2a2e6608c28569e2524522b5a0e1aec60572ce3",
+      "viewport": "390x844"
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/tradingview-heatmap-ytd-390x844.jpg",
+      "physical_dimensions": [
+        390,
+        844
+      ],
+      "sha256": "e38542bd07cd44c498787333cf37355a435e24929cbf8d649d9c54d70da5d9b1",
+      "viewport": "390x844"
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/loading-1440x900.jpg",
+      "physical_dimensions": [
+        1440,
+        900
+      ],
+      "sha256": "4ee21ce28cf682120372fb7e0e7d0fa02853d0d45ace195757ef96f1a00ed4a9",
+      "viewport": "1440x900"
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/fetch-error-1440x900.jpg",
+      "physical_dimensions": [
+        1440,
+        900
+      ],
+      "sha256": "ff4a7bfde44f30d42a9ed9d76fc11d2c1a0381481d58b5e6c97cc8ed1ecdc4a7",
+      "viewport": "1440x900"
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/absent-1440x900.jpg",
+      "physical_dimensions": [
+        1440,
+        900
+      ],
+      "sha256": "832e7ff0eeba9ecde14eb5c9c880f2b1da90e33045db8df17483d9031a15a878",
+      "viewport": "1440x900"
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/corrupt-core-1440x900.jpg",
+      "physical_dimensions": [
+        1440,
+        900
+      ],
+      "sha256": "7d56c3cbf2cd46839705c00ef00c4766a8133b2f976eb52e77cfdaec15a89b34",
+      "viewport": "1440x900"
+    },
+    {
+      "path": "docs/submission-release/final-audit-2026-10-08/screenshots/current-points-without-history-1440x900.jpg",
+      "physical_dimensions": [
+        1440,
+        900
+      ],
+      "sha256": "639338567e909fa9f6d04a534e29047e40d64d8c5acf4a51e640038919252397",
+      "viewport": "1440x900"
+    }
+  ],
+  "sectors_provider_requests": 0,
+  "source_commit": "d1a223f212e69dce9cf5478f2cd2f67093746597",
+  "status": "PASS",
+  "tested_bundle_sha256": "eae8a9149c447e910811fe03a01488a390cb14ace3876a9e9274d749b4ea0bdc",
+  "unexpected_console_errors": 0,
+  "unexpected_data_request_failures": 0
+}

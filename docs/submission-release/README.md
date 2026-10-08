@@ -51,7 +51,7 @@ KSEI composition and scripless-conversion analysis.
 
 - Active: `rel-64026e36d49733009fec952086fc95a3121a86efbb196b1c68d00fd6317f33d2`
 - Manifest SHA-256: `98e2c260c9afae07ce2b1cb5b5436cda8bbff9978a0239d809d909183ad36e4f`
-- Tested source: `2e6c516c3254bbae0d380491487181bae1867f7b`
+- Tested source: `d1a223f212e69dce9cf5478f2cd2f67093746597` (fixes at `555a27a`; handoff adds documentation and evidence only)
 - Immediate rollback: `rel-fad218940fcc7e2492d97613681175b6cb2b2e38d387254737fafc0cadfa09dc`
 - Rollback manifest SHA-256: `2defade3acf1688eb96e0e40d577189f390eafd03fea69a1175ce5e07aa1f11c`
 
@@ -65,12 +65,14 @@ The original budget retains 461 estimated reservations against its 500 ceiling.
 The user-reported 221 remaining provider calls have not been consumed or
 reconciled with that budget. No further acquisition is authorized by readiness.
 
-Current evidence is in [final repair verification](final-repair-2026-10-08/VERIFICATION.md),
-including [browser QA](final-repair-2026-10-08/browser-qa.json),
-[readiness](final-repair-2026-10-08/readiness.json),
-[clean reproduction](final-repair-2026-10-08/clean-reproduction.json), and
-[publication](final-repair-2026-10-08/publication.json). Earlier audit reports
-remain dated records and do not replace these checks.
+Current evidence is in [0810 verification](final-audit-2026-10-08/VERIFICATION.md),
+including [fresh browser QA](final-audit-2026-10-08/browser-qa.json),
+[readiness](final-audit-2026-10-08/readiness.json),
+[ticker charts](final-audit-2026-10-08/ticker-qa.json), and
+[clean reproduction at the fix commit](final-audit-2026-10-08/clean-reproduction.json).
+Browser QA covers 64 fresh loads: all sixteen navigation routes at four sizes.
+The data package is unchanged, so its [original publication receipt](final-repair-2026-10-08/publication.json)
+remains applicable. Earlier audit reports and receipts remain dated records.
 
 ## Reproduce without credentials
 
@@ -86,10 +88,11 @@ RELEASE_DIR="app/web/public/releases/$RELEASE_ID"
 .venv/bin/python -m pytest -q
 npm run typecheck --prefix app/web
 npm run build --prefix app/web
-npm run preview --prefix app/web -- --host 127.0.0.1 --port 5173 --strictPort
+npm run preview --prefix app/web -- --host 127.0.0.1 --port 4173 --strictPort
 ```
 
-Open `http://127.0.0.1:5173/sectors`. All inputs needed to rebuild the native core
+Open `http://127.0.0.1:4173/sectors`. The review preview is also reachable at
+`http://localhost:4173`. All inputs needed to rebuild the native core
 and broader group readings are hash-bound in the package. No credentials,
 provider transport, or paid requests are needed. Group/ticker links preserve
 `scope`, `date`, `cadence`, and `horizon`; `/recorded-sample` redirects to `/sources`.
@@ -100,15 +103,19 @@ hashes for 1036×799, 1369×799, 1440×900, and 390×844:
 
 ```sh
 .venv/bin/python -m scripts.verify_sectors_readiness \
-  --browser-qa-receipt docs/submission-release/final-repair-2026-10-08/browser-qa.json \
+  --browser-qa-receipt docs/submission-release/final-audit-2026-10-08/browser-qa.json \
   --out /tmp/diffusion-readiness-new.json
 ```
 
 ## Delivery gates
 
 The local application and public repository are separate from public hosting.
-See the dated [launch evidence](final-repair-2026-10-08/launch.json) for the latest
-Vercel result. A public URL must pass fresh-load checks before hosting is accepted.
+See the [current launch check](final-audit-2026-10-08/launch-check.json).
+Vercel has no project linked to this repository; the integration-status check
+was denied, and the earlier launch was blocked by missing GitHub integration.
+Connect repository access and deploy the verified `codex/final-diffusion-repair`
+branch. The remote `main` branch has an older application and is not this tested
+source. A public URL must pass fresh-load checks before hosting is accepted.
 Videos, the prescribed social post, and final submission remain deferred; app
 verification alone does not complete the submission.
 
