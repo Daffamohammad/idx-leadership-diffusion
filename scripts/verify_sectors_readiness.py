@@ -13,13 +13,15 @@ import sys
 import tempfile
 from typing import Any
 
-from idx_leadership.data.releases import _read_active_pointer, canonical_json_bytes
+from idx_leadership.data.releases import _read_active_pointer, canonical_json_bytes, validate_manifest_file
 try:
     from scripts.build_sectors_analysis import _parse_actions, build
     from scripts.verify_sectors_analysis_oracle import verify as verify_analysis
+    from scripts.verify_final_reading_oracle import verify as verify_research
 except ModuleNotFoundError:  # direct ``python scripts/...`` execution
     from build_sectors_analysis import _parse_actions, build
     from verify_sectors_analysis_oracle import verify as verify_analysis
+    from verify_final_reading_oracle import verify as verify_research
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -36,13 +38,14 @@ FOCUSED_TESTS = (
     "tests/test_prepare_sectors_ytd_baseline.py",
     "tests/test_sectors_analysis.py",
     "tests/test_submission_repair.py",
+    "tests/test_final_readings.py",
 )
-SOURCE_PATHS = ("app/web", "src", "scripts", "tests", "pyproject.toml", "requirements.txt")
+SOURCE_PATHS = ("app/web", ":(exclude)app/web/public/releases", "src", "scripts", "tests", "config", "pyproject.toml", "requirements.txt")
 REQUIRED_BROWSER_CHECKS = (
-    "sectors_1036x799", "sectors_1440x900", "sectors_390x844", "sources",
+    "sectors_1036x799", "sectors_1369x799", "sectors_1440x900", "sectors_390x844", "sources",
     "overview", "weekly_comparison", "context_map", "navigation_smoke",
     "core_interactions", "loading_state", "fetch_error_retry", "absent_asset",
-    "corrupt_core", "missing_selection", "corrupt_ytd", "server_restart", "map_without_history",
+    "corrupt_core", "missing_selection", "corrupt_ytd", "server_restart", "map_without_history", "catalogue_34", "ownership_comparisons", "chart_interactions",
 )
 REQUIRED_ROUTES = ("/sectors", "/sources", "/overview", "/what-changed", "/movers", "/foreign", "/ownership",
                    "/heatmap", "/map", "/konglo", "/themes", "/explorer", "/groups", "/tickers", "/methodology")
@@ -160,16 +163,20 @@ def verify_browser_receipt(path: Path, *, release_id: str, manifest_sha256: str,
         if not (raw.startswith(b"\x89PNG\r\n\x1a\n") or raw.startswith(b"\xff\xd8\xff")) or _sha(raw) != entry.get("sha256"):
             raise ValueError("browser QA screenshot hash does not validate")
         viewports.add(entry.get("viewport"))
-    if not {"1036x799", "1440x900", "390x844"}.issubset(viewports):
+    if not {"1036x799", "1369x799", "1440x900", "390x844"}.issubset(viewports):
         raise ValueError("browser QA needs screenshot evidence for every required viewport")
     return {"status": "PASS", "receipt": str(path.relative_to(ROOT)), "sha256": _sha(path.read_bytes()),
             "source_commit": commit, "checks": checks, "metrics": metrics, "screenshots": screenshots}
 
 
-def verify_readiness(*, browser_qa_receipt: Path) -> dict[str, Any]:
+def verify_readiness(*, browser_qa_receipt: Path, candidate_manifest: Path | None = None) -> dict[str, Any]:
     pointer, active, previous = _read_active_pointer(RELEASES)
     if pointer is None or active is None:
         raise ValueError("there is no verified active immutable release")
+    preserved_active = active
+    if candidate_manifest:
+        raw_manifest = json.loads(candidate_manifest.read_text())
+        active = validate_manifest_file(candidate_manifest, candidate=any("candidate_path" in row for row in raw_manifest["source_evidence"]))
     entries = _required_entries(active)
     sample_path = active.additional_paths["sectors_recorded_sample"]
     market_path = active.additional_paths["sectors_selection_market"]
@@ -180,10 +187,20 @@ def verify_readiness(*, browser_qa_receipt: Path) -> dict[str, Any]:
     sample = json.loads(sample_raw)
     analysis = json.loads(analysis_raw)
     market = json.loads(active.family_paths["market"].read_text())
+    context = json.loads(active.additional_paths["historical_comparison"].read_text())
+    catalogue = json.loads(active.additional_paths["business_group_catalogue"].read_text())
+    if len(catalogue["reference_groups"]) != 34:
+        raise ValueError("business catalogue does not reconcile all 34 reference labels")
+    research_oracle = verify_research(active.manifest_path)
+    if research_oracle["status"] != "PASS":
+        raise ValueError("independent research horizon and concentration oracle failed")
     browser = verify_browser_receipt(browser_qa_receipt, release_id=active.release_id, manifest_sha256=active.manifest_sha256,
-        expected_metrics={"ranking_rows": 11, "sectors_map_marks": sum(group["map"] is not None for group in analysis["daily"][-1]["groups"]),
+        expected_metrics={"ranking_rows": 11, "sectors_map_marks": sum((group.get("descriptive_map") or group["map"]) is not None for group in analysis["daily"][-1]["groups"]),
                           "constituents_inspected": 66, "daily_dates": len(analysis["daily"]), "weekly_dates": len(analysis["weekly"]),
-                          "context_sector_marks": 11, "ihsg_close": market["benchmark"][-1]["close"]})
+                          "context_sector_marks": 11, "ihsg_close": market["benchmark"][-1]["close"],
+                          "catalogue_reference_groups": 34, "konglo_groups": context["taxonomies"]["KONGLO"]["group_count"],
+                          "context_idxic_marks": sum(g["weekly"][-1]["map_x_60d"] is not None for g in context["taxonomies"]["IDXIC"]["groups"].values()),
+                          "context_theme_marks": sum(g["weekly"][-1]["map_x_60d"] is not None for g in context["taxonomies"]["CURATED_THEMES"]["groups"].values())})
     if len(sample.get("stocks", [])) != 66 or len({row.get("ticker") for row in sample["stocks"]}) != 66:
         raise ValueError("released sample must contain all 66 unique selected stocks")
     if len({row.get("sector") for row in sample["stocks"]}) != 11:
@@ -231,6 +248,8 @@ def verify_readiness(*, browser_qa_receipt: Path) -> dict[str, Any]:
         "schema_version": "sectors-readiness-receipt-v2",
         "status": "VERIFIED_LOCAL_BUILD",
         "created_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "preserved_active_release_id": preserved_active.release_id,
+        "tested_candidate": candidate_manifest is not None,
         "active_release": {
             "release_id": active.release_id,
             "manifest_sha256": active.manifest_sha256,
@@ -257,6 +276,7 @@ def verify_readiness(*, browser_qa_receipt: Path) -> dict[str, Any]:
             "credential_free_exact_rebuild": {"status": "PASS", "sha256": _sha(rebuilt_raw)},
             "independent_close_and_integer_diffusion_oracle": oracle,
             "corporate_action_exclusions": action_audit,
+            "independent_research_horizons_and_concentration_oracle": research_oracle,
             "minimum_five_contributor_floor": "PASS",
             "mocked_budget_retry_restart_concurrency_and_pre_501_tests": focused_tests,
             "browser_workflow": browser,
@@ -264,7 +284,9 @@ def verify_readiness(*, browser_qa_receipt: Path) -> dict[str, Any]:
             **({"ytd_acquisition_validation": acquisition_validation} if acquisition_validation else {}),
         },
         "budget_gate": ({
-            "status": "ACQUISITION_VALIDATED_WITHIN_500_CEILING",
+            "status": "HOLD_PENDING_PROVIDER_ALLOWANCE_RECONCILIATION",
+            "reported_provider_calls_remaining": 221,
+            "provider_calls_during_repair": 0,
             "original_reservations_carried": 433,
             "requests_and_estimated_credits_used": acquisition_validation["request_count_and_estimated_credits"],
             "failed_attempts_preserved": acquisition_validation["failed_attempt_events_preserved"],
@@ -294,10 +316,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--browser-qa-receipt", required=True, type=Path,
                         help="recorded browser checks, figures, and screenshots bound to this source commit and release")
+    parser.add_argument("--candidate-manifest", type=Path, help="verify a successor before changing the active data package")
     parser.add_argument("--out", required=True, type=Path, help="new readiness receipt path; existing dated records are never overwritten")
     args = parser.parse_args()
     try:
-        receipt = verify_readiness(browser_qa_receipt=args.browser_qa_receipt.resolve())
+        receipt = verify_readiness(browser_qa_receipt=args.browser_qa_receipt.resolve(), candidate_manifest=args.candidate_manifest.resolve() if args.candidate_manifest else None)
         _write(args.out, receipt)
         print(json.dumps({"status": receipt["status"], "receipt": str(args.out),
                           "release_id": receipt["active_release"]["release_id"],

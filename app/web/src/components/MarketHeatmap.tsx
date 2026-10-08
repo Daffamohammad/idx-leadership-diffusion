@@ -518,7 +518,7 @@ export default function MarketHeatmap({
       >
         <span>Source: Python-aggregated taxonomy views (no frontend recompute)</span>
         <span>·</span>
-        <span>Source: snapshot-backed aggregation</span>
+        <span>Source: verified group aggregation</span>
         <span>·</span>
         <span>Negative values mean the group is underperforming IHSG; no recommendation language.</span>
       </footer>

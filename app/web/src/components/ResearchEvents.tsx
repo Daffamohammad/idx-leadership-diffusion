@@ -5,6 +5,7 @@
 
 import type { ResearchEventView } from "../data/adapter";
 import { formatDateLabel, formatEnumLabel } from "../data/format";
+import { publicCopy } from "../data/publicCopy";
 import { EvidenceBadge } from "./EvidenceModel";
 
 interface ResearchEventsProps {
@@ -28,7 +29,7 @@ const CATEGORY_LABEL: Record<string, string> = {
 export default function ResearchEvents({
   events,
   limit,
-  emptyMessage = "No research events in the current snapshot.",
+  emptyMessage = "No research events in the selected observations.",
 }: ResearchEventsProps) {
   if (!events.length) {
     return (
@@ -117,8 +118,8 @@ export default function ResearchEvents({
                 </>
               )}
             </div>
-            <div style={{ fontWeight: 600 }}>{event.title}</div>
-            <div style={{ fontSize: 13, color: "var(--ink)" }}>{event.summary}</div>
+            <div style={{ fontWeight: 600 }}>{publicCopy(event.title)}</div>
+            <div style={{ fontSize: 13, color: "var(--ink)" }}>{publicCopy(event.summary)}</div>
             <div style={{ fontSize: 11, color: "var(--muted)" }}>
               {event.sourceUrl.startsWith("http://") ||
               event.sourceUrl.startsWith("https://") ? (

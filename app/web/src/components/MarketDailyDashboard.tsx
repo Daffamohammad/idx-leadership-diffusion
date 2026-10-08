@@ -22,6 +22,8 @@ interface Props {
   rankings: OverviewRanking[];
   rankingCounts: Record<TaxonomyKind, number>;
   asOf: string;
+  rankingState?: {loading: boolean; error: string | null};
+  rankingQuery?: string;
 }
 
 const RANK_LABELS: Record<TaxonomyKind, string> = {
@@ -36,7 +38,7 @@ function catalogPath(kind: TaxonomyKind): string {
   return "/themes";
 }
 
-export default function MarketDailyDashboard({ rankKind, onRankKindChange, rankings, rankingCounts, asOf }: Props) {
+export default function MarketDailyDashboard({ rankKind, onRankKindChange, rankings, rankingCounts, asOf, rankingState, rankingQuery = "scope=market&cadence=weekly&horizon=60d" }: Props) {
   const { data, error, loading } = useWorkspaceAsset<MarketWorkspace>("market");
   const [period, setPeriod] = useState(60);
   const latest = data?.benchmark.at(-1);
@@ -59,10 +61,10 @@ export default function MarketDailyDashboard({ rankKind, onRankKindChange, ranki
           <div className="market-level">IHSG {latest.close.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
           <p className={change >= 0 ? "positive" : "negative"}>{change >= 0 ? "+" : ""}{change.toFixed(3)} pts · {formatPercent(change / previous.close * 100, 2)}</p>
           <div className="market-overview-prior">Previous close <strong>{previous.close.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></div>
-        </> : <AssetLoadState label="IHSG closes" loading={loading} error={error} absentMessage="No closing observation is available for this release." />}
+        </> : <AssetLoadState label="IHSG closes" loading={loading} error={error} absentMessage="No closing observation is available for the selected data." />}
         <TradingViewTechnicalAnalysis />
         <details className="official-history-details">
-          <summary>Selected-release daily history</summary>
+          <summary>Daily IHSG history</summary>
           {data && latest && history.length > 0 ? <>
             <div className="workspace-controls" role="group" aria-label="IHSG history period">{[[20, "1M"], [60, "3M"], [120, "6M"], [188, "Available history"]].map(([n, label]) => <button className="btn btn-outline" key={n} aria-pressed={period === n} onClick={() => setPeriod(Number(n))}>{label}</button>)}</div>
             <div className="workspace-chart" role="img" aria-label={`IHSG end-of-day closes, ${formatDateLabel(history[0].date)} to ${formatDateLabel(latest.date)}, latest ${latest.close}`}>
@@ -71,31 +73,32 @@ export default function MarketDailyDashboard({ rankKind, onRankKindChange, ranki
             <div className="breadth-bar" aria-hidden="true"><span style={{ flex: data.breadth.advancers, background: "var(--up)" }}/><span style={{ flex: data.breadth.flat, background: "var(--muted)" }}/><span style={{ flex: data.breadth.decliners, background: "var(--down)" }}/></div>
             <p className="meta">{data.breadth.advancers} up · {data.breadth.flat} flat · {data.breadth.decliners} down. {data.breadth.traded_count} traded stocks; {data.breadth.not_traded_or_unavailable} not traded or outside the stock lane.</p>
             <Link to="/heatmap" className="btn btn-outline">Open stock heatmap →</Link>
-          </> : <AssetLoadState label="IHSG history" loading={loading} error={error} absentMessage="Dated closing observations are not available in this release." />}
+          </> : <AssetLoadState label="IHSG history" loading={loading} error={error} absentMessage="Dated closing observations are not available in the selected data." />}
         </details>
       </section>
 
       <TradingViewWidget ticker="IHSG" symbolOverride="IDX:COMPOSITE" title="IDX Composite · IHSG" containerId="market-overview-ihsg-chart" />
 
       <section className="dash-card overview-groups-card" aria-labelledby="overview-groups-title">
-        <div className="eyebrow-muted">Snapshot {asOf} · 20D excess vs IHSG</div>
+        <div className="eyebrow-muted">As of {asOf} · 20D excess vs IHSG</div>
         <h2 id="overview-groups-title">Sectors &amp; groups</h2>
         <div className="overview-group-tabs" role="group" aria-label="Sectors and group categories">
           {(["SECTOR", "KONGLO", "THEMES"] as TaxonomyKind[]).map((kind) => <button key={kind} type="button" aria-pressed={rankKind === kind} onClick={() => onRankKindChange(kind)}>{RANK_LABELS[kind]}</button>)}
         </div>
         <div className="overview-group-count">{rankKind === "SECTOR" ? `${rankingCounts[rankKind]} sectors` : `Top ${rankings.length} of ${rankingCounts[rankKind]} documented groups`}</div>
         <div className="overview-group-list">
+          {rankingState && (rankingState.loading || rankingState.error) && <AssetLoadState label="Group rankings" loading={rankingState.loading} error={rankingState.error} absentMessage="Group rankings are unavailable."/>}
           {rankings.map((row) => {
             const value = row.excess20d;
             const width = value === null ? 0 : Math.max(2, Math.min(100, Math.abs(value) / maxAbsReturn * 100));
-            const groupPath = `/explorer?taxonomy=${row.kind}&group=${encodeURIComponent(row.id)}`;
+            const groupPath = `/explorer?taxonomy=${row.kind}&group=${encodeURIComponent(row.id)}&${rankingQuery}`;
             return <Link className="overview-group-row" to={groupPath} key={row.id}>
               <span className="overview-group-name">{row.name}</span>
               <span className="overview-group-value" style={{ color: value === null ? "var(--muted)" : value >= 0 ? "var(--up)" : "var(--down)" }}>{formatPercent(value)}</span>
               <span className="overview-group-track" aria-hidden="true"><i style={{ width: `${width}%`, marginLeft: value !== null && value < 0 ? "auto" : 0, background: value !== null && value >= 0 ? "var(--up)" : "var(--down)" }}/></span>
             </Link>;
           })}
-          {!rankings.length && <p className="meta">No documented groups are included in this release.</p>}
+          {!rankings.length && <p className="meta">No documented groups are included in the selected data.</p>}
         </div>
         <Link className="overview-catalog-link" to={catalogPath(rankKind)}>{rankKind === "SECTOR" ? "Open sector rotation" : `Browse all ${rankingCounts[rankKind]} ${rankKind === "KONGLO" ? "Konglo portfolios" : "IDXIC subindustries"}`} →</Link>
       </section>
@@ -104,7 +107,7 @@ export default function MarketDailyDashboard({ rankKind, onRankKindChange, ranki
     <section className="dash-card overview-movers-card" aria-labelledby="overview-movers-title">
       <div className="eyebrow-muted">Latest session · {formatDateLabel(data?.as_of ?? null)}</div>
       <h2 id="overview-movers-title">{data?.index_movers.status === "RECONCILED" ? "Index movers" : "Stock movers"}</h2>
-      {!data && <AssetLoadState label="Market movers" loading={loading} error={error} absentMessage="Market movers are not included in this release." />}
+      {!data && <AssetLoadState label="Market movers" loading={loading} error={error} absentMessage="Market movers are not included in the selected data." />}
       {data && <>
         <div className="mover-columns">{(["leaders", "laggards"] as const).map(side => <div key={side}><h3>{side === "leaders" ? "Leaders" : "Laggards"}</h3>{movers[side].map(r => <Link className="mover-row" to={`/ticker/${r.ticker}`} key={r.ticker}><strong>{r.ticker.replace(".JK", "")}</strong><span className={side === "leaders" ? "positive" : "negative"}>{r.points !== null ? `${r.points > 0 ? "+" : ""}${r.points.toFixed(2)} pts` : formatPercent(r.return_1d, 2)}</span><small>{formatPercent(r.return_1d, 2)}</small></Link>)}</div>)}</div>
         <details className="meta overview-calculation-notes"><summary>Calculation and coverage</summary>{data.index_movers.status === "RECONCILED" ? <p>{data.index_movers.method}. Summed contributions: {data.index_movers.calculated_change?.toFixed(6)} pts; official move: {data.index_movers.official_change?.toFixed(3)} pts; residual: {data.index_movers.residual?.toFixed(6)} pts. Calculated from the official workbook; applies to this session only. <a href={data.index_movers.source} target="_blank" rel="noreferrer">IDX index methodology</a>.</p> : <p>{data.index_movers.reason}. Percentage movers are shown instead.</p>}<p>{data.coverage.observed_histories} observed histories of {data.coverage.requested} requested stocks. {data.coverage.signal_eligible} eligible for the sector signal policy. End-of-day observations; chart values are index levels.</p></details>

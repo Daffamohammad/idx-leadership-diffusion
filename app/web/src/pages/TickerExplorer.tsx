@@ -12,7 +12,7 @@ export default function TickerExplorer() {
       </p>
       {loading ? <p role="status">Loading listings…</p> : data?.listingRegistry
         ? <ListingRegistryPanel registry={data.listingRegistry} />
-        : <p>No listing registry is available in this snapshot.</p>}
+        : <p>No listing registry is available in the selected data.</p>}
     </section>
   );
 }

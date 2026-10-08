@@ -165,7 +165,7 @@ def browser_receipt(tmp_path, monkeypatch):
     screenshots = []
     # Small PNG fixtures test evidence validation; they are not real browser evidence.
     png = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl2ZAAAAABJRU5ErkJggg==")
-    for viewport in ("1036x799", "1440x900", "390x844"):
+    for viewport in ("1036x799", "1369x799", "1440x900", "390x844"):
         image = tmp_path / f"docs/{viewport}.png"
         image.parent.mkdir(exist_ok=True)
         image.write_bytes(png)
@@ -214,3 +214,31 @@ def test_readiness_does_not_overwrite_historical_receipts(tmp_path):
     with pytest.raises(ValueError, match="already exists"):
         readiness._write(path,{"status":"PASS"})
     assert path.read_text() == "historical"
+
+
+def test_ownership_comparison_preserves_unknown_prior_values_and_population_boundaries():
+    result = bun('''
+      import {ownershipComparisons} from "./app/web/src/data/ownershipComparison.ts";
+      const row=(holder,shares,percentage,extra={})=>({ticker:"TEST",holder,shares,percentage,...extra});
+      const data={registers:{one:[row("A",120,12),row("ENTRY",1,1),row("AMB",50,5,{identity_ambiguous:true})],previous_one:[row("A",100,10),row("EXIT",5,2),row("AMB",40,4)],five:[row("A",120,12,{previous_shares:100}),row("UNKNOWN",2,6)]}};
+      console.log(JSON.stringify({one:ownershipComparisons(data,false),five:ownershipComparisons(data,true),missing:ownershipComparisons({...data,registers:{...data.registers,previous_one:undefined}},false)}));
+    ''')
+    assert result["missing"] == []
+    positions = {row["holder"]: row for row in result["one"]}
+    assert "AMB" not in positions
+    assert positions["A"]["delta_shares"] == 20
+    assert positions["A"]["current_percentage"] - positions["A"]["previous_percentage"] == 2
+    assert positions["ENTRY"]["previous_shares"] is None
+    assert positions["EXIT"]["current_shares"] is None
+    assert result["five"][0]["previous_percentage"] is None
+    assert result["five"][1]["delta_shares"] is None
+
+
+def test_group_navigation_keeps_universe_and_comparison_controls():
+    result = bun('''
+      import {groupHref,rotationPhase} from "./app/web/src/data/research.ts";
+      console.log(JSON.stringify({href:groupHref({id:"Consumer Cyclicals",taxonomy:"SECTOR",scope:"sectors"},"2026-09-25","weekly","60d"),phases:[rotationPhase(null,1),rotationPhase(-1,2),rotationPhase(-1,-2),rotationPhase(1,-2)]}));
+    ''')
+    assert "scope=sectors" in result["href"] and "date=2026-09-25" in result["href"]
+    assert "cadence=weekly" in result["href"] and "horizon=60d" in result["href"]
+    assert result["phases"] == ["UNAVAILABLE", "IMPROVING", "LAGGING", "WEAKENING"]

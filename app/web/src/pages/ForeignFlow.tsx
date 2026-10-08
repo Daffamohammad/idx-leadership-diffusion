@@ -122,7 +122,7 @@ export default function ForeignFlow() {
     <main className="workspace-page foreign-flow-page">
       <header>
         <h1>Foreign flow</h1>
-        <p className="meta">IDX-reported net foreign transaction value · all stock trading markets · {data ? formatDateLabel(data.as_of) : "Loading dated release"}</p>
+        <p className="meta">IDX-reported net foreign transaction value · all stock trading markets · {data ? formatDateLabel(data.as_of) : "Loading dated observations"}</p>
       </header>
 
       <section className="dash-card foreign-flow-card">

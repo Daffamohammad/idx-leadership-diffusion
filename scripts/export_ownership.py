@@ -17,8 +17,8 @@ def main() -> int:
         five = read_five(Path(a.five), as_of=a.five_as_of, previous_as_of=a.five_previous_as_of)
         if not current or not previous or not five or a.previous_as_of >= a.as_of or a.five_as_of < a.as_of:
             raise ValueError('empty or nonchronological register')
-        payload = dict(schema_version='idx-ownership-v1', as_of=a.as_of, previous_as_of=a.previous_as_of, five_as_of=a.five_as_of,
-                       registers={'one': current, 'five': five}, changes=compare_one(current, previous),
+        payload = dict(schema_version='idx-ownership-v1', as_of=a.as_of, previous_as_of=a.previous_as_of, five_as_of=a.five_as_of, five_previous_as_of=a.five_previous_as_of,
+                       registers={'one': current, 'five': five, 'previous_one': previous}, changes=compare_one(current, previous),
                        sources=[source(Path(a.current), a.current_url, a.as_of), source(Path(a.previous), a.previous_url, a.previous_as_of), source(Path(a.five), a.five_url, a.five_as_of)],
                        coverage={'one_rows': len(current), 'one_issuers': len({r['ticker'] for r in current}), 'five_rows': len(five), 'five_issuers': len({r['ticker'] for r in five}), 'previous_rows': len(previous), 'five_unreconciled_account_blocks': sum(r['account_totals_reconciled'] is False for r in five)},
                        limitations=['Public names are not unique SID identities. Equal names are searchable connections, not proof of a single beneficial owner.',

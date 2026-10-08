@@ -65,9 +65,9 @@ export default function OfficialMarketContext({ context }: OfficialMarketContext
         <span>Parsed by {source.parser_agent ?? "LlamaCloud"} · {pages}</span>
         <span>·</span>
         {source.url.startsWith("https://") ? (
-          <a href={source.url} target="_blank" rel="noopener noreferrer">Open official release</a>
+          <a href={source.url} target="_blank" rel="noopener noreferrer">Open official data</a>
         ) : (
-          <span>Official release link unavailable</span>
+          <span>Official source link unavailable</span>
         )}
       </footer>
     </section>

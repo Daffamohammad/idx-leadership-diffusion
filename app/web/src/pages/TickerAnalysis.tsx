@@ -1,318 +1,46 @@
-// TickerAnalysis — per-ticker route that surfaces the methodology chart,
-// foreign-flow context (when the ticker is in the sample), and the
-// TradingView widget as a contextual overlay.
-//
-// The snapshot-backed yfinance chart (PriceChart) remains the source of
-// truth for the persisted price series. TradingView is contextual.
-
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
-import { useSnapshot } from "../data/SnapshotProvider";
-import PriceChart from "../components/PriceChart";
-import { EvidenceBadge } from "../components/EvidenceModel";
-import TradingViewWidget from "../components/TradingViewWidget";
-import { formatDateLabel, formatEnumLabel, formatIdrCompact } from "../data/format";
+import { useResearch, groupHref } from "../data/research";
+import { ResearchChart } from "../components/ResearchChart";
+import { AssetLoadState } from "../components/AssetLoadState";
+import { formatDateLabel, formatPercent } from "../data/format";
 
 export default function TickerAnalysis() {
-  const { ticker: rawTicker } = useParams<{ ticker: string }>();
-  const ticker = (rawTicker ?? "").toUpperCase();
-  const snap = useSnapshot();
-  const adapted = snap.data;
-  const feature = useMemo(() => {
-    if (!adapted || !ticker) return null;
-    return adapted.featureLookup[ticker] ?? null;
-  }, [adapted, ticker]);
-
-  const security = useMemo(() => {
-    if (!adapted || !ticker) return null;
-    const observed = adapted.securityLookup[ticker];
-    if (observed) return observed;
-    const listed = adapted.listingRegistry?.records.find(row => row.ticker === ticker);
-    return listed ? { name: listed.company_name, sector: listed.taxonomy.sector } : null;
-  }, [adapted, ticker]);
-
-  const priceHistory = useMemo(() => {
-    if (!adapted || !ticker) return [];
-    return adapted.tickerPriceHistory[ticker] ?? [];
-  }, [adapted, ticker]);
-
-  const events = useMemo(() => {
-    if (!adapted || !ticker) return [];
-    return adapted.researchEvents.filter((event) => event.ticker === ticker);
-  }, [adapted, ticker]);
-
-  const foreignContext = useMemo(() => {
-    if (!adapted || !adapted.foreignFlow) return null;
-    const rows = [
-      ...adapted.foreignFlow.topBuys,
-      ...adapted.foreignFlow.topSells,
-    ];
-    return rows.find((row) => row.ticker === ticker) ?? null;
-  }, [adapted, ticker]);
-
-  if (!ticker) {
-    return (
-      <main style={{ padding: 32 }}>
-        <h1>Invalid ticker</h1>
-        <p>The URL must include an IDX-formatted ticker.</p>
-        <Link to="/overview">Return to overview</Link>
-      </main>
-    );
-  }
-
-  if (snap.loading) {
-    return (
-      <main style={{ padding: 32, color: "var(--muted)" }}>
-        Loading snapshot for ticker analysis…
-      </main>
-    );
-  }
-
-  if (snap.error || !adapted) {
-    return (
-      <main style={{ padding: 32 }}>
-        <h1>Snapshot unavailable</h1>
-        <p style={{ color: "var(--down)" }}>{snap.error ?? "No snapshot loaded."}</p>
-        <Link to="/overview">Return to overview</Link>
-      </main>
-    );
-  }
-
-  const asOf = adapted.payload.as_of;
-  const manifestEntry = adapted.payload.manifest?.entries?.[0];
-  const providerMode = manifestEntry?.provider_mode ?? "PUBLIC_PROTOTYPE";
-  const priceBasis = manifestEntry?.price_basis ?? "close";
-
-  return (
-    <main
-      style={{
-        padding: "32px clamp(16px, 4vw, 36px) 56px",
-        display: "grid",
-        gap: 24,
-        gridTemplateColumns: "minmax(0, 1fr)",
-        maxWidth: 1180,
-        width: "100%",
-        boxSizing: "border-box",
-        margin: "0 auto",
-        minWidth: 0,
-      }}
-    >
-      <header
-        style={{
-          borderBottom: "1px solid var(--line)",
-          paddingBottom: 16,
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "space-between",
-          gap: 16,
-          minWidth: 0,
-          maxWidth: "100%",
-        }}
-      >
-        <div style={{ minWidth: 0, maxWidth: "100%" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-            <div className="eyebrow-muted">Ticker analysis</div>
-            <EvidenceBadge kind="SNAPSHOT" compact />
-          </div>
-          <h1 style={{ margin: "6px 0 4px", fontSize: 32, letterSpacing: "-.02em", overflowWrap: "anywhere", minWidth: 0 }}>
-            {security?.name ?? ticker}
-          </h1>
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 12,
-              fontSize: 12,
-              fontFamily: "Geist Mono, monospace",
-              color: "var(--muted)",
-              minWidth: 0,
-              maxWidth: "100%",
-              overflowWrap: "anywhere",
-            }}
-          >
-            <span>{ticker}</span>
-            {security?.sector && (
-              <>
-                <span>·</span>
-                <span>{security.sector}</span>
-              </>
-            )}
-            <span>·</span>
-            <span>As of {formatDateLabel(asOf)}</span>
-            <span>·</span>
-            <span>Provider mode: {formatEnumLabel(providerMode)}</span>
-          </div>
-        </div>
-        <Link
-          to="/explorer"
-          style={{
-            alignSelf: "flex-end",
-            padding: "8px 14px",
-            border: "1px solid #202325",
-            color: "var(--ink)",
-            textDecoration: "none",
-            fontSize: 12,
-          }}
-        >
-          ← Group explorer
-        </Link>
-      </header>
-
-      <section
-        aria-label="Methodology price chart"
-        style={{ display: "grid", gap: 12, gridTemplateColumns: "minmax(0, 1fr)", minWidth: 0, maxWidth: "100%" }}
-      >
-        <PriceChart
-          ticker={ticker}
-          points={priceHistory.map((row) => ({ date: row.date, value: row.value }))}
-          benchmarkPoints={priceHistory.map((row) => ({
-            date: row.date,
-            value: row.benchmark,
-          }))}
-          groupPoints={priceHistory}
-          asOf={asOf}
-          source={`Persisted snapshot · ${formatEnumLabel(providerMode)} · ${formatEnumLabel(priceBasis)}`}
-          metricLabel="Rebased index (start = 100)"
-          referenceValue={100}
-          providerMode={providerMode}
-          priceBasis={priceBasis}
-          dataStatus={adapted.payload.quality?.status ?? undefined}
-        />
-      </section>
-      <section
-        aria-label="TradingView context chart"
-        style={{ display: "grid", gap: 12, gridTemplateColumns: "minmax(0, 1fr)", minWidth: 0, maxWidth: "100%" }}
-      >
-        <TradingViewWidget ticker={ticker} />
-      </section>
-
-      <section
-        aria-label="Foreign flow sample context"
-        style={{
-          border: "1px solid var(--line)",
-          padding: 20,
-          background: "var(--surface-subtle)",
-        }}
-      >
-        <div className="eyebrow-muted">Foreign-flow sample context</div>
-        <h2 style={{ margin: "6px 0 8px", fontSize: 18 }}>
-          {foreignContext ? "Sample observation available" : "No sample observation"}
-        </h2>
-        {foreignContext ? (
-          <div style={{ display: "grid", gap: 6, fontSize: 13 }}>
-            <div>
-              <strong>{formatEnumLabel(foreignContext.direction)}</strong> on {formatDateLabel(foreignContext.asOf)}
-            </div>
-            <div>
-              Net: {formatIdrCompact(foreignContext.netValueIdr)}
-            </div>
-            <div style={{ fontSize: 11, color: "var(--muted)" }}>
-              <a href={foreignContext.sourceUrl} target="_blank" rel="noreferrer">
-                Source: {foreignContext.sourceName}
-              </a>
-            </div>
-          </div>
-        ) : (
-          <p style={{ margin: 0, fontSize: 13, color: "var(--muted)" }}>
-            This ticker does not appear in the latest published top-buy or
-            top-sell foreign-flow sample. The sample is bounded to the
-            published source articles and is not a full universe observation.
-          </p>
-        )}
-      </section>
-
-      <section
-        aria-label="Research events"
-        style={{
-          border: "1px solid var(--line)",
-          padding: 20,
-          background: "var(--surface-subtle)",
-        }}
-      >
-        <div className="eyebrow-muted">Research events</div>
-        <h2 style={{ margin: "6px 0 8px", fontSize: 18 }}>
-          {events.length === 0 ? "No dated events" : `${events.length} dated event(s)`}
-        </h2>
-        {events.length === 0 ? (
-          <p style={{ margin: 0, fontSize: 13, color: "var(--muted)" }}>
-            No research event for this ticker in the current bundle. Events
-            are explicitly context-only — they never become signals.
-          </p>
-        ) : (
-          <ul
-            style={{
-              listStyle: "none",
-              padding: 0,
-              margin: 0,
-              display: "grid",
-              gap: 8,
-              fontSize: 13,
-            }}
-          >
-            {events.map((event) => (
-              <li
-                key={event.eventId}
-                style={{
-                  borderLeft: "3px solid #c69f4a",
-                  paddingLeft: 12,
-                }}
-              >
-                <div style={{ fontFamily: "Geist Mono, monospace", fontSize: 11, color: "var(--muted)" }}>
-                  {formatDateLabel(event.eventDate)} · {formatEnumLabel(event.category)}
-                </div>
-                <div style={{ fontWeight: 600 }}>{event.title}</div>
-                <div style={{ color: "var(--ink)", marginTop: 2 }}>{event.summary}</div>
-                <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 2 }}>
-                  <a href={event.sourceUrl} target="_blank" rel="noreferrer">
-                    Source: {event.sourceName}
-                  </a>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <section
-        aria-label="Methodology feature snapshot"
-        style={{
-          border: "1px solid var(--line)",
-          padding: 20,
-          background: "var(--surface)",
-        }}
-      >
-        <div className="eyebrow-muted">Methodology snapshot</div>
-        <h2 style={{ margin: "6px 0 8px", fontSize: 18 }}>Feature row</h2>
-        {feature ? (
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              fontFamily: "Geist Mono, monospace",
-              fontSize: 12,
-            }}
-          >
-            <thead>
-              <tr>
-                <th align="left" style={{ borderBottom: "1px solid var(--line)" }}>Field</th>
-                <th align="left" style={{ borderBottom: "1px solid var(--line)" }}>Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>{formatEnumLabel("as_of")}</td><td>{formatDateLabel(feature.as_of)}</td></tr>
-              <tr><td>{formatEnumLabel("latest_close")}</td><td>{feature.latest_close ?? "—"}</td></tr>
-              <tr><td>{formatEnumLabel("return_20d")}</td><td>{feature.return_20d ?? "—"}</td></tr>
-              <tr><td>{formatEnumLabel("excess_return_20d")}</td><td>{feature.excess_return_20d ?? "—"}</td></tr>
-              <tr><td>{formatEnumLabel("excess_return_60d")}</td><td>{feature.excess_return_60d ?? "—"}</td></tr>
-              <tr><td>{formatEnumLabel("relative_strength_level")}</td><td>{feature.relative_strength_level ?? "—"}</td></tr>
-            </tbody>
-          </table>
-        ) : (
-          <p style={{ margin: 0, color: "var(--muted)" }}>
-            This ticker does not appear in the snapshot's feature table.
-          </p>
-        )}
-      </section>
-    </main>
-  );
+  const {ticker: rawTicker} = useParams<{ticker: string}>();
+  const code = (rawTicker ?? "").toUpperCase();
+  const ticker = code.endsWith(".JK") ? code : `${code}.JK`;
+  const state = useResearch();
+  const [playing, setPlaying] = useState(false);
+  const index = state.dates.indexOf(state.date);
+  useEffect(() => {
+    if (!playing || !state.dates.length) return;
+    const timer = window.setTimeout(() => {
+      if (index >= state.dates.length - 1) setPlaying(false);
+      else state.set("date", state.dates[index + 1]);
+    }, 850);
+    return () => window.clearTimeout(timer);
+  }, [playing, index, state]);
+  const series = (state.histories[ticker] ?? []).filter(row => row.date <= state.date);
+  const stock = state.source?.stocks.find(row => row.ticker === ticker);
+  const memberships = state.allGroups.filter(group => group.members.some(member => member.ticker === ticker));
+  const member = memberships.flatMap(group => group.members).find(row => row.ticker === ticker);
+  const native = state.native?.[state.cadence].find(row => row.date === state.date)?.groups.flatMap(group => group.contributors).find(row => row.ticker === ticker);
+  const actions = (state.native?.action_events?.[ticker] ?? []).map(event => ({date:event.date,type:`${ticker}:${event.type}`}));
+  if (state.loading || state.error) return <main className="workspace-page"><h1>{ticker}</h1><AssetLoadState label="Stock history" loading={state.loading} error={state.error} absentMessage="Stock history is unavailable."/></main>;
+  return <main className="workspace-page research-workspace">
+    <header className="submission-page-heading"><div><div className="eyebrow-muted">{ticker} · {state.scope === "sectors" ? "Raw Sectors closes" : "Yahoo Finance adjusted closes"}</div><h1>{stock?.company_name ?? member?.name ?? ticker}</h1><p>Through {formatDateLabel(state.date)} · {series.length} observed closes. {state.scope === "sectors" ? "Corporate-action windows are excluded from signal readings; the price curve retains the observed closes." : "Broader IDX research context."}</p></div><Link to={state.scope === "sectors" ? "/sectors" : "/groups"}>Group research</Link></header>
+    <div className="replay-controls">
+      <label>Cadence <select aria-label="Stock replay cadence" value={state.cadence} onChange={event => {setPlaying(false);state.set("cadence",event.target.value);}}><option value="daily">Daily</option><option value="weekly">Weekly</option></select></label>
+      <label>As of <select aria-label="Stock replay date" value={state.date} onChange={event => {setPlaying(false);state.set("date",event.target.value);}}>{state.dates.map(day => <option key={day} value={day}>{formatDateLabel(day)}</option>)}</select></label>
+      <button className="btn btn-outline" disabled={index <= 0} onClick={() => {setPlaying(false);state.set("date",state.dates[index-1]);}}>Previous</button>
+      <button className="btn btn-outline" disabled={index >= state.dates.length-1} onClick={() => {setPlaying(false);state.set("date",state.dates[index+1]);}}>Next</button>
+      <button className="btn btn-primary" onClick={() => {if(index >= state.dates.length-1) state.set("date",state.dates[0]);setPlaying(!playing);}}>{playing ? "Pause" : "Play"}</button>
+    </div>
+    <div className="workspace-stats"><div className="workspace-stat"><span className="meta">Latest observed close</span><strong>{series.at(-1)?.close.toLocaleString("en-US",{maximumFractionDigits:2}) ?? "Unavailable"} IDR</strong><small>{formatDateLabel(series.at(-1)?.date)}</small></div>
+      {state.scope === "sectors" && (["5d","20d","60d"] as const).map(horizon => <div className="workspace-stat" key={horizon}><span className="meta">{horizon.toUpperCase()} excess vs IHSG</span><strong>{formatPercent(native?.returns[horizon].excess_return_pct,2)}</strong><small>{native?.returns[horizon].exclusion_reason?.replace(/_/g," ") ?? "Matched start and end dates"}</small></div>)}
+    </div>
+    {series.length ? <ResearchChart histories={state.histories} benchmark={state.benchmark} members={[ticker]} date={state.date} title={`${ticker} price performance`} actions={state.scope === "sectors" ? actions : []}/> : <AssetLoadState label={`${ticker} price history`} loading={false} error={null} absentMessage="No verified price history for this stock in the selected universe. Its catalogue membership remains visible."/>}
+    {actions.length > 0 && <section className="dash-card"><h2>Corporate actions</h2><ul>{actions.map(action => <li key={`${action.date}:${action.type}`}>{formatDateLabel(action.date)} · {action.type.split(":").at(-1)?.replace(/_/g," ")}</li>)}</ul></section>}
+    <section><h2>Groups and ownership</h2><div className="workspace-controls">{memberships.map(group => <Link key={`${group.taxonomy}:${group.id}`} className="btn btn-outline" to={groupHref(group,state.date,state.cadence,state.horizon)}>{group.name}</Link>)}<Link className="btn btn-outline" to={`/ownership?view=stocks&search=${ticker.replace(/\.JK$/,"")}`}>Disclosed shareholders</Link></div></section>
+  </main>;
 }

@@ -17,6 +17,7 @@ import ResearchEvents from "../components/ResearchEvents";
 import type { TaxonomyKind } from "../data/snapshot";
 import { formatCountLabel, formatDateLabel, formatEnumLabel, formatSnapshotId } from "../data/format";
 import { EvidenceBadge } from "../components/EvidenceModel";
+import { useResearch } from "../data/research";
 
 const KIND_LABELS: Record<TaxonomyKind, string> = {
   SECTOR: "Sector",
@@ -28,6 +29,7 @@ type DetailTab = "overview" | "market" | "flow" | "structure";
 
 export default function MarketOverview() {
   const snap = useSnapshot();
+  const research = useResearch("market");
   const navigate = useNavigate();
   const location = useLocation();
   const adapted = snap.data;
@@ -45,33 +47,24 @@ export default function MarketOverview() {
   }, [location.hash, navigate]);
 
   const rankings = useMemo(() => {
-    if (!adapted) return [];
-    if (rankKind === "SECTOR") {
-      return [...adapted.sectors]
-        .map((s) => ({ id: s.id, name: s.name, kind: "SECTOR" as TaxonomyKind, excess20d: s.excess20d, members: s.constituents, eligible: s.eligibleConstituents }))
-        .sort((a, b) => (b.excess20d ?? Number.NEGATIVE_INFINITY) - (a.excess20d ?? Number.NEGATIVE_INFINITY))
-        .slice(0, 11);
-    }
-    return Object.values(adapted.taxonomyGroups)
-      .filter((g) => g.taxonomyKind === rankKind)
-      .map((g) => ({ id: g.id, name: g.name, kind: g.taxonomyKind, excess20d: g.excess20d, members: g.constituents, eligible: g.eligible }))
+    return research.allGroups.filter(group => group.taxonomy === (rankKind === "THEMES" ? "IDXIC" : rankKind))
+      .map(group => ({id: group.id, name: group.name, kind: rankKind, excess20d: research.reading(group)?.excess_return_20d ?? null, members: group.members.length, eligible: research.reading(group)?.contributor_counts?.["20d"] ?? 0}))
       .sort((a, b) => (b.excess20d ?? Number.NEGATIVE_INFINITY) - (a.excess20d ?? Number.NEGATIVE_INFINITY))
-      .slice(0, 6);
-  }, [adapted, rankKind]);
+      .slice(0, rankKind === "SECTOR" ? 11 : 6);
+  }, [research.allGroups, research.date, research.cadence, rankKind]);
 
   const rankingCounts = useMemo(() => {
-    if (!adapted) return { SECTOR: 0, KONGLO: 0, THEMES: 0 };
     return {
-      SECTOR: adapted.sectors.length,
-      KONGLO: Object.values(adapted.taxonomyGroups).filter((g) => g.taxonomyKind === "KONGLO").length,
-      THEMES: Object.values(adapted.taxonomyGroups).filter((g) => g.taxonomyKind === "THEMES").length,
+      SECTOR: research.allGroups.filter(group => group.taxonomy === "SECTOR").length,
+      KONGLO: research.allGroups.filter(group => group.taxonomy === "KONGLO").length,
+      THEMES: research.allGroups.filter(group => group.taxonomy === "IDXIC").length,
     };
-  }, [adapted]);
+  }, [research.allGroups]);
 
   if (snap.loading) {
     return (
       <main style={{ padding: 32, color: "var(--muted)" }}>
-        Loading snapshot…
+        Loading market data…
       </main>
     );
   }
@@ -79,7 +72,7 @@ export default function MarketOverview() {
   if (snap.error || !adapted) {
     return (
       <main style={{ padding: 32 }}>
-        <h1 style={{ fontSize: 28 }}>Snapshot unavailable</h1>
+        <h1 style={{ fontSize: 28 }}>Market data unavailable</h1>
         <Link to="/methodology">Review methodology</Link>
       </main>
     );
@@ -92,9 +85,9 @@ export default function MarketOverview() {
     taxonomyKindsById[taxonomyId] = view.taxonomy_kind;
   }
   const registryTotal = adapted.listingRegistry?.listedCount ?? adapted.listingRegistry?.persistedCount ?? null;
-  const sectorCount = adapted.sectors.length;
-  const kongloCount = Object.values(adapted.taxonomyGroups).filter((g) => g.taxonomyKind === "KONGLO").length;
-  const themeCount = Object.values(adapted.taxonomyGroups).filter((g) => g.taxonomyKind === "THEMES").length;
+  const sectorCount = research.allGroups.filter(group => group.taxonomy === "SECTOR").length;
+  const kongloCount = research.allGroups.filter(group => group.taxonomy === "KONGLO").length;
+  const themeCount = research.allGroups.filter(group => group.taxonomy === "IDXIC").length;
 
   return (
     <main
@@ -142,11 +135,11 @@ export default function MarketOverview() {
               color: "var(--muted)",
             }}
           >
-            <span>Snapshot overview · Data as of {asOf}</span>
+            <span>Market overview · Data as of {asOf}</span>
             <span>·</span>
             <span>{formatEnumLabel(providerMode)}</span>
             <span>·</span>
-            <span>Snapshot {formatSnapshotId(adapted.payload.snapshot_id, adapted.payload.as_of)}</span>
+            <span>Observed {asOf}</span>
           </div>
           <details style={{ marginTop: 8, fontSize: 12, color: "var(--muted)" }}>
             <summary style={{ cursor: "pointer" }}>Provenance and coverage</summary>
@@ -154,7 +147,7 @@ export default function MarketOverview() {
               {sectorCount} sectors · {kongloCount} konglo groups · {themeCount} themes ·{" "}
               {registryTotal !== null ? `${registryTotal} listed records` : "—"} ·{" "}
               {adapted.sectors.reduce((sum, sector) => sum + (sector.eligibleConstituents ?? 0), 0).toLocaleString()} eligible sector constituents ·{" "}
-              Source observations, analysis eligibility, and their dates are preserved in this selected release.
+              Source observations, analysis eligibility, and their dates are retained with the selected data.
             </div>
           </details>
         </div>
@@ -169,7 +162,9 @@ export default function MarketOverview() {
         onRankKindChange={setRankKind}
         rankings={rankings}
         rankingCounts={rankingCounts}
-        asOf={asOf}
+        asOf={formatDateLabel(research.date)}
+        rankingState={{loading: research.loading, error: research.error}}
+        rankingQuery={`scope=market&date=${research.date}&cadence=${research.cadence}&horizon=${research.horizon}`}
       />
 
       <MarketBreadthPanel />
@@ -206,8 +201,8 @@ export default function MarketOverview() {
         <section className="dash-card" aria-label="Market structure">
           <h2 style={{ margin: "0 0 8px", fontSize: 15 }}>Structure</h2>
           <div style={{ fontSize: 13, lineHeight: 1.6, color: "var(--ink)" }}>
-            {sectorCount} sectors · {registryTotal ?? "—"} listing records · {themeCount} captured IDXIC subindustries · {kongloCount} documented Konglo groups.
-            Unique members vs eligible members differ per group; see catalog for per-group counts. Theme/Konglo history is not persisted in this bundle; sector history is available.
+            {sectorCount} sectors · {registryTotal ?? "—"} listing records · {themeCount} classified IDXIC subindustries · {kongloCount} documented Konglo groups.
+            Unique members vs eligible members differ per group; see catalog for per-group counts. Daily and weekly group histories are available in group research.
           </div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 }}>
             <Link to="/groups" className="btn btn-outline">All groups</Link>
@@ -215,7 +210,7 @@ export default function MarketOverview() {
             <Link to="/maps/konglo" className="btn btn-ghost">Konglo map</Link>
           </div>
           <div className="meta" style={{ marginTop: 8 }}>
-            {formatCountLabel(sectorCount, "sector")} · {formatCountLabel(themeCount, "theme")} · {formatCountLabel(kongloCount, "konglo group")} · snapshot {formatSnapshotId(adapted.payload.snapshot_id, adapted.payload.as_of)}
+            {formatCountLabel(sectorCount, "sector")} · {formatCountLabel(themeCount, "theme")} · {formatCountLabel(kongloCount, "konglo group")} · as of {asOf}
           </div>
         </section>
       )}

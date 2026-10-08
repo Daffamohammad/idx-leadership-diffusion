@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import { useSnapshot } from "../data/SnapshotProvider";
 import { sectorWeeklyComparison, weeklySectorReadings, weightedGroupBreadth, type BreadthHistoryPoint, type SectorData } from "../data/adapter";
 import { LeadershipChip, DiffusionChip } from "../components/StatusChips";
-import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, CartesianGrid } from "recharts";
+import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 import { formatDateLabel, formatEnumLabel, formatPercent, formatSnapshotId } from "../data/format";
 import { AssetLoadState } from "../components/AssetLoadState";
 import { EvidenceBadge } from "../components/EvidenceModel";
@@ -158,9 +158,16 @@ function ConstituentCoverage({
 export default function WhatChanged() {
   const { data, payload, loading, error } = useSnapshot();
   const historical = useHistoricalComparison();
+  const [params,setParams] = useSearchParams();
   const navigate = useNavigate();
   const [sort, setSort] = useState<"rank" | "delta">("rank");
-  const replay = useMemo(() => historical.data ? sectorWeeklyComparison(historical.data) : null, [historical.data]);
+  const replay = useMemo(() => {
+    if (!historical.data) return null;
+    const comparison = sectorWeeklyComparison(historical.data);
+    const requestedDate = params.get("date") ?? comparison.as_of;
+    const selectedDate = comparison.comparison_dates.includes(requestedDate) ? requestedDate : comparison.as_of;
+    return {...comparison, comparison_dates: comparison.comparison_dates.filter(day => day <= selectedDate), weekly: comparison.weekly.filter(week => week.as_of <= selectedDate)};
+  }, [historical.data,params]);
   const sectors = useMemo(() => replay ? weeklySectorReadings(replay, data?.sectors ?? []) : data?.sectors ?? [], [replay, data]);
   const breadthHistory = data?.breadthHistory ?? [];
   const averageHistory = useMemo(
@@ -180,8 +187,8 @@ export default function WhatChanged() {
       ),
     [sort, sectors],
   );
-  if (!data || historical.loading || historical.error) return <main className="workspace-page"><h1>Weekly market changes</h1><AssetLoadState label="Weekly comparison" loading={loading || historical.loading} error={error ?? historical.error} absentMessage="No snapshot is included in this release." /></main>;
-  const select = (s: SectorData) => navigate(`/explorer?taxonomy=SECTOR&group=${encodeURIComponent(s.id)}`);
+  if (!data || historical.loading || historical.error) return <main className="workspace-page"><h1>Weekly market changes</h1><AssetLoadState label="Weekly comparison" loading={loading || historical.loading} error={error ?? historical.error} absentMessage="No verified weekly comparison is available." /></main>;
+  const select = (s: SectorData) => navigate(`/explorer?taxonomy=SECTOR&scope=market&group=${encodeURIComponent(s.id)}&date=${replay?.weekly.at(-1)?.as_of ?? ""}&cadence=weekly&horizon=60d`);
 
   const asOf = formatAsOf(payload?.as_of);
   const hasComparable = dataSources.trajectory;
@@ -222,7 +229,7 @@ export default function WhatChanged() {
             <div className="eyebrow-muted">Indonesian Equities · Market Intelligence</div>
             <EvidenceBadge kind="SNAPSHOT" compact />
           </div>
-            <h1 style={{ fontSize: 30, letterSpacing: "-.045em", margin: "5px 0 0" }}>{replay ? "Weekly market changes" : hasComparable ? "What changed" : "Current snapshot"}</h1>
+            <h1 style={{ fontSize: 30, letterSpacing: "-.045em", margin: "5px 0 0" }}>{replay ? "Weekly market changes" : hasComparable ? "What changed" : "Current readings"}</h1>
         </div>
         <span className="eyebrow-muted">EOD research / {asOf} · {replay ? `${formatDateLabel(replay.comparison_dates[0])}–${formatDateLabel(replay.comparison_dates.at(-1)!)} · Historical price replay using current membership` : hasComparable ? "compatible prior" : "current levels"}</span>
       </div>
@@ -236,6 +243,7 @@ export default function WhatChanged() {
           marginBottom: 22,
         }}
       >
+        <label className="workspace-controls">Weekly comparison date <select aria-label="Weekly comparison date" value={replay?.weekly.at(-1)?.as_of ?? ""} onChange={event => {const next=new URLSearchParams(params);next.set("date",event.target.value);next.set("cadence","weekly");setParams(next);}}>{historical.data?.comparison_dates.map(day => <option key={day} value={day}>{formatDateLabel(day)}</option>)}</select></label>
         <div className="eyebrow-muted" style={{ color: "#abb2b3" }}>Market read</div>
         <div
           style={{ fontSize: 15, letterSpacing: "-.01em", maxWidth: 900, lineHeight: 1.45, margin: "9px 0 25px" }}
@@ -303,7 +311,7 @@ export default function WhatChanged() {
       <section className="measured-shifts-panel" style={{ background: "var(--surface)", border: "1px solid var(--line)", padding: "16px 18px", marginBottom: 22 }}>
         <div className="measured-shifts-heading" style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
           <div className="eyebrow-muted">{replay ? "Measured weekly shifts" : hasComparable ? "What changed since prior snapshot" : "Current readings"}</div>
-          <span className="eyebrow-muted">{replay ? `${formatDateLabel(replay.weekly.at(-2)?.as_of)} → ${formatDateLabel(replay.weekly.at(-1)!.as_of)}` : hasComparable ? `vs ${formatSnapshotId(payload?.previous_snapshot_id)}` : "Selected release"}</span>
+          <span className="eyebrow-muted">{replay ? `${formatDateLabel(replay.weekly.at(-2)?.as_of)} → ${formatDateLabel(replay.weekly.at(-1)!.as_of)}` : hasComparable ? `vs ${formatSnapshotId(payload?.previous_snapshot_id)}` : "Selected observations"}</span>
         </div>
         {replay ? (
           materialShifts.length ? <div className="replay-shift-list">{materialShifts.map(group => <button key={group.group_id} type="button" onClick={() => navigate(`/map?taxonomy=SECTOR&mode=groups&q=${encodeURIComponent(group.name)}`)}><strong>{group.name}</strong><span>{group.material_shift}</span><small>{group.leadership_transition ?? group.diffusion_transition ?? "Measured movement"}</small></button>)}</div> : <p className="meta">No sector crossed the preserved materiality thresholds in the latest weekly interval.</p>
@@ -315,7 +323,7 @@ export default function WhatChanged() {
             </div>
             <div>
               <div style={{ fontWeight: 600, marginBottom: 4 }}>Historical price replay</div>
-              <div>Dated comparisons are not included in this release. Current levels remain available.</div>
+              <div>Dated comparisons are not available for this date. Current levels remain available.</div>
             </div>
           </div>
         ) : (
@@ -428,6 +436,7 @@ export default function WhatChanged() {
                     <CartesianGrid stroke="var(--line)" vertical={false} />
                     <XAxis dataKey="as_of" tickFormatter={(value) => String(value).slice(0, 10)} tick={{ fontFamily: "Geist Mono", fontSize: 9, fill: "var(--muted)" }} axisLine={false} tickLine={false} />
                     <YAxis domain={[0, 100]} tick={{ fontFamily: "Geist Mono", fontSize: 9, fill: "var(--muted)" }} axisLine={false} tickLine={false} />
+                    <Tooltip labelFormatter={value => formatDateLabel(String(value))} formatter={value => `${Number(value).toFixed(1)}%`}/>
                     <Area dataKey="breadth" connectNulls={false} isAnimationActive={false} name="Matched-cohort breadth" stroke="#178477" fill="#178477" fillOpacity={0.12} strokeWidth={2} />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -441,7 +450,7 @@ export default function WhatChanged() {
                   </AreaChart>
                 </ResponsiveContainer>
               ) : (
-                <AssetLoadState label="Breadth history" loading={historical.loading} error={historical.error} absentMessage="This release does not include dated breadth history. Current readings remain available above." />
+                <AssetLoadState label="Breadth history" loading={historical.loading} error={historical.error} absentMessage="Dated breadth history is unavailable. Current readings remain available above." />
               )}
             </div>
           </div>
@@ -467,7 +476,7 @@ export default function WhatChanged() {
           <div style={{ borderTop: "1px solid var(--line)", paddingTop: 12 }}>
             <div className="eyebrow-muted">Confirmation</div>
             <p style={{ margin: "6px 0 8px", fontSize: 12, lineHeight: 1.5, color: "var(--muted)" }}>
-              Official investor flow is a market-level measure. Recorded company-flow coverage is reported separately.
+              Official investor flow is a market-level measure. Company-flow coverage is reported separately.
             </p>
             <Link to="/foreign" style={{ fontSize: 12 }}>Open official market flow</Link>
           </div>

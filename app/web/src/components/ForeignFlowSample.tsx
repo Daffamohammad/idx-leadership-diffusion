@@ -13,6 +13,7 @@
 import type { ForeignFlowAdapted } from "../data/adapter";
 import { Link } from "react-router";
 import { formatCountLabel, formatDateLabel, formatEnumLabel, formatIdrCompact } from "../data/format";
+import { publicCopy } from "../data/publicCopy";
 import { EvidenceBadge } from "./EvidenceModel";
 
 interface ForeignFlowSampleProps {
@@ -30,24 +31,24 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
     return (
       <section
       id="foreign-flow-sample"
-        aria-label="Foreign flow sample"
+        aria-label="Company foreign flow coverage"
         style={{
           border: "1px dashed var(--line)",
           padding: 22,
           background: "var(--surface-subtle)",
         }}
       >
-        <div className="eyebrow-muted">Foreign-flow sample</div>
+        <div className="eyebrow-muted">Company foreign flow</div>
         <p style={{ margin: "8px 0 0", color: "var(--muted)", fontSize: 13 }}>
-          The exporter did not emit a foreign-flow sample for this snapshot.
+          Company foreign-flow observations are unavailable for this period.
         </p>
       </section>
     );
   }
 
   const breadthRows = [
-    ["Sample positive days", sample.breadth.samplePositiveDayCount],
-    ["Sample negative days", sample.breadth.sampleNegativeDayCount],
+    ["Company positive days", sample.breadth.samplePositiveDayCount],
+    ["Company negative days", sample.breadth.sampleNegativeDayCount],
     ["Market positive days", sample.breadth.marketPositiveDayCount],
     ["Market negative days", sample.breadth.marketNegativeDayCount],
   ] as const;
@@ -64,7 +65,7 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
 
   return (
     <section
-      aria-label="Foreign flow sample"
+      aria-label="Company foreign flow coverage"
       style={{
         border: "1px solid var(--line)",
         padding: 22,
@@ -75,7 +76,7 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
     >
       <header>
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-          <div className="eyebrow-muted">Foreign-flow sample</div>
+          <div className="eyebrow-muted">Company foreign flow</div>
           <EvidenceBadge kind="SAMPLE" compact />
         </div>
         <h2 style={{ margin: "6px 0 4px", fontSize: 22, letterSpacing: "-.02em" }}>
@@ -91,7 +92,7 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
             color: "var(--muted)",
           }}
         >
-          <span>Persisted source-backed sample · bounded top-list</span>
+          <span>Company-level coverage · provider top list</span>
           <span>·</span>
           <span>As of {formatDateLabel(sample.asOfMax || asOf) || "n/a"}</span>
           <span>·</span>
@@ -146,7 +147,7 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
             border: "1px solid var(--line)",
           }}
         >
-          <div className="eyebrow-muted">Latest sample net</div>
+          <div className="eyebrow-muted">Latest company net</div>
           <div
             style={{
               fontSize: 24,
@@ -173,7 +174,7 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
             border: "1px solid var(--line)",
           }}
         >
-          <div className="eyebrow-muted">Market ↔ sample alignment</div>
+          <div className="eyebrow-muted">Market ↔ company flow alignment</div>
           <div
             style={{
               fontSize: 24,
@@ -184,7 +185,7 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
             {sample.marketSampleAligned ? "Aligned" : "Divergent"}
           </div>
           <p style={{ margin: "6px 0 0", fontSize: 12, color: "var(--muted)" }}>
-            Sample is not a market-wide observation; divergence is expected.
+            Company coverage differs from the market-wide observation; divergence can occur.
           </p>
         </article>
       </div>
@@ -228,12 +229,12 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
         }}
       >
         <TopList
-          title="Latest top-buys (sample)"
+          title="Latest company buys"
           rows={sample.topBuys}
           accent="var(--up)"
         />
         <TopList
-          title="Latest top-sells (sample)"
+          title="Latest company sells"
           rows={sample.topSells}
           accent="var(--down)"
         />
@@ -311,7 +312,7 @@ export default function ForeignFlowSample({ sample, asOf }: ForeignFlowSamplePro
         <h3 style={{ margin: "0 0 8px", fontSize: 14 }}>Methodology limitations</h3>
         <ul style={{ margin: 0, padding: "0 0 0 18px", fontSize: 12, color: "var(--muted)" }}>
           {sample.limitations.map((line) => (
-            <li key={line}>{line}</li>
+            <li key={publicCopy(line)}>{publicCopy(line)}</li>
           ))}
         </ul>
       </div>
@@ -411,7 +412,7 @@ function TopList({
       </div>
       {rows.length === 0 ? (
         <p style={{ margin: "8px 0 0", fontSize: 12, color: "var(--muted)" }}>
-          No sample rows.
+          No company observations.
         </p>
       ) : (
         <ul style={{ margin: "8px 0 0", padding: 0, listStyle: "none", fontSize: 12 }}>

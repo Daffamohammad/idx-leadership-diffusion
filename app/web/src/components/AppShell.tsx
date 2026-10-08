@@ -77,11 +77,11 @@ function formatAsOf(asOf: string | null | undefined): string {
 function formatProviderMode(mode: string | undefined): string {
   switch (mode) {
     case "PUBLIC_PROTOTYPE":
-      return "Recorded release";
+      return "Market data";
     case "DEMO_FIXTURE":
-      return "Recorded data";
+      return "Market data";
     case "SECTORS_FIXTURE":
-      return "Recorded data";
+      return "Market data";
     case "SECTORS_LIVE":
       return "Live Sectors";
     default:
@@ -219,8 +219,8 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
                 {snap.loading
                   ? "Loading"
                   : snap.error
-                    ? "Release not loaded"
-                    : "Recorded"}
+                    ? "Market data not loaded"
+                    : "Data through"}
               </span>
             )}
           </div>
@@ -328,7 +328,7 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
             title={
               canToggleTaxonomy
                 ? "Switch between Sector and Industry"
-                : "Selected-release taxonomy"
+                : "Selected taxonomy"
             }
             style={{
               border: 0,
@@ -362,10 +362,10 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
               }}
             />
             {snap.loading
-              ? "Loading snapshot…"
+              ? "Loading market data…"
               : snap.error
-                ? "Release not loaded"
-                : "Recorded · " + asOf}
+                ? "Market data not loaded"
+                : "Data through · " + asOf}
           </span>
           <ThemeToggle />
           <div className="mobile-only"><LocalProfile compact /></div>
@@ -481,7 +481,7 @@ export default function AppShell({ children, taxonomy, onTaxonomyChange, snap }:
                 fontSize: 12,
               }}
             >
-              Loading latest snapshot…
+              Loading and verifying market data…
             </div>
           ) : (
             children

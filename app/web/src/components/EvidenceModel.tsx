@@ -13,7 +13,7 @@ const EVIDENCE_CONFIG: Record<
   { label: string; color: string; background: string; border: string; description: string }
 > = {
   SNAPSHOT: {
-    label: "Real snapshot",
+    label: "Market observations",
     color: "var(--up)",
     background: "var(--tint-ok)",
     border: "#b9ded6",
@@ -27,7 +27,7 @@ const EVIDENCE_CONFIG: Record<
     description: "First-party IDX publication parsed from its released table.",
   },
   SAMPLE: {
-    label: "Source-backed sample",
+    label: "Source coverage",
     color: "var(--accent-ink)",
     background: "var(--tint-flag)",
     border: "#ead39b",
@@ -41,7 +41,7 @@ const EVIDENCE_CONFIG: Record<
     description: "Dated membership evidence from official classification or disclosed holdings.",
   },
   CONTEXT: {
-    label: "Static context",
+    label: "Research context",
     color: "var(--muted)",
     background: "var(--surface-subtle)",
     border: "var(--line)",
@@ -92,7 +92,7 @@ export interface EvidenceLane {
 
 export function EvidenceModel({
   lanes,
-  intro = "This product intentionally separates real market evidence from bounded samples and static research lenses.",
+  intro = "This product intentionally separates real market evidence from coverage limits and research context.",
 }: {
   lanes: EvidenceLane[];
   intro?: ReactNode;

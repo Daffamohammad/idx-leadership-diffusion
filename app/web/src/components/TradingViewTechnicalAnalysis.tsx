@@ -64,7 +64,7 @@ export default function TradingViewTechnicalAnalysis() {
       <div ref={containerRef} className="tradingview-analysis-frame" aria-label="TradingView technical analysis for IDX Composite" hidden={status === "unavailable"}>
         {status === "loading" && <p className="tradingview-widget-fallback">Loading the IDX Composite technical summary…</p>}
       </div>
-      <p className="tradingview-widget-note">Third-party market summary; separate from the selected release’s calculated readings.</p>
+      <p className="tradingview-widget-note">Third-party market summary; separate from the selected date’s calculated readings.</p>
     </section>
   );
 }

@@ -12,7 +12,7 @@ export interface MarketStock {
   taxonomy: { sector?: string; subindustry?: string }; classification_as_of: string | null; listing_board: string | null;
 }
 export interface OwnershipEdge {
-  group_id: string; group_name: string; holder: string; ticker: string; percentage: number;
+  group_id: string; group_name: string; holder: string; ticker: string; percentage: number | null;
   as_of: string; source: string; relationship: string;
   control_source: { source: string; as_of: string; ultimate_holders?: string[] } | null;
 }
@@ -30,6 +30,9 @@ export interface MarketWorkspace {
 export interface HistoricalComparison {
   schema_version: "historical-comparison-v1" | "historical-comparison-v2"; as_of: string; comparison_dates: string[];
   analysis_dates?: string[];
+  reading_contract_version?: number;
+  price_histories?: Record<string, Array<{date: string; close: number}>>;
+  benchmark_history?: Array<{date: string; close: number}>;
   title: string; replay_basis: string; membership_as_of: string;
   cohort: { count: number; sha256: string; group_cohorts: Record<string, { count: number; sha256: string }> };
   weekly: { as_of: string; groups: Array<{
@@ -61,6 +64,8 @@ export interface HistoricalComparison {
         membership_type: string; source: string | null; source_as_of: string | null;
         control_source: { owner?: string; ticker?: string; relationship?: string; as_of?: string; source?: string; ultimate_holders?: string[] } | null;
       }> }>;
+      cohorts?: Record<string, string[]>;
+      coverage_reasons?: Record<string, string>;
       daily: HistoricalReplayPoint[]; weekly: HistoricalReplayPoint[];
       persistence: { current_leadership_weeks: number; observations: number };
     }>;
@@ -72,10 +77,15 @@ export interface HistoricalReplayPoint {
   excess_return_5d: number | null; excess_return_20d: number | null;
   excess_return_60d: number | null; excess_return_ytd: number | null;
   relative_momentum: number | null;
+  map_x_60d?: number | null; map_x_ytd?: number | null; map_y_ytd?: number | null;
+  map_contributors?: number; ytd_map_contributors?: number;
+  contributor_counts?: Record<string, number>;
+  rotation_phase_ytd?: string;
   breadth_count: number | null; breadth_denominator: number; breadth_pct: number | null;
   breadth_change_count: number | null; breadth_change_pp: number | null;
   leadership: string; diffusion: string; diffusion_v2: string;
   concentration_top3_pct: number | null; concentration_change_pp: number | null;
+  concentration_detail?: Array<{ticker: string; return_pct: number; absolute_share_pct: number | null}>;
   rotation_phase: string; coverage_pct: number;
   leadership_transition?: string | null; diffusion_transition?: string | null; material_shift?: string | null;
 }
@@ -202,6 +212,8 @@ export interface SectorSignalGroup {
     excess_return_pct: number | null;
     eligible_contributors: number;
   }>;
+  descriptive_returns?: Record<"5d" | "20d" | "60d", {stock_return_pct: number | null; excess_return_pct: number | null; eligible_contributors: number}>;
+  descriptive_map?: SectorSignalGroup["map"];
   map: { cohort_tickers: string[]; eligible_contributors: number; x_60d_excess_pct: number; y_relative_momentum_pct: number } | null;
   diffusion: {
     outperforming_count: number | null;
@@ -230,6 +242,7 @@ export interface SectorsSignalAnalysis {
   schema_version: "sectors-signal-analysis-v1";
   as_of: string;
   label: string;
+  action_events?: Record<string, Array<{date: string; type: string}>>;
   sources: {
     recorded_sample_sha256: string;
     selection_market_source_sha256: string;
@@ -270,7 +283,7 @@ export interface HoldingChange {
 }
 export interface OwnershipWorkspace {
   schema_version: "idx-ownership-v1"; as_of: string; previous_as_of: string; five_as_of: string;
-  registers: { one: Holder[]; five: Holder[] }; changes: HoldingChange[];
+  registers: { one: Holder[]; five: Holder[]; previous_one?: Holder[] }; changes: HoldingChange[];
   sources: { filename: string; sha256: string; url: string; as_of: string }[];
   coverage: { one_rows: number; one_issuers: number; five_rows: number; five_issuers: number; previous_rows: number }; limitations: string[];
 }
@@ -317,11 +330,12 @@ export function useWorkspaceAsset<T extends { as_of: string }>(key: ReleaseFamil
   return currentWorkspaceState(snapshot, state, selectedKey);
 }
 
-export function useHistoricalComparison() {
+export function useHistoricalComparison(enabled = true) {
   const snapshot = useSnapshot();
   const [state, setState] = useState<{ data: HistoricalComparison | null; error: string | null; loading: boolean; requestKey: string | null }>({ data: null, error: null, loading: true, requestKey: null });
   useEffect(() => {
     let cancelled = false;
+    if (!enabled) {setState({data: null, error: null, loading: false, requestKey: null}); return;}
     const release = snapshot.release;
     const entry = release?.manifest.additional_files.find(file => file.file_id === "historical_comparison");
     const requestKey = release && entry ? `${release.id}:${entry.sha256}` : null;
@@ -340,10 +354,10 @@ export function useHistoricalComparison() {
       if (!cancelled) setState({ data: null, error: String(error.message ?? error), loading: false, requestKey });
     });
     return () => { cancelled = true; };
-  }, [snapshot.release, snapshot.error, snapshot.loading]);
+  }, [enabled, snapshot.release, snapshot.error, snapshot.loading]);
   const entry = snapshot.release?.manifest.additional_files.find(file => file.file_id === "historical_comparison");
   const selectedKey = snapshot.release && entry ? `${snapshot.release.id}:${entry.sha256}` : null;
-  return currentWorkspaceState(snapshot, state, selectedKey);
+  return enabled ? currentWorkspaceState(snapshot, state, selectedKey) : {data: null, error: null, loading: false};
 }
 
 export function useMarketBreadth() {
@@ -375,11 +389,12 @@ export function useMarketBreadth() {
   return currentWorkspaceState(snapshot, state, selectedKey);
 }
 
-export function useRecordedSectorsSample() {
+export function useRecordedSectorsSample(enabled = true) {
   const snapshot = useSnapshot();
   const [state, setState] = useState<{ data: RecordedSectorsSample | null; error: string | null; loading: boolean; requestKey: string | null }>({ data: null, error: null, loading: true, requestKey: null });
   useEffect(() => {
     let cancelled = false;
+    if (!enabled) {setState({data: null, error: null, loading: false, requestKey: null}); return;}
     const release = snapshot.release;
     const entry = release?.manifest.additional_files.find(file => file.file_id === "sectors_recorded_sample");
     const selectionEntry = release?.manifest.additional_files.find(file => file.file_id === "sectors_selection_market");
@@ -453,19 +468,20 @@ export function useRecordedSectorsSample() {
       if (!cancelled) setState({ data: null, error: String(error.message ?? error), loading: false, requestKey });
     });
     return () => { cancelled = true; };
-  }, [snapshot.release]);
+  }, [enabled, snapshot.release]);
   const entry = snapshot.release?.manifest.additional_files.find(file => file.file_id === "sectors_recorded_sample");
   const selectionEntry = snapshot.release?.manifest.additional_files.find(file => file.file_id === "sectors_selection_market");
   const selectedKey = snapshot.release && entry ? `${snapshot.release.id}:${entry.sha256}:${selectionEntry?.sha256 ?? "missing-selection"}` : null;
-  return currentWorkspaceState(snapshot, state, selectedKey);
+  return enabled ? currentWorkspaceState(snapshot, state, selectedKey) : {data: null, error: null, loading: false};
 }
 
-export function useSectorsSignalAnalysis() {
+export function useSectorsSignalAnalysis(enabled = true) {
   const snapshot = useSnapshot();
-  const sampleState = useRecordedSectorsSample();
+  const sampleState = useRecordedSectorsSample(enabled);
   const [state, setState] = useState<{ data: SectorsSignalAnalysis | null; error: string | null; loading: boolean; requestKey: string | null }>({ data: null, error: null, loading: true, requestKey: null });
   useEffect(() => {
     let cancelled = false;
+    if (!enabled) {setState({data: null, error: null, loading: false, requestKey: null}); return;}
     const release = snapshot.release;
     const entry = release?.manifest.additional_files.find(file => file.file_id === "sectors_signal_analysis");
     const sampleEntry = release?.manifest.additional_files.find(file => file.file_id === "sectors_recorded_sample");
@@ -521,7 +537,7 @@ export function useSectorsSignalAnalysis() {
       if (!cancelled) setState({ data: null, error: String(error.message ?? error), loading: false, requestKey });
     });
     return () => { cancelled = true; };
-  }, [snapshot.release, sampleState.data, sampleState.error, sampleState.loading]);
+  }, [enabled, snapshot.release, sampleState.data, sampleState.error, sampleState.loading]);
   const entry = snapshot.release?.manifest.additional_files.find(file => file.file_id === "sectors_signal_analysis");
   const sampleEntry = snapshot.release?.manifest.additional_files.find(file => file.file_id === "sectors_recorded_sample");
   const selectionEntry = snapshot.release?.manifest.additional_files.find(file => file.file_id === "sectors_selection_market");
@@ -529,5 +545,5 @@ export function useSectorsSignalAnalysis() {
   const selectedKey = snapshot.release && entry
     ? `${snapshot.release.id}:${entry.sha256}:${sampleEntry?.sha256 ?? "missing-sample"}:${selectionEntry?.sha256 ?? "missing-selection"}:${ytdEntry?.sha256 ?? "no-ytd-baseline"}`
     : null;
-  return currentWorkspaceState(snapshot, state, selectedKey);
+  return enabled ? currentWorkspaceState(snapshot, state, selectedKey) : {data: null, error: null, loading: false};
 }

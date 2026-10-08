@@ -547,7 +547,7 @@ def build(
                             {"ticker": ticker, "date": reading["end_date"], "close": end_close},
                         ])
                     concentration = compute_concentration_v2(
-                        pd.DataFrame(rows), group_tickers=tickers, horizon=1,
+                        pd.DataFrame(rows), group_tickers=concentration_tickers, horizon=1,
                         as_of=target, price_col="close",
                     ).to_dict()
                 groups_out.append({
@@ -562,6 +562,19 @@ def build(
                     },
                     "signal_status": "PASS" if len(valid_by_horizon["20d"]) >= MINIMUM_CONTRIBUTORS else "UNCONFIRMED_BELOW_FIVE_CONTRIBUTORS",
                     "returns": metric_values,
+                    "descriptive_returns": {
+                        label: {
+                            "stock_return_pct": round(sum(float(calculated[target_iso][ticker][label]["return_pct"]) for ticker in names) / len(names), 8) if names else None,
+                            "excess_return_pct": round(sum(float(calculated[target_iso][ticker][label]["excess_return_pct"]) for ticker in names) / len(names), 8) if names else None,
+                            "eligible_contributors": len(names),
+                        } for label, names in valid_by_horizon.items()
+                    },
+                    "descriptive_map": {
+                        "cohort_tickers": map_cohort,
+                        "eligible_contributors": len(map_cohort),
+                        "x_60d_excess_pct": round(sum(float(calculated[target_iso][ticker]["60d"]["excess_return_pct"]) for ticker in map_cohort) / len(map_cohort), 8),
+                        "y_relative_momentum_pct": round(sum(float(calculated[target_iso][ticker]["20d"]["excess_return_pct"]) - float(calculated[target_iso][ticker]["60d"]["excess_return_pct"]) for ticker in map_cohort) / len(map_cohort), 8),
+                    } if map_cohort else None,
                     "map": map_values,
                     "diffusion": {
                         "outperforming_count": count,
@@ -595,6 +608,7 @@ def build(
     ]
     asset = {
         "schema_version": SCHEMA,
+        "action_events": action_map,
         "as_of": as_of,
         "label": "Sectors leadership and diffusion · recorded 66-stock sample",
         "sources": {
@@ -636,6 +650,7 @@ def build(
     return {
         "status": "PASS",
         "schema_version": SCHEMA,
+        "action_events": action_map,
         "as_of": as_of,
         "sample_sha256": _sha(sample_raw),
         "selection_market_sha256": market_hash,

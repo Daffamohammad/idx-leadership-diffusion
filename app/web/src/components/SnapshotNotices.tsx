@@ -34,7 +34,7 @@ export function BundleNotices({ data }: { data: AdaptedSnapshot | null }) {
           color: "var(--alert-ink)",
         }}
       >
-        <strong>Snapshot needs verification.</strong> Data as of {formatDateLabel(data.payload.as_of)}.
+        <strong>Data needs verification.</strong> Data as of {formatDateLabel(data.payload.as_of)}.
         {" "}Bundle completeness has not been verified. Treat these results as provisional.
       </div>,
     );
@@ -52,7 +52,7 @@ export function BundleNotices({ data }: { data: AdaptedSnapshot | null }) {
         }}
       >
         <strong>Incomplete pagination.</strong> The provider reported a partial
-        page window for this snapshot, so universe coverage may be understated.
+        page window for this data package, so universe coverage may be understated.
         Coverage denominators on this page already reflect only observed rows.
       </div>,
     );
@@ -76,13 +76,13 @@ export function BundleNotices({ data }: { data: AdaptedSnapshot | null }) {
           color: "var(--muted)",
         }}
       >
-        <strong>Bounded demo analysis.</strong>{" "}
+        <strong>Price-history coverage.</strong>{" "}
         {fullListing
           ? `The full accessible listing${listed !== undefined ? ` (${listed} securities)` : ""} is retained;`
-          : `This snapshot retains a bounded listing${listed !== undefined ? ` (${listed} securities)` : ""};`}{" "}
+          : `This data package retains a bounded listing${listed !== undefined ? ` (${listed} securities)` : ""};`}{" "}
         daily history and group metrics use
-        {analyzed !== undefined ? ` ${analyzed} selected securities` : " a selected sample"}
-        {" "}within the available history sample.
+        {analyzed !== undefined ? ` ${analyzed} selected securities` : " selected securities"}
+        {" "}within the available price history.
       </div>,
     );
   }

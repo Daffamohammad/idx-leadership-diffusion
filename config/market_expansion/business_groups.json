@@ -1,0 +1,621 @@
+{
+  "schema_version": "business-group-definitions-v1",
+  "as_of": "2026-09-30",
+  "reviewed_on": "2026-10-08",
+  "reference": {
+    "url": "https://www.arthara.id/konglo",
+    "group_count": 34,
+    "use": "Catalogue names only; memberships and counts are independently constructed from dated IDX holdings and issuer relationships."
+  },
+  "indirect_policy": "Follow exact listed-issuer legal names through disclosed holdings of at least 20%; label the path as indirect holdings, never infer legal control. Direct explicitly named holder positions retain their published percentages.",
+  "groups": [
+    {
+      "id": "KONGLO_INDOFOOD",
+      "name": "Salim",
+      "legacy_portfolios": [
+        "KONGLO_INDOFOOD"
+      ],
+      "listed_anchors": [
+        "INDF"
+      ],
+      "holder_names": [
+        "ANTHONI SALIM"
+      ],
+      "relationship_source": null,
+      "relationship_source_as_of": "2026-09-30",
+      "issuer_affiliations": [],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control."
+    },
+    {
+      "id": "KONGLO_SARATOGA",
+      "name": "TNT · Saratoga · Adaro",
+      "legacy_portfolios": [
+        "KONGLO_SARATOGA",
+        "KONGLO_ADARO"
+      ],
+      "listed_anchors": [
+        "SRTG",
+        "ADRO",
+        "AADI"
+      ],
+      "holder_names": [
+        "EDWIN SOERYADJAYA",
+        "SANDIAGA SALAHUDDIN UNO",
+        "GARIBALDI THOHIR"
+      ],
+      "relationship_source": "https://saratoga-investama.com/what-we-do/",
+      "relationship_source_as_of": "2026-09-30",
+      "issuer_affiliations": [
+        {
+          "ticker": "ADRO",
+          "source": "https://saratoga-investama.com/what-we-do/",
+          "source_as_of": "2026-09-30",
+          "relationship": "Issuer-documented portfolio investment"
+        },
+        {
+          "ticker": "AADI",
+          "source": "https://saratoga-investama.com/what-we-do/",
+          "source_as_of": "2026-09-30",
+          "relationship": "Issuer-documented portfolio investment"
+        },
+        {
+          "ticker": "MDKA",
+          "source": "https://saratoga-investama.com/what-we-do/",
+          "source_as_of": "2026-09-30",
+          "relationship": "Issuer-documented portfolio investment"
+        },
+        {
+          "ticker": "MPMX",
+          "source": "https://saratoga-investama.com/what-we-do/",
+          "source_as_of": "2026-09-30",
+          "relationship": "Issuer-documented portfolio investment"
+        },
+        {
+          "ticker": "NRCA",
+          "source": "https://saratoga-investama.com/what-we-do/",
+          "source_as_of": "2026-09-30",
+          "relationship": "Issuer-documented portfolio investment"
+        },
+        {
+          "ticker": "AGII",
+          "source": "https://saratoga-investama.com/what-we-do/",
+          "source_as_of": "2026-09-30",
+          "relationship": "Issuer-documented portfolio investment"
+        },
+        {
+          "ticker": "TBIG",
+          "source": "https://saratoga-investama.com/what-we-do/",
+          "source_as_of": "2026-09-30",
+          "relationship": "Issuer-documented portfolio investment"
+        }
+      ],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control."
+    },
+    {
+      "id": "KONGLO_SINARMAS",
+      "name": "Sinar Mas",
+      "legacy_portfolios": [
+        "KONGLO_SINARMAS",
+        "KONGLO_APP"
+      ],
+      "listed_anchors": [
+        "SMMA",
+        "DSSA"
+      ],
+      "holder_names": [
+        "PT. SINAR MAS TUNGGAL",
+        "SINAR MAS CAKRAWALA",
+        "PT APP PURINUSA EKAPERSADA"
+      ],
+      "relationship_source": "https://sinarmas.com/en/index.php",
+      "relationship_source_as_of": "2026-09-30",
+      "issuer_affiliations": [],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control."
+    },
+    {
+      "id": "KONGLO_MULTIPOLAR",
+      "name": "Lippo",
+      "legacy_portfolios": [
+        "KONGLO_MULTIPOLAR"
+      ],
+      "listed_anchors": [
+        "MLPL",
+        "LPKR"
+      ],
+      "holder_names": [],
+      "relationship_source": "https://lippogroup.com/",
+      "relationship_source_as_of": "2026-09-30",
+      "issuer_affiliations": [],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control."
+    },
+    {
+      "id": "KONGLO_BAKRIE_BROTHERS",
+      "name": "Bakrie",
+      "legacy_portfolios": [
+        "KONGLO_BAKRIE_BROTHERS"
+      ],
+      "listed_anchors": [
+        "BNBR"
+      ],
+      "holder_names": [],
+      "relationship_source": "https://bakrie-brothers.com/discover-bakrie/businesses/",
+      "relationship_source_as_of": "2026-09-30",
+      "issuer_affiliations": [],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control."
+    },
+    {
+      "id": "KONGLO_TANCORP",
+      "name": "Tanoko · Tancorp",
+      "legacy_portfolios": [
+        "KONGLO_TANCORP"
+      ],
+      "listed_anchors": [
+        "AVIA",
+        "CLEO"
+      ],
+      "holder_names": [
+        "PT TANCORP SURYA SENTOSA",
+        "PT. TANCORP GLOBAL ABADI",
+        "PT TANCORP GLOBAL SENTOSA",
+        "TANCORP INVESTAMA MULIA, PT",
+        "PT TANCORP SURYA SUKSES",
+        "TANCORP MEGA BUANA PT"
+      ],
+      "relationship_source": "https://tanobel.com/wp-content/uploads/2025/05/AR-CLEO-2024-FINAL-LOWRES.pdf",
+      "relationship_source_as_of": "2025-12-31",
+      "issuer_affiliations": [],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control."
+    },
+    {
+      "id": "KONGLO_HAPSORO",
+      "name": "Happy Hapsoro · Rukun Raharja",
+      "legacy_portfolios": [
+        "KONGLO_HAPSORO",
+        "KONGLO_RUKUN_RAHARJA"
+      ],
+      "listed_anchors": [
+        "RAJA"
+      ],
+      "holder_names": [
+        "HAPSORO"
+      ],
+      "relationship_source": "https://cms.raja.co.id/uploads/Rukun_Raharja_AR_2025_68113940cb.pdf",
+      "relationship_source_as_of": "2025-12-31",
+      "issuer_affiliations": [],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control."
+    },
+    {
+      "id": "KONGLO_ASTRA",
+      "name": "Astra · Jardine",
+      "legacy_portfolios": [
+        "KONGLO_ASTRA",
+        "KONGLO_JARDINE"
+      ],
+      "listed_anchors": [
+        "ASII"
+      ],
+      "holder_names": [
+        "JARDINE CYCLE AND CARRIAGE LIMITED"
+      ],
+      "relationship_source": "https://www.astra.co.id/astra-group-structure",
+      "relationship_source_as_of": "2026-09-30",
+      "issuer_affiliations": [],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control."
+    },
+    {
+      "id": "KONGLO_TRIPUTRA_IA",
+      "name": "Triputra · Adaro",
+      "legacy_portfolios": [
+        "KONGLO_TRIPUTRA_IA"
+      ],
+      "listed_anchors": [],
+      "holder_names": [
+        "PT TRIPUTRA INVESTINDO ARYA",
+        "TRIPUTRA PERSADA MEGATARA PT.",
+        "T PERMADI RACHMAT"
+      ],
+      "relationship_source": "https://triputra-group.com/en/bisnis/manufacturing/dharma-group/",
+      "relationship_source_as_of": "2026-09-30",
+      "issuer_affiliations": [],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control."
+    },
+    {
+      "id": "KONGLO_PANIN",
+      "name": "Panin",
+      "legacy_portfolios": [
+        "KONGLO_PANIN"
+      ],
+      "listed_anchors": [
+        "PNIN",
+        "PNLF",
+        "PNBN"
+      ],
+      "holder_names": [],
+      "relationship_source": null,
+      "relationship_source_as_of": "2026-09-30",
+      "issuer_affiliations": [],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control."
+    },
+    {
+      "id": "KONGLO_HARTONO",
+      "name": "Djarum · Hartono",
+      "legacy_portfolios": [
+        "KONGLO_HARTONO",
+        "KONGLO_PROTELINDO"
+      ],
+      "listed_anchors": [
+        "BBCA",
+        "TOWR",
+        "BELI"
+      ],
+      "holder_names": [
+        "PT DWIMURIA INVESTAMA ANDALAN"
+      ],
+      "relationship_source": "https://www.bca.co.id/en/tentang-bca/hubungan-investor/informasi-saham/komposisi-pemegang-saham",
+      "relationship_source_as_of": "2026-09-30",
+      "issuer_affiliations": [],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control."
+    },
+    {
+      "id": "KONGLO_BARITO",
+      "name": "Barito · Prajogo Pangestu",
+      "legacy_portfolios": [
+        "KONGLO_BARITO",
+        "KONGLO_PRAJOGO"
+      ],
+      "listed_anchors": [
+        "BRPT",
+        "CUAN"
+      ],
+      "holder_names": [
+        "PRAJOGO PANGESTU"
+      ],
+      "relationship_source": "https://www.barito-pacific.com/uploads/investors/annual-report-260513100241BRPT%20-%20AR%202025%20-%20260513_compressed.pdf",
+      "relationship_source_as_of": "2025-12-31",
+      "issuer_affiliations": [],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control."
+    },
+    {
+      "id": "KONGLO_GAJAH_TUNGGAL_MAP",
+      "name": "Gajah Tunggal · MAP",
+      "legacy_portfolios": [],
+      "listed_anchors": [
+        "GJTL",
+        "MAPI"
+      ],
+      "holder_names": [],
+      "relationship_source": "https://www.gt-tires.com/wp-content/uploads/2026/04/AR-GT-2025-REV5-2.pdf",
+      "relationship_source_as_of": "2025-12-31",
+      "issuer_affiliations": [],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control."
+    },
+    {
+      "id": "KONGLO_AGUNG_SEDAYU",
+      "name": "Agung Sedayu",
+      "legacy_portfolios": [],
+      "listed_anchors": [
+        "PANI"
+      ],
+      "holder_names": [],
+      "relationship_source": "https://www.agungsedayu.com/en/article/cbdk-resmi-melantai-di-bursa-efek-indonesia-bei",
+      "relationship_source_as_of": "2026-09-30",
+      "issuer_affiliations": [],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control."
+    },
+    {
+      "id": "KONGLO_JHONLIN",
+      "name": "Haji Isam · Jhonlin",
+      "legacy_portfolios": [],
+      "listed_anchors": [
+        "JARR"
+      ],
+      "holder_names": [
+        "ESHAN AGRO SENTOSA PT"
+      ],
+      "relationship_source": "https://ptjar.com/assets/file/backend/upload/file/laporan/laporan_tahunan/Laporan_Tahunan_JARR_20251.pdf",
+      "relationship_source_as_of": "2025-12-31",
+      "issuer_affiliations": [],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control."
+    },
+    {
+      "id": "KONGLO_EMTEK",
+      "name": "Emtek",
+      "legacy_portfolios": [
+        "KONGLO_EMTEK"
+      ],
+      "listed_anchors": [
+        "EMTK"
+      ],
+      "holder_names": [],
+      "relationship_source": "https://emtek.co.id/en/about-us/company-group-structure",
+      "relationship_source_as_of": "2026-09-30",
+      "issuer_affiliations": [],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control."
+    },
+    {
+      "id": "KONGLO_BAYAN",
+      "name": "Bayan",
+      "legacy_portfolios": [],
+      "listed_anchors": [
+        "BYAN"
+      ],
+      "holder_names": [
+        "LOW TUCK KWONG",
+        "ELAINE LOW"
+      ],
+      "relationship_source": "https://www.bayan.com.sg/",
+      "relationship_source_as_of": "2026-09-30",
+      "issuer_affiliations": [],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control."
+    },
+    {
+      "id": "KONGLO_ALFA",
+      "name": "Alfa Corp",
+      "legacy_portfolios": [],
+      "listed_anchors": [
+        "AMRT"
+      ],
+      "holder_names": [
+        "SIGMANTARA ALFINDO"
+      ],
+      "relationship_source": "https://alfamart.co.id/storage/annual-report/May2026/UhKCodBV9SgBL9sL8I33.pdf",
+      "relationship_source_as_of": "2026-09-30",
+      "issuer_affiliations": [],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control."
+    },
+    {
+      "id": "KONGLO_MAYAPADA_KARUNIA",
+      "name": "Mayapada",
+      "legacy_portfolios": [
+        "KONGLO_MAYAPADA_KARUNIA"
+      ],
+      "listed_anchors": [
+        "MAYA"
+      ],
+      "holder_names": [
+        "MAYAPADA KARUNIA PT",
+        "MAYAPADA KASIH PT"
+      ],
+      "relationship_source": null,
+      "relationship_source_as_of": "2026-09-30",
+      "issuer_affiliations": [],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control."
+    },
+    {
+      "id": "KONGLO_ARTHA_GRAHA",
+      "name": "Artha Graha",
+      "legacy_portfolios": [],
+      "listed_anchors": [
+        "INPC",
+        "ECII"
+      ],
+      "holder_names": [
+        "PT ARTHA GRAHA NETWORK",
+        "PT. Artha Graha Network"
+      ],
+      "relationship_source": "https://arthagraha.net/network-detail/electronic-city",
+      "relationship_source_as_of": "2026-09-30",
+      "issuer_affiliations": [],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control."
+    },
+    {
+      "id": "KONGLO_TRAKINDO",
+      "name": "Trakindo",
+      "legacy_portfolios": [
+        "KONGLO_TRAKINDO"
+      ],
+      "listed_anchors": [],
+      "holder_names": [
+        "PT TIARA MARGA TRAKINDO"
+      ],
+      "relationship_source": null,
+      "relationship_source_as_of": "2026-09-30",
+      "issuer_affiliations": [],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control."
+    },
+    {
+      "id": "KONGLO_RAJAWALI_KAPITAL_EMAS",
+      "name": "Rajawali",
+      "legacy_portfolios": [
+        "KONGLO_RAJAWALI_KAPITAL_EMAS"
+      ],
+      "listed_anchors": [],
+      "holder_names": [
+        "PT RAJAWALI KAPITAL EMAS",
+        "RAJAWALI CAPITAL INTERNATIONAL, PT.",
+        "PT. RAJAWALI KAPITAL AGRO"
+      ],
+      "relationship_source": null,
+      "relationship_source_as_of": "2026-09-30",
+      "issuer_affiliations": [],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control."
+    },
+    {
+      "id": "KONGLO_ARSARI",
+      "name": "Hashim · Arsari",
+      "legacy_portfolios": [],
+      "listed_anchors": [],
+      "holder_names": [
+        "ARSARI NUSA INVESTAMA, PT"
+      ],
+      "relationship_source": "https://www.arsari.co.id/about-us/",
+      "relationship_source_as_of": "2026-09-30",
+      "issuer_affiliations": [
+        {
+          "ticker": "WIFI",
+          "source": "https://www.surge.co.id/news/pimpinan-sales-dan-network-telkomsel-bergabung-dengan-surge-wifi-untuk-wujudkan-internetterjangkau-bagi-seluruh-rakyat-indonesia",
+          "source_as_of": "2024-10-03",
+          "relationship": "Issuer-documented strategic investment relationship"
+        }
+      ],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control."
+    },
+    {
+      "id": "KONGLO_MEGA",
+      "name": "CT Corp",
+      "legacy_portfolios": [
+        "KONGLO_MEGA"
+      ],
+      "listed_anchors": [
+        "MEGA",
+        "BBHI"
+      ],
+      "holder_names": [
+        "PT MEGA CORPORA"
+      ],
+      "relationship_source": "https://www.ctcorpora.com/who.html",
+      "relationship_source_as_of": "2026-09-30",
+      "issuer_affiliations": [],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control."
+    },
+    {
+      "id": "KONGLO_BUDI",
+      "name": "Sungai Budi",
+      "legacy_portfolios": [
+        "KONGLO_BUDI"
+      ],
+      "listed_anchors": [],
+      "holder_names": [
+        "PT SUNGAI BUDI"
+      ],
+      "relationship_source": null,
+      "relationship_source_as_of": "2026-09-30",
+      "issuer_affiliations": [],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control."
+    },
+    {
+      "id": "KONGLO_PAKUWON_ARTHANIAGA",
+      "name": "Pakuwon",
+      "legacy_portfolios": [
+        "KONGLO_PAKUWON_ARTHANIAGA"
+      ],
+      "listed_anchors": [
+        "PWON"
+      ],
+      "holder_names": [
+        "PAKUWON ARTHANIAGA"
+      ],
+      "relationship_source": null,
+      "relationship_source_as_of": "2026-09-30",
+      "issuer_affiliations": [],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control."
+    },
+    {
+      "id": "KONGLO_MEDCO",
+      "name": "Medco · Amman",
+      "legacy_portfolios": [],
+      "listed_anchors": [
+        "MEDC"
+      ],
+      "holder_names": [
+        "MEDCO DAYA ABADI LESTARI PT"
+      ],
+      "relationship_source": null,
+      "relationship_source_as_of": "2026-09-30",
+      "issuer_affiliations": [],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control."
+    },
+    {
+      "id": "KONGLO_MANDIRI_COAL",
+      "name": "Mandiri Coal",
+      "legacy_portfolios": [],
+      "listed_anchors": [
+        "MCOL"
+      ],
+      "holder_names": [
+        "EDIKA AGUNG MANDIRI PT"
+      ],
+      "relationship_source": "https://mandiricoal.co.id/who-we-are/",
+      "relationship_source_as_of": "2026-09-30",
+      "issuer_affiliations": [],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control."
+    },
+    {
+      "id": "KONGLO_KPN_WILMAR",
+      "name": "KPN · Wilmar",
+      "legacy_portfolios": [],
+      "listed_anchors": [
+        "CEKA"
+      ],
+      "holder_names": [
+        "WILMAR SEJAHTERA ASIA PT"
+      ],
+      "relationship_source": "https://www.wilmar-international.com/about-us/history-milestones",
+      "relationship_source_as_of": "2026-09-30",
+      "issuer_affiliations": [],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control. This lens currently verifies the Wilmar branch. No common legal controller between KPN and Wilmar is inferred."
+    },
+    {
+      "id": "KONGLO_HARITA",
+      "name": "Harita",
+      "legacy_portfolios": [
+        "KONGLO_HARITA"
+      ],
+      "listed_anchors": [],
+      "holder_names": [
+        "HARITA JAYARAYA"
+      ],
+      "relationship_source": null,
+      "relationship_source_as_of": "2026-09-30",
+      "issuer_affiliations": [],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control."
+    },
+    {
+      "id": "KONGLO_GARUDAFOOD",
+      "name": "Garudafood",
+      "legacy_portfolios": [],
+      "listed_anchors": [
+        "GOOD"
+      ],
+      "holder_names": [],
+      "relationship_source": "https://garudafood.com/cfind/source/files/laporan-tahunan/2025/annual%20report%20good%202025.pdf",
+      "relationship_source_as_of": "2025-12-31",
+      "issuer_affiliations": [],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control."
+    },
+    {
+      "id": "KONGLO_FKS",
+      "name": "FKS",
+      "legacy_portfolios": [],
+      "listed_anchors": [
+        "FISH"
+      ],
+      "holder_names": [
+        "PT.FKS CORPORINDO INDONESIA",
+        "PT PANGAN SEJAHTERA INVESTAMA"
+      ],
+      "relationship_source": "https://www.fksgroup.com/our-businesses/",
+      "relationship_source_as_of": "2026-09-30",
+      "issuer_affiliations": [],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control. AISA is linked by the disclosed FKS Food / Pangan Sejahtera investment structure, not by a name similarity."
+    },
+    {
+      "id": "KONGLO_FIRST_RESOURCES",
+      "name": "First Resources",
+      "legacy_portfolios": [],
+      "listed_anchors": [],
+      "holder_names": [
+        "FIRST RESOURCES LIMITED"
+      ],
+      "relationship_source": "https://links.sgx.com/1.0.0/corporate-announcements/FM1YCYQ6L52OC90Y/876466_First%20Resources%202H2025%20and%20FY2025%20Condensed%20Interim%20Financial%20Statements.pdf",
+      "relationship_source_as_of": "2025-12-31",
+      "issuer_affiliations": [],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control."
+    },
+    {
+      "id": "KONGLO_CHAROEN_POKPHAND",
+      "name": "Charoen Pokphand",
+      "legacy_portfolios": [],
+      "listed_anchors": [
+        "CPIN"
+      ],
+      "holder_names": [
+        "CHAROEN POKPHAND INDONESIA GROUP PT"
+      ],
+      "relationship_source": "https://cp.co.id/en/",
+      "relationship_source_as_of": "2026-09-30",
+      "issuer_affiliations": [],
+      "coverage_note": "Includes only dated disclosed positions, listed anchor companies, and cited issuer affiliations. Arthara constituent counts are not adopted. A business-group label does not establish common legal control."
+    }
+  ]
+}

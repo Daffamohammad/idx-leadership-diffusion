@@ -254,7 +254,7 @@ def verify(*, sample_path: Path, analysis_path: Path,
     checks = {"member_window_values": 0, "sector_return_aggregates": 0,
               "diffusion_states_and_cohorts": 0, "daily_observations": 0,
               "weekly_observations": 0, "ytd_contributor_values": 0,
-              "ytd_group_aggregates": 0}
+              "ytd_group_aggregates": 0, "concentration_values": 0}
     expected_cache: dict[tuple[str, str, str], dict[str, Any]] = {}
 
     def expected(ticker: str, target: str, horizon: str) -> dict[str, Any]:
@@ -327,6 +327,25 @@ def verify(*, sample_path: Path, analysis_path: Path,
                                                "actual": metric.get(field), "expected": value})
 
                 current20 = {ticker: expected(ticker, target, "20d") for ticker in tickers}
+                concentration_names = sorted(ticker for ticker in tickers if current20[ticker]["exclusion_reason"] is None)
+                concentration = group.get("concentration_v2")
+                if len(concentration_names) >= 5:
+                    signed = [current20[ticker]["return_pct"] for ticker in concentration_names]
+                    absolute = sorted([abs(value) for value in signed], reverse=True)
+                    gross = sum(absolute)
+                    values = {"requested_constituent_count": len(concentration_names), "contributor_count": len(concentration_names),
+                              "missing_constituent_count": 0, "gross_absolute_return": round(gross, 8), "net_signed_return": round(sum(signed),8),
+                              "top1_abs_share": round(sum(absolute[:1])/gross,4) if gross else None,
+                              "top3_abs_share": round(sum(absolute[:3])/gross,4) if gross else None,
+                              "top5_abs_share": round(sum(absolute[:5])/gross,4) if gross else None,
+                              "hhi": round(sum((value/gross)**2 for value in absolute),4) if gross else None}
+                    for field,value in values.items():
+                        checks["concentration_values"] += 1
+                        if not concentration or not _close_enough(concentration.get(field),value):
+                            mismatches.append({"cadence":cadence,"date":target,"sector":sector,
+                                               "field":f"concentration_v2.{field}","actual":concentration.get(field) if concentration else None,"expected":value})
+                elif concentration is not None:
+                    mismatches.append({"cadence":cadence,"date":target,"sector":sector,"field":"concentration_below_floor"})
                 paired = []
                 if previous_date:
                     previous20 = {ticker: expected(ticker, previous_date, "20d") for ticker in tickers}

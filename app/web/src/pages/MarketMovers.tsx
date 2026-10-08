@@ -69,13 +69,13 @@ export default function MarketMovers() {
 
   return (
     <main className="workspace-page movers-page">
-      <header className="submission-page-heading"><div><div className="eyebrow-muted">Research · Official IDX Stock Summary</div><h1>Market movers</h1><p>Daily rankings from the selected release. Foreign activity is shown in shares; turnover value is shown in rupiah.</p></div><div className="movers-asof">Release date<strong>{market.data ? formatDateLabel(market.data.as_of) : "Loading"}</strong></div></header>
+      <header className="submission-page-heading"><div><div className="eyebrow-muted">Research · Official IDX Stock Summary</div><h1>Market movers</h1><p>Daily rankings from the selected date. Foreign activity is shown in shares; turnover value is shown in rupiah.</p></div><div className="movers-asof">Observed date<strong>{market.data ? formatDateLabel(market.data.as_of) : "Loading"}</strong></div></header>
       <nav className="movers-tabs" aria-label="Market mover ranking">
         {CATEGORIES.map(item => <button key={item.id} type="button" aria-pressed={category === item.id} onClick={() => setParam("rank", item.id)}>{item.label}</button>)}
       </nav>
       <section className="dash-card movers-table-card">
         <div className="movers-toolbar"><div><div className="eyebrow-muted">Top 25 · {active.label}</div><h2>{active.label}</h2></div><div className="movers-filters"><input type="search" aria-label="Search ticker or company" placeholder="Search ticker or company…" value={params.get("q") ?? ""} onChange={event => setParam("q", event.target.value)} /><label><span>Board</span><select aria-label="Filter listing board" value={board} onChange={event => setParam("board", event.target.value)}><option value="all">All boards</option>{boards.map(value => <option key={value} value={value}>{value}</option>)}</select></label></div></div>
-        {!market.data && <AssetLoadState label="Market ranking" loading={market.loading} error={market.error} absentMessage="No market ranking is included in this release." />}
+        {!market.data && <AssetLoadState label="Market ranking" loading={market.loading} error={market.error} absentMessage="No market ranking is included in the selected data." />}
         {market.data && <>
           <div className="movers-result-count">Top {rows.length} of the filtered ranking · securities must have traded volume and a same-session official close</div>
           <div className="table-scroll"><table><thead><tr><th>#</th><th>Stock</th><th>Company</th><th>Board</th><th>Close</th><th>Daily change</th><th>Value · IDR</th><th>Volume · shares</th><th>Frequency</th><th>Foreign net · shares</th></tr></thead><tbody>{rows.map((row, index) => <tr key={row.ticker}>

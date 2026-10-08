@@ -26,7 +26,7 @@ const LABEL_OVERRIDES: Record<string, string> = {
   ANALYST_DEFINED_PROTOTYPE: "Research grouping",
   PROTOTYPE_CONFIG: "Configured grouping",
   PRIMARY_INDEX: "Primary index",
-  PUBLIC_PROTOTYPE: "IDX research release",
+  PUBLIC_PROTOTYPE: "IDX research data",
   THIRD_PARTY: "Captured classification source",
   SECTORS_LIVE: "Live Sectors",
   SECTORS_FIXTURE: "Sectors fixture",

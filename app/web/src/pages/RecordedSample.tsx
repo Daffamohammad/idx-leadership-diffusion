@@ -1,3 +1,5 @@
+import { Link } from "react-router";
+import { publicCopy } from "../data/publicCopy";
 import { useMemo } from "react";
 import { formatDateLabel, formatIdrCompact } from "../data/format";
 import { useRecordedSectorsSample } from "../data/marketWorkspace";
@@ -14,9 +16,9 @@ export default function RecordedSample() {
     last_close: [...stock.prices].sort((a, b) => a.date.localeCompare(b.date)).at(-1)?.close ?? null,
   })).sort((a, b) => a.sector.localeCompare(b.sector) || a.ticker.localeCompare(b.ticker)), [sample]);
 
-  if (snapshotError || sampleState.error) return <main className="workspace-page"><h1>Coverage &amp; sources</h1><AssetLoadState label="Sectors recording" loading={false} error={sampleState.error ?? snapshotError} absentMessage="" /></main>;
-  if (!sample && (snapshotLoading || sampleState.loading)) return <main className="workspace-page"><p className="meta" role="status">Loading the selected release.</p></main>;
-  if (!sample) return <main className="workspace-page"><h1>Coverage &amp; sources</h1><p className="meta">The selected immutable release does not include a Sectors recording.</p></main>;
+  if (snapshotError || sampleState.error) return <main className="workspace-page"><h1>Coverage &amp; sources</h1><AssetLoadState label="Sectors source evidence" loading={false} error={sampleState.error ?? snapshotError} absentMessage="" /></main>;
+  if (!sample && (snapshotLoading || sampleState.loading)) return <main className="workspace-page"><p className="meta" role="status">Loading coverage and sources…</p></main>;
+  if (!sample) return <main className="workspace-page"><h1>Coverage &amp; sources</h1><p className="meta">Sectors source evidence is unavailable.</p></main>;
 
   const quarter = sample.foreign_reconciliation.complete_quarter;
   const ytd = sample.foreign_reconciliation.sectors_ytd;
@@ -24,21 +26,21 @@ export default function RecordedSample() {
 
   return <main className="content-shell-wide recorded-sample-page">
     <header className="submission-page-heading">
-      <div><div className="eyebrow-muted">Sectors API · recorded acquisition</div><h1>Coverage &amp; sources</h1><p>{sample.stocks.length}</p></div>
+      <div><div className="eyebrow-muted">IDX market data · Source: Sectors API</div><h1>Coverage &amp; sources</h1><p>66 tracked stocks across 11 IDX sectors, six per sector chosen by market-cap ranking. The Diffusion sets this research coverage; it does not describe the reach of the Sectors API.</p></div>
       <div className="recorded-session"><span>Observed completed session</span><strong>{formatDateLabel(sample.as_of)}</strong><span>Selection frozen {formatDateLabel(sample.selection.membership_release_session)} · membership reference {formatDateLabel(sample.selection.membership_as_of)}</span></div>
     </header>
-    <section className="recorded-summary-grid" aria-label="Recording summary">
+    <section className="recorded-summary-grid" aria-label="Coverage summary">
       <article><span>Selected stocks</span><strong>{sample.stocks.length}</strong><small>6 per sector · market-cap order pinned to {formatDateLabel(sample.selection.selected_market_cap_date)}</small></article>
-      <article><span>Price observations</span><strong>{formatDateLabel(sample.price_history.start)} → {formatDateLabel(sample.price_history.end)}</strong><small>Raw Sectors close · corporate actions are disclosed below</small></article>
+      <article><span>Price observations</span><strong>{formatDateLabel(sample.price_history.start)} → {formatDateLabel(sample.price_history.end)}</strong><small>Raw Sectors closes · affected signal windows are excluded</small></article>
       <article><span>Official IDX foreign flow</span><strong>{formatIdrCompact(sample.foreign_reconciliation.official_ytd.total_idr)}</strong><small>YTD through {formatDateLabel(sample.foreign_reconciliation.official_ytd.as_of)} · IDR net flow</small></article>
-      <article><span>Sectors Q3 market flow</span><strong>{formatIdrCompact(quarter.sectors_sum_idr)}</strong><small>{formatDateLabel(quarter.start)} → {formatDateLabel(quarter.end)} · {q3Sessions} verified sessions</small></article>
+      <article><span>IDX Q3 market flow</span><strong>{formatIdrCompact(quarter.sectors_sum_idr)}</strong><small>{formatDateLabel(quarter.start)} → {formatDateLabel(quarter.end)} · {q3Sessions} verified sessions · Source: Sectors API</small></article>
     </section>
     <section className="recorded-section">
-      <div className="section-title-row"><div><div className="eyebrow-muted">Recorded prices</div><h2>Tracked stocks and latest closes</h2></div><span className="eyebrow-muted">{rows.length} tracked stocks</span></div>
-      <p className="meta">Latest recorded raw closes are shown with their observation dates. Return calculations and corporate-action exclusions are available in the dashboard. Membership is selected retrospectively; these stocks do not represent the full market.</p>
+      <div className="section-title-row"><div><div className="eyebrow-muted">Stock closes</div><h2>Tracked stocks and latest closes</h2></div><span className="eyebrow-muted">{rows.length} tracked stocks</span></div>
+      <p className="meta">Latest raw closes are shown with their observation dates. Return calculations and corporate-action exclusions are available in the dashboard. Membership is selected retrospectively; these stocks do not represent the full market.</p>
       <WorkspaceTable rows={rows} rowKey={row => row.ticker} columns={[
-        { label: "Sector", cell: row => row.sector },
-        { label: "Ticker", cell: row => row.ticker.replace(".JK", "") },
+        { label: "Sector", cell: row => <Link to={`/explorer?scope=sectors&taxonomy=SECTOR&group=${encodeURIComponent(row.sector)}&date=${sample.as_of}&cadence=daily&horizon=60d`}>{row.sector}</Link> },
+        { label: "Ticker", cell: row => <Link to={`/ticker/${row.ticker}?scope=sectors`}>{row.ticker.replace(".JK", "")}</Link> },
         { label: "Company", cell: row => row.company_name ?? "—" },
         { label: "Latest close · IDR", cell: row => row.last_close?.toLocaleString("en-US") ?? "—" },
         { label: "Observed date", cell: row => formatDateLabel([...row.prices].sort((a, b) => a.date.localeCompare(b.date)).at(-1)?.date) },
@@ -48,26 +50,26 @@ export default function RecordedSample() {
       <div className="section-title-row"><div><div className="eyebrow-muted">Separate market-level providers</div><h2>Foreign-flow reconciliation</h2></div><span className="eyebrow-muted">IDR · positive = net foreign buying</span></div>
       <div className="flow-reconciliation-grid">
         <article><h3>Official IDX · Q3</h3><strong>{formatIdrCompact(quarter.official_sum_idr)}</strong><p>Daily IDX values summed over {formatDateLabel(quarter.start)} → {formatDateLabel(quarter.end)} · {quarter.session_count} sessions</p></article>
-        <article><h3>Sectors · IHSG · Q3</h3><strong>{formatIdrCompact(quarter.sectors_sum_idr)}</strong><p>Daily Sectors values over the same {quarter.session_count} sessions</p></article>
+        <article><h3>IDX · IHSG · Q3 · Sectors API</h3><strong>{formatIdrCompact(quarter.sectors_sum_idr)}</strong><p>Daily Sectors values over the same {quarter.session_count} sessions</p></article>
       </div>
       <div className="recorded-reconciliation">
         <p>Matched Q3 comparison: {formatDateLabel(quarter.start)} → {formatDateLabel(quarter.end)} · {quarter.session_count} shared sessions · difference {formatIdrCompact(quarter.difference_idr)} · {quarter.status === "MATCHED" ? "same total" : "source difference retained"}.</p>
         <details><summary>Sources, method and remaining difference</summary><ul>
-          <li>Official IDX is the public release series and remains the default foreign-flow view.</li>
+          <li>Official IDX is the published series and remains the default foreign-flow view.</li>
           <li>Sectors values come from its IHSG market-flow endpoint. The Q3 comparison uses identical native IHSG session dates and daily IDR net flow.</li>
           <li>Official IDX YTD is {formatIdrCompact(sample.foreign_reconciliation.official_ytd.total_idr)} through {formatDateLabel(sample.foreign_reconciliation.official_ytd.as_of)}.</li>
           <li>The Sectors YTD response contains {ytd.observed_sessions} of {ytd.expected_sessions} expected sessions; its known-value sum ({formatIdrCompact(ytd.known_value_sum_idr)}) is not compared with the complete official YTD total.</li>
           <li>Sessions absent from the Sectors YTD response after a targeted check: {ytd.missing_dates.map(formatDateLabel).join(", ")}.</li>
           <li>Matched Q3 difference: {formatIdrCompact(quarter.difference_idr)}. The providers remain separate; no offset, scaling, zero-fill, or imputation is applied.</li>
-          <li>Raw-response hashes, request windows, session continuity, and the persistent request receipt are included in the recorded acquisition archive.</li>
-          {sample.foreign_reconciliation.limitations.map(item => <li key={item}>{item}</li>)}
-          {sample.limitations.map(item => <li key={item}>{item}</li>)}
+          <li>Raw-response hashes, request windows, session continuity, and the persistent request receipt are included in the source evidence archive.</li>
+          {sample.foreign_reconciliation.limitations.map(item => <li key={item}>{publicCopy(item)}</li>)}
+          {sample.limitations.map(item => <li key={item}>{publicCopy(item)}</li>)}
         </ul></details>
       </div>
     </section>
     <section className="recorded-section">
       <div className="section-title-row"><div><div className="eyebrow-muted">Membership reference</div><h2>Six stocks in each IDX sector</h2></div><span className="eyebrow-muted">As of {formatDateLabel(sample.selection.membership_as_of)}</span></div>
-      <div className="sector-sample-grid">{Object.entries(sample.selection.sector_counts).map(([sector, count]) => <div key={sector}><span>{sector}</span><strong>{count}</strong></div>)}</div>
+      <div className="sector-sample-grid">{Object.entries(sample.selection.sector_counts).map(([sector, count]) => <div key={sector}><Link to={`/explorer?scope=sectors&taxonomy=SECTOR&group=${encodeURIComponent(sector)}&date=${sample.as_of}&cadence=daily&horizon=60d`}>{sector}</Link><strong>{count}</strong></div>)}</div>
     </section>
   </main>;
 }

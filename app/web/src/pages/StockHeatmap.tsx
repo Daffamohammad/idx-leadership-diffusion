@@ -15,7 +15,7 @@ function tileColor(value: number | null) {
 }
 export default function StockHeatmap() {
   const [params, setParams] = useSearchParams();
-  const view = params.get("view") === "snapshot" ? "snapshot" : "tradingview";
+  const view = params.get("view") === "tradingview" ? "tradingview" : "snapshot";
   const tvColor = params.get("tv-color") === "YTD" ? "ytd" : "daily";
   const setPageParam = (key: string, value: string) => {
     const next = new URLSearchParams(params);
@@ -27,11 +27,11 @@ export default function StockHeatmap() {
     <main className="workspace-page">
       <header>
         <h1>Stock heatmap</h1>
-        <p className="meta">Compare TradingView’s Indonesia market view with the app’s pinned, dated snapshot.</p>
+        <p className="meta">Compare TradingView’s Indonesia market view with the app’s dated IDX observations.</p>
       </header>
       <div className="heatmap-view-switch" role="group" aria-label="Heatmap source">
         <button type="button" className="btn btn-outline" aria-pressed={view === "tradingview"} onClick={() => setPageParam("view", "tradingview")}>TradingView</button>
-        <button type="button" className="btn btn-outline" aria-pressed={view === "snapshot"} onClick={() => setPageParam("view", "snapshot")}>Snapshot</button>
+        <button type="button" className="btn btn-outline" aria-pressed={view === "snapshot"} onClick={() => setPageParam("view", "snapshot")}>IDX stocks</button>
       </div>
       {view === "tradingview" ? (
         <>
@@ -81,7 +81,7 @@ function SnapshotStockHeatmap() {
       {!leaf && node.width > 80 && <text x={node.x+8} y={node.y+15} fill="var(--ink)" fontSize={11}>{node.name.length > node.width/7 ? `${node.name.slice(0,Math.floor(node.width/7)-1)}…` : node.name}</text>}
     </g>;
   };
-  return <><p className="meta">{data ? `Pinned release · ${formatDateLabel(data.as_of)} · end-of-day` : "Pinned snapshot market data"}. Tile size uses listed-share market cap; color uses stock price returns.</p>
+  return <><p className="meta">{data ? `As of ${formatDateLabel(data.as_of)} · end-of-day` : "Dated IDX market data"}. Tile size uses listed-share market cap; color uses stock price returns.</p>
     <div className="workspace-controls" role="group" aria-label="Heatmap taxonomy">{(["MARKET","KONGLO","THEMES"] as const).map(k=><button key={k} className="btn btn-outline" aria-pressed={kind===k} onClick={()=>setParam("taxonomy",k)}>{k==="MARKET"?"Market":k==="KONGLO"?"Konglo":"Themes"}</button>)}</div>
     <div className="workspace-controls"><div role="group" aria-label="Heatmap return period"><button className="btn btn-outline" aria-pressed={!weekly} onClick={()=>setParam("period","daily")}>Daily</button><button className="btn btn-outline" aria-pressed={weekly} onClick={()=>setParam("period","weekly")}>Weekly</button></div><label>Group <select className="workspace-search" value={group} onChange={e=>setParam("group",e.target.value)}><option value="">All groups</option>{[...groups].sort((a,b)=>a[1].name.localeCompare(b[1].name)).map(([id,g])=><option key={id} value={id}>{g.name} · {g.rows.length}</option>)}</select></label><input className="workspace-search" aria-label="Search heatmap ticker or company" placeholder="Search ticker or company…" value={params.get("search")??""} onChange={e=>setParam("search",e.target.value)}/></div>
     {!data ? <p aria-live="polite">{loading?"Loading stock observations…":error}</p> : <>

@@ -1,4 +1,5 @@
-/** Keep unreachable or rejected assets distinct from an absent recording. */
+import { publicCopy } from "../data/publicCopy";
+/** Keep unreachable or rejected assets distinct from missing data. */
 export function AssetLoadState({ label, loading, error, absentMessage }: {
   label: string;
   loading: boolean;
@@ -8,8 +9,8 @@ export function AssetLoadState({ label, loading, error, absentMessage }: {
   if (error) return <div className="asset-load-state" role="alert">
     <strong>{label} could not be loaded</strong>
     <p>{/Failed to fetch|NetworkError|Load failed/i.test(error)
-      ? "The recorded release could not be reached. Retry when the connection is available."
-      : error}</p>
+      ? "The data could not be reached. Retry when the connection is available."
+      : publicCopy(error)}</p>
     <button type="button" className="btn btn-outline" onClick={() => window.location.reload()}>Retry</button>
   </div>;
   return <div className="asset-load-state" role="status">

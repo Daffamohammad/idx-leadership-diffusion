@@ -70,7 +70,7 @@ function RouteErrorElement() {
           This view is temporarily unavailable
         </h1>
         <p style={{ margin: 0, color: "var(--muted)", lineHeight: 1.55 }}>
-          The snapshot loaded, but this page encountered a rendering problem.
+          The data loaded, but this page encountered a rendering problem.
         </p>
         <p style={{ margin: "12px 0 20px", color: "var(--down)", fontFamily: "Geist Mono", fontSize: 11 }}>
           {message}
@@ -100,7 +100,7 @@ function RouteErrorElement() {
               fontSize: 12,
             }}
           >
-            Reload snapshot
+            Retry
           </button>
         </div>
       </section>

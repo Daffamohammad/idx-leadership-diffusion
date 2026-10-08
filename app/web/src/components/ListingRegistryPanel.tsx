@@ -55,7 +55,7 @@ export default function ListingRegistryPanel({ registry }: ListingRegistryPanelP
       <div className="method-coverage-grid" style={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(0, 1fr))", gap: 10, padding: "12px 18px" }}>
         {[
           ["Listed", registry.listedCount.toLocaleString("en-US")],
-          ["Analysis sample", registry.analysisRequestedCount.toLocaleString("en-US")],
+          ["Price-history coverage", registry.analysisRequestedCount.toLocaleString("en-US")],
           ["Taxonomy mapped", `${registry.taxonomyCoveragePct.toFixed(1)}%`],
           ["Konglo listings mapped", registry.kongloMappedCount.toLocaleString("en-US")],
           ["Theme listings mapped", registry.themeMappedCount.toLocaleString("en-US")],
