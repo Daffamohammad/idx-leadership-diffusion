@@ -80,8 +80,12 @@ export default function TradingViewTechnicalAnalysis() {
         </div>
         <a href="https://www.tradingview.com/symbols/IDX-COMPOSITE/" target="_blank" rel="noreferrer">Open ↗</a>
       </div>
-      <div ref={containerRef} className="tradingview-analysis-frame" aria-label="TradingView technical analysis for IDX Composite" hidden={status === "unavailable"}>
+      <div className="tradingview-analysis-frame" aria-label="TradingView technical analysis for IDX Composite" hidden={status === "unavailable"}>
         {status === "loading" && <p className="tradingview-widget-fallback">Loading the IDX Composite technical summary…</p>}
+        {/* The embed script is injected into this dedicated mount node, never
+            into an element that also holds React-rendered children. Mixing
+            imperative replaceChildren with React children crashes removal. */}
+        <div ref={containerRef} style={{ height: "100%" }} />
       </div>
       {status === "unavailable" && (
         <div className="tradingview-widget-fallback">

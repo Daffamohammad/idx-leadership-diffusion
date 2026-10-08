@@ -61,7 +61,7 @@ function DiaTextReveal({
         backgroundPosition: active ? undefined : "0% center",
         WebkitBackgroundClip: "text",
         backgroundClip: "text" as React.CSSProperties["backgroundClip"],
-        animation: active ? "dia-sweep 1.5s cubic-bezier(0.77, 0, 0.175, 1) forwards" : "none",
+        animation: active ? "dia-sweep 1.1s cubic-bezier(0.77, 0, 0.175, 1) infinite" : "none",
         display: "inline",
         ...style,
       }}
@@ -523,7 +523,7 @@ export default function PublicHome() {
               Coverage · The Diffusion chooses this coverage
             </div>
             <h2
-              style={{ fontSize: 44, maxWidth: 680, letterSpacing: "-.05em", lineHeight: 1.05 }}
+              style={{ fontSize: 44, maxWidth: 680, letterSpacing: "-.05em", lineHeight: 1.05, fontStyle: "italic" }}
             >
               <RevealText text="Every contributor visible." delay={60} />
             </h2>
@@ -548,7 +548,7 @@ export default function PublicHome() {
           <div className="reveal">
             <div className="eyebrow-muted">Research workflows</div>
             <h2
-              style={{ fontSize: 42, letterSpacing: "-.05em", marginBottom: 18, fontWeight: 500 }}
+              style={{ fontSize: 42, letterSpacing: "-.05em", marginBottom: 18, fontWeight: 500, fontStyle: "italic" }}
             >
               <RevealText text="Start from the question." delay={60} />
             </h2>
@@ -584,7 +584,7 @@ export default function PublicHome() {
           <div className="reveal">
             <div className="eyebrow-muted">Methodology / Transparent by design</div>
             <h2
-              style={{ fontSize: 42, letterSpacing: "-.05em", marginBottom: 18, fontWeight: 500 }}
+              style={{ fontSize: 42, letterSpacing: "-.05em", marginBottom: 18, fontWeight: 500, fontStyle: "italic" }}
             >
               <RevealText text="No black-box conviction score." delay={60} />
             </h2>
