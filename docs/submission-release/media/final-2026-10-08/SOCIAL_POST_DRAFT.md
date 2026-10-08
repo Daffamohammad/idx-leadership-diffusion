@@ -10,4 +10,5 @@ the yfinance Python client, and dated IDX/KSEI disclosures. Year-to-date and
 company-level flow still cover the original 66-stock set. Action-affected price
 windows and missing observations stay out of the calculations.
 
-Walkthrough and coverage notes: [add the public Dashboard link]
+Dashboard: https://idx-leadership-diffusion.vercel.app/sectors
+Coverage and sources: https://idx-leadership-diffusion.vercel.app/sources

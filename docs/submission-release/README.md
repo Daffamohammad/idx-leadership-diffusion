@@ -96,11 +96,20 @@ The final videos and their scripts, captions, and checksums are in
 - [Social post draft](media/final-2026-10-08/SOCIAL_POST_DRAFT.md)
 - [Media manifest](media/final-2026-10-08/video_manifest.json)
 
+All three MP4s include AAC voice-over narration from the scripts, with VTT and
+SRT captions supplied. Their durations, formats, audio tracks, and SHA-256
+hashes were checked against the manifest.
+
 ## Delivery status
 
-The expanded release is active in the local build. Repository publication and
-Vercel deployment are the remaining delivery steps; neither is represented as
-complete until its live result is checked.
+The expanded release is live at [idx-leadership-diffusion.vercel.app](https://idx-leadership-diffusion.vercel.app/).
+Direct visits to `/sectors` and `/sources` were checked; the dashboard shows
+132 stocks across 11 sectors, while YTD and company-level flow retain their
+narrower coverage.
+
+The implementation is in [pull request #3](https://github.com/Daffamohammad/idx-leadership-diffusion/pull/3),
+which is open with its checks passing. The deployed site uses the connected
+Vercel project, with the production domain assigned to the verified release.
 
 Earlier audit reports and receipts remain dated records under
 `final-audit-2026-10-08/`, `final-repair-2026-10-08/`, and
