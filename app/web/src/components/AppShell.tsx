@@ -26,7 +26,7 @@ const navGroups = [
   {
     label: "Sectors",
     items: [
-      { path: "/sectors", label: "Sectors dashboard", Icon: DashboardIcon },
+      { path: "/sectors", label: "Dashboard", Icon: DashboardIcon },
       { path: "/sources", label: "Coverage & sources", Icon: ActivityLogIcon },
     ],
   },

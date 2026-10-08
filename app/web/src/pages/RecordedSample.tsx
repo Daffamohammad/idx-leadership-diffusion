@@ -24,7 +24,7 @@ export default function RecordedSample() {
 
   return <main className="content-shell-wide recorded-sample-page">
     <header className="submission-page-heading">
-      <div><div className="eyebrow-muted">Sectors API · recorded acquisition</div><h1>Coverage &amp; sources</h1><p>66 tracked stocks across 11 IDX sectors, with frozen membership and source-bound observations.</p></div>
+      <div><div className="eyebrow-muted">Sectors API · recorded acquisition</div><h1>Coverage &amp; sources</h1><p>{sample.stocks.length}</p></div>
       <div className="recorded-session"><span>Observed completed session</span><strong>{formatDateLabel(sample.as_of)}</strong><span>Selection frozen {formatDateLabel(sample.selection.membership_release_session)} · membership reference {formatDateLabel(sample.selection.membership_as_of)}</span></div>
     </header>
     <section className="recorded-summary-grid" aria-label="Recording summary">
@@ -35,7 +35,7 @@ export default function RecordedSample() {
     </section>
     <section className="recorded-section">
       <div className="section-title-row"><div><div className="eyebrow-muted">Recorded prices</div><h2>Tracked stocks and latest closes</h2></div><span className="eyebrow-muted">{rows.length} tracked stocks</span></div>
-      <p className="meta">Latest recorded raw closes are shown with their observation dates. Return calculations and corporate-action exclusions are available in the Sectors dashboard. Membership is selected retrospectively; these stocks do not represent the full market.</p>
+      <p className="meta">Latest recorded raw closes are shown with their observation dates. Return calculations and corporate-action exclusions are available in the dashboard. Membership is selected retrospectively; these stocks do not represent the full market.</p>
       <WorkspaceTable rows={rows} rowKey={row => row.ticker} columns={[
         { label: "Sector", cell: row => row.sector },
         { label: "Ticker", cell: row => row.ticker.replace(".JK", "") },
