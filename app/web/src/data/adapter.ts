@@ -1968,6 +1968,12 @@ export function weeklySectorReadings(comparison: HistoricalComparison, snapshotR
     const prior = previous.get(group.group_id);
     const comparable = prior?.cohort_hash === group.cohort_hash && prior?.cohort_count === group.cohort_count && group.cohort_count >= 5;
     const diffusion = comparable ? group.diffusion : "UNCONFIRMED";
+    let persistence = 0;
+    for (const week of [...comparison.weekly].reverse()) {
+      const reading = week.groups.find(row => row.group_id === group.group_id);
+      if (!reading || reading.leadership !== group.leadership || reading.leadership === "UNCONFIRMED") break;
+      persistence += 1;
+    }
     return {
       id: group.group_id, name: group.name,
       leadership: group.leadership as LeadershipState,
@@ -1979,7 +1985,7 @@ export function weeklySectorReadings(comparison: HistoricalComparison, snapshotR
       breadth: group.breadth_pct,
       prevBreadth: comparable && group.breadth_pct !== null && group.breadth_change_pp !== null ? group.breadth_pct - group.breadth_change_pp : undefined,
       concentration: group.concentration_top3_pct,
-      persistence: comparison.persistence[group.group_id]?.current_leadership_weeks ?? 0,
+      persistence,
       constituents: base?.constituents ?? group.cohort_count, eligibleConstituents: group.cohort_count,
       missingConstituents: Math.max(0, (base?.constituents ?? group.cohort_count) - group.cohort_count),
       rank: index + 1, fundamentals: "DATA_GAP", foreignFlow: "DATA_GAP",

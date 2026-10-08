@@ -242,3 +242,30 @@ def test_group_navigation_keeps_universe_and_comparison_controls():
     assert "scope=sectors" in result["href"] and "date=2026-09-25" in result["href"]
     assert "cadence=weekly" in result["href"] and "horizon=60d" in result["href"]
     assert result["phases"] == ["UNAVAILABLE", "IMPROVING", "LAGGING", "WEAKENING"]
+
+
+def test_weekly_replay_persistence_does_not_use_future_observations():
+    result = bun('''
+      import {weeklySectorReadings} from "./app/web/src/data/adapter.ts";
+      const group={group_id:"A",name:"A",cohort_count:6,cohort_hash:"fixed",leadership:"LEADING",diffusion:"STABLE",breadth_pct:50,breadth_change_pp:0};
+      const weeks=[1,2,3].map(day=>({as_of:`2026-09-0${day}`,groups:[group]}));
+      const comparison={weekly:weeks,persistence:{A:{current_leadership_weeks:3}}};
+      const early=weeklySectorReadings({...comparison,weekly:weeks.slice(0,1)},[])[0];
+      const latest=weeklySectorReadings(comparison,[])[0];
+      console.log(JSON.stringify({early:early.persistence,latest:latest.persistence}));
+    ''')
+    assert result == {"early": 1, "latest": 3}
+
+
+def test_group_curves_keep_horizon_names_and_break_missing_observations():
+    result = bun('''
+      import {buildResearchCurve} from "./app/web/src/components/ResearchChart.tsx";
+      const prices=closes=>closes.map((close,i)=>({date:`2026-09-0${i+1}`,close}));
+      const inputs={histories:{A:prices([100,110,120]),B:prices([100,0,130]),C:prices([100,150,200])},benchmark:prices([100,101,102]),members:["A","B","C"],date:"2026-09-03",cohorts:{"20d":["A"],"60d":["A","B"]}};
+      console.log(JSON.stringify({short:buildResearchCurve(inputs,"20"),long:buildResearchCurve(inputs,"60"),action:buildResearchCurve({...inputs,actions:[{date:"2026-09-02",type:"A:split"}]},"60")}));
+    ''')
+    assert result["short"]["names"] == ["A"]
+    assert result["long"]["names"] == ["A", "B"]
+    assert result["long"]["rows"][1]["basket"] is None
+    assert result["long"]["rows"][-1]["basket"] == pytest.approx(25)
+    assert result["action"]["names"] == ["B"]
