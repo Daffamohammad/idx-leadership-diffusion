@@ -113,13 +113,14 @@ hashes for 1036×799, 1369×799, 1440×900, and 390×844:
 
 ## Delivery gates
 
-The local application and public repository are separate from public hosting.
-See the [fresh launch attempt](final-audit-2026-10-08/launch.json), made after
-verified source publication. Vercel returned HTTP 400 because its GitHub
-integration must be installed before this repository can be linked. The
-[earlier read-only check](final-audit-2026-10-08/launch-check.json) is retained.
-Connect repository access and deploy the verified `main` branch. A public URL
-must pass fresh-load checks before hosting is accepted.
+Live deployment is optional under the user's current direction. Its absence
+does not block repository sign-off. The verified local preview remains available
+at `http://localhost:4173/sectors`.
+
+The [historical launch attempt](final-audit-2026-10-08/launch.json) returned HTTP
+400 because Vercel's GitHub integration was missing. That receipt and the
+[earlier read-only check](final-audit-2026-10-08/launch-check.json) are retained
+as dated evidence. Deployment work is deferred unless requested again.
 Videos, the prescribed social post, and final submission remain deferred; app
 verification alone does not complete the submission.
 
