@@ -51,6 +51,12 @@ authorized by this sign-off.
 
 The dated 7 October receipts record the preceding acquisition and Sectors checks; they do not establish app-wide browser acceptance. The repair has a separate [browser QA receipt](repair-2026-10-08/browser-qa.json) and [readiness receipt](repair-2026-10-08/readiness.json), bound to its tested source commit and the active data release. See the [repair verification](repair-2026-10-08/VERIFICATION.md) for rendered figures, failure recovery, clean reproduction, and launch status.
 
+The subsequent 8 October copy follow-up labels the primary navigation entry
+**Dashboard** and displays **66** in the sources lead line. Its
+[targeted browser checks](label-followup-2026-10-08/qa.json) cover those labels
+on desktop and mobile. The full repair receipts above remain bound to their
+earlier tested source commit; the label receipt does not replace them.
+
 The [pre-acquisition readiness receipt](readiness-2026-10-07.json) records the
 offline gate before live baseline collection. The separate [YTD preflight
 record](budget-preflight-2026-10-07.json) documents its read-only plan: 433
